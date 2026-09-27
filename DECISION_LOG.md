@@ -33,6 +33,19 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-052 · 2026-09-28 · Primary detector training = supervised (ground-truth-labelled training missions); self-supervised pseudo-labelling demoted to an ablation
+- **Evidence:** TRUST-V2 gate A FAILED even with σ-floors: clean positive rate 0.0218 (bimodal: 3/10 seeds ≈ 5%, likely a transient), **precision 0.214** vs the 0.80 target, recall 0.587. The failure sits in the heuristic *positive* rules (AGC, RAIM, clock jump, CUSUM). This is the third consecutive labeller calibration failure (D-049 0.60, D-051 v2 0.29, now 0.21).
+- **Decision (amends ARCHITECTURE §4.3):** the detector for ALL learning methods (FedQPNT, A, B-cont) is trained on **ground-truth-labelled TRAINING missions** (tuning/train seed range 500–599 plus pre-training seeds). This matches the literature being compared against (Khan 2025 and Chai 2025 both train supervised detectors). At deployment/test time **no labels reach any node**; test seeds (10000+) are never used for training or tuning (D-002, D-005). Leakage guards still ensure AttackLabel never reaches the Agent at *runtime*; training labels are consumed only by offline or FL-round training on training-seed missions.
+- **Self-supervised hindsight pseudo-labelling** (the original §4.3) becomes the **"label-free FL" ablation** / extension. It is reported honestly with its measured precision, and it is not part of H1–H4.
+- **Accepted from TRUST-V2** (Master re-ran trust/node/eval: 117 passed; the agent said 119):
+  - labeller σ-floors (retained for the ablation);
+  - class-weight cap 10× (D-050);
+  - runtime Platt calibration;
+  - **trust law v2** (D-051 C), with unit-verified bounded exclusion (≤ 70 s), E_s persistence, jamming recovery and S7 bound 52/h.
+  - PDs 1–5 accepted (dof-normalised floor 0.5; cn0_rate floor 0.3; x10/x12/x13 unfloored; E_s abrupt quantile 99.9%; gate seed partition).
+- **Next:** supervised retrain (seeds 500–549 train; Platt on 550–574; eval on 575–599), then M1 acceptance (D-051 §D) with trust law v2. For FL (M2) the fleet's local datasets become labelled training missions too, which also supersedes the D-050 surrogate-feature issue: features still come from the real Agent innovations.
+- **Owner:** Master
+
 ### D-051 · 2026-09-27 · Trust/Detection design v2 (Master design session); permission block surfaced to the user
 - **Evidence (M1-CLOSE v2):**
   - Recalibrating the reference stats made the labeller *worse* (precision 0.60 → 0.29) because the joint χ² is dominated by a near-degenerate feature (nsat_delta σ = 0.024). Drift AUC inverted (0.17) while abrupt recovered (0.75).

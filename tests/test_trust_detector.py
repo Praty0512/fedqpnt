@@ -276,3 +276,39 @@ def test_train_local_balance_at_or_above_n_min_still_subsamples():
     # cap: n_pos_kept <= n_neg * 0.5/0.5 = 20
     assert metrics["n_pos"] <= 20.0 + 1e-9
     assert metrics["n_neg"] == float(n_neg)
+
+
+def test_class_weight_cap_bounds_update_norm_with_single_negative():
+    """D-050: class-weight cap at 10x. A single negative in an otherwise
+    all-positive batch (balance=False, so the D-039 subsampling above cannot
+    mask this) is the worst case for the uncapped inverse-class-frequency
+    weight (n / (2*n_neg) -> huge as n grows for a fixed n_neg=1). The cap
+    must keep w_neg <= 10 regardless of how large the batch is, and hence
+    keep the resulting parameter-update norm bounded rather than growing
+    with n."""
+    def update_norm(n: int, seed: int) -> tuple[float, float]:
+        detector = TrustDetector(arch="mlp", seed=0)
+        rng = np.random.default_rng(seed)
+        U = rng.normal(size=(n, 60))
+        y_spoof = np.ones(n)
+        y_spoof[0] = 0.0  # exactly one negative
+        y_jam = np.zeros(n)
+        theta_before = {k: v.copy() for k, v in detector.get_params().items() if k.startswith("fc")}
+        metrics = detector.train_local(U, y_spoof, y_jam, epochs=1, lr=0.05, batch_size=n,
+                                        balance=False, rng=np.random.default_rng(seed))
+        theta_after = detector.get_params()
+        delta_norm = float(np.sqrt(sum(
+            np.sum((theta_after[k] - theta_before[k]) ** 2) for k in theta_before)))
+        return delta_norm, metrics["w_neg"]
+
+    delta_100, w_neg_100 = update_norm(100, seed=10)
+    delta_5000, w_neg_5000 = update_norm(5000, seed=11)
+
+    assert w_neg_100 <= 10.0 + 1e-9
+    assert w_neg_5000 <= 10.0 + 1e-9, f"w_neg must be capped at 10x regardless of batch size, got {w_neg_5000}"
+    # Bounded: the update norm at n=5000 must not blow up relative to n=100
+    # (uncapped, w_neg would be ~25x larger at n=5000 than at n=100, i.e.
+    # n/(2*1) = 50 vs 2500 -- a 50x difference the cap must absorb).
+    assert delta_5000 < 5.0 * max(delta_100, 1e-9), (
+        f"update norm grew unbounded with batch size (n=100: {delta_100}, n=5000: {delta_5000}), "
+        f"class-weight cap not effective")

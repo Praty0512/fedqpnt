@@ -71,10 +71,42 @@ class TrustLawConfig:
     nis_chi2_quantile: float = 0.95
     nis_dof: int = 3
 
+    # D-051 sec C: trust law v2 (evidence-bounded exclusion). Ignored unless
+    # SensorTrustLaw(trust_law_version="v2", law_mode="continuous").
+    T_ex: float = 60.0       # continuous time in DISTRUST before PROBE
+    T_probe: float = 10.0    # PROBE duration
+    w_probe: float = 0.3     # fixed w during PROBE, regardless of p
+    T_sup: float = 120.0     # detector-suppression window after a successful PROBE->TRUST exit
+    # physical spoof evidence E_s thresholds (see _physical_spoof_evidence
+    # below): clock/clock-drift jump beyond es_clk_sigma (x8/x9, already in
+    # units of the receiver's reported 1-sigma per features.py), xsat C/N0
+    # correlation above the floored nominal band (D-024, reusing the
+    # detector's own running normalizer as the "clean reference"), a
+    # meaconing C/N0 bump >= es_cn0_band_excess_db, and an abrupt position
+    # innovation (x1, dof-normalised) beyond the es_position_gate_quantile
+    # chi2 gate.
+    es_clk_sigma: float = 5.0
+    es_xsat_quantile_z: float = 1.96
+    es_cn0_band_excess_db: float = 3.0
+    es_position_gate_quantile: float = 0.999
+
     @property
     def nis_clean_threshold(self) -> float:
         """`chi2_3(0.95) / 3` -- the per-epoch x1 (already /dof) clean cutoff."""
         return float(chi2.ppf(self.nis_chi2_quantile, self.nis_dof)) / self.nis_dof
+
+    @property
+    def position_gate_threshold(self) -> float:
+        """dof-normalised x1 gate for E_s's 'abrupt position innovation
+        beyond the gate' condition -- a stricter, less-frequently-crossed
+        quantile than ``nis_clean_threshold`` (95%), since this is meant to
+        be a rare physical-anomaly signature, not the routine clean/dirty
+        split. PROPOSED-DECISION: the D-051 table names this condition but
+        does not fix its quantile; 99.9% is chosen as a conservative "this
+        essentially never happens on clean data" gate, matching the order
+        of magnitude of this codebase's other rare-event thresholds (e.g.
+        pseudolabel.py RAIM_PFA family)."""
+        return float(chi2.ppf(self.es_position_gate_quantile, self.nis_dof)) / self.nis_dof
 
 
 def quantum_law_config(cycle_time_s: float, base: TrustLawConfig | None = None) -> TrustLawConfig:
@@ -181,36 +213,164 @@ class _LawCore:
 
 
 @dataclass
+class _LawCoreV2:
+    """D-051 sec C: TRUST/DISTRUST/PROBE evidence-bounded exclusion. Reuses
+    ``_LawCore`` unchanged for the p-bar smoothing / hysteresis-D / tau_star
+    / recovery-gate machinery (eqs 1-4, 6) -- v2 only changes what happens
+    to w once D=1: instead of the old unbounded-time exclusion (the M1-CLOSE
+    root cause, EXECUTION_LOG #83), DISTRUST is capped at T_ex before a
+    bounded PROBE decides recovery or renewed exclusion.
+    """
+
+    cfg: TrustLawConfig
+    core: _LawCore = field(init=False)
+    state: str = field(default="TRUST", repr=False)  # "TRUST" | "DISTRUST" | "PROBE"
+    w: float = 1.0
+    _distrust_timer: float = field(default=0.0, repr=False)
+    _probe_timer: float = field(default=0.0, repr=False)
+    _probe_nis_sum: float = field(default=0.0, repr=False)
+    _probe_nis_n: int = field(default=0, repr=False)
+    _probe_es_any: bool = field(default=False, repr=False)
+    _suppress_timer: float = field(default=0.0, repr=False)
+
+    def __post_init__(self) -> None:
+        self.core = _LawCore(cfg=self.cfg)
+
+    def reset(self, w0: float = 1.0) -> None:
+        self.core.reset(w0)
+        self.state = "TRUST"
+        self.w = w0
+        self._distrust_timer = 0.0
+        self._probe_timer = 0.0
+        self._probe_nis_sum = 0.0
+        self._probe_nis_n = 0
+        self._probe_es_any = False
+        self._suppress_timer = 0.0
+
+    @property
+    def D(self) -> int:
+        return 0 if self.state == "TRUST" else 1
+
+    @property
+    def p_bar(self) -> float:
+        return self.core.p_bar
+
+    def _ramp(self, target: float, dt: float, G_effective: bool) -> None:
+        c = self.cfg
+        if target < self.w:
+            self.w = self.w + (1.0 - np.exp(-dt / c.tau_d)) * (target - self.w) if dt > 0 else target
+        elif target > self.w and G_effective:
+            self.w = self.w + (1.0 - np.exp(-dt / c.tau_r)) * (target - self.w) if dt > 0 else target
+        self.w = float(np.clip(self.w, c.w_min, 1.0))
+
+    def advance(self, t: float, p: float, nis_ok: bool, features_nominal: bool,
+                nis_value: float, es_evidence: bool) -> float:
+        c = self.cfg
+        # T_sup (sec C item 4): while suppressed, the learned detector's p is
+        # ignored (treated as clean) unless E_s itself fires -- E_s always
+        # gets through, so a genuine physical spoof signature can still
+        # re-trigger exclusion during the suppression window.
+        effective_p = 0.0 if (self._suppress_timer > 0 and not es_evidence) else p
+        # es_evidence is a PHYSICAL signature, not the learned detector: if
+        # it fires, force the hysteresis core to see p=1 regardless of
+        # suppression, so an evidenced spoof is never masked.
+        if es_evidence:
+            effective_p = 1.0
+
+        info = self.core.advance(t, effective_p, nis_ok, features_nominal)
+        dt = info["dt"]
+        if self._suppress_timer > 0:
+            self._suppress_timer = max(0.0, self._suppress_timer - dt)
+
+        if self.state == "TRUST":
+            if info["D"] == 1:
+                self.state = "DISTRUST"
+                self._distrust_timer = 0.0
+            G_effective = info["G"] or info["G_capped"]
+            target = min(info["tau_star"], c.w_cap) if info["G_capped"] else info["tau_star"]
+            self._ramp(target, dt, G_effective)
+
+        elif self.state == "DISTRUST":
+            self._distrust_timer += dt
+            G_effective = info["G"] or info["G_capped"]
+            target = min(info["tau_star"], c.w_cap) if info["G_capped"] else info["tau_star"]
+            self._ramp(target, dt, G_effective)
+            if self._distrust_timer >= c.T_ex:
+                self.state = "PROBE"
+                self._probe_timer = 0.0
+                self._probe_nis_sum = 0.0
+                self._probe_nis_n = 0
+                self._probe_es_any = False
+
+        elif self.state == "PROBE":
+            # sec C item 3: w fixed at w_probe regardless of p, for the
+            # whole probe; collect NIS + E_s evidence.
+            self.w = c.w_probe
+            self._probe_timer += dt
+            self._probe_nis_sum += nis_value
+            self._probe_nis_n += 1
+            self._probe_es_any = self._probe_es_any or es_evidence
+            if self._probe_timer >= c.T_probe:
+                mean_nis = self._probe_nis_sum / max(self._probe_nis_n, 1)
+                if mean_nis <= c.nis_clean_threshold and not self._probe_es_any:
+                    # sec C item 4, success: TRUST, detector suppressed for
+                    # T_sup, recovery continues via the normal ramp (next
+                    # call, from w=w_probe) in the TRUST branch above.
+                    self.state = "TRUST"
+                    self._suppress_timer = c.T_sup
+                    self._distrust_timer = 0.0
+                else:
+                    # sec C item 4, failure: back to DISTRUST for another T_ex.
+                    self.state = "DISTRUST"
+                    self._distrust_timer = 0.0
+
+        return self.w
+
+
+@dataclass
 class SensorTrustLaw:
     """One instance per sensor stream (gnss / quantum). Wraps ``_LawCore``
     with the final w-assignment for the configured ``law_mode``."""
 
     cfg: TrustLawConfig = field(default_factory=TrustLawConfig)
     law_mode: LawMode = "continuous"
+    # D-051 sec C: "v2" (evidence-bounded exclusion) only has an effect when
+    # law_mode == "continuous"; every other law_mode ignores it. Default
+    # "v1" keeps the OLD (unbounded-DISTRUST-time) law selectable for
+    # ablation, per the Master's instruction.
+    trust_law_version: Literal["v1", "v2"] = "v1"
     _core: _LawCore = field(init=False)
+    _core_v2: _LawCoreV2 = field(init=False, repr=False)
     # "detect_switch" (B-bin) needs one bit of extra state: are we currently excluded?
     _excluded: bool = field(default=False, repr=False)
 
     def __post_init__(self) -> None:
         self._core = _LawCore(cfg=self.cfg)
+        self._core_v2 = _LawCoreV2(cfg=self.cfg)
 
     def reset(self, w0: float = 1.0) -> None:
         self._core.reset(w0)
+        self._core_v2.reset(w0)
         self._excluded = False
 
     @property
+    def _uses_v2(self) -> bool:
+        return self.law_mode == "continuous" and self.trust_law_version == "v2"
+
+    @property
     def w(self) -> float:
-        return self._core.w
+        return self._core_v2.w if self._uses_v2 else self._core.w
 
     @property
     def p_bar(self) -> float:
-        return self._core.p_bar
+        return self._core_v2.p_bar if self._uses_v2 else self._core.p_bar
 
     @property
     def attack_detected(self) -> bool:
-        return bool(self._core.D)
+        return bool(self._core_v2.D) if self._uses_v2 else bool(self._core.D)
 
-    def step(self, t: float, p: float, nis_ok: bool = True, features_nominal: bool = True) -> float:
+    def step(self, t: float, p: float, nis_ok: bool = True, features_nominal: bool = True,
+             nis_value: float | None = None, es_evidence: bool = False) -> float:
         c = self.cfg
 
         if self.law_mode == "fixed_exclude":
@@ -225,6 +385,16 @@ class SensorTrustLaw:
             self._core.p_bar = p
             self._core.w = 1.0
             return 1.0
+
+        if self._uses_v2:
+            # nis_value: the actual (dof-normalised) NIS, needed for the
+            # PROBE mean-NIS exit test (sec C item 4). Falls back to a
+            # value consistent with nis_ok when the caller doesn't have it
+            # (e.g. existing v1-style call sites / tests).
+            nv = nis_value
+            if nv is None:
+                nv = 0.0 if nis_ok else (c.nis_clean_threshold + 1.0)
+            return self._core_v2.advance(t, p, nis_ok, features_nominal, nv, es_evidence)
 
         info = self._core.advance(t, p, nis_ok, features_nominal)
         dt, tau_star, D, G, G_capped = info["dt"], info["tau_star"], info["D"], info["G"], info["G_capped"]
@@ -258,7 +428,21 @@ class SensorTrustLaw:
     def apply_reacquisition_cap(self) -> None:
         """§9/§5 table: first valid fix after an outage > T_gap gets its
         weight capped at ``w_reacq`` before normal recovery resumes."""
-        self._core.w = min(self._core.w, self.cfg.w_reacq)
+        if self._uses_v2:
+            self._core_v2.w = min(self._core_v2.w, self.cfg.w_reacq)
+        else:
+            self._core.w = min(self._core.w, self.cfg.w_reacq)
+
+    def force_w(self, w0: float) -> None:
+        """Version-agnostic direct override of the current weight (test /
+        harness hook -- e.g. to force a fully-trusted pre-outage state
+        before exercising the reacquisition cap). Writes whichever core
+        (``_core`` or ``_core_v2``) actually backs ``.w`` for this
+        instance's ``law_mode``/``trust_law_version``."""
+        if self._uses_v2:
+            self._core_v2.w = w0
+        else:
+            self._core.w = w0
 
 
 # --------------------------------------------------------------------------
@@ -366,6 +550,10 @@ class QuantumTrust:
 from fedqpnt.core.types import GnssFix, NavSolution, TrustState  # noqa: E402
 from fedqpnt.trust.detector import TrustDetector  # noqa: E402
 from fedqpnt.trust.features import GnssFeatureExtractor  # noqa: E402
+from fedqpnt.trust.pseudolabel import apply_sigma_floor  # noqa: E402
+
+# raw-feature indices used by _physical_spoof_evidence (features.FEATURE_NAMES order)
+_IDX_NIS_POS, _IDX_CN0_MEAN, _IDX_CLK_JUMP, _IDX_DRIFT_JUMP, _IDX_XSAT_CORR = 0, 3, 7, 8, 13
 
 
 @dataclass
@@ -380,16 +568,20 @@ class TrustEngineConfig:
     quantum_cycle_time_s: float = 1.0
     gnss_law_cfg: TrustLawConfig = field(default_factory=TrustLawConfig)
     detector_seed: int = 0
+    # D-051 sec C: v2 (evidence-bounded exclusion) applies ONLY to
+    # fedqpnt/baseline_b_cont (see _METHOD_TABLE); every other method,
+    # baseline A/B-bin/B' included, stays on the old law ("v1").
+    trust_law_version: Literal["v1", "v2"] = "v1"
 
 
 _METHOD_TABLE: dict[str, dict] = {
     # trust-law-relevant config diffs only; detector-training source (local
     # vs FL) and aggregator choice are FEDERATED-agent concerns, not this
     # module's -- they do not change TrustEngine's runtime behaviour.
-    "fedqpnt":              dict(law_mode="continuous", quantum_enabled=True, p_source="detector"),
+    "fedqpnt":              dict(law_mode="continuous", quantum_enabled=True, p_source="detector", trust_law_version="v2"),
     "baseline_a":           dict(law_mode="fixed_exclude", quantum_enabled=True, p_source="detector"),
     "a0":                   dict(law_mode="w_equals_1", quantum_enabled=True, p_source="detector"),
-    "baseline_b_cont":      dict(law_mode="continuous", quantum_enabled=True, p_source="detector"),
+    "baseline_b_cont":      dict(law_mode="continuous", quantum_enabled=True, p_source="detector", trust_law_version="v2"),
     "baseline_b_bin":       dict(law_mode="detect_switch", quantum_enabled=True, p_source="detector"),
     "bprime":               dict(law_mode="continuous", quantum_enabled=True, p_source="bprime"),
     "abl_minus_quantum":    dict(law_mode="continuous", quantum_enabled=False, p_source="detector"),
@@ -421,7 +613,8 @@ class TrustEngineImpl:
         self.node_id = node_id
         self.extractor = GnssFeatureExtractor()
         self.detector = TrustDetector(arch=self.cfg.detector_arch, seed=self.cfg.detector_seed)
-        self.gnss_law = SensorTrustLaw(cfg=self.cfg.gnss_law_cfg, law_mode=self.cfg.law_mode)
+        self.gnss_law = SensorTrustLaw(cfg=self.cfg.gnss_law_cfg, law_mode=self.cfg.law_mode,
+                                       trust_law_version=self.cfg.trust_law_version)
         self.imu_trust = ImuTrust(w_min=self.cfg.gnss_law_cfg.w_min)
         self.quantum_trust = QuantumTrust(cycle_time_s=self.cfg.quantum_cycle_time_s,
                                            law_mode=self.cfg.law_mode) if self.cfg.quantum_enabled else None
@@ -430,7 +623,7 @@ class TrustEngineImpl:
     def config(self) -> dict:
         return dict(method=self.cfg.method, law_mode=self.cfg.law_mode,
                     quantum_enabled=self.cfg.quantum_enabled, p_source=self.cfg.p_source,
-                    detector_arch=self.cfg.detector_arch)
+                    detector_arch=self.cfg.detector_arch, trust_law_version=self.cfg.trust_law_version)
 
     def reset(self) -> None:
         self.extractor.reset()
@@ -447,6 +640,24 @@ class TrustEngineImpl:
         p_spoof, p_jam, _u = self.detector.score(self.extractor._last_t or 0.0, raw)
         return max(p_spoof, p_jam)
 
+    def _physical_spoof_evidence(self, raw: np.ndarray) -> bool:
+        """D-051 sec C: E_s, the physical spoof-evidence set. Uses the
+        detector's own running normalizer (updated only on pseudo-label-
+        negative samples) as the "clean reference" mu/sd -- the same idea
+        as the labeller's quantile_mu/sd, but the node-local, runtime
+        version of it, with the same D-051 sigma floors applied so a
+        near-degenerate sd here cannot make this evidence spuriously easy
+        to trigger either."""
+        c = self.gnss_law.cfg
+        clk_event = (raw[_IDX_CLK_JUMP] >= c.es_clk_sigma) or (raw[_IDX_DRIFT_JUMP] >= c.es_clk_sigma)
+        mu = self.detector.normalizer.mu
+        sd = apply_sigma_floor(self.detector.normalizer.sd)
+        xsat_event = raw[_IDX_XSAT_CORR] > (mu[_IDX_XSAT_CORR] + c.es_xsat_quantile_z * sd[_IDX_XSAT_CORR])
+        cn0_event = raw[_IDX_CN0_MEAN] > (mu[_IDX_CN0_MEAN] + c.es_xsat_quantile_z * sd[_IDX_CN0_MEAN]
+                                          + c.es_cn0_band_excess_db)
+        position_event = raw[_IDX_NIS_POS] > c.position_gate_threshold
+        return bool(clk_event or xsat_event or cn0_event or position_event)
+
     def update(self, t: float, fix: GnssFix | None, imu: ImuSample | None,
                quantum: QuantumSample | None, nav_prior: NavSolution | None,
                innovations: list[Innovation]) -> TrustState:
@@ -460,7 +671,9 @@ class TrustEngineImpl:
                 nis_ok = raw[0] <= self.gnss_law.cfg.nis_clean_threshold
                 xtilde = self.detector.normalizer.normalize(raw)
                 features_nominal = bool(np.all(np.abs(xtilde[2:11]) <= _FEATURES_NOMINAL_Z))
-                gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal)
+                es_evidence = self._physical_spoof_evidence(raw) if self.gnss_law._uses_v2 else False
+                gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal,
+                                             nis_value=float(raw[_IDX_NIS_POS]), es_evidence=es_evidence)
 
                 gap = float("inf") if self._last_valid_gnss_t is None else (t - self._last_valid_gnss_t)
                 if gap > self.gnss_law.cfg.T_gap:

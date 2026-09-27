@@ -142,7 +142,7 @@ def test_reacquisition_cap_via_trust_engine():
                        mean_cn0=45.0, std_cn0=1.0, agc_db=0.0, valid=valid, raim_stat=1.0, pdop=2.0)
 
     eng.update(0.0, make_fix(0.0), None, None, None, [])
-    eng.gnss_law._core.w = 1.0  # force a fully-trusted pre-outage state (detector is untrained here)
+    eng.gnss_law.force_w(1.0)  # force a fully-trusted pre-outage state (detector is untrained here)
     # outage > T_gap (5s): no fix at all for several ticks
     for t in [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]:
         eng.update(t, None, None, None, None, [])
@@ -210,6 +210,104 @@ def test_detect_switch_hard_exclude_and_recovery():
         law.step(t, 0.0, nis_ok=True, features_nominal=True)
         t += 0.1
     assert law.w == 1.0
+
+
+T_EX_V2 = 60.0
+T_PROBE_V2 = 10.0
+
+
+def test_v2_chronic_false_detector_bounded_exclusion_and_recovers():
+    """D-051 sec C unit test (i): a chronically firing detector (p=1
+    forever) on otherwise CLEAN data (nis_ok, features_nominal, no physical
+    E_s evidence) must never keep w_gnss depressed (DISTRUST or PROBE) for
+    longer than T_ex + T_probe = 70s at a stretch, and must actually recover
+    (w -> near 1) during the T_sup suppression window that follows a
+    successful PROBE exit -- this is exactly the M1-CLOSE anti-lockout bug
+    (EXECUTION_LOG #83: v1 had NO bound on time spent with D=1)."""
+    cfg = TrustLawConfig()
+    law = SensorTrustLaw(cfg=cfg, law_mode="continuous", trust_law_version="v2")
+    t = 0.0
+    dt = 1.0
+    excl_run = 0.0
+    max_excl_run = 0.0
+    max_w = 0.0
+    for _ in range(1200):
+        w = law.step(t, 1.0, nis_ok=True, features_nominal=True, nis_value=0.1, es_evidence=False)
+        if law._core_v2.state in ("DISTRUST", "PROBE"):
+            excl_run += dt
+            max_excl_run = max(max_excl_run, excl_run)
+        else:
+            excl_run = 0.0
+        max_w = max(max_w, w)
+        t += dt
+    assert max_excl_run <= T_EX_V2 + T_PROBE_V2 + 1e-6, (
+        f"exclusion (DISTRUST+PROBE) ran continuously for {max_excl_run}s, "
+        f"exceeds the T_ex+T_probe={T_EX_V2 + T_PROBE_V2}s bound")
+    assert max_w > 0.9, f"never recovered near full trust despite the T_sup suppression window (max w={max_w})"
+
+
+def test_v2_drift_spoof_xsat_signature_stays_distrusted_through_probes():
+    """D-051 sec C unit test (ii): injected drift spoofing carrying a
+    physical E_s signature (here: es_evidence=True throughout, standing in
+    for a persistent xsat/clock-jump/position-gate signature) must keep the
+    PROBE exit test failing every cycle -- w must never rise above w_probe,
+    and the system stays flagged as attacked."""
+    cfg = TrustLawConfig()
+    law = SensorTrustLaw(cfg=cfg, law_mode="continuous", trust_law_version="v2")
+    t = 0.0
+    max_w_after_transient = 0.0
+    for _ in range(600):
+        w = law.step(t, 1.0, nis_ok=False, features_nominal=False, nis_value=50.0, es_evidence=True)
+        if t > 5.0:  # allow the initial hysteresis-latency ramp to settle
+            max_w_after_transient = max(max_w_after_transient, w)
+        t += 1.0
+    assert max_w_after_transient <= cfg.w_probe + 1e-6, (
+        f"w rose above w_probe={cfg.w_probe} despite persistent physical spoof evidence "
+        f"(max w after transient={max_w_after_transient})")
+    assert law.attack_detected
+
+
+def test_v2_consistent_partial_jamming_recovers():
+    """D-051 sec C unit test (iii): consistent partial jamming -- an
+    elevated detector score (p=0.7, enough to trip the p-bar hysteresis)
+    but with NIS staying nominal and no physical E_s evidence (jamming
+    degrades rather than deceives; the honest receiver covariance already
+    down-weights degraded fixes, so jamming alone must never block the
+    PROBE recovery). Must recover to TRUST within one T_ex+T_probe cycle."""
+    cfg = TrustLawConfig()
+    law = SensorTrustLaw(cfg=cfg, law_mode="continuous", trust_law_version="v2")
+    t = 0.0
+    recovered_at = None
+    for _ in range(400):
+        w = law.step(t, 0.7, nis_ok=True, features_nominal=True, nis_value=0.1, es_evidence=False)
+        if law._core_v2.state == "TRUST" and t > 5.0 and recovered_at is None:
+            recovered_at = t
+        t += 1.0
+    assert recovered_at is not None, "consistent partial jamming never recovered to TRUST"
+    assert recovered_at <= T_EX_V2 + T_PROBE_V2 + 10.0, f"recovery took {recovered_at}s, far beyond one T_ex+T_probe cycle"
+
+
+@pytest.mark.parametrize("period_s", [2.0, 5.0, 10.0, 20.0, 60.0])
+def test_v2_no_chattering_under_adversarial_toggling(period_s):
+    """D-051 sec C unit test (iv): S7 re-verified for trust_law_version='v2'.
+    A cycle here is >= T_ex + T_probe = 70s > the 26.1s §3.3 bound (sec C
+    item 7), so the chattering bound holds a fortiori with a tighter
+    per-hour cap than v1's."""
+    cfg = TrustLawConfig()
+    law = SensorTrustLaw(cfg=cfg, law_mode="continuous", trust_law_version="v2")
+    duration_s = 3600.0
+    dt = 1.0
+    n = int(duration_s / dt)
+    ts = np.arange(n) * dt
+    ws = np.empty(n)
+    for k, t in enumerate(ts):
+        phase = (t % period_s) < (period_s / 2.0)
+        p = 1.0 if phase else 0.0
+        ws[k] = law.step(t, p, nis_ok=not phase, features_nominal=not phase,
+                          nis_value=(5.0 if phase else 0.1), es_evidence=False)
+    n_cyc = _count_trust_cycles(ts, ws)
+    max_allowed = math.ceil(duration_s / (T_EX_V2 + T_PROBE_V2))
+    assert n_cyc <= max_allowed, f"period={period_s}s: {n_cyc} cycles > v2 bound {max_allowed}"
 
 
 def test_no_recovery_gate_ablation_recovers_without_clean_dwell():

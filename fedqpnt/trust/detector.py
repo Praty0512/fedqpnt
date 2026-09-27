@@ -121,6 +121,16 @@ class TrustDetector:
     arch: Literal["mlp", "logreg"] = "mlp"
     seed: int = 0
     normalizer: FeatureNormalizer = field(default_factory=FeatureNormalizer)
+    # D-051 sec B: per-head Platt (logistic) calibration on the raw sigmoid
+    # output, fit at the natural class ratio on tuning seeds (see
+    # scripts/recalibrate_and_retrain_v2.py) and applied HERE at runtime, so
+    # every caller of `score` (in particular TrustEngineImpl._gnss_p, the
+    # trust law's input) consumes calibrated p. Identity (a=1, b=0) by
+    # default, i.e. a no-op until fit params are loaded via set_params.
+    platt_a_spoof: float = 1.0
+    platt_b_spoof: float = 0.0
+    platt_a_jam: float = 1.0
+    platt_b_jam: float = 0.0
 
     def __post_init__(self) -> None:
         torch.manual_seed(self.seed)
@@ -131,23 +141,44 @@ class TrustDetector:
     def reset_stream(self) -> None:
         self._stack.reset()
 
+    @staticmethod
+    def _platt_apply(p_raw: float, a: float, b: float) -> float:
+        eps = 1e-6
+        p = float(np.clip(p_raw, eps, 1.0 - eps))
+        z = np.log(p / (1.0 - p))
+        return float(1.0 / (1.0 + np.exp(-(a * z + b))))
+
     def score(self, t: float, raw_features: np.ndarray) -> tuple[float, float, np.ndarray]:
-        """Causal single-step inference. Returns (p_spoof, p_jam, u_52)."""
+        """Causal single-step inference. Returns (p_spoof, p_jam, u_52), both
+        p's Platt-CALIBRATED (D-051 sec B) -- this is what the trust law
+        actually consumes."""
         xtilde = self.normalizer.normalize(raw_features)
         u = self._stack.step(t, xtilde)
         with torch.no_grad():
             out = self.model(torch.as_tensor(u, dtype=torch.float32)).numpy()
-        return float(out[0]), float(out[1]), u
+        p_spoof = self._platt_apply(float(out[0]), self.platt_a_spoof, self.platt_b_spoof)
+        p_jam = self._platt_apply(float(out[1]), self.platt_a_jam, self.platt_b_jam)
+        return p_spoof, p_jam, u
 
     def get_params(self) -> dict[str, np.ndarray]:
         p = _param_dict(self.model)
         p.update(self.normalizer.get_params())
+        p["platt_a_spoof"] = np.array([self.platt_a_spoof])
+        p["platt_b_spoof"] = np.array([self.platt_b_spoof])
+        p["platt_a_jam"] = np.array([self.platt_a_jam])
+        p["platt_b_jam"] = np.array([self.platt_b_jam])
         return p
 
     def set_params(self, params: dict[str, np.ndarray]) -> None:
         _load_param_dict(self.model, params)
         if "norm_mu" in params:
             self.normalizer.set_params(params)
+        if "platt_a_spoof" in params:
+            self.platt_a_spoof = float(np.asarray(params["platt_a_spoof"]).reshape(-1)[0])
+            self.platt_b_spoof = float(np.asarray(params["platt_b_spoof"]).reshape(-1)[0])
+        if "platt_a_jam" in params:
+            self.platt_a_jam = float(np.asarray(params["platt_a_jam"]).reshape(-1)[0])
+            self.platt_b_jam = float(np.asarray(params["platt_b_jam"]).reshape(-1)[0])
 
     def train_local(
         self,
@@ -197,7 +228,7 @@ class TrustDetector:
         rng = rng or np.random.default_rng(0)
         n = U.shape[0]
         if n == 0:
-            return {"n_pos": 0.0, "n_neg": 0.0, "loss": float("nan"), "pl_rate": 0.0}
+            return {"n_pos": 0.0, "n_neg": 0.0, "loss": float("nan"), "pl_rate": 0.0, "w_pos": 0.0, "w_neg": 0.0}
 
         if balance:
             pos_mask = (y_spoof > 0) | (y_jam > 0)
@@ -216,12 +247,20 @@ class TrustDetector:
             U, y_spoof, y_jam = U[keep], y_spoof[keep], y_jam[keep]
             n = U.shape[0]
             if n == 0:
-                return {"n_pos": 0.0, "n_neg": 0.0, "loss": float("nan"), "pl_rate": 0.0}
+                return {"n_pos": 0.0, "n_neg": 0.0, "loss": float("nan"), "pl_rate": 0.0, "w_pos": 0.0, "w_neg": 0.0}
 
         n_pos = float(np.sum((y_spoof > 0) | (y_jam > 0)))
         n_neg = float(n - n_pos)
-        w_pos = n / max(2 * n_pos, 1.0)
-        w_neg = n / max(2 * n_neg, 1.0)
+        # D-050: class-weight cap. Uncapped inverse-frequency weighting blows
+        # up when one class is a tiny minority of a batch (e.g. a single
+        # negative in an otherwise-all-positive batch), which can drive an
+        # unbounded SGD step on that lone sample. Capping at 10x keeps the
+        # per-sample weight -- and hence the update norm -- bounded
+        # regardless of how skewed a batch is (see
+        # tests/test_trust_detector.py::test_single_negative_batch_bounded_update).
+        class_weight_cap = 10.0
+        w_pos = min(n / max(2 * n_pos, 1.0), class_weight_cap)
+        w_neg = min(n / max(2 * n_neg, 1.0), class_weight_cap)
 
         opt = torch.optim.SGD(self.model.parameters(), lr=lr)
         theta_g_t = None
@@ -248,4 +287,5 @@ class TrustDetector:
                 bce.backward()
                 opt.step()
                 losses.append(float(bce.detach()))
-        return {"n_pos": n_pos, "n_neg": n_neg, "loss": float(np.mean(losses)), "pl_rate": n_pos / n}
+        return {"n_pos": n_pos, "n_neg": n_neg, "loss": float(np.mean(losses)), "pl_rate": n_pos / n,
+                "w_pos": w_pos, "w_neg": w_neg}

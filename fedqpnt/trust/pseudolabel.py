@@ -51,6 +51,56 @@ IDX_NIS_POS, IDX_NIS_VEL, IDX_RAIM, IDX_CN0_MEAN, IDX_CN0_STD, IDX_CN0_RATE, \
     IDX_AGC, IDX_CLK_JUMP, IDX_DRIFT_JUMP, IDX_RESID_RMS, IDX_NSAT_DELTA, \
     IDX_DIV_CUSUM, IDX_OUTAGE, IDX_XSAT_CORR, IDX_ELEV_SLOPE = range(15)
 
+# Labeller v2 (D-051 sec A): sigma floors, sigma_eff,k = max(sigma_ref,k,
+# sigma_floor,k), applied to the standardisation sigma BEFORE the joint
+# chi2_11 negative rule and the D-024 xsat/cn0 positive rule (both consume
+# quantile_sd). Fixes the M1-CLOSE failure mode where a near-degenerate
+# feature (nsat_delta, sigma=0.024 on clean converged runs) dominates the
+# joint Mahalanobis distance and makes the negative rule vacuous
+# (EXECUTION_LOG #80/#83).
+#
+# PROPOSED-DECISION: x1/x2/x3 (nis_pos, nis_vel, raim) are already divided
+# by their dof in this codebase (features.py: _innovation_nis_over_dof
+# divides by a fixed dof=3 for nis_pos/nis_vel; raim/dof for x3, dof varying
+# per epoch). The D-051 table's "0.5*dof" floor is stated for the RAW chi2
+# statistic. Applied to the dof-NORMALISED feature this codebase actually
+# carries, the equivalent, dof-invariant floor is 0.5*dof/dof = 0.5 (works
+# even though x3's dof varies epoch to epoch, since the floor is on the
+# already-normalised quantity, not on dof itself).
+# PROPOSED-DECISION: x6 (cn0_rate) gets the same 0.3 floor as the other C/N0
+# features -- the D-051 table does not give rate its own floor.
+# PROPOSED-DECISION: x10 (resid_rms), x12 (div_cusum) and x13 (outage) are
+# not covered by the D-051 table. Rather than invent an unspecified floor,
+# they are left un-floored (0.0, a no-op against max()); x12/x13 are not
+# consumed by the joint chi2_11 test or the xsat rule in any case.
+SIGMA_FLOOR_15 = np.array([
+    0.5,   # x1  nis_pos       (NIS/RAIM chi2, dof-normalised; see PROPOSED-DECISION)
+    0.5,   # x2  nis_vel
+    0.5,   # x3  raim
+    0.3,   # x4  cn0_mean      (C/N0, dB-Hz)
+    0.3,   # x5  cn0_std       (C/N0, dB-Hz)
+    0.3,   # x6  cn0_rate      (C/N0; see PROPOSED-DECISION)
+    0.5,   # x7  agc           (dB)
+    1.0,   # x8  clk_jump      (already in units of the receiver's reported 1-sigma)
+    1.0,   # x9  drift_jump    (ditto)
+    0.0,   # x10 resid_rms     -- not in the D-051 table; see PROPOSED-DECISION
+    0.5,   # x11 nsat_delta    (integer count)
+    0.0,   # x12 div_cusum     -- not in the D-051 table; see PROPOSED-DECISION
+    0.0,   # x13 outage        -- not in the D-051 table; see PROPOSED-DECISION
+    0.05,  # x14 cn0_xsat_corr (correlation-type)
+    0.02,  # x15 cn0_elev_slope (slope, dB/deg)
+])
+
+
+def apply_sigma_floor(quantile_sd: np.ndarray) -> np.ndarray:
+    """sigma_eff = max(sigma_ref, sigma_floor), D-051 sec A. Returns a new
+    array; ``quantile_sd`` may be 11-, 13- or 15-wide (matches whichever
+    slice of FEATURE_NAMES the caller carries)."""
+    quantile_sd = np.asarray(quantile_sd, dtype=float).copy()
+    n = min(len(quantile_sd), len(SIGMA_FLOOR_15))
+    quantile_sd[:n] = np.maximum(quantile_sd[:n], SIGMA_FLOOR_15[:n])
+    return quantile_sd
+
 
 def _dwell(cond: np.ndarray, t: np.ndarray, dwell_s: float) -> np.ndarray:
     """True at index k iff ``cond`` has held continuously for >= dwell_s
@@ -194,6 +244,10 @@ def label_epochs(
     else:
         quantile_mu_full = np.asarray(quantile_mu, dtype=float)
         quantile_sd_full = np.asarray(quantile_sd, dtype=float)
+
+    # Labeller v2 (D-051 sec A): sigma floors, applied regardless of whether
+    # quantile_sd was supplied by the caller or computed above.
+    quantile_sd_full = apply_sigma_floor(quantile_sd_full)
 
     # D-024: single-antenna/replay signature (x14 cn0_xsat_corr, x4 cn0_mean).
     # Only evaluated when the caller's feature matrix / reference actually
