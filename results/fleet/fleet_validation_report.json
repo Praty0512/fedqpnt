@@ -1,0 +1,159 @@
+{
+  "kappa_R_note": "kappa_R PROVISIONAL (D-046/D-047); tuning seeds",
+  "n_nodes": 5,
+  "duration_s": 600.0,
+  "seeds": [
+    500,
+    501
+  ],
+  "runs": {
+    "nominal_seed500": {
+      "aborted": false,
+      "abort_reason": "",
+      "wall_s": 46.23076391220093,
+      "wall_s_per_fleet_hour": 55.47691669464111,
+      "round_installs": {
+        "n0": 9,
+        "n1": 9,
+        "n4": 9,
+        "n2": 9,
+        "n3": 5
+      },
+      "node_failed": {
+        "n0": false,
+        "n1": false,
+        "n4": false,
+        "n2": false,
+        "n3": false
+      },
+      "rounds_skipped": 1,
+      "quarantine_events": 0,
+      "mean_w_gnss": {
+        "n0": 0.32074281422942047,
+        "n1": 0.3695676649466874,
+        "n4": 0.21842904639282193,
+        "n2": 0.3135780248713222,
+        "n3": 0.3263737493182267
+      },
+      "latency_on": {
+        "n0": NaN,
+        "n1": NaN,
+        "n4": NaN,
+        "n2": NaN,
+        "n3": NaN
+      },
+      "result_file": "runs_fleet\\nominal\\fedqpnt_local\\seed_500.json"
+    },
+    "s15_30pct_drift_spoof_seed500": {
+      "aborted": false,
+      "abort_reason": "",
+      "wall_s": 45.09779405593872,
+      "wall_s_per_fleet_hour": 54.11735286712646,
+      "round_installs": {
+        "n1": 9,
+        "n3": 5,
+        "n0": 9,
+        "n2": 9,
+        "n4": 9
+      },
+      "node_failed": {
+        "n1": false,
+        "n3": false,
+        "n0": false,
+        "n2": false,
+        "n4": false
+      },
+      "rounds_skipped": 1,
+      "quarantine_events": 0,
+      "mean_w_gnss": {
+        "n1": 0.3222177616022507,
+        "n3": 0.32671176784119077,
+        "n0": 0.2895261268802689,
+        "n2": 0.3135780248713222,
+        "n4": 0.21842904639282193
+      },
+      "latency_on": {
+        "n1": 302.0,
+        "n3": NaN,
+        "n0": 0.0,
+        "n2": NaN,
+        "n4": NaN
+      },
+      "result_file": "runs_fleet\\s15_30pct_drift_spoof\\fedqpnt_local\\seed_500.json"
+    },
+    "nominal_seed501": {
+      "aborted": false,
+      "abort_reason": "",
+      "wall_s": 43.24660038948059,
+      "wall_s_per_fleet_hour": 51.895920467376705,
+      "round_installs": {
+        "n2": 9,
+        "n1": 7,
+        "n4": 9,
+        "n0": 9,
+        "n3": 9
+      },
+      "node_failed": {
+        "n2": false,
+        "n1": false,
+        "n4": false,
+        "n0": false,
+        "n3": false
+      },
+      "rounds_skipped": 1,
+      "quarantine_events": 0,
+      "mean_w_gnss": {
+        "n2": 0.29971482201161426,
+        "n1": 0.2914757663129575,
+        "n4": 0.3667855856761095,
+        "n0": 0.3320125200089991,
+        "n3": 0.33501921035741417
+      },
+      "latency_on": {
+        "n2": NaN,
+        "n1": NaN,
+        "n4": NaN,
+        "n0": NaN,
+        "n3": NaN
+      },
+      "result_file": "runs_fleet\\nominal\\fedqpnt_local\\seed_501.json"
+    },
+    "s15_30pct_drift_spoof_seed501": {
+      "aborted": false,
+      "abort_reason": "",
+      "wall_s": 43.53577399253845,
+      "wall_s_per_fleet_hour": 52.24292879104614,
+      "round_installs": {
+        "n3": 9,
+        "n2": 9,
+        "n1": 7,
+        "n4": 9,
+        "n0": 9
+      },
+      "node_failed": {
+        "n3": false,
+        "n2": false,
+        "n1": false,
+        "n4": false,
+        "n0": false
+      },
+      "rounds_skipped": 1,
+      "quarantine_events": 0,
+      "mean_w_gnss": {
+        "n3": 0.33501921035741417,
+        "n2": 0.29971482201161426,
+        "n1": 0.27389592235878674,
+        "n4": 0.3667855856761095,
+        "n0": 0.2962770523218427
+      },
+      "latency_on": {
+        "n3": NaN,
+        "n2": NaN,
+        "n1": 0.0,
+        "n4": NaN,
+        "n0": 0.0
+      },
+      "result_file": "runs_fleet\\s15_30pct_drift_spoof\\fedqpnt_local\\seed_501.json"
+    }
+  }
+}

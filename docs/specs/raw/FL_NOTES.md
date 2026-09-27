@@ -271,3 +271,68 @@ Verified via `Get-CimInstance Win32_Process` before/after: two other agents' pro
 during this work (`scripts/filter_gnss_d038.py`, `pytest tests/test_eval_stats.py`) were left
 untouched (confirmed by command line, not assumed). No process was stopped this session. Federations
 were run one at a time throughout (N=10 -> 11 processes per run, no concurrent federation runs).
+
+## D-048: FedAvg poisoned-better-than-clean diagnosis (NOT a bug)
+Checked (a) pairing: clean and poisoned arms use identical seed/base_seed, n_rounds, eval set and
+node data (same `make_provider(base_seed=seed,...)` call, stateless given (node_id, round) -- CONFIRMED
+correctly paired.
+(b) AUC-per-round, seed=500, FedAvg, clean: round1..4 = 0.873, 0.857, 0.784, **0.483** -- the clean
+arm does NOT plateau, it COLLAPSES at round 4 (does not converge in 4 rounds; actively destabilises).
+(c) Per-node contribution trace (in-process replica, same seed/data) showed the cause: at round 3,
+one HONEST node (n3, not malicious in either run) produced a delta_norm of 6.88 vs ~0.1-0.3 for every
+other node that round -- an outlier SGD step (small per-round batch, lr=0.05, no clipping in FedAvg
+by design) that DOMINATES the uncapped weighted average and destabilises the global model for round
+4. In the poisoned run, n3's OWN round-3 delta_norm was smaller (1.87) purely because its starting
+point (theta_g installed after round 2) differed between the two runs -- round 2's aggregate itself
+differs since n0/n1 are poisoned in one run and not the other, so by round 3 the two runs are
+training from different points and hit different (in)stability. The poisoned run's random walk
+happened to avoid the instability the clean run hit.
+(d) AUC polarity: per-head AUCs decay toward ~0.5 (random), never invert toward ~0 -- no sign/scoring
+bug; this is instability/collapse, not a polarity flip.
+**Conclusion: this is FedAvg's documented, designed vulnerability (ARCHITECTURE.md SS4.1: "FedAvg does
+weight by [self-reported n_samples], which is part of why FedAvg is the vulnerable reference in
+S12") manifesting as uncapped-gradient instability over few rounds with tiny synthetic per-round
+batches, not a pairing/scoring/aggregator bug. No fix applied (per Master: "if after the fix FedAvg
+still improves significantly, report the numbers and stop" -- no fix was warranted since no bug was
+found).** TRIM-NB-R's clipping step (SS4.5, c=2 x median norm) is exactly the mechanism that prevents
+this kind of single-outlier-gradient instability, which is why it does not show this pathology.
+
+## D-048: M2 fleet integration (fedqpnt/fleet/)
+- `features.py`: `FleetFeatureTracker` -- real hindsight-pseudo-label feature extraction per node,
+  reusing the ALREADY-APPROVED `fedqpnt.node.methods.pretrain_detector` precedent exactly
+  (own `GnssFeatureExtractor`, `innovations=[]`, `surrogate_s_cusum`+`label_epochs`). x1/x2
+  (innovation-NIS features) are therefore unavailable, same limitation as that precedent;
+  PROPOSED-DECISION, out of scope without editing `fedqpnt/fusion/eskf.py`. Implements
+  `local_dataset_provider(node_id, round) -> (X, y)` exactly, fed by real per-tick `GnssFix`.
+- `node_runner.py`: one real fleet node process. Builds `NodeEnvironment`+`Agent` via the PUBLIC
+  `fedqpnt.node` API only (no edits to fedqpnt/node/*.py). `FLClient` wraps `agent.trust.detector`
+  DIRECTLY (the same live object the Agent's trust engine uses for real navigation), so
+  `client.install_global(...)` immediately changes what the live trust engine uses from the next
+  tick on -- exactly "the installed global model is used by the node's trust engine from the next
+  round on." Reuses `fedqpnt.fl`'s message types (`NoUpdate`/`Lost`/`Failed`) and `uplink_channel`
+  unchanged. Guarantees exactly one result on ``node_result_q`` even on a hard crash (top-level
+  try/except wrapper), so the orchestrator's join loop can't hang on a node that died outside the
+  tick loop.
+- `orchestrator.py`: `FleetScenarioConfig` (adds mission fields: duration_s, round_period_s,
+  attacks-per-node, kappa_R/kappa_Q, gnss_rate_hz) on top of the same SS4.7/S5/S12/S15 knobs as
+  `fedqpnt.fl.orchestrator.ScenarioConfig` (join_round/failure_round/delay_window/poison_kind).
+  **The server side is 100% REUSED, unchanged**: `to_fl_scenario()` builds a plain
+  `fl.orchestrator.ScenarioConfig` and `run_fleet` spawns `fl.orchestrator._server_main` directly as
+  the server process -- no new aggregation/comms/poisoning code was written for the fleet, since the
+  server never depended on the data source. `write_campaign_result()` writes
+  `runs_fleet/<scenario_id>/<method>/seed_<seed>.json` matching `fedqpnt.eval.campaign`'s exact
+  schema (status/scenario_id/method/seed/config_hash/wall_s/metrics), with `metrics` = flat per-node
+  MEAN of each scalar (report-generator-compatible) plus `metrics["nodes"]` (full per-node
+  breakdown) and `metrics["fleet"]` (rounds_skipped/quarantine_events/wall time per fleet-hour).
+- Leakage guard extended: `tests/test_fleet_leakage_guard.py` mirrors trust's/fl's AST scan over
+  `fedqpnt/fleet/*.py` (no `fedqpnt.sim`/`fedqpnt.attacks`/`AttackLabel`/`TruthState` imports).
+- S5/S8/S9/S12/S15 support: `FleetScenarioConfig.failure_round`/`delay_window` (S5),
+  `.join_round` (S8, cold start), `.comms_cfg` (S9), `.poison_kind` (S12, node-local sign_flip/
+  label_flip; gaussian_noise/alie route through the SAME server-side hook as fl.orchestrator, no
+  fleet-specific code needed), `.attacks` per-node dict (S15, heterogeneous attack subsets).
+
+### Validation (item 3), tuning seeds only (500-599), N=5, 10-min missions, 2 seeds, kappa_R
+PROVISIONAL (D-046/D-047; tuning seeds). `scripts/run_fleet_validate.py` ->
+`results/fleet/fleet_validation_report.json`. See the FEDERATED report for the numeric summary
+(rounds skipped, global-model installs per node, mean w_gnss, wall time per fleet-hour, nominal vs
+30%-drift-spoof).

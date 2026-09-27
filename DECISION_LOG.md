@@ -33,6 +33,19 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-050 · 2026-09-27 · M2 fleet runner accepted as infrastructure; surrogate-feature PD REJECTED; class-weight cap
+- **Accepted** (Master re-ran the fleet tests: 8/8):
+  - `fedqpnt/fleet/`: real N-node pipelines (Environment + Agent) federated through the unchanged fl server; the live detector object is updated from the next tick; S5/S8/S9/S12/S15 are configurable; result files match the campaign schema.
+  - Leakage-guard AST test extended. Deterministic.
+  - 52–55 s wall per fleet-hour (N = 5).
+- **FedAvg anomaly explained:**
+  - The clean arm *collapsed* at round 4 (AUC 0.87 → 0.48): one honest node produced an update norm of 6.88 vs 0.1–0.3 for the rest, and unclipped FedAvg was dominated by it. Pairing and polarity were verified correct.
+  - Accepted as FedAvg's documented vulnerability (TRIM-NB-R clips it).
+  - **Master follow-up:** a 20–70× honest update is itself suspicious. The likely cause is the D-039 dead-zone path, where inverse-frequency class weights are unbounded when n_neg is tiny (e.g. 1 negative gives a huge weight), causing exploding SGD steps. Decision: **cap class weights at 10×**, a stability fix and not a design change. Verify that the round-3 outlier node was on the n_min path.
+- **REJECTED PD:** fleet local training uses `innovations=[]` plus `surrogate_s_cusum`, zeroing x1/x2 (the innovation-NIS features) and using a surrogate reference. The deployed detector sees REAL x1/x2, so training on a different feature distribution is exactly the train/deploy mismatch that broke M1 (D-049). The claim "unavailable without touching eskf.py" is incorrect: the Agent already computes and splits the ESKF innovations each tick for the trust engine. **Decision:** create a single shared feature/label extraction path used by (a) the M1 node retraining, (b) fleet local training and (c) the deployed trust engine. It captures the Agent's per-tick innovations through an additive hook and uses the real CAI-aided reference for pseudo-labels.
+- **Sequencing:** implement after M1-CLOSE's D-049 recalibration lands, so the shared path adopts the recalibrated labeller. FEDERATED is at about 508k tokens of context, so the follow-up goes to a **fresh** Sonnet agent.
+- **Owner:** Master
+
 ### D-049 · 2026-09-27 · M1 sign-off WITHHELD: pseudo-labeller mis-calibrated on real features → recalibrate + Platt calibration; anti-lockout failure
 - **M1-CLOSE results** (tuning seeds, real closed-loop features, frozen design):
   - Held-out AUC: overall 0.835, drift 0.924, meaconing 0.997, **abrupt 0.413 and jamming 0.142 (inverted)**. Pseudo-label precision/recall = **0.602**/0.995.
