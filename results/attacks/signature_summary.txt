@@ -1,0 +1,9 @@
+scenario | cn0_clean_pre-onset(mean+-std) | cn0_attacked(mean+-std) | poserr_attacked(mean+-std) | raim_clean_PAIRED_same_window(mean+-std) | raim_attacked(mean+-std) | note
+clean | 41.57+-0.10 | -- | 3.45+-1.10 | 4.060+-1.491 | -- | reference (no attack)
+drift_spoof | 41.57+-0.07 | 44.99+-1.72 | 32.41+-30.29 | 5.029+-1.302 | 5.280+-1.300 | 
+meaconing | 41.57+-0.07 | 45.53+-0.10 | 2.52+-0.55 | 5.166+-1.431 | 5.280+-1.463 | 
+abrupt_spoof | 41.57+-0.07 | 41.53+-0.10 | 64.02+-0.68 | 5.166+-1.431 | 4.923+-1.269 | 
+jam_cw | 41.57+-0.07 | 26.09+-0.00 | 3.23+-0.63 | 5.166+-1.431 | 2.149+-0.599 | 
+jam_wideband | 41.57+-0.07 | 27.78+-0.01 | 3.00+-0.62 | 5.166+-1.431 | 2.708+-0.755 | 
+jam_wideband_strong | 41.57+-0.07 | -53.94+-0.00 | nan+-nan | 5.166+-1.431 | nan+-nan | TOTAL DENIAL (no valid fix)
+jam_then_spoof | 41.56+-0.07 | 31.11+-27.52 | 11.38+-9.36 | 4.991+-1.481 | 5.782+-1.636 | 

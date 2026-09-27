@@ -1,0 +1,11 @@
+{
+  "status": "PROVISIONAL",
+  "kappa_R": 40.0,
+  "kappa_Q": 1.0,
+  "config_hash": "f1fce4f96c51fff2",
+  "tuning_seeds": "500-599 (10-seed probe: 500-505)",
+  "mean_anees_pos_probe_180s": "0.9809 (target 1.0 +- 0.1)",
+  "note": "root cause: time-correlated GNSS errors treated as white (D-023/D-027); no GNSS error-state added by design",
+  "provisional_reason": "D-028: the ESKF process model is being changed concurrently (dynamics-dependent Q inflation for unmodelled IMU scale-factor/misalignment, fedqpnt/fusion/eskf.py, another agent). Q_c changes the propagated P that ANEES is computed against, so this kappa_R value and config_hash MUST be re-chosen, by the same procedure (scripts/tune_kappa_r.py), once D-028 lands. Do not treat this as final; do not consume it downstream as frozen.",
+  "re_tune_command": "python scripts/tune_kappa_r.py --seeds 10 --duration 600.0"
+}

@@ -1,0 +1,2 @@
+PDOP distribution sanity (synthetic Walker almanac, 10 deg mask, 30 min static, 1 Hz):
+  n=1800  mean=2.02  std=0.11  min=1.83  max=2.11  p95=2.11

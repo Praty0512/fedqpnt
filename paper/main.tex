@@ -1,0 +1,559 @@
+\documentclass[journal]{IEEEtran}
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{todonotes}
+\usepackage{cite}
+
+\begin{document}
+
+\title{FedQPNT: Federated, Quantum-Sensor-Augmented Positioning, Navigation and Timing with Continuous Attack-Adaptive Trust Fusion}
+
+\author{\IEEEauthorblockN{Author names withheld for review}
+\IEEEauthorblockA{Affiliation withheld for review}}
+
+\maketitle
+
+\begin{abstract}
+Global Navigation Satellite System (GNSS) spoofing and jamming remain an open threat to autonomous
+vehicles and unmanned aerial vehicles (UAVs), and existing defenses trade off three properties that
+have not, to our knowledge, been combined in one closed loop: (i) federated learning (FL) across a
+fleet so that one node's experience protects nodes that have not yet seen a given attack,
+(ii) continuously varying, per-sensor trust rather than a binary detect-and-exclude decision, and
+(iii) a physically independent quantum inertial sensor -- a cold-atom interferometer (CAI) -- whose
+absolute, low-bias output is not subject to the same spoofing surface as GNSS. \todo{result: one-sentence
+summary of the headline RMSE\_h(P\_att) comparison, once measured} We present FedQPNT, a system that
+fuses a classical inertial measurement unit (IMU), GNSS, and a cold-atom accelerometer inside a
+loosely-coupled error-state Kalman filter, in which a learnable, federated detector drives a continuous,
+asymmetric trust law with formally bounded chattering, and in which detector parameters (never raw
+sensor data) are aggregated fleet-wide by a trust-aware robust aggregator (TRIM-NB-R). The quantum
+sensor's noise and fault statistics are calibrated against real cold-atom interferometer laboratory data
+(d'Armagnac de Castanet et al., 2024) rather than assumed; the platform dynamics, GNSS observables, and
+attacks are simulated at the raw-observable level. We report the system design, the pre-registered
+hypotheses (H1--H4) that isolate the contribution of FL, continuous trust, and quantum aiding
+respectively, and the experimental protocol. \todo{result: RMSE\_h(P\_att) FedQPNT vs B-cont}
+\todo{result: RMSE\_h(P\_att) FedQPNT vs Baseline A (FL detect-and-exclude)}
+\todo{result: latency\_on FedQPNT vs B-cont, cold-start scenario S8}
+\todo{result: H3, latency\_eff with vs without quantum aiding, gradual spoofing}
+We disclose two scoped limitations up front: the rigid-mode cold-atom sensor loses contrast above
+$\Omega_c \approx 17\,\mathrm{mrad/s}$, making quantum aiding intermittent during ordinary vehicle
+manoeuvres, and the loosely-coupled filter requires a GNSS covariance inflation factor $\kappa_R$ whose
+root cause is still under investigation. No experimental outcome is claimed in this draft; all
+quantitative statements are placeholders pending the completed evaluation matrix.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Federated learning, GNSS spoofing, cold-atom interferometry, quantum inertial sensing, sensor fusion, trust-aware fault tolerance, positioning navigation and timing (PNT).
+\end{IEEEkeywords}
+
+%=====================================================================
+\section{Introduction}
+%=====================================================================
+
+\subsection{Motivation}
+Positioning, navigation and timing (PNT) for autonomous vehicles and UAVs depends heavily on GNSS, a
+signal that is inexpensive to spoof or jam and whose loss or manipulation directly threatens safety.
+A wide literature addresses parts of this problem: federated learning has been used to detect GNSS
+spoofing across a fleet without centralizing raw sensor data \cite{khan2025enhancing,chai2025navigation,liu2026g2fl,namagembe2026machine,zhou2023spatiotemporal};
+classical and learned adaptive filters re-weight or exclude GNSS when it disagrees with inertial
+propagation \cite{mehra1970identification,carlson1988federated,carlson1990federated,ren2020adaptive,pardhasaradhi2022gps,negru2024resilient};
+and cold-atom interferometers (CAIs) have been proposed and increasingly demonstrated as inertial
+sensors whose bias is orders of magnitude below that of classical accelerometers
+\cite{wright2022cold,darmagnac2024atom}. Separately, quantum-enhanced and quantum federated learning
+have been studied as a way to speed up or secure the \emph{learning computation} itself
+\cite{hazarika2025quantum,chehimi2023foundations,chehimi2022quantum}. To date, however, these threads
+have not been combined: no verified prior work couples (a) a physical quantum inertial sensor, (b)
+fleet-wide federated learning of an attack detector, and (c) a continuous, attack-adaptive trust law
+that keeps this detector's output as a smoothly varying confidence rather than a switch. The closest
+robust-FL system for GNSS spoofing, G\textsuperscript{2}FL \cite{liu2026g2fl}, addresses robust
+aggregation under Byzantine clients but does not couple its detector to a continuously varying,
+per-sensor trust weight, nor does it use a physical quantum sensor.
+
+\subsection{Gap statement}
+\label{sec:gap}
+No verified reference in our bibliography (Section~\ref{sec:related}, Table~\ref{tab:comparison})
+implements federated learning together with a physical quantum inertial sensor, and among the FL-based
+GNSS-defense papers we could verify, all use a binary detect-and-exclude action rather than a
+continuously varying trust weight. Conversely, the continuous/adaptive-trust literature we verified
+either has no federated learning component (it is single-node) or, when described as "federated", uses
+the classical multi-sensor "federated filter" sense of the term (Carlson-style master/local filter
+fusion within one platform) rather than federated learning across distributed clients
+\cite{negru2024resilient} -- a distinction we make precise in Section~\ref{sec:related} because the
+term is a recurring source of confusion in this literature. The specific, scoped gap this paper
+addresses is therefore: \emph{a closed loop in which an FL-trained, fleet-shared spoofing/jamming
+detector drives a continuous, formally bounded, per-sensor trust weight that gates a quantum-aided
+navigation filter, with the quantum sensor's own noise and fault behaviour calibrated to real
+laboratory data rather than assumed.}
+
+\subsection{Contributions}
+\begin{itemize}
+\item A system architecture in which a single 15-state loosely-coupled error-state Kalman filter is
+  shared, unmodified, across every baseline and ablation, so that comparisons isolate the contribution
+  of each mechanism (FL, continuous trust, quantum aiding) rather than confounding it with
+  implementation differences (Section~\ref{sec:method}).
+\item A continuous, asymmetric trust law with a proven chattering bound
+  ($T_{\mathrm{cyc}} \geq 26.1\,\mathrm{s}$ between trust cycles for any input sequence, adversarial
+  included) that couples a learned, federated detector to the GNSS and quantum measurement
+  covariances via a bounded inflation $R_{\mathrm{eff}} = R / \max(w, w_{\min})$
+  (Section~\ref{sec:method}).
+\item TRIM-NB-R, a trust-aware robust federated aggregator that combines norm clipping, coordinate-wise
+  trimmed-mean/median aggregation, and a cosine-similarity reputation score with quarantine, evaluated
+  against FedAvg and FedProx references under sign-flip, Gaussian, label-flip and "A Little Is Enough"
+  poisoning (Section~\ref{sec:method}).
+\item A quantum inertial sensor model whose noise density, per-interrogation-time noise scaling, and
+  bursty fault process are calibrated from real cold-atom interferometer shot data
+  \cite{darmagnac2024atom} rather than from published summary statistics alone, together with an
+  explicit, honestly reported operating limit (rigid-mode contrast loss above
+  $\Omega_c \approx 17\,\mathrm{mrad/s}$) that makes quantum aiding intermittent during ordinary vehicle
+  manoeuvres (Section~\ref{sec:limitations}).
+\item A pre-registered, mechanism-class baseline taxonomy (A: FL detect-and-exclude; B-bin: single-node
+  detect-and-switch; B-cont: single-node continuous trust; B$'$: classical innovation-based adaptive
+  filter) and four falsifiable hypotheses H1--H4, reported whatever their outcome
+  (Section~\ref{sec:setup}).
+\end{itemize}
+
+\subsection{Paper organisation}
+Section~\ref{sec:related} surveys related work in five groups and positions FedQPNT against it.
+Section~\ref{sec:threat} specifies the node and threat model. Section~\ref{sec:method} gives the
+fusion, trust, and federation equations. Section~\ref{sec:setup} describes the experimental protocol.
+Section~\ref{sec:results} and Section~\ref{sec:discussion} report results and limitations (currently
+placeholders). Section~\ref{sec:conclusion} concludes, followed by a reproducibility statement.
+
+%=====================================================================
+\section{Related Work}
+\label{sec:related}
+%=====================================================================
+
+\subsection{Federated learning for GNSS security and spoofing detection}
+Several recent papers apply federated learning to GNSS spoofing or jamming detection so that a fleet of
+vehicles can share a detector without centralizing raw trajectory data. Khan et al.
+\cite{khan2025enhancing} have each vehicle localize itself from dead-reckoning-style signals (yaw
+rate, steering angle, wheel speed), compare this against GNSS, and use the resulting localization
+mismatch to compute weights that are aggregated at a roadside unit, where a global support-vector
+machine classifier is trained by FL; they report 99\% accuracy on CARLA-simulated trajectories. Chai et
+al. \cite{chai2025navigation} similarly use federated learning to identify GNSS spoofing and jamming
+signals for UAVs. Namagembe et al. \cite{namagembe2026machine} propose a machine-learning-based GPS
+spoofing detection and mitigation scheme for UAVs. Zhou et al. \cite{zhou2023spatiotemporal} propose a
+spatial-temporal federated transfer learning architecture with multi-sensor data fusion for cooperative
+positioning across vehicles; this targets positioning accuracy under heterogeneous data distributions
+rather than adversarial spoofing specifically, but it establishes that federated transfer learning is a
+workable mechanism for multi-vehicle positioning problems. Closest to our own robust-aggregation
+component is G\textsuperscript{2}FL \cite{liu2026g2fl}, which proposes a robust federated learning
+scheme explicitly for GNSS spoofing detection under Byzantine or poisoned clients. In every one of these
+papers, the FL-trained detector's output drives a \emph{binary} decision at the node
+(classify-and-exclude, or classify-and-flag); none couples the detector to a continuously varying
+trust weight on the fusion filter's measurement covariance, and none uses a physical quantum sensor.
+TRIM-NB-R differs from G\textsuperscript{2}FL's robustness mechanism in aggregation detail (per-round
+cosine-similarity reputation with quarantine, rather than G\textsuperscript{2}FL's own scheme), but the
+central point of departure from this entire group is architectural: in FedQPNT the FL-trained detector
+is one input to a continuous trust law, not the exclude decision itself.
+
+\subsection{Adaptive and fault-tolerant sensor fusion and trust}
+The idea of re-weighting or excluding a sensor based on its own innovation statistics predates federated
+learning by decades. Mehra \cite{mehra1970identification} introduced innovation-based adaptive
+estimation of measurement and process noise for Kalman filters, the root of the "adaptive Kalman filter"
+family and the basis of our B$'$ baseline. Carlson's federated filter
+\cite{carlson1988federated,carlson1990federated} decomposes a navigation filter into local filters per
+sensor feeding a master filter, giving fault tolerance and decorrelation properties; this is the
+classical, single-platform sense of "federated," and it is worth stating precisely because the term
+recurs, confusingly, in more recent papers. Ren et al. \cite{ren2020adaptive} demonstrate adaptive
+sensor fusion of camera, GNSS and IMU for autonomous driving, adjusting fusion weights as sensor quality
+changes; we use this as our representative of the single-node, continuous-weighting mechanism class
+(B-cont in our taxonomy) because, unlike \cite{mehra1970identification}, it targets exactly the
+camera/GNSS/IMU setting our own filter generalizes. Pardhasaradhi and Cenkeramaddi
+\cite{pardhasaradhi2022gps} detect GPS spoofing on a drone via distributed radar tracking and, once
+spoofing is flagged, switch control to the independent radar track; this is a detect-then-switch
+mechanism against an independent second sensor, which we use as the representative of our B-bin
+(detect-and-switch) baseline class, while noting that it switches to a different physical sensor
+(radar) rather than continuously re-weighting the same GNSS/INS filter. Negru et al.
+\cite{negru2024resilient} integrate GNSS, IMU, a monocular camera and a barometer using local
+extended Kalman filters feeding a gated-recurrent-unit master filter; despite being described in its own
+title as a "hybrid federated fusion architecture," this is the classical Carlson-style federated
+\emph{filter} architecture with one learned component inside a single UAV, not federated learning across
+distributed clients, and we cite it here, in the fusion-architecture group, rather than alongside the
+FL-for-spoofing-detection papers of Section~2.1 -- a reframing that sharpens the gap statement of
+Section~\ref{sec:gap}. A companion paper from the same group \cite{negru2024uwb} studies UWB-aided
+hybrid navigation in degraded GNSS environments. None of this group's continuous or adaptive fusion
+mechanisms is trained or shared across a fleet by federated learning, and none uses a physical quantum
+sensor as an independent aiding source.
+
+\subsection{Quantum inertial sensing for navigation}
+Cold-atom interferometers measure acceleration or rotation via atom-interferometric phase, giving an
+absolute output whose bias is set by fundamental atomic constants rather than by the drift of a
+mechanical or MEMS proof mass. Wright et al. \cite{wright2022cold} review cold-atom inertial sensors for
+navigation applications, covering the physical principle, achievable sensitivities, and the practical
+challenges (dead time, dynamic range, size/weight/power) of fielding such a sensor on a moving platform.
+d'Armagnac de Castanet et al. \cite{darmagnac2024atom} report a three-axis hybrid cold-\textsuperscript{87}Rb
+atom interferometer operated at arbitrary orientations and rotation rates, providing, to our knowledge,
+the most directly usable real dataset for calibrating a moving-platform CAI noise and fault model: per-shot
+Raman population-ratio residuals at several interrogation times, and a measured contrast-versus-rotation-rate
+law in both a rigid-mirror and an actively tip-tilt-compensated ("inertial-pointing") mode. We use this
+dataset directly (Section~\ref{sec:threat}, and D-014/D-015/D-019/D-020/D-021 in the project decision
+log) to calibrate our simulated CAI's noise density, its per-interrogation-time scaling, and a
+Gilbert--Elliott bursty-outlier channel, rather than assuming these from the summary numbers in the
+paper's text alone. Neither \cite{wright2022cold} nor \cite{darmagnac2024atom} addresses fleet-wide
+learning or GNSS attack robustness; they are the physical-sensing foundation our system builds on, not a
+navigation-security contribution in themselves.
+
+\subsection{Quantum federated learning (distinguished from quantum sensing)}
+A separate line of work applies quantum computation to the federated learning process itself, and it is
+important to distinguish it from quantum \emph{sensing}, since the two are sometimes conflated. Hazarika
+et al. \cite{hazarika2025quantum} propose quantum-enhanced federated learning for metaverse-empowered
+vehicular networks, using quantum-enhanced computation to accelerate or improve FL convergence, not a
+physical quantum sensor providing navigation-grade measurements. Chehimi et al.
+\cite{chehimi2023foundations} lay foundational architectures for quantum federated learning over
+classical and quantum communication networks, and a related paper by the same first two authors
+\cite{chehimi2022quantum} studies quantum federated learning specifically with quantum \emph{data}
+(i.e., data that is itself a quantum state, transmitted over a quantum network) -- again, a statement
+about the learning substrate and communication channel, not about inertial or positioning sensors. None
+of this group's methods involves a physical quantum sensor of the kind used in FedQPNT (a cold-atom
+accelerometer providing a classical-unit acceleration measurement), and none targets GNSS spoofing or
+jamming. We cite this group specifically to pre-empt a natural but mistaken reading of "quantum
+federated learning for navigation" as prior work equivalent to ours: it is not, since it addresses the
+learning computation rather than the sensing modality.
+
+\subsection{GNSS spoofing and jamming signatures}
+Detecting GNSS attacks depends on the observable signatures those attacks leave, at the level of raw
+receiver measurements rather than final position. Psiaki and Humphreys \cite{psiaki2016gnss} give a
+foundational survey of GNSS spoofing mechanisms and detection principles, including the
+capture-and-carry-off dynamics that a power-advantage spoofer must use to smoothly pull a receiver's
+tracking loops away from the true signal, and the vulnerability of a receiver at the moment of
+re-acquisition after an outage. An earlier study by Humphreys et al.
+\cite{humphreys2008assessing} assesses the practical spoofing threat and its feasibility with
+civilian-grade equipment. Radoš et al. \cite{rados2024recent} survey recent advances in jamming and
+spoofing detection in GNSS and report field-measured signatures we rely on directly, including the
+collapse of cross-satellite carrier-to-noise-density-ratio (C/N0) correlation under single-antenna
+spoofing (from $-0.76$ clean to $0.99$ spoofed) -- a signature our attack and detector-feature models
+reproduce explicitly, since a single spoofing antenna necessarily transmits all counterfeit signals with
+a common-mode power fluctuation. Borhani-Darian et al. \cite{borhanidarian2024detecting} detect GNSS
+spoofing with a deep-learning classifier operating on the cross-ambiguity function in the correlation
+domain, a complementary, lower (pre-tracking) level of the receiver signal chain than the
+raw-observable (pseudorange/Doppler/C-N0/AGC) level at which our own attacks and detector features
+operate. Tariq and Ahanger \cite{tariq2026multimodel} propose a multi-model fusion scheme -- Kalman
+filtering combined with ensemble machine learning and a transformer-based detector -- for detecting and
+mitigating BeiDou spoofing across a decentralized UAV swarm, reporting approximately 99\% detection
+accuracy and a greater-than-97\% mission-success rate under active spoofing; we note, following our own
+verification, that this fusion is per-model ensembling rather than an explicit decentralized-consensus
+mechanism, and that the frequently quoted "97\%" figure in this line of work is mission-success rate,
+not detection accuracy. Together, this group establishes the observable-level attack signatures
+(C/N0 correlation collapse, AGC and clock-jump behaviour, RAIM blindness to slow drift-off spoofing) that
+motivate our own attack simulator and detector feature set (Section~\ref{sec:threat}).
+
+\begin{table*}[t]
+\centering
+\caption{Comparison of related systems against the four properties FedQPNT combines. ``FL?'' = detector or model trained/aggregated across distributed clients (not the classical single-platform ``federated filter'' sense). ``Quantum?'' = uses a physical quantum sensor (not quantum-enhanced computation). ``Adaptive trust?'' = continuously varying, not binary, sensor trust during an active attack. ``Attack-tested?'' = evaluated under an explicit spoofing/jamming/poisoning scenario in the cited paper.}
+\label{tab:comparison}
+\begin{tabular}{lcccc}
+\toprule
+System / paper & FL? & Physical quantum sensor? & Adaptive (continuous) trust during attack? & Attack-tested? \\
+\midrule
+Khan et al. 2025 \cite{khan2025enhancing} & Yes & No & Not stated (detection only) & Yes (GPS spoofing) \\
+Chai et al. 2025 \cite{chai2025navigation} & Yes & No & No (classification only) & Yes (spoofing/jamming) \\
+G\textsuperscript{2}FL, Liu et al. 2026 \cite{liu2026g2fl} & Yes (robust) & No & No & Yes (spoofing, Byzantine clients) \\
+Negru et al. 2024 \cite{negru2024resilient} & No (classical federated \emph{filter}) & No & Continuous (GRU master filter) & No (degraded GNSS, not adversarial) \\
+Pardhasaradhi \& Cenkeramaddi 2022 \cite{pardhasaradhi2022gps} & No & No & No (detect-and-switch to radar) & Yes (GPS spoofing) \\
+Hazarika et al. 2025 \cite{hazarika2025quantum} & Yes & No (quantum-enhanced compute) & No & No \\
+Chehimi et al. 2023 \cite{chehimi2023foundations} & Yes (quantum FL) & No & No & No \\
+Tariq \& Ahanger 2026 \cite{tariq2026multimodel} & No (multi-model fusion) & No & Partial (model ensembling) & Yes (BeiDou spoofing) \\
+\textbf{FedQPNT (this paper)} & \textbf{Yes} & \textbf{Yes (cold-atom, real-data-calibrated)} & \textbf{Yes (continuous, bounded-chatter)} & \textbf{Yes (15-scenario matrix)} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+%=====================================================================
+\section{System and Threat Model}
+\label{sec:threat}
+%=====================================================================
+
+\subsection{Node model}
+The system is a fleet of $N$ independent nodes (ground vehicles or UAVs), each running the same code
+path. Every node is split into two halves connected only by defined sensor-output types: an
+\emph{Environment} half (ground truth trajectory, sensor models, GNSS signal generation, and any
+attacks) and an \emph{Agent} half (GNSS receiver, fusion filter, trust engine, learnable detector, and
+FL client). Only sensor outputs cross from Environment to Agent; ground truth (\texttt{TruthState}), the
+per-tick attack label (\texttt{AttackLabel}), and the environment's own private metadata on
+\texttt{GnssEpoch} never do, and this boundary is enforced both by construction (the environment strips
+private fields before handing an epoch to the receiver) and by an automated static-analysis guard that
+scans the Agent-side packages for forbidden imports of truth or label types. A node runs a 100~Hz global
+tick; at each tick the IMU and, when scheduled, the quantum sensor and GNSS receiver are stepped, giving
+a fixed per-tick sequence (truth $\rightarrow$ sensors $\rightarrow$ optional attack $\rightarrow$
+receiver $\rightarrow$ filter propagation/innovations $\rightarrow$ feature extraction $\rightarrow$
+detector $\rightarrow$ trust update $\rightarrow$ filter correction $\rightarrow$ pseudo-labelling and FL
+buffering). Nodes exchange only federated-learning model updates with a server, on a fixed round
+schedule (Section~\ref{sec:method}); navigation never blocks on the availability of a fresh global
+model, so a node that has lost communications keeps navigating and detecting with its last-known
+detector.
+
+\subsection{Sensors}
+Each node carries three sensor types feeding one shared, loosely-coupled 15-state error-state Kalman
+filter (position, velocity, attitude error, accelerometer bias, gyroscope bias): a classical strapdown
+IMU (accelerometer plus gyroscope, one of two grades -- MEMS or tactical -- reported separately because
+their free-inertial error growth differs by roughly an order of magnitude); a simulated GNSS receiver
+that computes a position/velocity/clock fix by weighted least squares with receiver autonomous integrity
+monitoring (RAIM) from per-satellite pseudorange, pseudorange-rate, carrier-to-noise-density ratio and
+automatic-gain-control (AGC) observables; and a cold-atom accelerometer (CAI) used in a
+hybrid-with-classical configuration, where the CAI's absolute, low-bias output is fused as a direct,
+dynamics-independent observation of the classical accelerometer's bias (both instruments sense the same
+specific force over the same time window, so gravity, attitude and trajectory terms cancel in the
+hybridisation residual). The CAI's noise density, per-interrogation-time scaling, and a bursty
+outlier/fringe-jump fault process are calibrated from real per-shot atom-interferometer data
+\cite{darmagnac2024atom} rather than assumed from published summary statistics: field-grade operation
+uses a $2T = 20\,\mathrm{ms}$ interrogation time, a robust per-shot noise of $\sigma_{\mathrm{shot}}
+\approx 5.6\,\mu g$ (within 11\% of the value implied by the paper's own stated signal-to-noise ratio),
+and a two-state Gilbert--Elliott channel fitted to a measured $9.0\%$ outlier rate with $66\%$ burst
+persistence. The CAI keeps reporting \texttt{valid=True} during a burst -- it is silently wrong, exactly
+as a real sensor would be -- so the trust engine, not a validity flag, is what must catch a bad quantum
+sample (Section~\ref{sec:method}).
+
+\subsection{Attacker capabilities and limits}
+The attacker acts only on the GNSS signal, at the raw-observable level (per-satellite pseudorange,
+pseudorange rate, C/N0, lock state, AGC/noise floor), never on the IMU, the quantum sensor, or the
+inter-node communication channel in the scenarios reported here. Five attack families are modelled: (i)
+gradual (``drift-in'') spoofing, in which a single-antenna spoofer captures the receiver's tracking loops
+via a brief power-advantage bump and then drags the code and Doppler measurements smoothly toward a
+fake trajectory, remaining statistically close to indistinguishable from clean GNSS to a snapshot RAIM
+test; (ii) meaconing (record-and-rebroadcast), which appears as a common-mode clock/delay shift across
+all satellites with only a small C/N0 rise; (iii) abrupt, non-aligned spoofing, which cannot capture
+smoothly and instead forces a momentary loss of lock, a reacquisition delay, and a discontinuous
+position jump on re-lock; (iv) continuous-wave and wideband jamming, which raises the receiver noise
+floor and reduces the number of locked satellites; and (v) combined jam-then-spoof, in which a denial
+phase is followed by a capture attempt at the moment of reacquisition -- the classic window in which a
+receiver is most vulnerable to being handed to a spoofer \cite{psiaki2016gnss}. A single-antenna
+spoofer's signature (common-mode C/N0 fluctuation across all spoofed satellites, and the loss of the
+normal elevation dependence of C/N0) is modelled explicitly, following field-measured correlation
+statistics reported by Radoš et al. \cite{rados2024recent}, and is available to any detector operating
+at the raw-observable level, though it is not itself exposed as a hand-crafted detector feature by the
+attack layer. In the federated-learning threat surface, a fraction $f$ of nodes may be Byzantine,
+submitting arbitrary model updates (sign-flipped, Gaussian-noised, label-flipped, or the "A Little Is
+Enough" family of small, aggregate-shifting perturbations) rather than honest gradients; the
+self-reported sample count on an update is untrusted, since an attacker could claim an arbitrarily large
+$n$ to bias a naive weighted average.
+
+\subsection{What never leaves a node}
+No raw sensor stream, trajectory, or attack label ever leaves a node. The only object that crosses a node
+boundary to the server is a federated \texttt{ModelUpdate}: a detector weight delta (882 floating-point
+parameters, about 3.5~kB), a coordinate-wise running mean/standard-deviation pair for feature
+normalisation, and a small set of scalar training metrics (sample counts, loss, pseudo-label rate). The
+server never receives ground truth, position, velocity, or raw features. Trust-law hyperparameters and
+the fusion filter itself are not learned or shared in this version of the system; they are fixed,
+identical across every method under comparison, and tuned once, before any test-seed result is examined,
+on a disjoint range of tuning seeds (Section~\ref{sec:setup}).
+
+%=====================================================================
+\section{Method}
+\label{sec:method}
+%=====================================================================
+\todo[inline]{This section is an equation-level outline; the surrounding exposition, worked examples and
+figures are to be expanded in a later drafting pass.}
+
+\subsection{Fusion filter and trust-to-covariance coupling}
+The shared 15-state error-state Kalman filter processes GNSS position/velocity and the CAI-derived
+hybridisation residual as independent innovations. For a sensor $s$ with continuous trust weight
+$w_s \in [w_{\min}, 1]$, trust couples into the filter only through the effective measurement covariance
+and an exclusion rule, so that every method (including a fixed-trust baseline) shares one fusion core:
+\begin{align}
+R_{\mathrm{eff},s} &= \frac{R_s}{\max(w_s,\, w_{\min})}, \label{eq:reff}\\
+&\text{skip the update entirely if } w_s < w_{\mathrm{excl}}. \label{eq:excl}
+\end{align}
+A $\chi^2$ normalised-innovation-squared (NIS) gate, evaluated with $R_{\mathrm{eff}}$, is applied to
+every sensor and every method alike, so a low-trust sensor can still contribute a small, gated update
+rather than being invisibly discarded.
+
+\subsection{Continuous, asymmetric trust law}
+Trust is updated at each GNSS evidence event $j$ from a smoothed detector output $\bar p_j$ (an
+exponentially smoothed version of the learned detector's spoof/jam probability) via a target trust
+$\tau^*_j$ and an asymmetric, hysteresis-gated recursion toward it:
+\begin{align}
+\bar p_j &= \bar p_{j-1} + \beta_j\,(p_j - \bar p_{j-1}), && \beta_j = 1 - e^{-\Delta t_j/\tau_p}, \label{eq:smooth}\\
+\tau^*_j &= w_{\min} + (1-w_{\min})\,\mathrm{clip}\!\left(\frac{\theta_{\mathrm{hi}} - \bar p_j}{\theta_{\mathrm{hi}} - \theta_{\mathrm{lo}}},\,0,\,1\right), \label{eq:target}\\
+w_j &=
+\begin{cases}
+w_{j-1} + (1-e^{-\Delta t_j/\tau_d})(\tau^*_j - w_{j-1}) & \text{if } \tau^*_j < w_{j-1} \\
+w_{j-1} + (1-e^{-\Delta t_j/\tau_r})(\tau^*_j - w_{j-1}) & \text{if } \tau^*_j > w_{j-1} \wedge G_j \\
+w_{j-1} & \text{otherwise,}
+\end{cases} \label{eq:trustlaw}
+\end{align}
+where $G_j$ is a recovery gate requiring both a sustained clean detector output and a run of
+nominal-range NIS values before trust is allowed to recover, and the fast distrust time constant
+$\tau_d$ is much smaller than the slow recovery time constant $\tau_r$. Equation~\eqref{eq:trustlaw} is a
+convex combination of $w_{j-1}$ and $\tau^*_j \in [w_{\min}, 1]$ at every step, so $w$ is bounded in
+$[w_{\min}, 1]$ by construction, and for constant $\tau^*$ the law is a contraction with exponential,
+overshoot-free convergence. Counting a ``trust cycle'' as a downward crossing of $w=0.5$ followed by an
+upward crossing of $w=0.9$, the recovery gate's minimum dwell time on the smoothed statistic implies a
+provable lower bound on the cycle period, $T_{\mathrm{cyc}} \geq 26.1\,\mathrm{s}$, for any input
+sequence, including an adversarial one -- this is what bounds trust chattering (evaluated in scenario
+S7, Section~\ref{sec:setup}) independent of the detector's own quality.
+
+\subsection{TRIM-NB-R: trust-aware robust federated aggregation}
+Each round, live nodes submit a detector weight delta $\Delta_i$. The server aggregates as follows:
+\begin{align}
+\Delta_i &\leftarrow \Delta_i \cdot \min\!\left(1,\; \frac{c \cdot \mathrm{median}_j \lVert \Delta_j\rVert}{\lVert \Delta_i \rVert}\right), && c = 2, \label{eq:clip}\\
+\Delta &= \mathrm{coordinate\text{-}wise\ trimmed\ mean}_{\beta=0.2}(\{\Delta_i\}_{i\ \mathrm{live}}), \label{eq:trim}\\
+r_i &\leftarrow \rho\, r_i + (1-\rho)\max(0, \cos(\Delta_i, \Delta)), && \rho = 0.8, \label{eq:reputation}\\
+\theta_g &\leftarrow \theta_g + \eta_s \Delta, && \eta_s = 1, \label{eq:serverstep}
+\end{align}
+with nodes whose reputation $r_i$ falls below a threshold for several consecutive rounds quarantined for
+a fixed number of subsequent rounds. Norm clipping bounds any single node's influence before aggregation;
+the trimmed mean (falling back to a coordinate-wise median when too few nodes are live to trim safely)
+tolerates up to a designed fraction $\beta = 20\%$ of Byzantine nodes; the reputation and quarantine step
+adds a slower, cross-round defense against nodes that are individually within norm but persistently
+inconsistent with the consensus update direction. FedAvg and FedProx are retained as reference
+aggregators (the former weights by each node's self-reported sample count, which is exactly the
+untrusted quantity a poisoning node can misreport, and is expected to be the more vulnerable reference
+for that reason).
+
+\subsection{Local training and pseudo-labels}
+No node ever has access to a ground-truth attack label. Each node trains its detector locally against
+\emph{hindsight pseudo-labels}: an epoch is labelled positive if a sustained innovation-based CUSUM
+statistic, computed against the CAI-aided filter as a slowly drifting but trustworthy hindsight
+reference, crosses a threshold within a fixed look-ahead window, or if AGC, RAIM or clock-jump features
+cross conservative, independently justified thresholds; it is labelled negative only if every feature
+stays within its nominal range for the entire window; otherwise it is not used for training. This is the
+specific mechanism by which the quantum sensor contributes to the learning problem, not only to
+navigation: a CAI-aided inertial reference that drifts far more slowly than GNSS position error under
+denial is a more trustworthy hindsight label source than GNSS alone, and federated learning is what lets
+one node's hindsight-labelled experience of an attack family improve the shared detector's real-time,
+causal decision at a node that has not yet experienced that family.
+
+%=====================================================================
+\section{Experimental Setup}
+\label{sec:setup}
+%=====================================================================
+\todo[inline]{Expand with concrete parameter tables, hardware/runtime budget, and exact seed ranges once
+the M1/M2 integration described in the project log completes.}
+
+Every method under comparison -- FedQPNT and its baselines and ablations (A, A0, B-bin, B-cont, B$'$,
+and the $-$quantum, $-$FL, fixed-trust, binary, $-$recovery-gate, logreg and FedAvg ablations) --
+shares the same sensor noise realisations (paired, seed-indexed
+random number generator streams), the same fusion filter and NIS gate, the same detector architecture and
+initial weights, and the same tuning budget, so that a difference in outcome can be attributed to the
+mechanism under test rather than to incidental implementation differences (a design constraint drawn
+directly from the project's scientific-integrity rule that results must be reported exactly as measured,
+with no scenario dropped after the fact). \todo[inline]{Table: baseline/ablation matrix (FedQPNT, A, A0,
+B-bin, B-cont, B$'$, $-$quantum, $-$FL, fixed-trust, binary, $-$recovery-gate, logreg, FedAvg) with
+detector-training / trust-law / CAI / aggregator columns.}
+
+\subsection{Hypotheses}
+Four pre-registered, falsifiable hypotheses are reported whatever their outcome:
+H1 (FedQPNT improves on Baseline A, FL detect-and-exclude, on $\mathrm{RMSE}_h(P_{\mathrm{att}})$ and
+$\mathrm{MAX}_h(P_{\mathrm{att}})$); H2 (FedQPNT improves on B-cont, the strongest single-node
+continuous-trust competitor, on the same metrics and on detection latency for attack families a given
+node has not yet experienced); H3 (FedQPNT with quantum aiding improves on the $-$quantum ablation on
+detection latency for gradual spoofing); H4 (FedQPNT improves on B-cont on a cold-start node's detection
+probability and latency). The pre-registered primary metrics are $\mathrm{RMSE}_h(P_{\mathrm{att}})$
+(horizontal position RMSE during the active-attack phase) and $\mathrm{latency}_{\mathrm{on}}$
+(time from attack onset to sustained detection); all other metrics are secondary.
+
+\subsection{Scenario matrix}
+Fifteen scenarios (nominal operation; gradual spoofing at three severities; sudden jamming; combined
+jam-then-spoof at reacquisition; partial node failure/delayed FL updates; long-duration CAI bias drift;
+trust chattering under toggled spoofing; cold-start node join; communications dropouts; sample-rate
+mismatch; extreme sensor noise; trust-score/model poisoning at two Byzantine fractions; post-attack
+recovery; multi-hour stability; and simultaneous attacks on a fleet subset) exercise the system along
+axes independent of the scientific hypotheses, each with its own pre-registered, pass/fail engineering
+acceptance criterion evaluated over 30 paired test seeds with a Wilcoxon signed-rank test as the primary
+statistical test and Holm--Bonferroni correction across the confirmatory family
+$\{H1,\ldots,H4\}\times\{\text{primary metrics}\}$.
+
+%=====================================================================
+\section{Results}
+\label{sec:results}
+%=====================================================================
+\todo[inline]{No results exist yet. This section will report, per scenario and per method: RMSE\_h/MAX\_h/P95\_h and ANEES for S1--S15; detection probability and latency\_on/latency\_eff for the spoofing/jamming scenarios; trust chattering counts for S7; FL global-model AUC, rounds skipped and quarantined-node counts for S5/S8/S9/S12/S15; and the H1--H4 hypothesis tests with Hodges--Lehmann effect sizes and Holm-corrected p-values. All numbers below are placeholders.}
+
+\todo{result: Table -- RMSE\_h(P\_att), MAX\_h(P\_att), P95\_h(P\_att) for FedQPNT, A, A0, B-bin, B-cont, B$'$, per attack scenario (S2--S4, S15), 30 seeds, median [IQR]}
+\todo{result: Table -- detection probability P\_D and latency\_on/latency\_eff, same methods and scenarios}
+\todo{result: Figure -- trust trajectory $w_{\mathrm{gnss}}(t)$, $w_{\mathrm{quantum}}(t)$ and detector output $\bar p(t)$ across a representative gradual-spoof run}
+\todo{result: Table -- S12 poisoning: global-model AUC drop at $f=20\%$ and $f=40\%$, TRIM-NB-R vs FedAvg vs FedProx}
+\todo{result: S1 nominal-operation cost check (RMSE\_h ratio to fixed-trust, FAR/h, ANEES, mean $w_{\mathrm{gnss}}$) for every method}
+\todo{result: H1--H4 hypothesis test table with Hodges--Lehmann median differences, 95\% BCa CIs, Holm-adjusted p-values}
+\todo{result: MEMS vs tactical IMU grade comparison of the CAI's contribution (H3), reported for both grades per D-002/D-009 risk R-6}
+
+%=====================================================================
+\section{Discussion and Limitations}
+\label{sec:discussion}
+\label{sec:limitations}
+%=====================================================================
+
+The following limitations are already established by the project's own validation work and are stated
+here rather than deferred, in keeping with the scientific-integrity requirement that known weaknesses be
+disclosed regardless of how they affect the headline comparison.
+
+\begin{itemize}
+\item \textbf{The quantum sensor's calibration is real, the platform dynamics are not.} The CAI noise
+  density, per-interrogation-time scaling and bursty-outlier fault process are fitted to real cold-atom
+  interferometer laboratory shot data \cite{darmagnac2024atom}, but the vehicle/UAV trajectories, the
+  GNSS constellation and signal propagation, and the resulting sensor time series along those
+  trajectories are all simulated; no public dataset places a moving quantum inertial sensor under GNSS
+  attack, so a fully real-data closed-loop evaluation is not currently possible.
+\item \textbf{Rigid-mode quantum aiding is intermittent during ordinary manoeuvres.} The measured
+  rigid-mode contrast roll-off rate implies a rotation-rate tolerance of only
+  $\Omega_c \approx 17\,\mathrm{mrad/s}$ (field grade), well below the rotation rates of an ordinary
+  vehicle turn ($\sim 0.3\,\mathrm{rad/s}$). The CAI therefore loses contrast, and its aiding becomes
+  intermittent, during manoeuvring rather than only during straight-and-level segments. This is reported
+  as a real effect, not corrected for, and it is expected to weaken the measured quantum benefit relative
+  to an idealized always-on quantum sensor.
+\item \textbf{The GNSS is simulated at the raw-observable level, not the signal (IF-sample) level.}
+  Pseudorange, Doppler, carrier-to-noise-density ratio, lock state and AGC are modelled directly, with
+  attacks constructed as literature-grounded deltas on the clean observables; this keeps published
+  attack signatures faithful and keeps multi-hour, multi-node simulation computationally tractable, but
+  it cannot capture receiver-internal (tracking-loop, correlator) effects that an IF-sample-level or
+  hardware-in-the-loop evaluation would.
+\item \textbf{The loosely-coupled filter requires a GNSS covariance inflation factor $\kappa_R$.} Under
+  fixed trust, the nominal-operation filter is over-confident unless the GNSS fix covariance is inflated
+  by a currently non-unit factor; this is being investigated as an effect of the loosely-coupled fix's
+  time-correlated (ionospheric/tropospheric/multipath) error being processed as if it were white, and,
+  separately, of the receiver's reported velocity-fix covariance not yet being independently checked for
+  honesty. $\kappa_R$ is tuned once, identically for every method, on tuning seeds disjoint from the test
+  seeds, so it cannot bias a between-method comparison; its root cause is documented as an open,
+  in-progress investigation rather than resolved.
+\item \textbf{The novelty claimed here is scoped, not absolute.} G\textsuperscript{2}FL
+  \cite{liu2026g2fl} already provides robust federated learning for GNSS spoofing detection under
+  Byzantine clients. FedQPNT's contribution is the closed loop that couples an FL-trained detector to a
+  continuous, formally bounded trust law and to physical quantum-sensor aiding, not the robust-aggregation
+  idea in isolation.
+\item \textbf{Hypotheses are pre-registered; no result yet exists.} H1--H4 above are stated as hypotheses,
+  to be reported whatever their outcome, including a null or reversed result, per the project's own
+  scientific-integrity rule.
+\end{itemize}
+
+%=====================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%=====================================================================
+\todo[inline]{To be finalized once Section~\ref{sec:results} is populated. Draft closing paragraph
+below.}
+
+We have presented FedQPNT, a system architecture that closes the loop between federated, fleet-shared
+attack detection, a continuous and formally bounded per-sensor trust law, and physical quantum inertial
+aiding whose noise and fault behaviour is calibrated against real laboratory data rather than assumed.
+We have specified the node and threat model, the fusion and trust equations, the federated aggregation
+mechanism, and a pre-registered, mechanism-class baseline and hypothesis structure designed so that the
+eventual results can be attributed to a specific mechanism rather than to incidental implementation
+choices. \todo{result: one-sentence outcome summary once the evaluation matrix completes} We have also
+disclosed, in advance of any result, the two most consequential limitations of the current design: the
+intermittency of rigid-mode quantum aiding above ordinary vehicle turn rates, and the as-yet-unresolved
+need for a GNSS covariance inflation factor in the loosely-coupled filter.
+
+\section*{Reproducibility Statement}
+Every numeric default in the system specification is tagged as literature-derived, design-derived, or an
+explicit assumption requiring a sensitivity sweep before publication (project decision log, D-001 and
+architecture specification conventions). All Monte Carlo experiments use a hierarchical, deterministic
+random-number-generator seeding scheme (one independent stream per node, component and purpose) so that
+adding or removing a component does not change the noise realization seen by any other component, and so
+that paired statistical tests across methods are exact rather than approximate. Pre-training, tuning and
+test seed ranges are disjoint and fixed before any test-seed result is examined; the trust-law and filter
+hyperparameters are frozen, with their configuration hash logged, before the test-seed sweep begins. The
+quantum-sensor calibration pipeline, from the raw Zenodo-hosted dataset \cite{darmagnac2024dataset}
+through per-interrogation-time robust noise statistics to the bursty-outlier channel, is scripted
+end-to-end and is re-run by an automated test suite. No experimental result, ablation, or scenario is
+withheld or dropped after being observed; any exclusion, if one becomes necessary, is logged with its
+reason in the project decision log. Code, configuration hashes, and the full 15-scenario result set will
+be released alongside the camera-ready version.
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

@@ -1,0 +1,214 @@
+{
+  "source": {
+    "doi": "10.1038/s41467-024-50804-0",
+    "zenodo": "10.5281/zenodo.11543715",
+    "arxiv": "2402.18988"
+  },
+  "classical_accel_mical": {
+    "static_record": {
+      "path": "Raw Data/Figure 3 & 5/20230320/Streaming/Run21_1.csv",
+      "fs_hz": 2565.6750535288866,
+      "duration_s": 373.16300000000007,
+      "n_samples": 957415
+    },
+    "white_noise_sensitivity_mps2_per_sqrt_hz": 8.955226644646213e-05,
+    "white_noise_sensitivity_ug_per_sqrt_hz": 9.131789800437677,
+    "adev_floor_mps2": 1.8999195040506883e-05,
+    "adev_floor_tau_s": 25.54337499203585,
+    "adev_floor_confidence": "LOW -- only ~15 independent 25.5s segments in a 373s record",
+    "adev_floor_95pct_ci_mps2": [
+      1.3987167923697457e-05,
+      2.9614282483008564e-05
+    ],
+    "residuals_file": "mical_static_residuals.npz"
+  },
+  "atom_interferometer": {
+    "residuals_file": "atom_shot_residuals.npz",
+    "noise_vs_rotation_file": "atom_noise_vs_rotation.csv",
+    "note": "See atom_residual_summary.json (written by scripts/jarlaud2024_atom_residuals.py) for sigma_shot, n_shots, the per-run fringe fit, and the ADEV of the Run21 shot sequence; populated by a separate script run after this one.",
+    "n_shots_static_pool": 1715,
+    "n_run_k_fits": 60,
+    "run21_kD_fit": {
+      "run_id": "Figure 3 & 5/20230320/Run21/kD",
+      "r0": 0.48365586200408733,
+      "c0": 0.37149101111483684,
+      "phi0": 0.04838959005276855,
+      "n_shots_total": 121,
+      "n_shots_used": 96,
+      "T_s": 0.01,
+      "two_T_s": 0.02,
+      "tilt_x_deg": 0.0,
+      "tilt_z_deg": 0.0,
+      "cycle_s": 3.0939999999999976
+    },
+    "paper_comparison": {
+      "paper_static_snr_range": [
+        20,
+        30
+      ],
+      "paper_static_sigma_ug_at_snr25_2T20ms": 5.06,
+      "field_grade_sigma_robust_ug_at_2T20ms": 5.603278733296871,
+      "ratio_field_grade_to_paper_static": 1.11,
+      "note": "D-015 correction: previously reported a pooled (mixed-2T) ratio of ~4.1x, which was a pooling artefact. Comparing like-for-like at 2T=20ms (the paper's own condition) instead."
+    },
+    "per_two_T": {
+      "10ms": {
+        "two_T_s": 0.01,
+        "n": 720,
+        "sigma_robust_mps2": 0.00010497209455619238,
+        "sigma_robust_ug": 10.70417467292015,
+        "sigma_robust_ug_95ci": [
+          9.824913946364795,
+          11.735247190996148
+        ],
+        "median_mps2": 1.801377840491111e-07,
+        "classical_equivalent_sigma_ug": 7.693993005378188,
+        "n_outliers": 1,
+        "outlier_rate": 0.001388888888888889,
+        "outlier_rate_95ci": [
+          0.00024521507710583866,
+          0.007824865476616562
+        ],
+        "source_runs": [
+          "Figure 3 & 5/20220902/Run04/kD",
+          "Figure 3 & 5/20220902/Run13/kD",
+          "Figure 3 & 5/20220902/Run21/kD"
+        ]
+      },
+      "12ms": {
+        "two_T_s": 0.012,
+        "n": 24,
+        "sigma_robust_mps2": 0.00012228010383898586,
+        "sigma_robust_ug": 12.46910044092385,
+        "sigma_robust_ug_95ci": [
+          2.9057094600813036,
+          24.292752487662497
+        ],
+        "median_mps2": -9.471781405582429e-06,
+        "classical_equivalent_sigma_ug": 7.493637478971544,
+        "n_outliers": 0,
+        "outlier_rate": 0.0,
+        "outlier_rate_95ci": [
+          0.0,
+          0.13797620655132792
+        ],
+        "source_runs": [
+          "Figure 2/20230510/Run16/kD"
+        ]
+      },
+      "14ms": {
+        "two_T_s": 0.014,
+        "n": 480,
+        "sigma_robust_mps2": 6.698132677830276e-05,
+        "sigma_robust_ug": 6.830194488260799,
+        "sigma_robust_ug_95ci": [
+          6.074898705443688,
+          7.674711103578172
+        ],
+        "median_mps2": -6.0219113180232e-07,
+        "classical_equivalent_sigma_ug": 7.680148141778634,
+        "n_outliers": 0,
+        "outlier_rate": 0.0,
+        "outlier_rate_95ci": [
+          0.0,
+          0.007939499211535013
+        ],
+        "source_runs": [
+          "Figure 3 & 5/20220902/Run05/kD",
+          "Figure 3 & 5/20220902/Run14/kD"
+        ]
+      },
+      "20ms": {
+        "two_T_s": 0.02,
+        "n": 491,
+        "sigma_robust_mps2": 5.4949393389885756e-05,
+        "sigma_robust_ug": 5.603278733296871,
+        "sigma_robust_ug_95ci": [
+          5.0371652213873555,
+          6.396612163051018
+        ],
+        "median_mps2": -1.3025040418061117e-06,
+        "classical_equivalent_sigma_ug": 6.080854200938787,
+        "n_outliers": 44,
+        "outlier_rate": 0.08961303462321792,
+        "outlier_rate_95ci": [
+          0.06743205212958779,
+          0.11816569283083837
+        ],
+        "source_runs": [
+          "Figure 3 & 5/20220902/Run06/kD",
+          "Figure 3 & 5/20230315/Run17/kD",
+          "Figure 3 & 5/20230315/Run18/kD",
+          "Figure 3 & 5/20230315/Run18/kU",
+          "Figure 3 & 5/20230315/Run19/kD",
+          "Figure 3 & 5/20230315/Run19/kU",
+          "Figure 3 & 5/20230315/Run21/kU",
+          "Figure 3 & 5/20230315/Run22/kD",
+          "Figure 3 & 5/20230315/Run23/kD",
+          "Figure 3 & 5/20230315/Run23/kU",
+          "Figure 3 & 5/20230315/Run24/kD",
+          "Figure 3 & 5/20230315/Run24/kU",
+          "Figure 3 & 5/20230315/Run25/kD",
+          "Figure 3 & 5/20230315/Run25/kU",
+          "Figure 3 & 5/20230315/Run26/kD",
+          "Figure 3 & 5/20230315/Run26/kU",
+          "Figure 3 & 5/20230315/Run27/kD",
+          "Figure 3 & 5/20230315/Run27/kU",
+          "Figure 3 & 5/20230315/Run28/kD",
+          "Figure 3 & 5/20230315/Run28/kU",
+          "Figure 3 & 5/20230315/Run29/kD",
+          "Figure 3 & 5/20230315/Run29/kU",
+          "Figure 3 & 5/20230315/Run30/kD",
+          "Figure 3 & 5/20230315/Run30/kU",
+          "Figure 3 & 5/20230317/Run15/kU",
+          "Figure 3 & 5/20230317/Run17/kU",
+          "Figure 3 & 5/20230317/Run19/kU",
+          "Figure 3 & 5/20230317/Run20/kD",
+          "Figure 3 & 5/20230320/Run21/kD",
+          "Figure 3 & 5/20230320/Run21/kU",
+          "Figure 3 & 5/20230320/Run25/kD"
+        ]
+      },
+      "pooled_mixed_T_DO_NOT_USE": {
+        "n": 1715,
+        "sigma_shot_mps2": 0.000204807686914842,
+        "sigma_shot_ug": 20.88457188895719,
+        "warning": "Mixes 2T in {10,12,14,20} ms with different k_eff*T^2 scaling -- a pooling artefact per D-015. Use per-2T entries above."
+      },
+      "field_grade_recommendation": "20ms"
+    },
+    "field_grade_recommendation_two_T": "20ms"
+  },
+  "cycle_rate_hz": 0.6459948320413429,
+  "cycle_period_s": 1.5480000000000018,
+  "paper_reference_values": {
+    "single_shot_sensitivity_ug": 24.0,
+    "single_shot_sensitivity_condition": "2T=20ms, inertial pointing mode, SNR=5.3",
+    "static_snr_range": [
+      20,
+      30
+    ],
+    "gyro_noise_nrad_s_per_sqrt_hz": 100.0,
+    "note": "The paper's 24 ug/shot and SNR 20-30 figures are ATOM INTERFEROMETER (hybrid, closed-loop) numbers -- compare them against atom_interferometer/sigma_shot_ug in atom_residual_summary.json, NOT against the classical MICAL white-noise density above. See docs/specs/raw/DATA_JARLAUD_NOTES.md."
+  },
+  "contrast_fit": {
+    "c0": 0.39409541100156253,
+    "c0_sigma": 0.017460990087590892,
+    "omega_c_rad_s": 0.04817828306192081,
+    "omega_c_sigma_rad_s": 0.0024648768408607226,
+    "omega_c_mrad_s": 48.17828306192081,
+    "r0_fringe_offset": 0.484901633,
+    "n_shots": 2000,
+    "runs_used": [
+      "Figure 2/20230510/Run14",
+      "Figure 2/20230510/Run15",
+      "Figure 2/20230510/Run16",
+      "Figure 2/20230511/Run34"
+    ]
+  },
+  "PROPOSED_DECISION": [
+    "Detrending is mean+linear-drift only (record is 373 s, far too short to fit or remove a tidal signal). [D-014/PD2: ACCEPTED]",
+    "Contrast-vs-rotation fit uses only Figure 2 (rigid-mode) runs; Figure 3 & 5 (inertial-pointing) contrast requires per-Omega-bin sinusoidal fringe fitting which was judged out of scope for this pass -- flagged as a follow-up. [D-014/PD3: ACCEPTED for now]",
+    "theta~=0 per-shot is not directly recorded for the pooled multi-run atom-residual set; Run21 (dedicated static/theta~0 calibration run) plus a per-run nominal Tilt X=Tilt Z=0 Parameters.txt proxy are used instead -- see scripts/jarlaud2024_atom_residuals.py docstring."
+  ]
+}

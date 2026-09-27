@@ -1,0 +1,105 @@
+{
+  "10ms": {
+    "two_T_s": 0.01,
+    "n_shots": 720,
+    "n_outliers": 1,
+    "outlier_rate": 0.001388888888888889,
+    "outlier_rate_95ci": [
+      0.00024521507710583866,
+      0.007824865476616562
+    ],
+    "outlier_magnitudes_ug": [
+      63.0956894223828
+    ],
+    "adjacency_rate_among_outliers": 0.0,
+    "expected_adjacency_rate_if_independent": 0.001388888888888889,
+    "clustering_interpretation": "adjacency_rate >> expected_adjacency_rate_if_independent suggests bursts (fringe jumps / loss-of-lock); comparable values suggest independent heavy-tailed shot noise, not clustered bursts."
+  },
+  "12ms": {
+    "two_T_s": 0.012,
+    "n_shots": 24,
+    "n_outliers": 0,
+    "outlier_rate": 0.0,
+    "outlier_rate_95ci": [
+      0.0,
+      0.13797620655132792
+    ],
+    "outlier_magnitudes_ug": [],
+    "adjacency_rate_among_outliers": 0.0,
+    "expected_adjacency_rate_if_independent": 0.0,
+    "clustering_interpretation": "adjacency_rate >> expected_adjacency_rate_if_independent suggests bursts (fringe jumps / loss-of-lock); comparable values suggest independent heavy-tailed shot noise, not clustered bursts."
+  },
+  "14ms": {
+    "two_T_s": 0.014,
+    "n_shots": 480,
+    "n_outliers": 0,
+    "outlier_rate": 0.0,
+    "outlier_rate_95ci": [
+      0.0,
+      0.007939499211535013
+    ],
+    "outlier_magnitudes_ug": [],
+    "adjacency_rate_among_outliers": 0.0,
+    "expected_adjacency_rate_if_independent": 0.0,
+    "clustering_interpretation": "adjacency_rate >> expected_adjacency_rate_if_independent suggests bursts (fringe jumps / loss-of-lock); comparable values suggest independent heavy-tailed shot noise, not clustered bursts."
+  },
+  "20ms": {
+    "two_T_s": 0.02,
+    "n_shots": 491,
+    "n_outliers": 44,
+    "outlier_rate": 0.08961303462321792,
+    "outlier_rate_95ci": [
+      0.06743205212958779,
+      0.11816569283083837
+    ],
+    "outlier_magnitudes_ug": [
+      68.72020601774136,
+      61.536908550231104,
+      97.45659288297294,
+      91.0910345714954,
+      82.40553972743217,
+      150.33392450041327,
+      118.98700532708958,
+      46.94665164832592,
+      99.79114881511514,
+      30.155418636031893,
+      88.2558222459364,
+      268.65982168191994,
+      56.363092949864594,
+      123.19634655760996,
+      112.327187742604,
+      109.18759613259684,
+      112.66646135733212,
+      119.05360727142035,
+      56.825681215288604,
+      49.57659811173824,
+      94.31886233728177,
+      206.94400817223965,
+      154.19419844846243,
+      187.22169793235437,
+      50.78262700962084,
+      83.8327061981113,
+      159.20192495247375,
+      161.58286883996783,
+      81.28668555386479,
+      29.655704304021636,
+      44.534744464796894,
+      107.09061019871204,
+      71.60533833160281,
+      61.13044302382854,
+      148.85221885001573,
+      164.9470444901872,
+      184.09532897115326,
+      80.96616141892164,
+      39.88871208611403,
+      129.30419025217395,
+      149.96927505795452,
+      56.5578260026912,
+      158.5843382750386,
+      38.93412243864599
+    ],
+    "adjacency_rate_among_outliers": 0.6590909090909091,
+    "expected_adjacency_rate_if_independent": 0.08961303462321792,
+    "clustering_interpretation": "adjacency_rate >> expected_adjacency_rate_if_independent suggests bursts (fringe jumps / loss-of-lock); comparable values suggest independent heavy-tailed shot noise, not clustered bursts."
+  }
+}

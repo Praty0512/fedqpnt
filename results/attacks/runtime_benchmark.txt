@@ -1,0 +1,3 @@
+rate_hz | sim_hours | wall_s | wall_s_per_sim_hour
+1.0 | 0.05 | 1.119 | 22.385
+10.0 | 0.05 | 9.425 | 188.498

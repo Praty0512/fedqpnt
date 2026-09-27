@@ -1,0 +1,22 @@
+State index map used by diagnostic (matches ESKF): p=0:3 v=3:6 psi=6:9 b_a=9:12 b_g=12:15
+Sign convention: err = est - true throughout (v_err=eskf.v-truth.v=eskf.v since truth=0 here; etc.)
+
+(i) delta b_a_x = 0.01 m/s^2 (idx=9)
+  t=10s: actual v_err=[-0.1  0.   0. ] p_err=[-0.5  0.   0. ]  analytic dv_x=-b*t=-1.0000e-01 dp_x=-0.5*b*t^2=-5.0000e-01  sqrt(Pv)=[1.00017081e-01 1.84838625e-03 4.31653304e-05] sqrt(Pp)=[5.00032643e-01 5.71353288e-03 1.88614296e-04]
+  t=60s: actual v_err=[-0.6  0.   0. ] p_err=[-18.   0.   0.]  analytic dv_x=-b*t=-6.0000e-01 dp_x=-0.5*b*t^2=-1.8000e+01  sqrt(Pv)=[6.08485145e-01 1.01262937e-01 3.98722445e-04] sqrt(Pp)=[1.80973543e+01 1.87462945e+00 1.05013157e-02]
+  t=300s: actual v_err=[-3.  0.  0.] p_err=[-450.    0.    0.]  analytic dv_x=-b*t=-3.0000e+00 dp_x=-0.5*b*t^2=-4.5000e+02  sqrt(Pv)=[4.50723806e+00 3.36380836e+00 4.23007009e-03] sqrt(Pp)=[5.51164737e+02 3.18249387e+02 4.72200551e-01]
+
+(ii) delta psi_x(roll) = 1e-3 rad (idx=6)
+  t=10s: actual v_err=[ 0.00000000e+00 -9.80664837e-02 -4.90332459e-05] p_err=[ 0.00000000e+00 -4.90332418e-01 -2.45166230e-04]  analytic |dv|=g*psi*t=9.8067e-02 (coupled axis = Y per skew(f_n)@psi derivation)  sqrt(Pv)=[0.00184839 0.09808387 0.00010715] sqrt(Pp)=[0.00571353 0.49036554 0.00052536]
+  t=60s: actual v_err=[ 0.00000000e+00 -5.88398902e-01 -2.94199475e-04] p_err=[ 0.00000000e+00 -1.76519671e+01 -8.82598426e-03]  analytic |dv|=g*psi*t=5.8840e-01 (coupled axis = Y per skew(f_n)@psi derivation)  sqrt(Pv)=[0.10126288 0.59704874 0.00071048] sqrt(Pp)=[ 1.87462848 17.75122423  0.02053606]
+  t=300s: actual v_err=[ 0.00000000e+00 -2.94199451e+00 -1.47099738e-03] p_err=[ 0.00000000e+00 -4.41299176e+02 -2.20649607e-01]  analytic |dv|=g*psi*t=2.9420e+00 (coupled axis = Y per skew(f_n)@psi derivation)  sqrt(Pv)=[3.36380661 4.4688376  0.00510864] sqrt(Pp)=[318.24922203 544.08390837   0.64318357]
+
+(iii) delta v_x = 0.1 m/s (idx=3)
+  t=10s: actual v_err=[0.1 0.  0. ] p_err=[1. 0. 0.]  analytic dv_x=v0=1.0000e-01 (const, no decay) dp_x=v0*t=1.0000e+00  sqrt(Pv)=[1.00017081e-01 1.84838529e-03 4.31241823e-05] sqrt(Pp)=[1.00001632e+00 5.71352991e-03 1.88524389e-04]
+  t=60s: actual v_err=[0.1 0.  0. ] p_err=[6. 0. 0.]  analytic dv_x=v0=1.0000e-01 (const, no decay) dp_x=v0*t=6.0000e+00  sqrt(Pv)=[0.14231715 0.10126288 0.00038512] sqrt(Pp)=[6.28603467 1.87462848 0.01032587]
+  t=300s: actual v_err=[0.1 0.  0. ] p_err=[30.  0.  0.]  analytic dv_x=v0=1.0000e-01 (const, no decay) dp_x=v0*t=3.0000e+01  sqrt(Pv)=[3.36529269e+00 3.36380661e+00 2.47542326e-03] sqrt(Pp)=[319.6600809  318.24922203   0.34301272]
+
+(iv) VRW only, industrial_mems value=2.4517e-4 m/s^2*sqrt(s), seed=500, no initial error
+  t=10s: actual v_err=[-0.00022523  0.00025635  0.00018268] p_err=[-0.00328002 -0.00238461 -0.00165656]  analytic std(v)=vrw*sqrt(t)=7.7530e-04 std(p)=vrw*sqrt(t^3/3)=4.4762e-03  sqrt(Pv)=[0.00125418 0.00125418 0.00077562] sqrt(Pp)=[0.00545224 0.00545224 0.0044773 ]
+  t=60s: actual v_err=[-3.21325108e-05 -1.76143458e-03 -2.67050821e-03] p_err=[-0.03890003  0.00319497 -0.08806674]  analytic std(v)=vrw*sqrt(t)=1.8991e-03 std(p)=vrw*sqrt(t^3/3)=6.5786e-02  sqrt(Pv)=[0.05257127 0.05257127 0.00191   ] sqrt(Pp)=[0.9710041  0.9710041  0.06600379]
+  t=300s: actual v_err=[-0.00456001  0.00119574 -0.00304863] p_err=[-0.75783697 -0.15658063 -0.57488323]  analytic std(v)=vrw*sqrt(t)=4.2465e-03 std(p)=vrw*sqrt(t^3/3)=7.3551e-01  sqrt(Pv)=[2.04112823 2.04112823 0.00454187] sqrt(Pp)=[184.72147559 184.72147559   0.76439254]
