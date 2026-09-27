@@ -33,6 +33,22 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-051 · 2026-09-27 · Trust/Detection design v2 (Master design session); permission block surfaced to the user
+- **Evidence (M1-CLOSE v2):**
+  - Recalibrating the reference stats made the labeller *worse* (precision 0.60 → 0.29) because the joint χ² is dominated by a near-degenerate feature (nsat_delta σ = 0.024). Drift AUC inverted (0.17) while abrupt recovered (0.75).
+  - Platt calibration does not help AUC or Brier.
+  - S1 is still a catastrophic FAIL (RMSE ratio 726,287; w_gnss pinned at the floor for 30 min).
+  - The agent traced the root cause: **the anti-lockout only runs when D = 0, so time with D = 1 is unbounded.**
+- **Decision:** adopt `docs/specs/TRUST_DESIGN_V2.md`:
+  - A: labeller σ-floors, with an acceptance test before retraining;
+  - B: runtime Platt calibration and the class-weight cap;
+  - C: **evidence-bounded exclusion.** After T_ex = 60 s of distrust, PROBE at w = 0.3 for 10 s. Recover if NIS is consistent and there is no physical spoof evidence; jamming evidence does not block recovery. The detector is suppressed for 120 s after recovery.
+  - D: M1 acceptance criteria.
+  - Applies to FedQPNT and B-cont; baselines unchanged. Tuning seeds only, before any test seed, and declared in the paper.
+- **Threat-model assumption made explicit:** recovery against consistent (NIS-blind) spoofers relies on at least one physical signature.
+- **Permission block:** the harness blocked a subagent's edit to `fedqpnt/trust/detector.py` ("Modify Shared Resources"), and the agent asked the Master to apply the edit instead. **The Master refused** (it would bypass a permission decision) and surfaced it to the user. Implementing v2 requires edits to `fedqpnt/trust/*` (and maybe `fedqpnt/node/*`), which need the user's permission.
+- **Owner:** Master
+
 ### D-050 · 2026-09-27 · M2 fleet runner accepted as infrastructure; surrogate-feature PD REJECTED; class-weight cap
 - **Accepted** (Master re-ran the fleet tests: 8/8):
   - `fedqpnt/fleet/`: real N-node pipelines (Environment + Agent) federated through the unchanged fl server; the live detector object is updated from the next tick; S5/S8/S9/S12/S15 are configurable; result files match the campaign schema.

@@ -146,3 +146,114 @@ parked the root filter-overconfidence issue for a dedicated future session).
 files were edited by this WP (only new scripts + this notes file + an
 additive `--weights` CLI flag on `scripts/run_m1_smoke.py`), so this is
 consistent with no regression from the retrain-only work.
+
+---
+
+## D-049 round (recalibrate reference stats, retrain, Platt-calibrate)
+
+New script `scripts/recalibrate_and_retrain_v2.py`. Reference stats
+(joint chi2_11 negative rule + D-024 xsat/cn0 positive rule) recalibrated
+on REAL clean closed-loop runs, seeds 500-519, 1800s (30 min) each,
+fixed_trust/kappa_R=40 -- a data-derived-constant recalibration, allowed
+under D-026's freeze (no rule/threshold/feature-design change). Compared
+against the same seeds at the old 300s duration:
+
+Largest shifts (mu/sd, old->new): nis_vel sd 0.644->0.275; resid_rms sd
+1.205->0.988; **nsat_delta sd 1.000->0.024** (a ~40x tightening -- over a
+genuinely converged 30-min clean run, satellite count almost never changes,
+so its empirical sd collapses near zero). cn0_std/cn0_mean sd widen instead
+(0.104->0.16/0.26).
+
+Effect: clean-run positive-label rate (new ref, applied to the calib pool
+itself) = 2.77% -- better than an unmeasured baseline but still above the
+<=1% target. Pseudo-label precision vs oracle DROPPED 0.602->0.290 (recall
+stayed ~1.0): the near-zero nsat_delta sd makes the joint chi2_11 test
+hypersensitive to that single dimension, so many oracle-negative epochs now
+fail the "jointly nominal" test and get pushed to y=1 by default (window
+clean-fraction <90%) rather than left as true negatives.
+
+Retrained (same frozen design) on relabelled seeds 520-549. Per-head Platt
+scaling fit on seeds 550-574 (natural ratio, PSEUDO-labels, never oracle) --
+spoof (a=1.617, b=-0.275), jam (a=1.668, b=-0.134). Held out on 575-599:
+
+| family    | v1 (fixed-trust data gen, old ref) | v2 (new ref, raw) | v2 (Platt-calibrated) |
+|-----------|-------------------------------------|--------------------|--------------------------|
+| overall   | 0.835 [.825,.845]                    | 0.623 [.614,.632]  | 0.625 [.616,.633]        |
+| drift     | 0.924 [.903,.941]                    | **0.171 [.153,.189] (worse, below chance)** | 0.172 |
+| meaconing | 0.997 [.995,.999]                    | 0.969 [.961,.977]  | 0.970                    |
+| abrupt    | 0.413 [.380,.447] (below chance)     | 0.753 [.734,.772] (recovered) | 0.753           |
+| jamming   | 0.142 [.038,.210] (below chance)     | 0.254 [.197,.312] (still below chance) | 0.258 |
+
+Brier score (calibrated) = 0.393 vs raw 0.384 (Platt did not improve Brier
+here -- reliability curve in results/m1/detector_retrain_v2_report.json).
+Platt params were saved into detector_weights_real_v2.npz for reporting
+only; NOT wired into the runtime `_gnss_p`/`detector.score()` path (that
+would be a trust_law.py change, out of scope / not requested -- the S1 and
+smoke re-runs below use the RAW MLP output exactly as trust_law.py already
+consumes it).
+
+**Honest finding: recalibration did not fix the abrupt/jamming problem
+uniformly -- it TRADED drift's AUC for abrupt's.** No family combination
+found across v1/v2 has all four families above chance simultaneously.
+Flagged for Master; no further iteration attempted (D-026 freeze + token
+economy).
+
+**D-050 (weight-cap fix + unit test): NOT APPLIED.** The requested edit to
+`fedqpnt/trust/detector.py::train_local` (cap inverse-class-frequency BCE
+weights at 10x) was blocked by the harness's own permission system
+("Modify Shared Resources" -- this file may be touched by concurrent
+agents). Per the no-workaround rule this was left undone; v2's retrain used
+the UNMODIFIED `train_local`. Needs explicit user/Master-side permission
+grant to proceed.
+
+## Re-run with v2 weights
+
+S1 (results/m1/s1_far_check_v2.json), 5 seeds x 30 min: FAR/h still fails
+for every method but bprime (0.0/h, unaffected -- doesn't use the trained
+detector). fixed_trust/undefended FAR dropped sharply (179-183/h -> 9-10/h)
+-- the new reference makes the raw detector fire less OFTEN, but
+fedqpnt_local/baseline_b_cont's mean w_gnss dropped further, to 0.022 (v1:
+0.108) -- essentially PINNED at w_min for the whole 30 min once triggered.
+S1 RMSE ratio: median 726287 (v1: 40019) -- WORSE, not better. ANEES_pos
+2.88 (still outside [0.5,2], though less extreme than v1's 18.6).
+
+**This is the clean empirical confirmation of the Task-4/anti-lockout
+finding below**: fewer, but now essentially PERMANENT once-triggered,
+distrust episodes are strictly worse for RMSE than v1's more frequent but
+shorter-lived ones, because nothing in `_LawCore` bounds total time spent
+with D==1 -- see below.
+
+Smoke matrix v2 (results/m1/smoke_matrix_v2.json): see final report for the
+CW-jamming comparison; qualitative pattern (defended worse than undefended)
+persists and is not improved by v2.
+
+## Task 4 (this round): ANTI-LOCKOUT -- why it didn't bound GNSS exclusion
+
+Read `fedqpnt/trust/trust_law.py::_LawCore.advance` (lines ~127-172, the
+anti-lockout block). The recovery gate is
+`G = (D==0) and (clean_dwell>=T_clean) and (frac_clean>=frac_clean_threshold)`.
+The anti-lockout timer only accumulates while
+`blocked_only_by_nis = (D==0) and (clean_dwell>=T_clean) and (frac_clean<0.9)
+and features_nominal`; `G_capped` (which forces `target=min(tau_star,w_cap)`,
+i.e. the actual escape hatch) requires `_lock_timer >= T_lock=120s`, and
+`_lock_timer` resets to 0 on every step where `blocked_only_by_nis` is
+False -- which is EVERY step where `D==1`. **The anti-lockout mechanism's
+own precondition is `D==0`: it exists to rescue recovery that is blocked
+ONLY by the frac_clean/NIS-dwell test despite the detector already having
+cleared (D already back to 0), not to bound how long D itself can stay 1.**
+There is no timer anywhere in `_LawCore` that forces D back to 0, or w back
+up, purely as a function of elapsed time while D==1 -- recovery depends
+ENTIRELY on `p_bar` (the EWMA of the detector's own p) dropping below
+`theta_off=0.3` and staying there for `T_off=5s`. If the (mis-calibrated,
+per D-029/D-049) detector's raw output stays chronically elevated on clean
+data, D can remain 1 (or re-trigger immediately after each brief dip)
+indefinitely, and the anti-lockout's `D==0` precondition is simply never
+met, so `T_lock=120s` never engages. Empirical confirmation: v1's
+fedqpnt_local held mean w_gnss=0.108-0.282 over a 10-30 min nominal run
+without ever recovering to the S1-required >=0.95, and v2 (a differently
+mis-calibrated detector, chosen independently) pinned w_gnss at 0.022 --
+i.e. essentially floor -- for the same duration. Both are consistent with
+"no upper bound on time-with-D==1" rather than any dwell/threshold-specific
+number; changing kappa_R, T_lock, w_cap etc. would not by itself fix this,
+since none of them are reachable while D stays locked at 1. Not changed
+(reporting only, per Master's D-049/this-round instruction).
