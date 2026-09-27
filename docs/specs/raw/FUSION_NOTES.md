@@ -848,3 +848,65 @@ explains the residual v3/p3 NEES excess found in 2(a) for industrial_mems
 (large `sigma_ba_turnon`) while tactical's much smaller values keep the
 same relative excess numerically negligible at these time horizons. No
 fix proposed or applied, per instruction.
+
+### D-038 (FILTER-GNSS agent, seeds 500-504/509, script `scripts/filter_gnss_d038.py`)
+
+**Item 3 (prime): receiver cov_vel honesty.** Bypassed the ESKF entirely
+(GnssSignalModel + GnssReceiver only), 5 seeds x 600s, static and dynamic
+industrial_mems: reported mean sqrt(diag cov_vel) vs actual (fix.vel-truth.vel)
+std, ratio (E,N,U) = [0.975, 1.010, 1.001] -- **honest to ~2.5%**. Normalized
+vel-err^2 (3dof diag) mean=3.033 vs ideal chi2_3 mean=3.0; lag-1s
+autocorrelation of vel-error ~0.001 (white). Static and dynamic arms are
+numerically identical (expected: WLS cov = inv(H^T W H) depends only on
+geometry/weights, not on platform speed, for a linear-in-velocity Doppler
+model). Code-level cross-check: `receiver.py::_weight_vel` weights by
+`doppler_thermal_sigma_mps(cn0)^2` only (thermal), which matches
+`signal.py`'s truth generator -- the ONLY per-epoch stochastic term added to
+`pseudorange_rate` there is thermal Doppler noise (clock drift is a
+jointly-estimated smooth state via the shared clock column, not injected
+per-epoch noise; no satellite-velocity error term exists in the truth model
+at all). **VERDICT: cov_vel is NOT the cause of GNSS-aided overconfidence --
+the D-038 "prime suspect" is ruled out.**
+
+**Item 3 continued: kappa_R sweep with honest-vel split** (5 seeds x 310s,
+industrial_mems, ESKF block ANEES p/v/psi_rp/psi_yaw/ba/bg at 60s/300s, test-
+local `_SplitKappaESKF` subclass -- `fedqpnt/fusion/eskf.py` NOT edited):
+- kappa_R=1 (pos+vel): p=33.4/16.9, v=24.2/3.6, psi_rp=44.3/6.3, psi_yaw=7.7/5.8,
+  ba and bg ANEES astronomically large (1e6-1e10) at both checkpoints.
+- kappa_R=40 (pos+vel): p=0.92/0.77, v=1.71/0.32 (good), but psi_rp=12.4/10.4
+  and ba/bg STILL huge (1e8-1e9) -- **the ANEES=0.98 headline number from
+  D-035 is a 6-dof average dominated by well-behaved p/v; it masks severe,
+  still-unresolved b_a/b_g (and psi) overconfidence even at kappa_R=40.**
+  (ba/bg magnitudes in the 1e6-1e10 range likely reflect P_ba/P_bg collapsing
+  toward the `_hygiene()` 1e-12 eigenvalue floor under sustained GNSS
+  aiding while the true bias error stays ~1e-2; not independently verified
+  this pass -- flagged, not confirmed, no fix proposed.)
+- kappa_pos=1, kappa_vel=(measured ratio)^2=0.991 (near-unity, i.e. "honest"
+  vel R, negligible extra inflation): p=33.5/17.0, v=24.3/3.6, psi_rp=44.3/6.3,
+  ba/bg similarly huge -- **essentially IDENTICAL to kappa_R=1 on both.**
+  **VERDICT: honest R_vel does NOT restore consistency at kappa_R~=1 on
+  position. kappa_R=40 remains necessary for reasons unrelated to velocity
+  covariance** (consistent with Item 3's honesty finding above -- there was
+  never a velocity-covariance error to fix).
+
+**Item 1 (D-038 hyp. 1, MEMS linearisation-limit): NOT confirmed -- test as
+run is inconclusive, methodological gap found.** Pure-INS run initialised
+`eskf.b_a`/`eskf.b_g` to the EXACT true bias at t=0 (no P0-consistent dx0
+draw, unlike D-034's convention), which cancels the turn-on-bias
+contribution to tilt by construction. Result: measured |tilt| at 300s is
+only ~0.024 rad (native gyro) vs the ~0.5 rad assumed in the D-038 hypothesis
+write-up, and is essentially UNCHANGED (0.025 rad) with gyro turn-on sigma
+scaled /10 -- i.e. turn-on bias is NOT the driver of the measured tilt in
+this setup, because the test cancelled it at init. v/p ANEES at 300s came
+out ~0.00 for both arms (native and /10), which is an artifact of near-zero
+injected error against large P0-turnon-derived P, not a meaningful
+consistency measurement. **This item needs a re-run with a proper
+P0-consistent dx0 draw (as in D-034/`pure_ins_nees`) before the
+linearisation-limit hypothesis can be confirmed or refuted -- not done this
+pass per Master's park directive (D-046); flagging only.**
+
+**Owner's decision (D-046):** GNSS-aided overconfidence issue PARKED by
+user; kappa_R=40 stays provisional. No fix applied to `fedqpnt/fusion/eskf.py`
+or `fedqpnt/gnss/*` this pass. Script `scripts/filter_gnss_d038.py` staged
+(git add, not committed); per-task JSON results under
+`results/fusion/d038_*.json`.

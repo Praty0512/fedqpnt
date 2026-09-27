@@ -33,6 +33,26 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-047 · 2026-09-27 · FILTER-GNSS final: κ_R = 40 fixes p/v consistency only; ψ/b_a/b_g stay overconfident. The gate is widened
+- **Results (5 seeds, 310 s, industrial_mems, per-block NEES):**
+  - κ_R = 40: p 0.92/0.77 and v 1.71/0.32 (60 s / 300 s, acceptable). **ψ_rp 12.4/10.4 and b_a/b_g 1e8–1e9, severely overconfident.**
+  - κ_R = 1 and "honest-R_vel" (κ_v = 0.991) are essentially identical, so velocity covariance is definitively not the cause.
+  - The earlier "ANEES 0.98" was a p/v-dominated aggregate that masked this.
+  - Task 2 (the linearisation limit) was INCONCLUSIVE: the harness initialised biases to truth, which cancels the hypothesised error source. The agent reported it correctly and did not over-claim.
+- **Master interpretation (unverified; for the pre-M4 session):** b_a/b_g NEES ≈ 1e8 implies P_ba/P_bg collapsing toward ~1e-12 under aiding. That is far below what GNSS (+ CAI) observability should allow. Candidates: (i) an over-tight CAI R (`sigma_win_g` = 1e-5 g is an ASSUMPTION; the CAI sample variance is tiny); (ii) update-step numerics or a missing Joseph form; (iii) a diagnostic truth-bias definition, as in D-034. First check in the pre-M4 session: per-block NEES with CAI updates on vs off.
+- **Gate widened (amends D-046):**
+  - Results depending only on **position/velocity** accuracy and the p/v innovations (detector features, trust behaviour, RMSE_h, latency) may proceed under κ_R = 40 provisional.
+  - **Claims depending on attitude/bias estimates (GNSS-outage drift, the CAI/H3 benefit, S6 CAI-drift, S14 long-duration) are BLOCKED** until the ψ/b consistency is fixed. Any existing numbers for them are labelled PRELIMINARY.
+- **Owner:** Master
+
+### D-046 · 2026-09-27 · PARK the GNSS-aided overconfidence issue (user decision); gate on final experiments
+- **Decision (user, on Master's recommendation):** stop investigating the GNSS-aided ESKF overconfidence for now. κ_R = 40 stays as a **provisional, documented** setting: nominal ANEES is 0.98 after the D-035 fix, and GNSS R inflation for unmodelled effects is common practice.
+- **Work proceeds** on: M1 close (detector retrained on real closed-loop features, smoke re-run, S1 FAR), runtime optimisation, M2 integration, and the M3 experiment/statistics pipeline.
+- **GATE:** no final/publication experiment campaign (M4) runs until either the root cause is fixed, or the Master formally accepts κ_R = 40 as a stated limitation. Before M4 there is one focused session, starting with the cheapest top suspect: a **time-alignment mismatch between GNSS fix epochs and the filter state**. Other suspects: the pos–vel cross-covariance of the fix being ignored in the joint 6-D update; update-step numerics. The `_hygiene` floor → eigenvalue-clip fix (D-043) is done in the same session.
+- **Consequences:** M1 can be signed off "with known limitation", and every M1–M3 artefact is labelled "κ_R provisional". Re-running the detector retrain and κ_R tuning after a fix is cheap (committed scripts). The MEMS H3 result is re-evaluated after the fix.
+- **Rationale:** the bug won't resolve itself, but most remaining work is independent of it. The expensive thing to redo is the M4 campaign, which the gate protects. Better tooling from M2/M3 will also make the root cause easier to isolate.
+- **Owner:** Master (user decision)
+
 ### D-045 · 2026-09-27 · Git policy; paper on hold; paper tier = Sonnet
 - **Git:** repository on `master`, initial commit `2da7fa0`. The Master commits after each accepted work package or milestone sign-off, with a message citing the D-/EXECUTION_LOG IDs and the co-author trailer. Agents stage but never commit. No pushes (no remote configured; outward-facing, so requires explicit user approval).
 - **Excluded from git:** `data/raw/` (the 875 MB CC-BY archive; MD5 in the log), `runs/`, and caches. Derived `data/processed/` (8 MB) and `results/` (2 MB) are included for reproducibility.
