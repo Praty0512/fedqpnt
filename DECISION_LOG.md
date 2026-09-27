@@ -33,6 +33,23 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-049 · 2026-09-27 · M1 sign-off WITHHELD: pseudo-labeller mis-calibrated on real features → recalibrate + Platt calibration; anti-lockout failure
+- **M1-CLOSE results** (tuning seeds, real closed-loop features, frozen design):
+  - Held-out AUC: overall 0.835, drift 0.924, meaconing 0.997, **abrupt 0.413 and jamming 0.142 (inverted)**. Pseudo-label precision/recall = **0.602**/0.995.
+  - Closed loop: the detector fires on almost every clean epoch (FAR ≈ 180/h even under fixed trust). FedQPNT and B-cont hold w_gnss ≈ 0.28 on NOMINAL and diverge (mean 90 km, worst 4.2 Mm; ANEES_pos 18.6). **S1 FAIL** by ~4 orders of magnitude.
+  - B-bin is sane (3.8 m). B′ and undefended are unaffected.
+  - CW jamming: defended 13 km vs undefended 237 m.
+- **Master diagnosis:** the labeller's nominal-reference statistics (D-024/D-026) were calibrated on the synthetic harness. Real ESKF innovations (at κ_R = 40) have shifted distributions, so the labeller marks clean epochs positive (precision 0.60), the detector learns to fire on clean data, and attack families that look "unlike" those mislabelled clean epochs score inverted. Class-balanced training (50/50) additionally inflates raw posteriors at the natural (rare-attack) base rate.
+- **Decision (calibration only; allowed under the D-026 design freeze):**
+  1. Recalibrate every labeller reference statistic on REAL clean closed-loop runs (seeds 500–549).
+  2. Retrain.
+  3. Per-head Platt output calibration on seeds 550–574 at the natural class ratio. Evaluate on 575–599 (AUC, reliability, Brier).
+  4. Re-run S1 and the smoke matrix.
+- **Anti-lockout:** §3.3's anti-lockout failed to bound GNSS exclusion under chronic detector firing. Investigate the cause; the Master rules on any trust-law change. **Safety principle for the trust law:** a mis-firing detector must never be able to drive unbounded free-inertial exposure. The B-bin recovery gate evidently does bound it; compare.
+- **Known design question, deferred until the detector is calibrated:** distrusting *still-consistent* partially jammed GNSS worsens the solution (CW jamming). A candidate trust-law refinement is to condition jam-driven distrust on fix/innovation consistency. This is a design change, to be decided later with evidence.
+- **Note:** this also shows why D-046/D-047's parked filter issue matters. κ_R = 40 changes the innovation-feature scale the whole detection chain is calibrated to, so a later κ_R fix requires re-running this calibration. The procedure is scripted, so it is cheap.
+- **Owner:** Master
+
 ### D-048 · 2026-09-27 · D-039 and M3-pipeline acceptance; FedAvg "negative drop" anomaly; eval PD rulings
 - **D-039 ACCEPTED** (Master re-ran trust + FL tests; all pass):
   - Dead-zone fix: `n_min = 10` → train on all samples with inverse-frequency weights. Zero-delta nodes 6/10 → 0/10. The harness workaround is reverted.
