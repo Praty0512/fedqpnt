@@ -1,0 +1,7 @@
+scenario,criterion,passed,value,blocked_by_D047,detail,kappa_R_status
+S1,rmse_h_vs_fixed_trust,,,False,missing/mismatched fedqpnt_local vs fixed_trust,PROVISIONAL_D047_kappa_R=40
+S1,far_le_1_per_hour,False,30.000000000005972,False,FAR=30.000/h/node (bound 1.0),PROVISIONAL_D047_kappa_R=40
+S1,anees_in_band,False,0.4505526710883152,False,"ANEES_pos=0.451 (band [0.5,2])",PROVISIONAL_D047_kappa_R=40
+S1,mean_w_gnss_ge_0_95,False,0.17265739390749435,False,mean w_gnss=0.1727 (bound >=0.95),PROVISIONAL_D047_kappa_R=40
+S2-low,detection_prob,,1.0,False,P_D=1.000 (n=3),PROVISIONAL_D047_kappa_R=40
+S2-low,damage_bound,True,-0.007626214044719859,False,median(MAX_h_a - MAX_h_u)=-0.008 (bound 3*sigma_nom=15.0),PROVISIONAL_D047_kappa_R=40

@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 
 from fedqpnt.node.runner import RunSpec, run_many  # noqa: E402
 DETECTOR_WEIGHTS = ROOT / "results" / "m1" / "detector_weights.npz"
+DETECTOR_WEIGHTS_REAL = ROOT / "results" / "m1" / "detector_weights_real.npz"
 
 SCENARIOS = {
     "nominal": None,
@@ -36,7 +37,11 @@ def main() -> None:
     ap.add_argument("--kappa-r", type=float, default=40.0)
     ap.add_argument("--workers", type=int, default=None)
     ap.add_argument("--out", type=str, default=str(ROOT / "results" / "m1" / "smoke_matrix.json"))
+    ap.add_argument("--weights", type=str, default=str(DETECTOR_WEIGHTS),
+                     help="detector weights .npz (default: old synthetic-feature weights; "
+                          "pass results/m1/detector_weights_real.npz for the D-029 real-feature retrain)")
     args = ap.parse_args()
+    weights_path = Path(args.weights)
 
     specs = []
     for scen_name, atk in SCENARIOS.items():
@@ -47,7 +52,7 @@ def main() -> None:
                     duration_s=args.duration, hold_s=30.0, platform="ground", world="flat",
                     imu_grade="industrial_mems", quantum_grade="field", gnss_rate_hz=1.0,
                     heading_noise_deg=2.0, attack=atk, kappa_R=args.kappa_r, kappa_Q=1.0,
-                    detector_weights_path=str(DETECTOR_WEIGHTS) if DETECTOR_WEIGHTS.exists() else None,
+                    detector_weights_path=str(weights_path) if weights_path.exists() else None,
                     record=False,
                 ))
 

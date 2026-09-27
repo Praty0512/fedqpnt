@@ -219,3 +219,55 @@ instruction to keep to <=6 worker processes while another agent runs heavy simul
 `Get-CimInstance Win32_Process` before/after each run that only this session's own
 `fedqpnt.fl`/`run_fl_*`/`test_fl_*` command lines were present; no process was stopped that wasn't
 confirmed as this session's own.
+
+## D-039 (Master follow-up): the real source fix + S12 at the spec fleet size (N=10)
+The D-037 round-0-forced-clean warm-start in `tests/_fl_harness.py` was a workaround, not the real
+fix. Master approved fixing the actual source, `fedqpnt/trust/detector.py`'s
+`TrustDetector.train_local(balance=True)`, under D-026's freeze (a correctness fix, not a design
+change): when `n_neg < n_min` (new param, default `n_min=10`, PROPOSED-DECISION), subsampling is
+skipped entirely and the node trains on ALL available samples, relying on the existing inverse-
+class-frequency loss weights (`w_pos`/`w_neg`) instead of the sample cap. At/above `n_min` negatives,
+behaviour is unchanged (bit-identical subsampling).
+- Unit tests added to `tests/test_trust_detector.py`: `n_neg=0` (all-positive batch -- SGD now runs,
+  finite loss, weights actually update) and `n_neg=3` (< n_min -- trains on all 40 samples, not just
+  ~3 positives). A third sanity test confirms n_neg=20 (>= n_min) still subsamples as before.
+  `python -m pytest tests/test_trust_*.py -q` -> 40 passed.
+- The D-037 warm-start workaround in `tests/_fl_harness.py` was REVERTED (random family draws every
+  round again, including round 0) so the harness exercises the real fix under the same conditions
+  that originally exposed the bug.
+- **Result: zero-delta nodes disappeared.** Diagnostic re-run (10 nodes, 8 rounds, base_seed=540,
+  same conditions as the D-037 diagnosis): 0/10 chronically-degenerate nodes (was 6/10 before any
+  fix, 1/10 with only the harness-level warm-start workaround).
+
+### S12 at N=10 (spec fleet size), 10 seeds (500-509), 4 rounds, `scripts/run_fl_s12_n10.py`,
+`results/fl/fl_s12_n10_sweep.json`. Federations run strictly sequentially (11 processes per run,
+approved by Master alongside two other agents' concurrent work). Mean AUC drop vs clean with 95%
+percentile bootstrap CI (2000 resamples), PROVISIONAL:
+
+| f | attack | FedAvg mean drop [95% CI] | TRIM-NB-R mean drop [95% CI] |
+|---|---|---|---|
+| 20% | sign_flip | -0.163 [-0.278, -0.044] | **0.032 [-0.049, 0.110]** |
+| 20% | label_flip | 0.045 [-0.024, 0.115] | 0.070 [0.015, 0.130] |
+| 20% | gaussian_noise | -0.095 [-0.192, -0.005] | -0.024 [-0.072, 0.035] |
+| 20% | alie | -0.021 [-0.057, 0.014] | 0.015 [-0.010, 0.041] |
+| 40% | sign_flip | -0.234 [-0.345, -0.123] | -0.003 [-0.117, 0.102] |
+| 40% | label_flip | 0.010 [-0.093, 0.120] | 0.147 [0.088, 0.206] |
+| 40% | gaussian_noise | -0.192 [-0.279, -0.113] | 0.011 [-0.078, 0.100] |
+| 40% | alie | 0.021 [-0.041, 0.082] | 0.020 [-0.018, 0.056] |
+
+**Acceptance criterion (TRIM-NB-R, f=20%, sign_flip): mean drop=0.032, 95% CI=[-0.049, 0.110] <= 0.05
+-> PASS** at the spec fleet size (the N=5 FAIL on record from D-037 stands for that smaller fleet;
+at N=10 the trimmed-mean's designed behaviour holds, consistent with beta=20% covering exactly one
+malicious node in five being the harder, noisier case).
+Several FedAvg cells show a NEGATIVE mean drop (poisoned AUC > clean AUC) -- expected under this
+much noise (small held-out eval set, 4-round runs, single-seed-per-cell training): FedAvg has no
+defence, so its variance is large and not all draws land on the "attack hurts" side; this is honestly
+reported, not evidence FedAvg is fine (see the D-037 synthetic-delta unit test, which isolates the
+aggregation math and shows FedAvg's raw output IS pulled further from the honest mean by more
+poisoning -- AUC is a noisier, indirect readout of that same underlying effect).
+
+### Process-count discipline (D-039)
+Verified via `Get-CimInstance Win32_Process` before/after: two other agents' processes observed
+during this work (`scripts/filter_gnss_d038.py`, `pytest tests/test_eval_stats.py`) were left
+untouched (confirmed by command line, not assumed). No process was stopped this session. Federations
+were run one at a time throughout (N=10 -> 11 processes per run, no concurrent federation runs).

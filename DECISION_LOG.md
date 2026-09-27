@@ -33,6 +33,19 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-048 · 2026-09-27 · D-039 and M3-pipeline acceptance; FedAvg "negative drop" anomaly; eval PD rulings
+- **D-039 ACCEPTED** (Master re-ran trust + FL tests; all pass):
+  - Dead-zone fix: `n_min = 10` → train on all samples with inverse-frequency weights. Zero-delta nodes 6/10 → 0/10. The harness workaround is reverted.
+  - **S12 at N = 10:** TRIM-NB-R sign-flip f = 20% mean drop 0.032, CI [−0.049, 0.110]. Recorded as **"PASS on mean, CI inconclusive"**. The CI upper bound exceeds 0.05, so the definitive verdict comes with the M4 30-seed run. The N = 5 FAIL stays on record.
+- **ANOMALY, blocking FL-based claims (H2/H4, S8, S12):** FedAvg shows *negative* AUC drops (poisoned better than clean). sign-flip f = 20% gives −0.163 with CI [−0.278, −0.044] **entirely below 0**, and gaussian f = 40% gives −0.192. Poisoning cannot systematically improve detection, so this indicates an evaluation or reference artefact: the clean reference is under-trained (too few rounds), the eval set differs between arms, or the poisoned runs differ in something besides poisoning (seed pairing, round count, the dead-zone path). This must be diagnosed during M2 integration, before any FL comparison is trusted. The agent's "noise" explanation is rejected, because a CI excluding 0 is not noise.
+- **M3 EVALUATION pipeline ACCEPTED:** Master re-ran 55 tests passing (the agent reported 57). The gate refused `--final --gate-cleared` with `results/GATE_D047.json` = false (verified). Resumability was demonstrated.
+- **Rulings on PROPOSED-DECISIONs:**
+  - S2 severity → offset mapping (0.3/0.6/0.9): accepted as ASSUMPTION, but the "final offset ≥ 50 m" applicability must use the *measured* final offset of each attacked run, not the nominal mapping.
+  - σ_nom = 5 m: **rejected**. Use σ_nom = RMSE_h(P_pre) measured in the same run (same seed and method); no assumed constant.
+  - Worker cap: make it a CLI argument (default 4) instead of a hard-coded value.
+  - S5/S8/S9/S12/S15 NOT_RUNNABLE until a fleet runner exists: accepted, and assigned to M2 integration.
+- **Owner:** Master
+
 ### D-047 · 2026-09-27 · FILTER-GNSS final: κ_R = 40 fixes p/v consistency only; ψ/b_a/b_g stay overconfident. The gate is widened
 - **Results (5 seeds, 310 s, industrial_mems, per-block NEES):**
   - κ_R = 40: p 0.92/0.77 and v 1.71/0.32 (60 s / 300 s, acceptable). **ψ_rp 12.4/10.4 and b_a/b_g 1e8–1e9, severely overconfident.**
