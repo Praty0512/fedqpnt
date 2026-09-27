@@ -33,6 +33,12 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-045 · 2026-09-27 · Git policy; paper on hold; paper tier = Sonnet
+- **Git:** repository on `master`, initial commit `2da7fa0`. The Master commits after each accepted work package or milestone sign-off, with a message citing the D-/EXECUTION_LOG IDs and the co-author trailer. Agents stage but never commit. No pushes (no remote configured; outward-facing, so requires explicit user approval).
+- **Excluded from git:** `data/raw/` (the 875 MB CC-BY archive; MD5 in the log), `runs/`, and caches. Derived `data/processed/` (8 MB) and `results/` (2 MB) are included for reproducibility.
+- **Paper:** ON HOLD (user). When resumed, writing = Sonnet (resolves D-007).
+- **Owner:** Master (user directives)
+
 ### D-043 · 2026-09-27 · FILTER-GNSS results: receiver cov_vel honest; D-036 excess = `_hygiene` additive floor (Master-proven)
 - **Task 1a:** receiver cov_vel is HONEST. Reported/actual ratio [0.975, 1.010, 1.001] (E/N/U); normalized error² mean 3.03 vs χ²₃ 3.0; lag-1 s autocorrelation ≈ 0. **Master's D-038 prime suspect is refuted.**
 - **Task 3 → Master root cause:**

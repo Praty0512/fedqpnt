@@ -22,9 +22,12 @@ All DOIs below were resolved by the Master against Crossref/DataCite on 2026-09-
 | Chai et al. 2025 | Full biblio: *IEEE IoT J.* vol. 12, pp. 44177–44188 (Consensus). Aggregation = **accuracy-weighted** (abstract). Post-detection action: not stated |
 | Khan et al. 2025 | Authors: M. M. Khan, M. Kamal, M. Shabbir, S. Alahmari (Consensus). Aggregation: SVM weights aggregated at an RSU ("secure aggregation", rule not named). Post-detection action and recovery: **NOT stated** in the text Consensus accessed |
 
+## Resolved 2026-09-27 (user Consensus search + Master DataCite check)
+- **TEXBAT:** T. Humphreys, J. Bhatti, D. P. Shepard, K. D. Wesson, "The Texas Spoofing Test Battery: Toward a Standard for Evaluating GPS Signal Authentication Techniques," *Proc. ION GNSS 2012*, pp. **3569–3583**. DOI **10.15781/t26d5pt4x** (UT Austin repository; DataCite resolved to the exact title; the 2018 year is the repository deposit date, so cite the conference as 2012). The earlier "2845–2859" from the rejected non-authoritative source was wrong. The title variant "TEXBAT: A Public Database…" is not the paper title.
+- **Misra & Enge:** ISBN not resolvable online (Consensus has no book records; Google Books/OpenLibrary inaccessible from this machine). **Decision: IEEE reference style does not require ISBNs for books**, so cite as: P. Misra and P. Enge, *Global Positioning System: Signals, Measurements, and Performance*, 2nd ed. Lincoln, MA: Ganga-Jamuna Press, 2006. Same ISBN-free form for Anderson & Moore, Groves, and Kaplan & Hegarty. Optional: the user can confirm edition/year from the copyright page before submission.
+
 ## Still unverified (user/library)
-- TEXBAT (Humphreys, Bhatti, Shepard, Wesson, ION GNSS 2012): no DOI in Crossref/DataCite. The page range is **unconfirmed**: sources conflict ("2845–2859" from a non-authoritative source). Needs the ION proceedings page.
-- Misra & Enge 2006 ISBN: two candidates, 978-0-9709544-0-4 (REF-VERIFY-2) vs 978-0-9709544-1-1 (non-authoritative source). Unresolved.
+- (none blocking)
 - Anderson & Moore 1979, Groves 2013, Kaplan & Hegarty 2017 ISBNs: consistent across sources, but not checked against a catalogue.
 - Pardhasaradhi 2022 full text: not retrieved. The abstract (Consensus) suffices for the B-bin characterisation.
 
