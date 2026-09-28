@@ -45,28 +45,53 @@ Scratchpad dir (all logs live here):
   (metric artifact, see item 4) b_g=7.31. Close to CAI-ON kappa_R=40 numbers (item 4b) except
   p is closer to ideal (2.61 vs 3.58).
 
-## IN PROGRESS / NEXT
-- Confirm `scratchpad/kappa60_block_nees.log` finished; read it.
-- **Item 6** M1 re-verification with v2 detector (`results/m1/detector_weights_sup_v2.npz`),
-  ALL using `--kappa-r 60`:
-  (i) `scripts/run_m1_s1_far_check.py --kappa-r 60 --weights results/m1/detector_weights_sup_v2.npz`
-  (ii) `scripts/run_m1_smoke.py --kappa-r 60 --weights results/m1/detector_weights_sup_v2.npz`
-  (iii) `scripts/defended_vs_undefended_check.py --kappa-r 60 --weights results/m1/detector_weights_sup_v2.npz`
-  (iv) `scripts/sweep_signature_strength.py` -- kappa_R is HARDCODED 40.0 in this script (lines
-       ~92, ~196), no CLI flag yet. NEEDS a `--kappa-r` arg added before running at 60 (script
-       edit, not core code, no approval needed) OR run as-is at 40 with a note. DECIDE: add
-       the flag (cheap edit) so all item-6 runs are consistent at kappa_R=60.
-  (v) E_s firing fraction on drift/meaconing with the NEW jump test: NO reusable script exists
-      (`scripts/subrule_decompose_d056.py` reimplements the OLD position_event logic
-      independently, stale vs the new `_physical_spoof_evidence`). Need a NEW small script that
-      reads `agent.trust.last_es_evidence` directly (already reflects the new jump test live) --
-      NOT YET WRITTEN.
-- Retrain detector only if feature distributions changed materially -- NOT expected (E_s change
-  doesn't touch detector features/training, only the E_s position term); state this in the report,
-  don't retrain unless evidence says otherwise.
-- Write terse notes to `docs/specs/raw/CORE_ROBUST_NOTES.md` (NOT YET CREATED).
-- Run full suite `python -m pytest tests/ -q` once at the very end.
-- Final report via SubagentHandback per the original task format.
+## IN PROGRESS / NEXT (as of this write)
+- Item 5 kappa_R=60 per-block NEES: DONE (see above).
+- sweep_signature_strength.py: added `--kappa-r` CLI flag (threaded through `_collect_family`,
+  `run_sweep`, `run_rmse_comparison`). DONE.
+- New scripts written for item 6: `scripts/core_robust_safety_principle_sweep.py` (item 6ii,
+  s-sweep safety table, writes `results/m1/core_robust_safety_sweep.json`),
+  `scripts/core_robust_es_firing_fraction.py` (item 6iii, reads `agent.trust.last_es_evidence`
+  directly -- automatically reflects the NEW D-058 jump test).
+- **Item 6 campaign LAUNCHED as two parallel background chains** (both `run_in_background: true`,
+  direct Bash tool tracking, NOT nohup+disown):
+  - Chain A (task id **b17ktblbp**, log dir prefix `item6_*`): S1 far check (kappa-r 60, sup_v2
+    weights, out `results/m1/s1_far_check_core_robust.json`, log
+    `scratchpad/item6_s1_far_check.log`) THEN smoke matrix (out
+    `results/m1/smoke_matrix_core_robust.json`, log `scratchpad/item6_smoke_matrix.log`) THEN
+    defended_vs_undefended (out `results/m1/defended_vs_undefended_core_robust.json`, log
+    `scratchpad/item6_defended_vs_undefended.log`).
+  - Chain B (task id **bjaxuyjmj**): safety-principle s-sweep (log
+    `scratchpad/item6_safety_sweep.log`) THEN signature-strength AUC sweep (out
+    `results/m1/sig_strength_sweep_core_robust.json`, log `scratchpad/item6_sig_strength_auc.log`)
+    THEN E_s firing fraction (log `scratchpad/item6_es_firing_fraction.log`).
+  - Quick single-seed sanity check of the E_s firing script already ran manually: drift
+    severity=0.5 (cn0_sig_scale=0.0) fired 31/32 active epochs (0.97). This looks HIGH but is
+    plausibly correct, not a bug: DriftInSpoof severity=0.5 ramps to 1.5 m/s terminal drift
+    velocity over ~60s, which is a genuinely fast KINEMATIC drag (not "slow" in absolute
+    velocity), so the short-baseline test (designed to catch exactly this GNSS-vs-INS motion
+    inconsistency) firing often is expected/correct, distinct from the earlier unit test's
+    truly-slow 0.1 m/epoch case (which correctly did NOT fire). State this interpretation in
+    the final report; don't chase further unless the full campaign shows something inconsistent.
+  - If EITHER chain fails/errors, re-launch just the failed step (each step's `python -u ...`
+    command is self-contained and listed above/in the script files); do not re-run completed
+    steps.
+- After both chains finish: read all `item6_*.log` files, cross-check against M1 criteria (S1
+  FAR<=1/h, RMSE ratio<=1.05, ANEES_pos in [0.5,2], no divergence), the D-055 safety-principle
+  table (PASS/FAIL per method per s), and the E_s firing fractions (drift vs meaconing).
+- Retrain detector only if feature distributions changed materially -- NOT expected (the D-058
+  E_s change only touches the position evidence TERM inside _physical_spoof_evidence, not the
+  13-feature vector the detector itself trains/scores on); state this in the report, don't
+  retrain unless the campaign shows AUC/feature-distribution drift.
+- Write terse notes to `docs/specs/raw/CORE_ROBUST_NOTES.md` (NOT YET CREATED) -- do this once
+  the item-6 numbers are in hand, one pass, not incrementally.
+- Run full suite `python -m pytest tests/ -q` once at the very end (already confirmed green
+  after items 1-3; re-run after item 6 in case any script edits broke an import, though scripts/
+  aren't covered by tests/ normally -- just a final sanity gate per the task's "keep the whole
+  suite green" instruction).
+- Final report via SubagentHandback per the original task format (AGENT/STATUS/pytest line/
+  items 1-6 with numbers/kappa_R chosen/M1 table/safety table/E_s fractions/PROPOSED-DECISIONs/
+  permission denials -- there have been NONE so far, no edit prompts were denied).
 
 ## Resume command pattern
 Background jobs: always `python -u <script> > "<scratchpad>/<name>.log" 2>&1` passed directly to

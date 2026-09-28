@@ -14,17 +14,26 @@
 - Saved BEFORE reference trace (scratchpad/perf_before.npz, 114 arrays)
   BEFORE any source edit.
 
-## In progress
 - Single-sample fast paths in fedqpnt/sim/rotations.py for so3_exp /
   dcm_to_euler (avoid moveaxis/batch-matmul overhead on N=1 calls, same
-  arithmetic as the batch path) -- implementing next, then re-run
-  perf_bitident_check.py --compare to prove bit-identical.
+  arithmetic as batch path). Verified BIT-IDENTICAL via
+  perf_bitident_check.py --compare (114/114 arrays match).
+- scripts/perf_benchmark.py written and run before/after (via git stash of
+  just rotations.py). Speedup: rotations 13.69s->5.95s/simhour (2.30x),
+  full node 135.60s->120.73s/simhour (1.12x); IMU/GNSS/CAI unchanged
+  (not touched, no safe win found).
+- docs/specs/raw/PERF_NOTES.md written with full table + deferred ideas
+  (eigvalsh PSD check, F/G hoisting, coning cross -- all require eskf.py,
+  off-limits).
+
+## In progress
+- Running required test suite in background (PID bzv21t2h1, output at
+  ...\tasks\bzv21t2h1.output): `python -m pytest tests/test_sensors_*.py
+  tests/test_gnss_*.py tests/test_attacks_*.py tests/test_sim_*.py -q`.
 
 ## Next
-- scripts/perf_benchmark.py (s/sim-hour per component: node / IMU / GNSS / CAI).
-- Speedup table + docs/specs/raw/PERF_NOTES.md (incl. deferred ideas needing
-  eskf.py or non-bit-identical changes: eigvalsh PSD check, F/G hoisting).
-- Final: `python -m pytest tests/test_sensors_*.py tests/test_gnss_*.py tests/test_attacks_*.py tests/test_sim_*.py -q`.
+- Read back test output once background run finishes; report PASS/FAIL line
+  in final report.
 
 ## Background PIDs / output paths
 - None running in background. perf_before.npz at:
