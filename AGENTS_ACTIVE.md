@@ -12,7 +12,7 @@ _Last updated: 2026-09-29_
 | PATENT | Sonnet | Patent claim skeleton | patent/ | progress/PATENT.md | **DONE 2026-09-29, accepted** (3 independent + 17 dependent claims) | — |
 | VIZ | Sonnet | Architecture / loop / trust-state / FL-protocol figures | figures/, scripts/make_figures_arch.py | progress/VIZ.md | Started | same |
 | REPRO | Haiku | README, requirements, REPRODUCE, DATA, CITATION | README.md, requirements.txt, docs/REPRODUCE.md, docs/DATA.md, CITATION.cff | progress/REPRO.md | **DONE 2026-09-29, accepted** (Master pinned scikit-learn==1.7.2) | — |
-| DOCS | Haiku | FEDERATION / FLEET / EVALUATION / TRAINING docs | docs/FEDERATION.md, FLEET.md, EVALUATION.md, TRAINING.md, the docs/README.md index | progress/DOCS.md | Started | same |
+| DOCS | Haiku | FEDERATION / FLEET / EVALUATION / TRAINING docs | docs/FEDERATION.md, FLEET.md, EVALUATION.md, TRAINING.md, the docs/README.md index | progress/DOCS.md | **DONE 2026-09-29, accepted** | — |
 
 ## Queued (not started)
 - H2/H4 re-run with abrupt as the novel family (θ0 without abrupt) plus drift/meaconing with the new E_s: **after CORE-ROBUST**.

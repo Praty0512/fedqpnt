@@ -64,6 +64,59 @@ Full system architecture specification (WP-1.1). Covers:
 
 ---
 
+## Federated Learning and Training
+
+### [FEDERATION.md](FEDERATION.md)
+Federated learning transport layer, aggregators, and poisoning resilience. Covers:
+- FL transport (bulk-synchronous, multiprocessing spawn, deterministic RNG)
+- Aggregators: FedAvg, FedProx, TRIM-NB-R (with byzantine robustness)
+- Communications model (Gilbert-Elliott fading, LogNormal delay)
+- Poisoning attacks: sign-flip, label-flip, gaussian-noise, ALIE
+- Cold-start and staleness handling
+- Known bugs (server message buffering, model installation tuple unpacking) with fixes and regression tests
+- S12 poisoning at N=5 and N=10 (TRIM-NB-R PASS at spec size)
+- S5/S9 comms-loss results (both PASS)
+
+**Key spec changes:** D-037 (real bugs found via multiprocess validation), D-039 (dead-zone fix at scale), D-050 (fleet infrastructure accepted).
+
+### [FLEET.md](FLEET.md)
+Fleet runner, θ0 pretraining protocol, and evaluation redesign. Covers:
+- N-node federated loops (Environment + Agent) with live detector updates
+- θ0 restricted-family pretraining (D-054): excludes novel family from pretraining so "never saw X" test is fair
+- FL sanity check (D-056): FedAvg/TRIM-NB-R ≥ 0.95× centralised on IID data — **PASS** (AUC 0.996–0.998)
+- H2/H4 evaluation protocol redesign: report learned-detector-only AUC separately from operational p_bar; novel family in sub-rule regime
+- Fleet validation: infrastructure PASS, deterministic, 52–55 s per fleet-hour at N=5
+- FedAvg uncapped-gradient anomaly diagnosis (designed vulnerability, not scoring bug)
+
+**Key spec changes:** D-050 (fleet runner), D-054 (θ0 protocol and H2/H4 redesign), D-056 (sanity check).
+
+### [EVALUATION.md](EVALUATION.md)
+Evaluation framework: statistics, scenarios, campaign runner, and report generator. Covers:
+- Statistical methods: Wilcoxon + conditional paired t-test, Hodges-Lehmann CI, Holm-Bonferroni, Friedman+Nemenyi, exact McNemar
+- Scenario registry (S1–S15): acceptance criteria, blocking status (D-046/D-047 gate on CAI-related scenarios)
+- Campaign runner: resumability, test-seed gate (≥ 10000), worker cap=4
+- Dry-run plumbing verification (proved resumability)
+- Report generator (Markdown + CSV, per-scenario tables, H1–H4 hypothesis tests)
+
+**Key spec changes:** D-048 (σ_nom per-run measured, final offset used, S5/S8/S9/S12/S15 NOT_RUNNABLE until fleet/protocol finalized).
+
+### [TRAINING.md](TRAINING.md)
+Supervised detector training, trust law v2, and signature-strength validation. Covers:
+- Supervised primary path (D-052): `fedqpnt/training/build_supervised_dataset.py` is ONLY place AttackLabel joins features; no label leakage at runtime
+- Label-free pseudo-labelling relegated to ablation (D-049 gate A failed, D-052)
+- Labeller v2 sigma floors; class-weight cap 10× (D-050/D-051); Platt calibration
+- Signature-strength sweep (D-055): s < 0.5 failure boundary; s < 0.25 inverted (AUC 0.129); actively harmful RMSE (2.3 km vs 108 m undefended)
+- 6-family rebalancing (D-053a): jammer EIRP calibrated per severity (old: 8 jam epochs; new: 1590 jam positives, all families ≥ 500)
+- Detector v2 AUC: drift 0.998, meaconing 0.999, abrupt 0.691 (regressed, honest report), jam_cw 0.996, jam_wideband 0.988, jam_then_spoof 0.997, overall 0.953
+- Trust law v2 state machine (TRUST/DISTRUST/PROBE/RECOVER, 70 s cycle bound)
+- S1 v2: FAR 0.0/h, RMSE ratio 0.9904, ANEES 1.306 — **all PASS**
+- E_s redesign (D-058): short-baseline jump test (independent of filter divergence artifacts)
+- Core-robustness session planned (D-058): soft gating, E_s jump test, eigenvalue clip, overconfidence investigation
+
+**Key spec changes:** D-026 (freeze), D-029 (real features), D-049 (recalibration and anti-lockout), D-051 (trust law v2), D-052 (supervised primary), D-053 (6-family rebalance), D-055 (safety principle + s < 0.5 boundary), D-058 (E_s redesign).
+
+---
+
 ## Project state and decision logs
 
 ### [PROJECT_STATE.md](../PROJECT_STATE.md)
@@ -106,6 +159,22 @@ Agent execution history and reproducibility trace. Records all WP runs, seeds, g
 | Baseline method definitions (A, B-bin, B-cont, B′) | [specs/ARCHITECTURE.md](specs/ARCHITECTURE.md) §5 |
 | Trust law, continuous weighting, hysteresis | [specs/ARCHITECTURE.md](specs/ARCHITECTURE.md) §3.3 |
 | FL client, aggregator, comms, round timing | [specs/ARCHITECTURE.md](specs/ARCHITECTURE.md) §4, §8 |
+| FL transport, determinism, aggregators (FedAvg/FedProx/TRIM-NB-R) | [FEDERATION.md](FEDERATION.md) §1–5 |
+| Poisoning attacks (sign-flip, label-flip, ALIE), S12 results | [FEDERATION.md](FEDERATION.md) §5–6 |
+| Known FL bugs (server buffering, model installation) and fixes | [FEDERATION.md](FEDERATION.md) §5 |
+| Fleet runner, θ0 pretraining protocol, novel-family evaluation | [FLEET.md](FLEET.md) §2–3 |
+| FL sanity check (IID data, FedAvg 0.996, TRIM-NB-R 0.998) | [FLEET.md](FLEET.md) §3 |
+| H2/H4 evaluation protocol (learned-only vs operational p_bar AUC) | [FLEET.md](FLEET.md) §4 |
+| Statistical methods (Wilcoxon, Hodges-Lehmann, Holm-Bonferroni) | [EVALUATION.md](EVALUATION.md) §1 |
+| Scenario registry (S1–S15), acceptance criteria, blocking status | [EVALUATION.md](EVALUATION.md) §2 |
+| Campaign runner, resumability, test-seed gate, dry-run validation | [EVALUATION.md](EVALUATION.md) §3–4 |
+| Supervised detector training, label sourcing, leakage guard | [TRAINING.md](TRAINING.md) §1–2 |
+| Platt calibration, class-weight cap, labeller sigma floors | [TRAINING.md](TRAINING.md) §3 |
+| Signature-strength sweep (s < 0.5 failure boundary, inversion at s=0) | [TRAINING.md](TRAINING.md) §4 |
+| 6-family rebalance, jammer EIRP calibration (D-053a) | [TRAINING.md](TRAINING.md) §5 |
+| Detector v2 AUC per family, S1 results (all PASS) | [TRAINING.md](TRAINING.md) §6–7 |
+| Trust law v2 state machine (TRUST/DISTRUST/PROBE/RECOVER) | [TRAINING.md](TRAINING.md) §8 |
+| E_s short-baseline jump test redesign, core-robustness session | [TRAINING.md](TRAINING.md) §9 |
 
 ---
 
@@ -152,13 +221,19 @@ python scripts/gen_gnss_attack_results.py              # Generate signature_summ
 - ✓ Bibliography curation (WP-10.0, agents: REF-VERIFY → DOCUMENTATION)
 - ✓ System architecture (WP-1.1, ARCHITECT agent)
 - ✓ Project state and decisions (Master-maintained DECISION_LOG.md, EXECUTION_LOG.md, PROJECT_STATE.md)
+- ✓ Federated learning stack (WP-5.1–5.3, FEDERATED agent → DOCUMENTATION)
+- ✓ Fleet infrastructure and evaluation protocol (WP-5.3, M2 integration → DOCUMENTATION)
+- ✓ Evaluation framework (WP-8.x, EVALUATION agent → DOCUMENTATION)
+- ✓ Detector training and trust law (WP-4.x/6.x, TRUST/M1-CLOSE/DETECT-MIX agents → DOCUMENTATION)
 
 **Documentation verification:**
 - All numeric values and DOI citations copied exactly from source files
-- All ASSUMPTION and UNVERIFIED labels visible and preserved
-- All decision-log cross-references (D-NNN) included with brief rationale
+- All ASSUMPTION and UNVERIFIED labels visible and preserved; unclear items marked "(unclear in source)"
+- All decision-log cross-references (D-NNN) included with brief rationale; DECISION_LOG overrides raw notes on conflicts
 - Markdown structure and formatting per GitHub-flavored Markdown (GFM)
 - No marketing language or filler; accurate, terse, source-linked
+- Negative results (failures, regressions) reported honestly without softening
+- Test counts and seed ranges (500–599 tuning, 9500–9699 sweep, ≥10000 test) preserved exactly
 
 ---
 
@@ -169,14 +244,25 @@ python scripts/gen_gnss_attack_results.py              # Generate signature_summ
 
 ## Suggested next steps for other agents
 
-1. **FUSION+TRUST (WP-4.x):** Implement the EKF (§2, ARCHITECTURE), trust law (§3.3), detector (§3.2), pseudolabeler (§4.3). Cross-validate signatures from [GNSS_AND_ATTACKS.md](GNSS_AND_ATTACKS.md) and quantum trust from [REAL_DATA_JARLAUD2024.md](REAL_DATA_JARLAUD2024.md).
+1. **CORE-ROBUSTNESS SESSION (D-058, post H2-SUBRULE):** Soft covariance-scaling gating (D-057), E_s short-baseline jump test (D-058), eigenvalue clip (D-043), ψ/b overconfidence investigation (D-046/D-047), re-verify S1 + smoke matrix + κ_R re-tune, then re-attempt H2 sub-rule with new E_s.
 
-2. **FEDERATED (WP-5.x):** Implement FL client, server, TRIM-NB-R aggregator (§4, §8 ARCHITECTURE). Test with paired seeds per baseline definitions (§5 ARCHITECTURE) and decision D-011.
+2. **H2/H4 EVALUATION (post core-robustness, using revised evaluation protocol D-056):**
+   - Report three separate quantities: learned-detector-only AUC (calibrated p, E_s excluded), operational p_bar AUC (fused), detection latency
+   - Novel family in sub-rule regime (drift s ∈ {0.5, 0.75}, meaconing C/N0 bump < 3 dB)
+   - θ0 pretrained on restricted families (e.g. jamming+abrupt; drift/meaconing novel)
+   - ≥ 5 seeds with CIs
+   - See [FLEET.md](FLEET.md) §4 for protocol details; [EVALUATION.md](EVALUATION.md) for campaign execution
 
-3. **EVALUATION (WP-6.x/7.x):** Pre-register hypotheses (H1–H4), design acceptance criteria (S1–S15), implement metrics (§6 ARCHITECTURE, EVALUATION.md when ready).
+3. **M4 FILTER SESSION (D-046/D-047):** Investigate ψ/b overconfidence (ANEES issues, S1 margin); κ_R re-tuning; parked eigenvalue hysteresis and outlier handling.
 
-4. **PAPER DRAFTING:** Use [REFERENCES.md](REFERENCES.md) bibliography. Baseline claims per D-011 (mechanism classes, not paper re-implementations). Quantum-sensor numbers from [REAL_DATA_JARLAUD2024.md](REAL_DATA_JARLAUD2024.md) (D-014 split: classical MICAL 9.1 µg/√Hz, atom 5.6 µg at 2T=20ms). Acknowledge all [ASSUMPTION] values and planned sensitivity sweeps (D-002).
+4. **PAPER DRAFTING:** Use [REFERENCES.md](REFERENCES.md) bibliography. Baseline claims per D-011. Quantum-sensor numbers from [REAL_DATA_JARLAUD2024.md](REAL_DATA_JARLAUD2024.md). **Acknowledge:**
+   - All [ASSUMPTION] values and planned sensitivity sweeps (D-002)
+   - κ_R = 40 PROVISIONAL (D-046/D-047 parked)
+   - Minimum signature strength s ≳ 0.5 operating assumption; s < 0.5 failure boundary (D-055)
+   - S5/S8/S9/S12/S15 scenarios: NOT_RUNNABLE until core-robustness session (D-048)
+   - Abrupt AUC regression (0.754→0.691, D-055 honest report)
+   - Anti-lockout mechanism not fully effective (D-049 diagnosis, awaiting core session fix)
 
 ---
 
-**Last updated:** 2026-09-24 · **Documentation Agent:** Haiku 4.5 (DOCUMENTATION role)
+**Last updated:** 2026-09-29 · **Documentation Agent:** Haiku 4.5 (DOCUMENTATION role) · **Files added:** FEDERATION.md, FLEET.md, EVALUATION.md, TRAINING.md
