@@ -86,6 +86,7 @@ class FleetResult:
     aborted: bool
     abort_reason: str
     wall_s: float
+    final_theta: dict[str, np.ndarray] | None = None   # D-054: final global model, for offline eval
 
 
 def _default_local_train_seeds(scenario: FleetScenarioConfig, node_id: str) -> list[int]:
@@ -180,7 +181,8 @@ def run_fleet(scenario: FleetScenarioConfig, theta0: dict[str, np.ndarray], para
     if result is None:
         abort_reason = abort_reason or "watchdog timeout / server crash before producing a result"
     return FleetResult(node_results=node_results, server_log=(result or {}).get("log", []),
-                        aborted=aborted, abort_reason=abort_reason, wall_s=time.time() - t0)
+                        aborted=aborted, abort_reason=abort_reason, wall_s=time.time() - t0,
+                        final_theta=(result or {}).get("theta"))
 
 
 def write_campaign_result(scenario: FleetScenarioConfig, result: FleetResult,

@@ -6,6 +6,7 @@ global model is used by the node's trust engine from the next tick on.
 """
 from __future__ import annotations
 
+import hashlib
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 
@@ -30,6 +31,19 @@ from fedqpnt.node.environment import EnvConfig, NodeEnvironment
 from fedqpnt.node.methods import make_agent_config
 
 G0 = 9.80665
+
+
+def _theta_hash(params: dict[str, np.ndarray]) -> str:
+    """D-054 provenance diagnostic: a short content hash of the detector
+    params ACTUALLY used for scoring (the same dict ``get_params()``
+    returns), so a fleet run can prove -- per node, per round -- whether
+    local training changed anything and whether the installed global model
+    differs from the locally-trained one."""
+    h = hashlib.md5()
+    for k in sorted(params):
+        h.update(k.encode())
+        h.update(np.asarray(params[k], dtype=np.float64).tobytes())
+    return h.hexdigest()[:12]
 
 
 @dataclass
@@ -133,18 +147,27 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
     rows_score: list[float] = []   # H2/H4 preview: max detector anomaly score per tick (AUC)
     round_installs = 0
     current_round = 0
+    provenance: list[dict] = []   # D-054 provenance diagnostic: per-round param hashes
 
     def _do_fl_round(r: int) -> None:
         nonlocal round_installs
+        hash_pre = _theta_hash(agent.trust.detector.get_params())
+        rec = dict(round=r, hash_pre=hash_pre)
         if r < spec.join_round:
+            rec.update(hash_post_train=hash_pre, installed=False, hash_post_install=hash_pre)
+            provenance.append(rec)
             return
         if spec.failure_round is not None and r == spec.failure_round:
             server_q.put((spec.node_id, r, Failed(node_id=spec.node_id, round_idx=r)))
+            rec.update(hash_post_train=hash_pre, installed=False, hash_post_install=hash_pre)
+            provenance.append(rec)
             raise _NodeFailed()
         if spec.delay_window is not None and spec.delay_window[0] <= r <= spec.delay_window[1]:
             server_q.put((spec.node_id, r, NoUpdate(node_id=spec.node_id, round_idx=r, reason="scripted_delay")))
+            rec["n_local_samples"] = 0
         else:
             update = client.local_round(r)
+            rec["n_local_samples"] = 0 if update is None else int(update.n_samples)
             if update is None:
                 server_q.put((spec.node_id, r, NoUpdate(node_id=spec.node_id, round_idx=r)))
             else:
@@ -154,15 +177,23 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
                     server_q.put((spec.node_id, r, Lost(node_id=spec.node_id, round_idx=r, direction="up")))
                 else:
                     server_q.put((spec.node_id, r, update))
+        rec["hash_post_train"] = _theta_hash(agent.trust.detector.get_params())
         try:
             _recv_round, reply = down_q.get(timeout=600.0)
         except Exception:
+            rec.update(installed=False, hash_post_install=rec["hash_post_train"])
+            provenance.append(rec)
             raise _NodeFailed()
         if isinstance(reply, tuple):
             global_model, _delay_s = reply
             client.install_global(global_model.params, global_model.round_idx)
             round_installs += 1
+            rec["installed"] = True
+        else:
+            rec["installed"] = False
         # Lost / RoundSkipped: keep the currently-installed model.
+        rec["hash_post_install"] = _theta_hash(agent.trust.detector.get_params())
+        provenance.append(rec)
 
     class _NodeFailed(Exception):
         pass
@@ -217,7 +248,9 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
 
     t_arr = np.array(rows_t)
     result: dict[str, Any] = dict(node_id=spec.node_id, seed=spec.master_seed, n_ticks=len(t_arr),
-                                   wall_s=time.time() - t_wall0, round_installs=round_installs, failed=failed)
+                                   wall_s=time.time() - t_wall0, round_installs=round_installs, failed=failed,
+                                   provenance=provenance,
+                                   final_theta_hash=_theta_hash(agent.trust.detector.get_params()))
     if len(t_arr) > 0:
         pos_est, pos_true = np.array(rows_pos), np.array(rows_true_pos)
         vel_est, vel_true = np.array(rows_vel), np.array(rows_true_vel)

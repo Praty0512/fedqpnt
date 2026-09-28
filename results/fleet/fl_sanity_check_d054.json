@@ -1,0 +1,260 @@
+{
+  "centralised": {
+    "auc_overall": 0.9966331794732555,
+    "auc_abrupt": 0.9997094149554436,
+    "auc_clean": NaN,
+    "auc_drift": 0.9979158772262221,
+    "auc_jam_cw": 0.9655172413793104,
+    "auc_jam_then_spoof": 0.9990526714664646,
+    "auc_meaconing": 0.9979158772262221,
+    "far_per_hour_nominal_proxy": 0.0
+  },
+  "grid_results": [
+    {
+      "local_epochs": 2,
+      "lr": 0.02,
+      "prox_mu": 0.0,
+      "rounds": 10,
+      "arms": {
+        "fedavg": {
+          "aborted": false,
+          "final_theta_hash": "0072fd98bbbc",
+          "eval": {
+            "auc_overall": 0.9976323649199023,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.9942212959454338,
+            "auc_jam_cw": 0.7931034482758621,
+            "auc_jam_then_spoof": 0.9993368700265252,
+            "auc_meaconing": 0.9987684729064039,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n0": 10,
+            "n3": 5,
+            "n1": 10,
+            "n4": 10,
+            "n2": 10
+          }
+        },
+        "trim_nb_r": {
+          "aborted": false,
+          "final_theta_hash": "067f9bd501d1",
+          "eval": {
+            "auc_overall": 0.9960720427187981,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.9922319060250094,
+            "auc_jam_cw": 0.7586206896551724,
+            "auc_jam_then_spoof": 0.9992421371731717,
+            "auc_meaconing": 0.9992421371731717,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n3": 5,
+            "n2": 10,
+            "n1": 10,
+            "n4": 10,
+            "n0": 10
+          }
+        }
+      }
+    },
+    {
+      "local_epochs": 2,
+      "lr": 0.05,
+      "prox_mu": 0.0,
+      "rounds": 10,
+      "arms": {
+        "fedavg": {
+          "aborted": false,
+          "final_theta_hash": "a9ba310b3f78",
+          "eval": {
+            "auc_overall": 0.9980450719522128,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.995642288745737,
+            "auc_jam_cw": 0.6896551724137931,
+            "auc_jam_then_spoof": 0.9995263357332322,
+            "auc_meaconing": 0.998957938613111,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n4": 10,
+            "n1": 10,
+            "n3": 5,
+            "n2": 10,
+            "n0": 10
+          }
+        },
+        "trim_nb_r": {
+          "aborted": false,
+          "final_theta_hash": "da4235bb660b",
+          "eval": {
+            "auc_overall": 0.9974151506923703,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.9937476316786662,
+            "auc_jam_cw": 0.7931034482758621,
+            "auc_jam_then_spoof": 0.9993368700265252,
+            "auc_meaconing": 0.9991474043198181,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n1": 10,
+            "n2": 10,
+            "n4": 10,
+            "n3": 5,
+            "n0": 10
+          }
+        }
+      }
+    },
+    {
+      "local_epochs": 4,
+      "lr": 0.02,
+      "prox_mu": 0.0,
+      "rounds": 10,
+      "arms": {
+        "fedavg": {
+          "aborted": false,
+          "final_theta_hash": "b21b3665af33",
+          "eval": {
+            "auc_overall": 0.9977337315594171,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.9942212959454338,
+            "auc_jam_cw": 0.7931034482758621,
+            "auc_jam_then_spoof": 0.9994316028798788,
+            "auc_meaconing": 0.9987684729064039,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n4": 10,
+            "n2": 10,
+            "n0": 10,
+            "n1": 10,
+            "n3": 5
+          }
+        },
+        "trim_nb_r": {
+          "aborted": false,
+          "final_theta_hash": "5f638c6fb57b",
+          "eval": {
+            "auc_overall": 0.9968938365462938,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.9943160287987874,
+            "auc_jam_cw": 0.7931034482758621,
+            "auc_jam_then_spoof": 0.9993368700265252,
+            "auc_meaconing": 0.9992421371731717,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n1": 10,
+            "n3": 5,
+            "n0": 10,
+            "n2": 10,
+            "n4": 10
+          }
+        }
+      }
+    },
+    {
+      "local_epochs": 4,
+      "lr": 0.05,
+      "prox_mu": 0.0,
+      "rounds": 10,
+      "arms": {
+        "fedavg": {
+          "aborted": false,
+          "final_theta_hash": "55e2e33aa8c6",
+          "eval": {
+            "auc_overall": 0.9978061363019278,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.9959264873057977,
+            "auc_jam_cw": 0.5862068965517241,
+            "auc_jam_then_spoof": 0.992326638878363,
+            "auc_meaconing": 0.9982948086396363,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n2": 10,
+            "n0": 10,
+            "n1": 10,
+            "n3": 5,
+            "n4": 10
+          }
+        },
+        "trim_nb_r": {
+          "aborted": false,
+          "final_theta_hash": "6031c9188ac8",
+          "eval": {
+            "auc_overall": 0.9976794280025342,
+            "auc_abrupt": 1.0,
+            "auc_clean": NaN,
+            "auc_drift": 0.9941265630920804,
+            "auc_jam_cw": 0.7241379310344828,
+            "auc_jam_then_spoof": 0.9993368700265252,
+            "auc_meaconing": 0.9988632057597575,
+            "far_per_hour_nominal_proxy": 0.0
+          },
+          "round_installs": {
+            "n2": 10,
+            "n0": 10,
+            "n3": 5,
+            "n1": 10,
+            "n4": 10
+          }
+        }
+      }
+    }
+  ],
+  "chosen": null,
+  "train_seeds": [
+    500,
+    501,
+    502,
+    503,
+    504,
+    505,
+    506,
+    507,
+    508,
+    509,
+    510,
+    511,
+    512,
+    513,
+    514,
+    515,
+    516,
+    517,
+    518,
+    519,
+    520,
+    521,
+    522,
+    523,
+    524,
+    525,
+    526,
+    527,
+    528,
+    529
+  ],
+  "eval_seeds": [
+    575,
+    576,
+    577,
+    578,
+    579,
+    580,
+    581,
+    582,
+    583,
+    584
+  ],
+  "note": "SCALED DOWN: 60s train missions (30 seeds), 120s eval missions (10 seeds); full-scale should use 500-549 (50 seeds) at 300-600s."
+}

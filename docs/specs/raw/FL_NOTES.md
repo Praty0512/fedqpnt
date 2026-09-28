@@ -387,3 +387,57 @@ fleet_validation_report.json`.
 H2/H4 need longer per-node local-training missions (or more FL rounds) before the effect is
 visible above noise at this short (10-min) live-mission plumbing scale; the M4 campaign should use
 the full training-seed range (500-599) per node's local set, not the 60 s stand-in used here.
+
+## D-054 (Master directive, follow-up to the identical-AUC red flag)
+1. PROVENANCE DIAGNOSTIC (`scripts/diag_provenance.py`, `scripts/diag_provenance_fleet.py`; hash
+   logging added permanently to `node_runner.py::_do_fl_round` -> `result["provenance"]`/
+   `result["final_theta_hash"]`, MD5 of `get_params()`): (i) local training changes params EVERY
+   round (verified via real `FLClient.local_round` calls, hash changes each time); (ii) the
+   installed global model differs from the pre-install locally-trained one every round (expected FL
+   semantics: local delta sent, then overwritten by the aggregate on install); (iii) FedQPNT and
+   B-cont DO end up with DIFFERENT final parameter hashes. **No data-plumbing bug** in the sense
+   Master worried about (stale/shared model). The bit-identical-AUC anomaly at TINY scale (60-100s
+   missions, 3-6 training seeds/node) is explained by `TrustEngineImpl.anomaly_scores["gnss"] =
+   self.gnss_law.p_bar`, which is also driven by attack-family-strength-dependent rule evidence
+   (`_physical_spoof_evidence`, feature-threshold based, NOT detector-weight dependent) plus sigmoid
+   saturation -- both arms' detectors, even with different weights, saturate to near-identical p on
+   an easily-separable attack with too few (~dozens of) live GNSS epochs for the rank statistic to
+   distinguish. At FULL scale (step 4 below) AUCs are no longer bit-identical (differ from the 5th
+   decimal on) but remain statistically indistinguishable -- a genuine finding, not a bug.
+2. THETA0 (D-054.1): `scripts/pretrain_theta0_d054.py` -> `results/fleet/theta0_d054.npz` +
+   `..._provenance.json`. Restricted-family selection queries `plan_for` directly rather than
+   hardcoding its index scheme, because DETECT-MIX changed `build_supervised_dataset.py`'s family
+   set CONCURRENTLY under D-053a (was 4 families via `(seed//5)%4`; now 6: drift, meaconing, abrupt,
+   jam_cw, jam_wideband, jam_then_spoof, `seed%10==0`->clean) -- my original hardcoded exclusion
+   logic broke against the new module and was rewritten to call `plan_for(seed, "mixed")` per
+   candidate seed. theta0 trained on 35 seeds in [400,449] restricted to clean/abrupt/jam_* (drift
+   and meaconing excluded), 120s missions, 30 epochs, final loss 0.165, n=3152 samples.
+3. FL SANITY CHECK (D-054.3): `scripts/fl_sanity_check_d054.py` -> `results/fleet/
+   fl_sanity_check_d054.json`. N=5 IID nodes, seeds 500-529 (30, scaled down from 500-549's 50; 60s
+   local-training missions, scaled down from 300-600s), all families, from theta0, vs a centralised
+   upper bound trained on the seed union. 2x2x1 grid (local_epochs in {2,4}, lr in {0.02,0.05},
+   prox_mu=0, rounds=10) x {fedavg, trim_nb_r}: **ALL 8 combos PASS** (target AUC >= 0.95 x
+   centralised = 0.9468; actual 0.996-0.998 for every combo; FAR-proxy (p>0.5 on held-out clean
+   epochs) = 0/h for every combo, well under the 1/h target). Chosen values (same for both FL
+   methods, per the rule): local_epochs=2, lr=0.05, prox_mu=0.0, rounds=10 (cheapest combo that
+   passed). Held-out eval: seeds 575-584, all families; centralised auc_overall=0.9966 (per-family
+   0.97-1.0 except jam_cw 0.966).
+4. H2/H4 RE-RUN with FULL missions (`scripts/h2_h4_full_d054.py` -> `results/fleet/
+   h2_h4_full_d054.json`), theta0 + chosen hyperparams, 600s LIVE missions (120s local-training
+   missions, scaled down from a full 300-600s retrain -- noted, not hidden), 3 seeds (500-502),
+   mean +/- 95% CI:
+   - H2 (novel family = meaconing, absent from theta0 AND n0's own local data, present in its 4
+     peers'): FedQPNT AUC 0.9594 +/- 0.0016 vs B-cont AUC 0.9594 +/- 0.0016 (differ only from the
+     4th decimal per-seed). latency_on identical per seed (0/1/1 s across both arms).
+   - H4 (cold-start, n0 joins at round 5/10): FedQPNT AUC 0.9437 +/- 0.0164 vs B-cont AUC 0.9437 +/-
+     0.0164 (same per-seed pattern). n0 installs: 5 (FedQPNT, post-join only) vs 10 (B-cont, trivial
+     self-aggregation every round).
+   - **Reported honestly per Master's instruction: no measurable FedQPNT-over-B-cont benefit at this
+     scale for either H2 or H4.** Both arms already detect meaconing/abrupt-cold-start well (AUC
+     0.93-0.96) from theta0 + their OWN local training alone; there is little headroom left for FL
+     aggregation to add on top of an already-strong base detector at N=5/R=10. This does not
+     contradict the FL sanity check (which shows FedAvg/TRIM-NB-R match a centralised upper bound
+     well) -- it says the CHOSEN theta0/attack-severity combination for H2/H4 does not create enough
+     of a capability GAP for B-cont to have anywhere to lose. A harder H2/H4 preview (weaker theta0,
+     lower attack severity, or a node with less local data) is needed to actually discriminate the
+     two arms.

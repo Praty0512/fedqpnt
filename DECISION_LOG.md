@@ -33,6 +33,21 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-056 · 2026-09-28 · M2 FL sanity PASSES; H2 evaluation redesigned to isolate the learned contribution
+- **Accepted** (Master re-ran 56 tests; the agent said 58):
+  - Provenance hash logging: parameters change every round, and the arms end with different θ.
+  - Restricted θ0 (seeds 400–449; no drift or meaconing).
+  - **FL sanity check PASS:** N = 5 IID, FedAvg and TRIM-NB-R AUC 0.996–0.998 vs centralised 0.997 (target ≥ 0.95×); FAR proxy 0/h. Passes on all 8 grid cells; chosen local_epochs = 2, lr = 0.05, μ = 0, R = 10 for all FL methods. It ran at a reduced scale (30 seeds × 60 s), noted.
+- **H2/H4 previews (full missions, 3 seeds):** FedQPNT = B-cont (meaconing AUC 0.959 ± 0.002; cold-start 0.944 ± 0.016).
+- **Master diagnosis:** the scored quantity was the trust-law `p_bar`, which fuses the learned detector with **the rule-based physical evidence E_s (D-051)**, and E_s includes the meaconing "C/N0 bump ≥ 3 dB" rule. A detector that never saw meaconing still scores 0.96 because the rules catch it. The preview measured the Master's safety rules, not FL knowledge transfer. **This is a Master test-design flaw.**
+- **Decision (H2/H4 evaluation protocol, amends ARCHITECTURE §6.2):**
+  1. Report three quantities separately: (a) **learned-detector-only AUC** (calibrated p, E_s excluded); (b) operational p_bar AUC; (c) detection latency_on / t_dist.
+  2. The novel-family test is run in the **sub-rule regime**, where E_s does not fire: signature strength s ∈ {0.5, 0.75} for drift, and meaconing C/N0 bump < 3 dB (and the clock-jump below 5σ, e.g. a smaller replay delay).
+  3. The novel family is absent from θ0 and from the target node's data, and present in peers' data.
+  4. ≥ 5 seeds with CIs.
+  5. **The claim framing:** FL's contribution is the learned detection of attacks *below* the fixed physical-evidence thresholds, plus faster detection. The rules give a safety floor.
+- **Owner:** Master
+
 ### D-055 · 2026-09-28 · D-053 accepted; a signature-strength failure boundary found; safety principle
 - **Accepted** (Master re-ran 66 tests passing):
   - Rebalanced training: ≥ 577 positives per family. The jamming root cause was geometry: every severity was full denial. Fixed by varying jammer EIRP.

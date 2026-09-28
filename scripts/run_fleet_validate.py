@@ -33,6 +33,7 @@ import numpy as np
 from fedqpnt.trust.detector import TrustDetector
 from fedqpnt.fl.client import ClientConfig
 from fedqpnt.fleet.orchestrator import FleetScenarioConfig, run_fleet, write_campaign_result
+from fedqpnt.training.build_supervised_dataset import plan_for
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / "results" / "fleet"
 N_NODES = 5
@@ -44,24 +45,22 @@ DRIFT_SPOOF = dict(kind="drift_spoof", onset_s=120.0, duration_s=300.0, severity
 MEACONING_LIVE = dict(kind="meaconing", onset_s=120.0, duration_s=300.0, severity=0.6)
 LOCAL_TRAIN_DURATION_S = 60.0   # short offline training missions -- plumbing, not M1's own retrain
 
-# FAMILY_ATTACKS cycle in fedqpnt.training.build_supervised_dataset.plan_for:
-# index (seed // 5) % 4 -> 0 drift, 1 meaconing, 2 abrupt, 3 jamming.
-MEACONING_FAMILY_IDX = 1
-
-
 def _theta0():
     d = TrustDetector(arch="mlp", seed=0)
     theta0 = d.get_params()
     return theta0, list(theta0.keys())
 
 
-def _seeds_excluding_family(base: int, n: int, exclude_idx: int, count: int = 6) -> list[int]:
-    """count deterministic seeds >= base, skipping any whose plan_for family
-    index == exclude_idx (used for the H2-preview node that must never see
-    meaconing in its OWN local training data)."""
+def _seeds_excluding_family(base: int, family_name: str, count: int = 6) -> list[int]:
+    """count deterministic seeds >= base whose plan_for(seed, "mixed") family
+    != family_name (used for the H2-preview node that must never see that
+    family in its OWN local training data). Queries plan_for directly
+    (never hardcodes its seed->family scheme, which fedqpnt/training/
+    build_supervised_dataset.py's own owner may change, D-053a)."""
     out, s = [], base
     while len(out) < count:
-        if (s // 5) % 4 != exclude_idx:
+        fam, _atk = plan_for(s, "mixed")
+        if fam != family_name:
             out.append(s)
         s += 1
     return out
@@ -132,7 +131,7 @@ def main():
     # local-only detector).
     h2_seed = SEEDS[0]
     h2_local_seeds = {
-        "n0": _seeds_excluding_family(300_000 + h2_seed * 100, N_NODES, MEACONING_FAMILY_IDX),
+        "n0": _seeds_excluding_family(300_000 + h2_seed * 100, "meaconing"),
         **{f"n{i}": _seeds_including_family(300_000 + h2_seed * 100 + i * 10, None)
            for i in range(1, N_NODES)},
     }
