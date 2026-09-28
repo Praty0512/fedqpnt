@@ -33,6 +33,23 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-054 · 2026-09-28 · Fleet data path accepted; H2/H4 previews INVALID; θ0 protocol and FL sanity checks
+- **Accepted** (Master re-ran 56 tests; the agent said 58):
+  - The surrogate path is removed. Each node's local dataset is built offline in the parent via the shared real-feature builder, and nodes receive plain arrays.
+  - `fedqpnt/fleet/__init__` has been made import-free, closing a latent label-join leak into spawned node processes. The transitive import-graph leakage tests pass.
+- **INVALID (rejected as evidence):**
+  - H2 preview: FedQPNT AUC 0.708 = B-cont 0.708. H4 preview: 0.40985 vs 0.40984.
+  - Agreement to 5 decimals between independently trained arms implies the same model is being evaluated, or no effective training is happening.
+  - **Master's brief omitted the θ0 protocol**: if θ0 is the M1 detector (trained centrally on ALL families, meaconing included), the "never saw meaconing" test is meaningless.
+  - Further red flags: fleet meaconing AUC 0.708 vs 0.999 centrally, and fleet nominal FAR ≈ 12/h vs 0/h single-node, both suggesting FL rounds on tiny local sets *degrade* the model.
+- **Decisions:**
+  1. **θ0 protocol:** FL experiments start from θ0 pretrained on a disjoint PRETRAIN seed range (400–449) with a RESTRICTED family set that excludes the H2 "novel" family (e.g. θ0 sees jamming + abrupt only; drift and meaconing are "novel" in rotation). B-cont starts from the same θ0. Document it in ARCHITECTURE §4.
+  2. **Evaluation provenance:** every evaluated detector logs a parameter hash per arm and per round. Assert that the arms differ after the first install and that the parameters actually change during local training.
+  3. **FL sanity check (standard; required before any H2/H4 run):** with IID nodes that all have all families, FedAvg/TRIM-NB-R after R rounds must reach ≥ 0.95 × the centralised AUC (the M1 supervised detector trained on the union of the node data). If it doesn't, tune only FL hyper-parameters (local epochs, lr, FedProx μ, rounds, per-node dataset size) **on tuning seeds, identically for all FL methods**, and report the chosen values.
+  4. **Per-node local datasets** use full training missions (not the 60 s stand-ins); the agent's PD is accepted.
+  5. Fleet FAR must meet the S1 bound (≤ 1/h) after the sanity check, before H2/H4 previews are rerun.
+- **Owner:** Master
+
 ### D-053 · 2026-09-28 · M1 SIGNED OFF with stated limitations; next = detector mix rebalance + signature sensitivity
 - **Evidence** (TRUST-V2 report; Master re-ran 120 tests passing, the agent said 122; Master read the S1, detector and defended-vs-undefended JSONs directly): see PROJECT_STATE "M1 evidence". Every D-051 §D criterion PASSES for FedQPNT and B-cont on tuning seeds.
 - **Leakage:** the supervised dataset builder (`fedqpnt/training/`) is the only module joining AttackLabel with features, outside the Agent import graph (test-enforced).

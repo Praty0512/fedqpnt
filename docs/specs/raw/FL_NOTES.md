@@ -336,3 +336,54 @@ PROVISIONAL (D-046/D-047; tuning seeds). `scripts/run_fleet_validate.py` ->
 `results/fleet/fleet_validation_report.json`. See the FEDERATED report for the numeric summary
 (rounds skipped, global-model installs per node, mean w_gnss, wall time per fleet-hour, nominal vs
 30%-drift-spoof).
+
+## D-052/D-050 (M2 completion): local training data replaced (FLEET-SUP)
+- REJECTED surrogate path (`innovations=[]` + `surrogate_s_cusum`, `fedqpnt/fleet/features.py`'s
+  old `FleetFeatureTracker`) removed entirely. Each node's local FL training dataset is now built
+  OFFLINE (parent process, before node processes spawn) by
+  `fedqpnt.fleet.local_data.build_node_local_dataset`, which reuses
+  `fedqpnt.training.build_supervised_dataset.collect_run` (real Agent innovations, oracle
+  `tick.label` joined by timestamp strictly outside the Agent/trust runtime) -- the node's own
+  attack mix (per-node `seeds`/`pool`). `fedqpnt/fleet/features.py` now holds only a pure-numpy
+  `make_round_provider(X, y, n_rounds)` round-slicer (no label/feature imports) that runs INSIDE
+  the node process against the pre-built arrays passed via `FleetNodeSpec.local_X/local_y`.
+- Leakage guard extended (`tests/test_fleet_leakage_guard.py`):
+  `test_node_runner_never_reaches_the_builder` walks `fedqpnt/fleet/node_runner.py`'s import graph
+  (mirrors `test_training_leakage_guard.py`'s agent.py walk) and asserts it never reaches
+  `fedqpnt/training/build_supervised_dataset.py`; `test_node_runner_does_not_import_training_
+  package_directly` checks the direct-import case. `fedqpnt/fleet/__init__.py` was made import-free
+  of its own submodules (was eagerly re-exporting `orchestrator`, which now imports `local_data` ->
+  the builder -- would have pulled the label join into every spawned node process via package
+  `__init__` execution otherwise).
+- `pytest tests/test_fl_*.py tests/test_fleet_*.py tests/test_training_leakage_guard.py -q`: 58
+  passed.
+
+### Fleet plumbing run (tuning seeds; kappa_R PROVISIONAL; plumbing, not results)
+N=5, 10-min missions, seeds 500-501 (nominal + S15-style 2-of-5 drift-spoof), plus one H2 preview
+seed and one H4 preview seed. `scripts/run_fleet_validate.py` -> `results/fleet/
+fleet_validation_report.json`.
+- (a) nominal FAR/h (fleet-wide, both seeds): ~12/h per node (one node -- n3 seed500, n0 seed501's
+  nominal comparator -- shows 24/h or 0/h; small-N noise, not investigated further at plumbing
+  scope).
+- (b) S15 (2/5 nodes drift-spoofed): FAR/h on the clean phase is unchanged (~12/h) for both
+  attacked and honest nodes; round_installs 8-10/10 per node both seeds (a couple of nodes miss one
+  round, non-fatal -- comms-loss/quorum behavior, not investigated).
+- (c) H2 PREVIEW (n0 never sees meaconing in its OWN local training data; its 4 peers do; n0
+  evaluated on a live meaconing attack): FedQPNT (fleet, FL) AUC 0.708, latency_on 0.0s vs B-cont
+  (n0 alone, local-only) AUC 0.708, latency_on 0.0s -- IDENTICAL to reported precision. Reported
+  honestly: this plumbing run shows NO measurable FL-generalization benefit for H2 -- most likely
+  because 10 rounds x tiny (60 s mission) per-round datasets barely move TRIM-NB-R's aggregate
+  before this 10-min live mission ends, not because the mechanism doesn't work. A real H2 result
+  needs longer local-training missions and/or more FL rounds before the live evaluation; NOT
+  claimed as a negative result on the mechanism itself.
+- (d) H4 PREVIEW (n0 cold-starts at round 5/10, first attack after joining): FedQPNT AUC 0.40985
+  (5 installs) vs B-cont AUC 0.40984 (10 installs, no join) -- again near-identical, same
+  short-mission caveat as (c).
+- Wall time: (a)+(b) alone average ~295 s per fleet-hour (N=5, 60 s local-training missions
+  included). Overall across all 8 runs (including the 1-node H2/H4 previews, whose fixed per-
+  mission overhead is amortized over far fewer fleet-hours) = 307.7 s per fleet-hour.
+
+### PROPOSED-DECISION (FLEET-SUP)
+H2/H4 need longer per-node local-training missions (or more FL rounds) before the effect is
+visible above noise at this short (10-min) live-mission plumbing scale; the M4 campaign should use
+the full training-seed range (500-599) per node's local set, not the 60 s stand-in used here.

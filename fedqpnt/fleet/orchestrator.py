@@ -29,6 +29,7 @@ from fedqpnt.fl.orchestrator import ScenarioConfig as FLScenarioConfig, _server_
 from fedqpnt.fl.server import ServerConfig
 from fedqpnt.fl.client import ClientConfig
 from fedqpnt.fl.comms import CommsConfig
+from fedqpnt.fleet.local_data import build_node_local_dataset
 from fedqpnt.fleet.node_runner import FleetNodeSpec, run_fleet_node_process
 
 
@@ -55,6 +56,16 @@ class FleetScenarioConfig:
     kappa_Q: float = 1.0
     gnss_rate_hz: float = 1.0
     hold_s: float = 30.0
+    # D-052/D-050: each node's own local FL training dataset -- real
+    # labelled TRAINING missions (fedqpnt.fleet.local_data), NOT the live
+    # fleet mission this scenario evaluates. node_id -> training seeds /
+    # attack-mix pool; a node absent from these dicts falls back to a
+    # small deterministic default (below) so plumbing runs need not name
+    # every node explicitly.
+    local_train_seeds: dict[str, list[int]] = field(default_factory=dict)
+    local_train_pool: dict[str, str] = field(default_factory=dict)     # "mixed" | "clean" (see plan_for)
+    local_train_duration_s: float = 60.0
+    local_train_workers: int = 1
 
     def to_fl_scenario(self, theta0_param_names: list[str]) -> FLScenarioConfig:
         return FLScenarioConfig(node_ids=self.node_ids, n_rounds=self.n_rounds, seed=self.seed,
@@ -77,7 +88,29 @@ class FleetResult:
     wall_s: float
 
 
+def _default_local_train_seeds(scenario: FleetScenarioConfig, node_id: str) -> list[int]:
+    """A node absent from ``scenario.local_train_seeds`` gets 2 deterministic
+    training seeds derived from the scenario seed + its position in
+    ``node_ids``, so different nodes get different (but reproducible)
+    training missions without every caller having to name them."""
+    idx = scenario.node_ids.index(node_id) if node_id in scenario.node_ids else 0
+    base = 100_000 + scenario.seed * 100 + idx * 10
+    return [base, base + 1]
+
+
+def _node_local_dataset(scenario: FleetScenarioConfig, node_id: str) -> tuple:
+    """D-052/D-050: builds this node's own local FL training dataset from
+    real labelled TRAINING missions -- in THIS (parent) process, before the
+    node process is spawned. See ``fedqpnt.fleet.local_data`` module
+    docstring for why this must not run inside the node process."""
+    seeds = scenario.local_train_seeds.get(node_id) or _default_local_train_seeds(scenario, node_id)
+    pool = scenario.local_train_pool.get(node_id, "mixed")
+    return build_node_local_dataset(seeds, pool=pool, duration_s=scenario.local_train_duration_s,
+                                     n_workers=scenario.local_train_workers)
+
+
 def _node_spec_for(scenario: FleetScenarioConfig, node_id: str) -> FleetNodeSpec:
+    local_X, local_y = _node_local_dataset(scenario, node_id)
     return FleetNodeSpec(
         node_id=node_id, master_seed=scenario.seed, duration_s=scenario.duration_s, dt=scenario.dt,
         gnss_rate_hz=scenario.gnss_rate_hz, hold_s=scenario.hold_s, kappa_R=scenario.kappa_R,
@@ -86,6 +119,7 @@ def _node_spec_for(scenario: FleetScenarioConfig, node_id: str) -> FleetNodeSpec
         join_round=scenario.join_round.get(node_id, 0), failure_round=scenario.failure_round.get(node_id),
         delay_window=scenario.delay_window.get(node_id), poison_kind=scenario.poison_kind.get(node_id),
         comms_seed=scenario.seed, comms_cfg=scenario.comms_cfg, attack=scenario.attacks.get(node_id),
+        local_X=local_X, local_y=local_y,
     )
 
 

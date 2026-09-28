@@ -24,7 +24,7 @@ from fedqpnt.fl.client import ClientConfig, FLClient
 from fedqpnt.fl.comms import CommsConfig, uplink_channel
 from fedqpnt.fl.poisoning import sign_flip, label_flip
 from fedqpnt.fl.transport import NoUpdate, Lost, Failed
-from fedqpnt.fleet.features import FleetFeatureTracker
+from fedqpnt.fleet.features import make_round_provider
 from fedqpnt.node.agent import Agent
 from fedqpnt.node.environment import EnvConfig, NodeEnvironment
 from fedqpnt.node.methods import make_agent_config
@@ -58,6 +58,12 @@ class FleetNodeSpec:
     poison_kind: str | None = None    # "sign_flip" | "label_flip" (node-local only, see fl/poisoning.py)
     comms_seed: int = 500
     comms_cfg: CommsConfig = field(default_factory=CommsConfig)
+    # D-052/D-050: this node's PRE-BUILT local FL training dataset (real
+    # features, oracle labels, built offline by the orchestrator via
+    # fedqpnt.fleet.local_data.build_node_local_dataset -- see that module's
+    # docstring). Plain numpy arrays only; never built inside this process.
+    local_X: np.ndarray | None = None
+    local_y: np.ndarray | None = None
 
 
 def _level_att(f_b_mean: np.ndarray) -> tuple[float, float]:
@@ -107,10 +113,10 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
     agent = Agent(agent_cfg, env.imu.config(), node_id=spec.node_id)
     agent.trust.detector.set_params({k: np.asarray(v) for k, v in theta0.items()})
 
-    tracker = FleetFeatureTracker()
+    _round_provider = make_round_provider(spec.local_X, spec.local_y, spec.n_rounds)
 
     def _provider(nid, r):
-        X, y = tracker.provider(nid, r)
+        X, y = _round_provider(nid, r)
         if spec.poison_kind == "label_flip" and X is not None and len(X) > 0:
             y = label_flip(np.asarray(y, dtype=float))
         return X, y
@@ -124,6 +130,7 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
     initialized = False
     rows_t, rows_pos, rows_vel, rows_cov = [], [], [], []
     rows_w_gnss, rows_detected, rows_true_pos, rows_true_vel, rows_active = [], [], [], [], []
+    rows_score: list[float] = []   # H2/H4 preview: max detector anomaly score per tick (AUC)
     round_installs = 0
     current_round = 0
 
@@ -180,7 +187,6 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
                 continue
 
             atick = agent.step(t, tick.imu, tick.quantum, tick.gnss_epoch)
-            tracker.observe(t, atick.fix)
 
             rows_t.append(t)
             rows_pos.append(atick.nav.pos.copy())
@@ -191,6 +197,8 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             rows_true_pos.append(tick.truth.pos.copy())
             rows_true_vel.append(tick.truth.vel.copy())
             rows_active.append(bool(tick.label.spoofing or tick.label.jamming))
+            scores = atick.trust.anomaly_scores
+            rows_score.append(float(max(scores.values())) if scores else 0.0)
 
             target_round = min(int(t // spec.round_period_s), spec.n_rounds)
             while current_round < target_round:
@@ -217,6 +225,7 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
         w_gnss = np.array(rows_w_gnss)
         active = np.array(rows_active, dtype=bool)
         detected = np.array(rows_detected, dtype=bool)
+        scores = np.array(rows_score, dtype=float)
         e_h = M.horizontal_error(pos_est, pos_true)
         e_3 = M.full3d_error(pos_est, pos_true)
         e_v = M.velocity_error(vel_est, vel_true)
@@ -231,6 +240,7 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             latency_on=M.detection_latency(t_arr, detected, phases),
             t_dist=M.time_to_distrust(t_arr, w_gnss, phases),
             mean_w_gnss=float(np.mean(w_gnss)),
+            auc=M.roc_auc(scores, active),
             **M.false_alarm_rate(t_arr, detected, active),
         ))
     node_result_q.put(result)
