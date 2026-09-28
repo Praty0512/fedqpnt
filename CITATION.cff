@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+title: FedQPNT
+message: If you use this software, please cite it using these metadata.
+type: software
+authors:
+  - name: TBD
+    email: TBD
+repository-code: https://github.com/Praty0512/fedqpnt
+version: 0.1.0
+date-released: "2026-09-29"
+license: TBD
+keywords:
+  - federated learning
+  - quantum sensing
+  - positioning and navigation
+  - attack-adaptive trust
+  - GNSS spoofing detection
