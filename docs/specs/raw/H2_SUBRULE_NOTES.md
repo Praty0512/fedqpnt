@@ -107,19 +107,27 @@ values, NOT yet the full run's CI table):
 | 501  | fedqpnt_local   | 0.6797 | 0.6046 | 0.0000 |
 | 501  | baseline_b_cont | (running) | | |
 
-Already visible in this partial data: **E_s fires in <1% of attack epochs
-for `abrupt` (vs ~98-99% for drift/meaconing)**, confirming `abrupt` is a
-genuinely rule-quiet control family whose AUC is carried by the learned
-detector, not the physical-evidence floor -- and FedQPNT/B-cont track each
-other closely per seed (no gap), as expected when n0 already has the
-family locally (design-check PASS so far, n=2/5 seeds). The full run
-continues writing to `results/fleet/h2_h4_subrule_d056.json` (key
-`h2_control_abrupt`, including the paired Wilcoxon on auc_detector_only/
-latency_on once all 5 seeds land) and to this same log
-(`scratchpad` path noted in the agent's tool transcript) -- re-run
-`python scripts/h2_h4_subrule_d056.py --parts h2_control` to resume/redo if
-the in-flight process was interrupted (it overwrites `h2_control_abrupt`
-only, other keys in the JSON are preserved).
+**COMPLETE (all 5 seeds, results/fleet/h2_h4_subrule_d056.json key
+`h2_control_abrupt`):**
+
+| arm | auc_detector_only (a) | auc/p_bar (b) | latency_on (c) [s] | es_fire_frac_attack (d) |
+|-----|------------------------|-----------------|----------------------|---------------------------|
+| fedqpnt_local   | 0.6493 +/- 0.0398 (n=5) | 0.5638 +/- 0.0341 | 23.4 +/- 42.9 | 0.0187 +/- 0.0181 |
+| baseline_b_cont | 0.6041 +/- 0.0668 (n=5) | 0.5518 +/- 0.0659 | 23.4 +/- 42.9 (identical per-seed) | 0.0167 +/- 0.0145 |
+
+Paired Wilcoxon (n=5, per-seed pairing): auc_detector_only diff_mean=+0.045
+(FedQPNT higher), **W=6.0, p=0.8125 (n.s.)**; latency_on diff_mean=0.0,
+**W=0.0, p=1.0** (identical per seed: [0,2,2,111,2] s for both arms).
+
+**E_s fires in ~1.7-1.9% of attack epochs for `abrupt` vs ~98-99% for
+drift/meaconing** -- confirms `abrupt` is a genuinely rule-quiet control
+family whose AUC is carried by the learned detector. **FedQPNT ~= B-cont
+on every metric, not significant (design-check PASS)** -- exactly the
+expected null result for a family n0 already has locally, and it validates
+the (a)-(d) instrumentation pipeline end-to-end on a real 5-node, 600 s,
+R=10 fleet run (the drift/meaconing sub-rule failure above is therefore a
+property of those two families' interaction with the trust law, not a bug
+in the new metrics).
 
 ### PROPOSED-DECISIONs (for Master)
 1. D-056's sub-rule regime cannot be reached for drift/meaconing via

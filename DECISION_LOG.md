@@ -47,6 +47,7 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
      - (e) re-verify: M1 criteria (S1, the smoke matrix, defended ≤ undefended), the s-sweep safety principle (all defended methods ≤ undefended + 3σ_nom at s ∈ {0, 0.25, 0.5, 1}), and the κ_R re-tune.
      - Then re-attempt the H2 sub-rule verification.
   3. Sequencing: start after the H2 control run finishes (it uses the node pipeline).
+  4. **Control result (5 seeds):** abrupt, known to n0: FedQPNT ≈ B-cont (detector-only AUC 0.649 vs 0.604, Wilcoxon p = 0.81; identical latency); E_s ≈ 1.8%. This validates the metrics. **Abrupt spoofing is rule-quiet and learned-detector-carried**, so after the core session, run H2/H4 with abrupt as the NOVEL family (θ0 retrained excluding abrupt, and absent from n0), in addition to re-trying drift/meaconing with the new E_s jump test.
 - **Owner:** Master
 
 ### D-057 · 2026-09-28 · The s = 0 harm is a shared-core hard NIS gate lockout → adopt SOFT (covariance-inflating) gating in the pre-M4 filter session
