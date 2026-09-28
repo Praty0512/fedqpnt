@@ -33,6 +33,13 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-060 · 2026-09-29 · PERF rotations fast path REJECTED (not bit-identical); ESKF-level speedups deferred to post-CORE-ROBUST
+- **PERF result:** single-sample fast paths in `sim/rotations.py` (so3_exp, dcm_to_euler): rotations 2.30× faster, full node only **1.12×** (the ESKF dominates and was off-limits). The agent's 60 s × 3-seed trace check reported 114/114 arrays bit-identical.
+- **Master verification:** a direct randomised test of the fast vs the batch path found **4/40,000 mismatches** in so3_exp (1 ulp, up to 6.7e-16) for |φ| ≳ 0.026 rad. Those per-tick increments arise at ω ≳ 2.5 rad/s (aggressive UAV turns), which the agent's short traces never exercised. **This violates the hard bit-identity constraint** and would break cross-version exact reproducibility (docs/REPRODUCE.md).
+- **Decision:** reverted; the patch is kept at `patches/perf_rotations_fastpath_NOT_BITIDENTICAL.patch`. PERF's harness and benchmark scripts are kept. Speedups resume **after** CORE-ROBUST lands, when a new reference baseline is re-established anyway. Candidates: the ESKF eigvalsh → eigen-clip only when needed (overlaps D-043), hoisting the static F/G blocks, and this patch (acceptable then, since the new baseline is recorded after it).
+- **Lesson for verification:** bit-identity must be tested on randomised inputs spanning the full dynamic range, not only on short nominal traces.
+- **Owner:** Master
+
 ### D-059 · 2026-09-29 · Fleet local-only baselines must actually train locally (fix the frozen-θ0 mapping)
 - **Finding (CAMPAIGN-FLEET PD2):** the campaign fleet adapter mapped B-cont/B-bin to n_rounds = 0. node_runner trains only inside FL rounds, so those baselines were a **frozen θ0**, not "local training without federation". Any fleet comparison would have been biased in FedQPNT's favour.
 - **Master check:** the earlier H2/H4 scripts (h2_h4_full_d054.py, h2_h4_subrule_d056.py) ran B-cont as a **1-node federation** (ids = ["n0"], same n_rounds), so B-cont did train locally there. **Those results stand.**

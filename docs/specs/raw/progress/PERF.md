@@ -26,14 +26,12 @@
   (eigvalsh PSD check, F/G hoisting, coning cross -- all require eskf.py,
   off-limits).
 
-## In progress
-- Running required test suite in background (PID bzv21t2h1, output at
-  ...\tasks\bzv21t2h1.output): `python -m pytest tests/test_sensors_*.py
-  tests/test_gnss_*.py tests/test_attacks_*.py tests/test_sim_*.py -q`.
+- Required test suite: `python -m pytest tests/test_sensors_*.py
+  tests/test_gnss_*.py tests/test_attacks_*.py tests/test_sim_*.py -q`
+  -> all green, exit code 0 (174 dots, 100%).
 
 ## Next
-- Read back test output once background run finishes; report PASS/FAIL line
-  in final report.
+- Task complete. PERF handed final report back to Master.
 
 ## Background PIDs / output paths
 - None running in background. perf_before.npz at:
