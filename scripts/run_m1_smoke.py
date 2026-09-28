@@ -27,7 +27,8 @@ SCENARIOS = {
     "meaconing": dict(kind="meaconing", onset_s=120.0, duration_s=180.0, severity=0.5),
     "jam_cw": dict(kind="jam_cw", onset_s=120.0, duration_s=180.0, severity=0.5),
 }
-METHODS = ("fedqpnt_local", "baseline_a", "baseline_b_bin", "baseline_b_cont", "bprime", "undefended")
+METHODS = ("fedqpnt_local", "baseline_a", "baseline_b_bin", "baseline_b_cont", "bprime",
+           "fixed_trust", "undefended")
 
 
 def main() -> None:

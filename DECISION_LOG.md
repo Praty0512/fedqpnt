@@ -33,6 +33,16 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-053 · 2026-09-28 · M1 SIGNED OFF with stated limitations; next = detector mix rebalance + signature sensitivity
+- **Evidence** (TRUST-V2 report; Master re-ran 120 tests passing, the agent said 122; Master read the S1, detector and defended-vs-undefended JSONs directly): see PROJECT_STATE "M1 evidence". Every D-051 §D criterion PASSES for FedQPNT and B-cont on tuning seeds.
+- **Leakage:** the supervised dataset builder (`fedqpnt/training/`) is the only module joining AttackLabel with features, outside the Agent import graph (test-enforced).
+- **Limitations carried forward:** κ_R provisional (D-046/D-047); the jam head under-trained (8 positive epochs); drift/meaconing AUC dependent on the assumed single-antenna C/N0 signature strength; Baseline A fails the CW-jamming bound (reported as-is).
+- **Next work package:**
+  - (a) Rebalance training missions so every attack family has ≥ 500 positive epochs (more jamming and abrupt missions, jam severities across the J/S range).
+  - (b) A signature-strength sweep: scale the spoofer's shared-C/N0 correlation and convergence (D-018 ASSUMPTION parameters) from 0 to 1× and report the drift/meaconing AUC versus strength. That defines where the method stops working.
+  - Retrain and re-check S1 (the design is not changed).
+- **Owner:** Master
+
 ### D-052 · 2026-09-28 · Primary detector training = supervised (ground-truth-labelled training missions); self-supervised pseudo-labelling demoted to an ablation
 - **Evidence:** TRUST-V2 gate A FAILED even with σ-floors: clean positive rate 0.0218 (bimodal: 3/10 seeds ≈ 5%, likely a transient), **precision 0.214** vs the 0.80 target, recall 0.587. The failure sits in the heuristic *positive* rules (AGC, RAIM, clock jump, CUSUM). This is the third consecutive labeller calibration failure (D-049 0.60, D-051 v2 0.29, now 0.21).
 - **Decision (amends ARCHITECTURE §4.3):** the detector for ALL learning methods (FedQPNT, A, B-cont) is trained on **ground-truth-labelled TRAINING missions** (tuning/train seed range 500–599 plus pre-training seeds). This matches the literature being compared against (Khan 2025 and Chai 2025 both train supervised detectors). At deployment/test time **no labels reach any node**; test seeds (10000+) are never used for training or tuning (D-002, D-005). Leakage guards still ensure AttackLabel never reaches the Agent at *runtime*; training labels are consumed only by offline or FL-round training on training-seed missions.

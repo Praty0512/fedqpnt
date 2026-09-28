@@ -1,63 +1,49 @@
 # FedQPNT — Project State
 
-> **▶ RESUMED 2026-09-27, concurrency cap = 3 (D-040).** Running: FILTER-GNSS (queue item 1), FEDERATED (item 8), PAPER (item 6, text only). Queue:
-> 1. D-038 item 3 (gating): receiver cov_vel honesty + GNSS-aided per-block NEES → fixes κ_R = 40 / MEMS overconfidence. Then D-038 items 1–2 (MEMS tilt-linearisation confirmation; D-036 P0 artefact check). (D-036 itself is done.)
-> 2. κ_R re-tune (`scripts/tune_kappa_r.py`).
-> 3. Retrain the detector on real closed-loop features.
-> 4. Re-run the M1 smoke matrix plus FAR/h → M1 sign-off.
-> 5. Runtime optimisation.
-> 6. Paper skeleton + Related Work; architecture diagrams.
-> 7. M2 integration of FL with the real node pipeline.
-> 8. D-039: re-run S12 at N = 10 (the N = 5 run FAILED at 0.063 > 0.05; root cause fixed); fix the class-balance zero-negative dead zone at M2 integration.
-
-_Last updated: 2026-09-26 by Master_
+_Last updated: 2026-09-28 by Master · repo: private https://github.com/Praty0512/fedqpnt (`master`) · decisions up to D-053 · log up to #88_
 
 ## Identity
-Federated learning across vehicle/UAV nodes. Each node fuses a cold-atom quantum accelerometer, GNSS and a classical IMU behind a **continuous, attack-adaptive trust engine**. Trust/detection models improve fleet-wide via FL, and no raw sensor data leaves a node. The system must beat (A) FL detection → detect-and-exclude, (B-bin) single-node detect-and-switch, and (B-cont) single-node continuous trust without FL, under realistic spoofing/jamming (D-011).
+Federated learning across vehicle/UAV nodes. Each node fuses a cold-atom quantum accelerometer (CAI), GNSS and a classical IMU behind a continuous, attack-adaptive trust engine; the detector improves fleet-wide via FL, and no raw data leaves a node.
+- **Baselines** (D-011): A = FL detection → detect-and-exclude; B-bin = single-node detect-and-switch; B-cont = single-node continuous trust without FL; B′ = innovation-χ² adaptive KF.
+- **Hypotheses:** H1–H4 (ARCHITECTURE §6.2). All results so far are on **tuning seeds (500–599)**; test seeds (10000+) are untouched.
 
 ## Milestones
 | Milestone | Status |
 |---|---|
-| **M0 — Foundations** | ✅ **Signed off 2026-09-26** (186/186 tests; EXECUTION_LOG #36) |
-| M1 — Single-node closed loop (ES-EKF, detector, trust law, E2E harness v1) | 🔄 Wave 2 starting |
-| M2 — Federation (multi-process, aggregators, comms, cold start) | ⏳ |
-| M3 — Baselines, ablations, evaluation, statistics | ⏳ |
-| M4 — Full 15-scenario test matrix | ⏳ |
-| M5 — Figures, paper, patent, reproducibility package | ⏳ (reference gate D-012 cleared) |
+| **M0 — Foundations** | ✅ Signed off 2026-09-26 (186/186) |
+| **M1 — Single-node closed loop** | ✅ **Signed off 2026-09-28, with stated limitations** (D-053). Trust law v2 + supervised detector. S1 PASS; defended ≤ undefended PASS; all four detector families > 0.5 |
+| **M2 — Federation** | 🔶 Infrastructure done: fl stack (42 tests), fleet runner (real node pipelines). Next: fleet local data = labelled training missions (D-052), rebalanced mission mix, FL runs with the new detector |
+| **M3 — Baselines/eval/stats** | 🔶 Pipeline done: stats.py, 15-scenario registry, resumable campaign runner with a test-seed gate, report generator. Not yet run at scale |
+| **M4 — Full 15-scenario campaign** | ⛔ **GATED** (D-046/D-047): needs the κ_R/filter issue fixed or formally accepted, plus runtime optimisation |
+| **M5 — Paper/patent/figures/repro** | ⏸ **Paper ON HOLD** (user); Sonnet when resumed. Skeleton + Related Work + verified references exist. Patent outline not started |
 
-## Module status
-| Module | WP | Status | Owner |
-|---|---|---|---|
-| Core contracts | 0.1 | ✅ v0.2 (D-009) | Master |
-| Architecture spec | 1.1 | ✅ ratified (D-009, D-011) | ARCHITECT (Opus) |
-| Trajectories, strapdown, config, recorder | 1.2 | ✅ 115 tests | SIM-IMPL (Sonnet) |
-| Quantum sensor + IMU + ADEV | 2.1–2.3 | ✅ 27 tests; FIELD = primary grade (D-021) | QUANTUM-SENSOR (Sonnet) |
-| Real data: Jarlaud 2024 | 2.4–2.5 | ✅ 12 tests (D-014, D-015, D-019) | DATA-INGEST (Sonnet) |
-| GNSS + receiver + attacks | 3.1–3.2 | ✅ 32 tests (D-010, D-018) | ATTACK (Sonnet) |
-| Verified bibliography | 10.0 | ✅ D-013; 3 DOI-less entries still need a catalogue check | REF-VERIFY (Sonnet) |
-| Docs | 11.1 | ✅ `docs/` | DOCUMENTATION (Haiku) |
-| ES-EKF fusion | 4.1 | 🔄 Wave 2 | FUSION (Sonnet) |
-| Features, detector, trust law | 4.2–4.3 | 🔄 Wave 2 | TRUST (Sonnet) |
-| E2E harness v1 + leakage guard | 8.1 | ⏳ next slot | TESTING (Sonnet) |
+## M1 evidence (tuning seeds, κ_R = 40 PROVISIONAL; Master-verified: 120 tests passed)
+- **Detector** (supervised, Platt-calibrated, held-out seeds 575–599): AUC overall 0.923; drift 0.999; meaconing 0.999; abrupt 0.751; jamming 0.649. Brier 0.053.
+- **S1** (5 × 30 min, nominal): FedQPNT FAR 0.0/h; RMSE_h ratio vs fixed trust 0.990 (limit 1.05); ANEES_pos 1.30; mean w_gnss 0.97.
+- **Smoke** (attack-phase RMSE_h, FedQPNT vs Baseline A): drift 121 vs ~650 m; meaconing 20 vs ~650 m; CW jamming 246 vs 658 m. The undefended CW jamming reference is 237 m, and FedQPNT is within the 3σ_nom bound.
+- **Limitations carried forward:**
+  1. κ_R = 40 provisional; attitude/bias overconfidence (issue #1).
+  2. The jam head was trained on only 8 positive epochs (the mission mix must be rebalanced).
+  3. Drift/meaconing AUC ≈ 0.999 depends on the strength of the simulated single-antenna C/N0 signature (an ASSUMPTION), so a sensitivity sweep is required.
+  4. Baseline A fails the defended ≤ undefended bound under CW jamming (a property of that baseline, reported as-is).
 
-## Key measured/decided numbers
-- **CAI FIELD grade** (real data): 2T = 20 ms, σ_shot = 5.60 µg (1.11× paper), cycle 1.548 s, N = 6.97 µg/√Hz, C0 = 0.394, Ω_c = 17.3 mrad/s (1/T² scaling from 48.2 at 2T = 12 ms); bursty outliers 9% with 66% persistence.
-- **GNSS**: clean horizontal error ~3.5 m; RAIM χ² calibrated (0.96–1.09 × (n−4)); consistent spoofing is RAIM-blind (KS p = 0.99).
-
-## Open risks
-| ID | Risk | Mitigation |
+## Open issues (ranked)
+| # | Issue | Status / decision |
 |---|---|---|
-| R-1 | The rigid-mode CAI loses contrast in normal turns (Ω_c ≈ 17 mrad/s), so quantum aiding is intermittent | Report honestly (D-014, D-020); include inertial-pointing NEAR_FUTURE as a sensitivity case |
-| R-2 | FL may add little over local adaptive fusion (B-cont) | Pre-registered H2/H4; cold-start and novel-attack scenarios; report whatever the outcome (D-002) |
-| R-3 | Runtime: IMU 11–32 s, strapdown 19–33 s, GNSS 7–88 s per sim-hour per node | Budget in the harness; accelerate hot loops if the 4 h × N-node runs are too slow |
-| R-4 | Agent output overstates verification | Master re-runs tests and re-resolves DOIs on every report (done so far) |
-| R-5 | Usage-limit interruptions | Concurrency cap of 2 (D-016); resume agents in place |
-| R-6 | MEMS gyro tilt may dominate over the CAI benefit | Report MEMS and tactical grades separately |
+| 1 | **ESKF overconfidence under GNSS aiding.** κ_R = 40 fixes p/v only; ψ/b_a/b_g are still overconfident | **PARKED** (D-046). **Gate** (D-047): outage/CAI-H3/S6/S14 claims blocked. Pre-M4 session: GNSS/filter time alignment; CAI-update on/off block NEES; `_hygiene` floor → eigenvalue clip (D-043) |
+| 2 | Detector training mix (jamming 8 positives) + signature-strength dependence | Next work package (D-053) |
+| 3 | CAI benefit for MEMS IMUs | PRELIMINARY / blocked by #1. Tactical: CAI halves outage drift (7.0 → 3.3 m) |
+| 4 | S12 poisoning at N = 10 | PASS on mean (0.032), CI inconclusive; M4 decides |
+| 5 | Runtime ≈ 55 s per sim-hour per node | Optimisation queued |
+| 6 | Label-free (pseudo-label) FL | Ablation only (D-052): precision 0.21 |
 
-## Work queue (cap = 2), as of EXECUTION_LOG #47
-- Done: FUSION (WP-4.1), TRUST (WP-4.2/4.3, detector design frozen per D-026), node integration (WP-8.1).
-- Running: D-028 ESKF fix (dynamics-dependent Q inflation for unmodelled IMU SF/misalignment).
-1. After D-028: re-tune κ_R (`scripts/tune_kappa_r.py`) → retrain the frozen detector on REAL closed-loop features (seeds 500–599) → re-run the M1 smoke plus clean-run FAR/h (D-029). Resume the integration agent.
-2. Runtime optimisation (ESKF propagate, eigvalsh PSD check, so3_exp, IMU channel step), after the eskf.py edits settle.
-3. M1 sign-off, then M2 (federation).
-3. User actions: full-text check of Khan 2025, Chai 2025 and Pardhasaradhi 2022 (paywalled); catalogue check of the 3 DOI-less references.
+## Work queue (cap 3 agents)
+1. Detector training-mix rebalance + a signature-strength sensitivity sweep (D-053).
+2. M2: fleet local data = labelled training missions; shared real feature path (D-050); FL runs (H2/H4 plumbing on tuning seeds).
+3. Runtime optimisation (no agent may be running the pipeline at the same time).
+4. Pre-M4 filter session (issue #1) → gate decision.
+5. M4 campaign → M5 (paper resumes on user go-ahead).
+
+## Waiting on the user
+- Paper stays on hold until you say otherwise.
+- Keep approving edit prompts for `fedqpnt/trust/*` and `fedqpnt/node/*` when agents touch them.

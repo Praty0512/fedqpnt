@@ -1,0 +1,212 @@
+{
+  "label": "D-048 defended-vs-undefended check, tuning seeds, kappa_R PROVISIONAL",
+  "seeds": [
+    500,
+    501,
+    502,
+    503,
+    504
+  ],
+  "duration_s": 600.0,
+  "kappa_R": 40.0,
+  "weights_used": "C:\\Users\\DELL\\Downloads\\FEDQPNT\\results\\m1\\detector_weights_sup_v1.npz",
+  "wall_s": 512.0552365779877,
+  "scenarios": {
+    "nominal": {
+      "metric": "rmse_h_pre",
+      "sigma_nom": 0.8218023415329285,
+      "mean_undefended": 2.815604446482316,
+      "methods": {
+        "fedqpnt_local": {
+          "metric": "rmse_h_pre",
+          "mean": 2.7719331820714026,
+          "per_seed": [
+            1.5498268426502537,
+            2.7100978883458056,
+            2.5406416294013603,
+            3.381280774504859,
+            3.677818775454734
+          ],
+          "threshold_undefended_plus_3sigma": 5.281011471081102,
+          "PASS": true
+        },
+        "baseline_a": {
+          "metric": "rmse_h_pre",
+          "mean": 2.7766524660549243,
+          "per_seed": [
+            1.5022157276004726,
+            2.6103827745903314,
+            2.4936955518065456,
+            3.4357695345612105,
+            3.8411987417160636
+          ],
+          "threshold_undefended_plus_3sigma": 5.281011471081102,
+          "PASS": true
+        },
+        "baseline_b_bin": {
+          "metric": "rmse_h_pre",
+          "mean": 2.817305525665936,
+          "per_seed": [
+            1.505607053876059,
+            2.8180044353028584,
+            2.526647991888426,
+            3.5061362522610233,
+            3.7301318950013127
+          ],
+          "threshold_undefended_plus_3sigma": 5.281011471081102,
+          "PASS": true
+        },
+        "baseline_b_cont": {
+          "metric": "rmse_h_pre",
+          "mean": 2.7719331820714026,
+          "per_seed": [
+            1.5498268426502537,
+            2.7100978883458056,
+            2.5406416294013603,
+            3.381280774504859,
+            3.677818775454734
+          ],
+          "threshold_undefended_plus_3sigma": 5.281011471081102,
+          "PASS": true
+        },
+        "bprime": {
+          "metric": "rmse_h_pre",
+          "mean": 2.7715351273539386,
+          "per_seed": [
+            1.5445763880217458,
+            2.7280144777267554,
+            2.512841678348388,
+            3.3864489729946756,
+            3.6857941196781283
+          ],
+          "threshold_undefended_plus_3sigma": 5.281011471081102,
+          "PASS": true
+        },
+        "fixed_trust": {
+          "metric": "rmse_h_pre",
+          "mean": 2.798721289999583,
+          "per_seed": [
+            1.5375897940125627,
+            2.4849189075933116,
+            2.5875253645523633,
+            3.5275425556641613,
+            3.856029828175518
+          ],
+          "threshold_undefended_plus_3sigma": 5.281011471081102,
+          "PASS": true
+        },
+        "undefended": {
+          "metric": "rmse_h_pre",
+          "mean": 2.815604446482316,
+          "per_seed": [
+            1.5361379250217877,
+            2.5530522420681914,
+            2.5907950318345905,
+            3.526613338197646,
+            3.8714236952893666
+          ],
+          "threshold_undefended_plus_3sigma": 5.281011471081102,
+          "PASS": true
+        }
+      }
+    },
+    "jam_cw": {
+      "metric": "rmse_h_att",
+      "sigma_nom": 63.665317898239124,
+      "mean_undefended": 236.77976664865886,
+      "methods": {
+        "fedqpnt_local": {
+          "metric": "rmse_h_att",
+          "mean": 245.83360701444644,
+          "per_seed": [
+            212.54447668184633,
+            167.73315491187995,
+            267.7198123305724,
+            342.39317008543657,
+            238.777421062497
+          ],
+          "threshold_undefended_plus_3sigma": 427.77572034337624,
+          "PASS": true
+        },
+        "baseline_a": {
+          "metric": "rmse_h_att",
+          "mean": 658.401226156934,
+          "per_seed": [
+            429.0159845937702,
+            436.5324920634122,
+            366.3462099795336,
+            1013.9362615379258,
+            1046.175182610028
+          ],
+          "threshold_undefended_plus_3sigma": 427.77572034337624,
+          "PASS": false
+        },
+        "baseline_b_bin": {
+          "metric": "rmse_h_att",
+          "mean": 237.64861693654143,
+          "per_seed": [
+            206.5782361829087,
+            141.63735466435466,
+            270.40950399680065,
+            332.8308366244804,
+            236.78715321416263
+          ],
+          "threshold_undefended_plus_3sigma": 427.77572034337624,
+          "PASS": true
+        },
+        "baseline_b_cont": {
+          "metric": "rmse_h_att",
+          "mean": 245.83360701444644,
+          "per_seed": [
+            212.54447668184633,
+            167.73315491187995,
+            267.7198123305724,
+            342.39317008543657,
+            238.777421062497
+          ],
+          "threshold_undefended_plus_3sigma": 427.77572034337624,
+          "PASS": true
+        },
+        "bprime": {
+          "metric": "rmse_h_att",
+          "mean": 237.010261038362,
+          "per_seed": [
+            211.5363854075132,
+            146.56799694137263,
+            266.6240106552649,
+            328.5015414714854,
+            231.82137071617376
+          ],
+          "threshold_undefended_plus_3sigma": 427.77572034337624,
+          "PASS": true
+        },
+        "fixed_trust": {
+          "metric": "rmse_h_att",
+          "mean": 237.1090718166328,
+          "per_seed": [
+            206.37710045488222,
+            139.92982283659805,
+            270.5759629721792,
+            333.273392654284,
+            235.3890801652206
+          ],
+          "threshold_undefended_plus_3sigma": 427.77572034337624,
+          "PASS": true
+        },
+        "undefended": {
+          "metric": "rmse_h_att",
+          "mean": 236.77976664865886,
+          "per_seed": [
+            206.19573185518504,
+            140.31148125229865,
+            270.5759629721792,
+            331.0225061436488,
+            235.7931510199826
+          ],
+          "threshold_undefended_plus_3sigma": 427.77572034337624,
+          "PASS": true
+        }
+      }
+    }
+  }
+}

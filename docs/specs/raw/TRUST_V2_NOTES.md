@@ -87,5 +87,52 @@ run at end of session -- see EXECUTION_LOG for the number.
 
 ## Permission denials
 
-None. All edits were within fedqpnt/trust/* and fedqpnt/node/* (well,
-node/* untouched this session) plus scripts/* and tests/*.
+None (session 1: gate A). None (session 2: D-052).
+
+## D-052 update: supervised primary path (session 2)
+
+Master ruling: pseudo-labelling becomes an ablation; primary detector
+training is SUPERVISED on oracle AttackLabel, joined OFFLINE after each
+mission (never inside Agent/TrustEngineImpl at runtime).
+
+New: `fedqpnt/training/build_supervised_dataset.py` (the ONLY place
+AttackLabel is joined with features -- statically enforced by
+`tests/test_training_leakage_guard.py`, 3 tests, green), reusing the real
+Agent/Environment pipeline. `scripts/train_supervised_v1.py`: train (seeds
+500-549) / Platt (550-574, oracle-labelled, natural ratio) / heldout eval
+(575-599). Saved `results/m1/detector_weights_sup_v1.npz` +
+`detector_train_sup_v1_report.json`.
+
+Heldout family AUCs (oracle-vs-calibrated-score, bootstrap CI):
+  jamming   0.649 [0.562, 0.747]
+  drift     0.999 [0.997, 1.000]
+  meaconing 0.999 [0.997, 1.000]
+  abrupt    0.751 [0.735, 0.773]  (calibrated)
+  overall   0.923 [0.917, 0.930]
+All four families > 0.5 -- PASS. Brier: raw 0.075, calibrated 0.053.
+
+M1 acceptance (trust law v2 + supervised detector, tuning seeds,
+kappa_R=40 PROVISIONAL):
+  S1 (5 seeds x 30 min): FAR=0/h for fedqpnt_local and baseline_b_cont
+    (criterion <=1/h) -- PASS. RMSE_h ratio median 0.990 (<=1.05) -- PASS.
+    ANEES_pos 1.30 (in [0.5,2]) -- PASS. No divergence (RMSE_h ~2-4m
+    throughout, all seeds) -- PASS.
+  Smoke matrix (4 scenarios x 7 methods, seeds 500-504): complete, no
+    crashes/NaNs outside the expected nominal-scenario "no attack phase"
+    cells. fedqpnt_local: drift 121m, meaconing 20m, jam_cw 246m RMSE
+    (attack-phase) -- far better than baseline_a (642-658m on spoof
+    families) and comparable to baseline_b_cont (identical law, expected).
+  Defended-vs-undefended (D-048, sigma_nom measured per run): fedqpnt_local
+    PASSES both nominal (2.77 vs 2.82 undefended mean, sigma_nom=0.82) and
+    jam_cw (245.8 vs 236.8 undefended mean +3*63.7=427.8 threshold) --
+    PASS. (baseline_a fails jam_cw: 658 > 427.8 -- a known baseline
+    weakness, not fedqpnt/B-cont, out of scope to fix per "don't tune
+    beyond spec".)
+
+Ablation-for-the-record: gate-A (label-free/pseudo-label) run from session
+1 -- clean-run positive rate 0.0218 (target <=0.01, FAIL), precision 0.214
+(target >=0.80, FAIL) vs oracle. Superseded as primary path by D-052; kept
+only as the ablation number.
+
+Regression: full `pytest tests/test_trust_*.py tests/test_node_*.py
+tests/test_eval_*.py tests/test_training_leakage_guard.py -q` = 122 passed.
