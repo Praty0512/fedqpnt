@@ -199,8 +199,13 @@ def write_campaign_result(scenario: FleetScenarioConfig, result: FleetResult,
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     node_metrics = result.node_results
+    # CAMPAIGN-FLEET additive hook (D-054/D-056 §6.1 fleet criteria need
+    # per-run AUC and install-count aggregates alongside the existing
+    # nav/trust scalars; backward compatible -- purely appends keys, never
+    # removes or renames any existing one):
     scalar_keys = [k for k in ("rmse_h_pre", "rmse_h_att", "rmse_h_post", "rmse_3_att", "rmse_v_att",
-                                "anees_pos_pre", "latency_on", "t_dist", "mean_w_gnss")
+                                "anees_pos_pre", "latency_on", "t_dist", "mean_w_gnss", "auc",
+                                "auc_detector_only", "round_installs", "far_per_hour", "fpr")
                    if any(k in v for v in node_metrics.values())]
     flat: dict[str, float] = {}
     for k in scalar_keys:

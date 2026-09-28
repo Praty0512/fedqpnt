@@ -25,9 +25,16 @@
   unchanged and applies to `seeds` before task generation, so it covers fleet scenarios too.
 - `fedqpnt/eval/report.py`: `requires_fl` message updated to describe fleet dispatch instead of
   NOT_RUNNABLE.
-- Dry run: TUNING seeds 500-501, N=3, 120s, S5/S8/S9/S12/S15 x {fedqpnt, baseline_b_cont}, labelled
-  "PLUMBING ONLY" -- see `results/eval_fleet_dryrun/report.md`.
-- `python -m pytest tests/test_eval_*.py -q` at the end.
+- Dry run: TUNING seeds 500-501, N=3, 120s, 4 FL rounds, S5/S8/S9/S12/S15 x {fedqpnt, baseline_b_cont}
+  (20/20 tasks `status="ok"`), labelled "PLUMBING ONLY" -- see
+  `results/eval_fleet_dryrun/{report.md,report.csv}`, raw files under `runs/dryrun_fleet/`.
+  Quorum/no-deadlock and cold-start-install-within-2-rounds criteria evaluated PASS on the plumbing
+  data (expected -- N=3 short missions, not evidence); AUC-drop criteria correctly `n/a` (no
+  reference arm run); S15's FAR-margin criterion FAILED on the plumbing data (30/h vs bound 1.5/h,
+  as expected for an untuned 120s short run -- same caveat EVAL_NOTES.md already documents for the
+  single-node dry run).
+- `python -m pytest tests/test_eval_*.py -q` at the end: **57 passed** (1 pre-existing unrelated scipy
+  RuntimeWarning in test_eval_stats.py, not from this session's changes).
 
 ## Known limitation (flagged, not fixed here -- out of my owned scope)
 - `baseline_b_cont`/`baseline_b_bin` mapped to `n_rounds=0` skips FL rounds entirely inside
@@ -51,8 +58,15 @@
   foreground. Outputs: `runs/dryrun_fleet/**`, `results/eval_fleet_dryrun/{report.md,report.csv}`.
 
 ## Resume command
+The dry run used `run_campaign(..., n_rounds=4, n_nodes=3)`, which `scripts/run_campaign.py`'s CLI
+does not yet expose (only `campaign.run_campaign`'s Python API takes them) -- call it directly:
 ```
-python scripts/run_campaign.py --scenarios S5 S8 S9 S12 S15 \
-    --methods fedqpnt baseline_b_cont --seeds 500 501 --duration 120 \
-    --workers 1 --run-root runs/dryrun_fleet
+python -c "
+from fedqpnt.eval.campaign import run_campaign
+run_campaign(['S5','S8','S9','S12','S15'], seeds=[500,501], methods=['fedqpnt','baseline_b_cont'],
+             run_root='runs/dryrun_fleet', duration_s=120.0, n_rounds=4, n_nodes=3, n_workers=1)
+"
 ```
+(Already complete and skip-on-resume for this exact command; re-running just reports
+`skipped_done` for all 20.) A CLI `--n-rounds`/`--n-nodes` flag pair would be a small, safe follow-up
+to `scripts/run_campaign.py` if Master wants fleet dry-runs driven from the CLI.

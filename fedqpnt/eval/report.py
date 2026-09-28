@@ -151,8 +151,8 @@ def render_markdown(scenario_ids: list[str], run_root: str = "runs", *, is_dry_r
         scenario = SC.get(sid)
         lines.append(f"\n### {sid}: {scenario.title}")
         if scenario.requires_fl:
-            lines.append("_requires_fl: not executable via fedqpnt.node.runner (single-node); "
-                          "registered declaratively only._")
+            lines.append("_requires_fl: dispatched via fedqpnt.eval.fleet_adapter to the fleet "
+                          "orchestrator (fedqpnt.fleet.orchestrator.run_fleet), not fedqpnt.node.runner._")
         lines.append(f"n per method: {rep.n_by_method}")
         lines.append("")
         lines.append("| Criterion | Passed | Value | Blocked by D-047 | Detail |")

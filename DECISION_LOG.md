@@ -33,6 +33,13 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-059 · 2026-09-29 · Fleet local-only baselines must actually train locally (fix the frozen-θ0 mapping)
+- **Finding (CAMPAIGN-FLEET PD2):** the campaign fleet adapter mapped B-cont/B-bin to n_rounds = 0. node_runner trains only inside FL rounds, so those baselines were a **frozen θ0**, not "local training without federation". Any fleet comparison would have been biased in FedQPNT's favour.
+- **Master check:** the earlier H2/H4 scripts (h2_h4_full_d054.py, h2_h4_subrule_d056.py) ran B-cont as a **1-node federation** (ids = ["n0"], same n_rounds), so B-cont did train locally there. **Those results stand.**
+- **Decision:** local-only baselines in fleet scenarios run as independent 1-node federations, with aggregator = FedAvg (the identity for N = 1: no clip or trim) and the same rounds/epochs/lr as FedQPNT. A provenance test asserts the parameters change and that no update leaves the node. No node_runner edit.
+- **Accepted from CAMPAIGN-FLEET:** all 15 scenarios dispatchable; the fleet criteria are executable; the gate covers fleet seeds; the method mapping (A = FL detector + detect-and-exclude). The AUC-drop reference arms come later.
+- **Owner:** Master
+
 ### D-058 · 2026-09-28 · E_s position term is self-contaminated → replace it with a trust-independent GNSS-vs-IMU short-baseline jump test; a combined core-robustness session
 - **H2-SUBRULE finding:** no attack parameterisation makes drift/meaconing sub-rule. E_s fires on 99.4% (drift) and 98.3% (meaconing) of attack epochs, invariant to cn0_sig_scale, bump and delay. Decomposition: the **position_event term dominates (0.87–0.88)**. It fires one epoch after onset, as w_gnss collapses to about 0.06, then free-inertial coasting diverges the filter's own state, which produces large innovations. **E_s was designed by the Master to be independent physical evidence but is coupled to the trust law's own exclusion dynamics** (a Master design flaw in D-051 §C.3).
 - H2/H4 on drift/meaconing are not run (correct per the D-056 fallback). Instrumentation added (additive): `last_raw_p`, `last_es_evidence`, and `auc_detector_only` / `es_fire_frac` per node.

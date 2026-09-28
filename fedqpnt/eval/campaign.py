@@ -87,6 +87,7 @@ class RunTask:
     method: str
     seed: int
     spec: dict[str, Any]
+    is_fleet: bool = False   # CAMPAIGN-FLEET: dispatch to fleet_adapter.run_fleet_task, not node.runner
 
     @property
     def hash(self) -> str:
@@ -98,19 +99,32 @@ class RunTask:
 
 def generate_tasks(scenario_ids: list[str], methods: list[str] | None, seeds: list[int], *,
                     duration_s: float | None = None, kappa_R: float = 40.0, kappa_Q: float = 1.0,
-                    detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS) -> list[RunTask]:
+                    detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS,
+                    n_rounds: int = 10, n_nodes: int | None = None) -> list[RunTask]:
     """Cross product scenario x method x seed, methods defaulting to each
     scenario's own declared method list (paired by seed per D-005: the same
-    seed list is used for every method within a scenario)."""
+    seed list is used for every method within a scenario). Scenarios with
+    ``requires_fl=True`` (S5/S8/S9/S12/S15, D-050) get ``is_fleet=True``
+    tasks: a lightweight config-dict spec (for hashing/resumability only --
+    the real ``FleetScenarioConfig`` is built by
+    ``fedqpnt.eval.fleet_adapter.build_fleet_scenario_config`` at execution
+    time, in-process, not via a subprocess CLI)."""
     tasks: list[RunTask] = []
     for sid in scenario_ids:
         scenario = SC.get(sid)
         method_list = methods if methods is not None else list(scenario.methods)
         for method in method_list:
             for seed in seeds:
-                spec = build_spec_dict(scenario, method, seed, duration_s=duration_s, kappa_R=kappa_R,
-                                        kappa_Q=kappa_Q, detector_weights_path=detector_weights_path)
-                tasks.append(RunTask(scenario_id=sid, method=method, seed=seed, spec=spec))
+                if scenario.requires_fl:
+                    spec = dict(scenario_id=sid, method=method, seed=seed,
+                                duration_s=(duration_s if duration_s is not None else scenario.duration_s),
+                                kappa_R=kappa_R, kappa_Q=kappa_Q, n_rounds=n_rounds,
+                                fleet_size=(n_nodes if n_nodes is not None else scenario.fleet_size))
+                    tasks.append(RunTask(scenario_id=sid, method=method, seed=seed, spec=spec, is_fleet=True))
+                else:
+                    spec = build_spec_dict(scenario, method, seed, duration_s=duration_s, kappa_R=kappa_R,
+                                            kappa_Q=kappa_Q, detector_weights_path=detector_weights_path)
+                    tasks.append(RunTask(scenario_id=sid, method=method, seed=seed, spec=spec))
     return tasks
 
 
@@ -124,6 +138,22 @@ def _is_done(path: Path) -> bool:
     return rec.get("status") == "ok"
 
 
+def _execute_one_fleet(task: "RunTask", run_root: str) -> dict[str, Any]:
+    """CAMPAIGN-FLEET: runs ONE fleet-scenario task (S5/S8/S9/S12/S15) via
+    ``fedqpnt.eval.fleet_adapter.run_fleet_task``, in-process (the fleet
+    orchestrator itself spawns its own real N+1 subprocess federation --
+    see ``fedqpnt.fleet.orchestrator.run_fleet`` -- so this does not shell
+    out to a second CLI). Kept out of ``_execute_one`` because fleet tasks
+    are run strictly sequentially by ``run_campaign`` (see there), never
+    inside the single-node ``ProcessPoolExecutor``."""
+    from fedqpnt.eval import fleet_adapter as FA
+    scenario = SC.get(task.scenario_id)
+    return FA.run_fleet_task(scenario, task.method, task.seed, run_root=run_root,
+                              duration_s=task.spec.get("duration_s"), kappa_R=task.spec.get("kappa_R", 40.0),
+                              kappa_Q=task.spec.get("kappa_Q", 1.0), n_rounds=task.spec.get("n_rounds", 10),
+                              n_nodes=task.spec.get("fleet_size"))
+
+
 def _execute_one(task_dict: dict[str, Any], run_root: str, python_exe: str) -> dict[str, Any]:
     """Runs ONE task via ``python -m fedqpnt.node.runner '<json spec>'`` as
     a real subprocess (section 8 policy applied to the eval campaign: "runs
@@ -133,6 +163,9 @@ def _execute_one(task_dict: dict[str, Any], run_root: str, python_exe: str) -> d
     out_path = task.result_path(Path(run_root))
     if _is_done(out_path):
         return dict(scenario_id=task.scenario_id, method=task.method, seed=task.seed, status="skipped_done")
+
+    if task.is_fleet:
+        return _execute_one_fleet(task, run_root)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     spec_json = json.dumps(task.spec)
@@ -169,7 +202,8 @@ def _execute_one(task_dict: dict[str, Any], run_root: str, python_exe: str) -> d
 def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str] | None = None,
                   run_root: str = "runs", duration_s: float | None = None, kappa_R: float = 40.0,
                   kappa_Q: float = 1.0, n_workers: int | None = None, final: bool = False,
-                  gate_cleared_flag: bool = False, python_exe: str | None = None) -> list[dict[str, Any]]:
+                  gate_cleared_flag: bool = False, python_exe: str | None = None,
+                  n_rounds: int = 10, n_nodes: int | None = None) -> list[dict[str, Any]]:
     """Runs (or resumes) a campaign. Refuses the TEST seed range (>= 10000,
     section 7.1) unless ``final and gate_cleared_flag``; ``gate_cleared_flag``
     is itself refused unless ``results/GATE_D047.json`` says
@@ -186,12 +220,23 @@ def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str
                 "D-046/D-047: no M4/publication campaign before the kappa_R gate clears")
 
     tasks = generate_tasks(scenario_ids, methods, seeds, duration_s=duration_s, kappa_R=kappa_R,
-                            kappa_Q=kappa_Q)
-    task_dicts = [asdict(t) for t in tasks]
+                            kappa_Q=kappa_Q, n_rounds=n_rounds, n_nodes=n_nodes)
+    fleet_tasks = [t for t in tasks if t.is_fleet]
+    node_tasks = [t for t in tasks if not t.is_fleet]
+    task_dicts = [asdict(t) for t in node_tasks]
     workers = max(1, min(n_workers or MAX_WORKERS, MAX_WORKERS))
     py = python_exe or sys.executable
 
     results = []
+    # CAMPAIGN-FLEET: fleet tasks run strictly sequentially in THIS process
+    # (never through the ProcessPoolExecutor below), because each one
+    # already spawns its own N+1-process federation (fedqpnt.fleet.
+    # orchestrator.run_fleet); running several concurrently would blow past
+    # the MAX_WORKERS process-count intent on a machine shared with other
+    # agents.
+    for t in fleet_tasks:
+        results.append(_execute_one_fleet(t, run_root))
+
     if workers == 1:
         for td in task_dicts:
             results.append(_execute_one(td, run_root, py))

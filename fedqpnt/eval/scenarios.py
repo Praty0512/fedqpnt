@@ -32,6 +32,13 @@ KAPPA_R_STATUS = "PROVISIONAL_D047_kappa_R=40"
 METHOD_ALL = ("fedqpnt_local", "baseline_a", "baseline_b_bin", "baseline_b_cont",
               "bprime", "fixed_trust", "undefended")
 
+# CAMPAIGN-FLEET: fleet-scenario method labels (S5/S8/S9/S12/S15), routed
+# through fedqpnt.eval.fleet_adapter instead of fedqpnt.node.runner (D-050).
+# Must match fedqpnt.eval.fleet_adapter._METHOD_MAP's keys exactly -- kept
+# as a literal tuple here (not imported) to avoid scenarios.py depending on
+# fleet_adapter, which itself imports this module for KAPPA_R_STATUS.
+FLEET_METHOD_ALL = ("fedqpnt", "fedavg_ablation", "baseline_a", "baseline_b_cont", "baseline_b_bin")
+
 
 @dataclass
 class Criterion:
@@ -220,10 +227,14 @@ S4 = Scenario(
 
 
 # --------------------------------------------------------------------------
-# S5-S15: registered declaratively; S5/S8/S9/S12/S15 need a federated fleet
-# (fedqpnt.fl is out of scope here and fedqpnt.node.runner is single-node
-# only) -- PROPOSED-DECISION: mark requires_fl=True and let campaign.py
-# report NOT_RUNNABLE for them rather than fabricate a fleet harness.
+# S5-S15: registered declaratively. S5/S8/S9/S12/S15 need a federated fleet;
+# CAMPAIGN-FLEET (D-050 follow-up) routes them through
+# fedqpnt.eval.fleet_adapter -> fedqpnt.fleet.orchestrator.run_fleet instead
+# of fedqpnt.node.runner. ``requires_fl=True`` now means "dispatched to the
+# fleet orchestrator" (fedqpnt.eval.campaign checks this flag), not
+# NOT_RUNNABLE -- see fedqpnt.eval.fleet_adapter.FLEET_SCENARIO_IDS.
+# `_not_runnable` is kept for any criterion still lacking a real reference
+# run (e.g. the "no-fault" baseline some AUC-drop bounds need).
 # --------------------------------------------------------------------------
 def _not_runnable(reason: str) -> Callable[[dict], dict]:
     def _check(results):
@@ -231,14 +242,56 @@ def _not_runnable(reason: str) -> Callable[[dict], dict]:
     return _check
 
 
+# --------------------------------------------------------------------------
+# Fleet-scenario helpers (S5/S8/S9/S12/S15). ``results[method]`` entries are
+# the flat metric dicts fedqpnt.eval.campaign.load_results returns for a
+# fleet run (fedqpnt.fleet.orchestrator.write_campaign_result's schema):
+# per-run means of the usual scalars PLUS ``nodes`` (full per-node
+# breakdown, including each node's ``provenance`` -- per-FL-round install
+# timing, D-054) and ``fleet`` (rounds_skipped/quarantine_events/aborted).
+# Node-id conventions (fedqpnt.eval.fleet_adapter): nodes are "node0..N-1";
+# S8's cold-start node is the LAST id; S12/S15's poisoned/attacked subset is
+# the FIRST ceil(frac*N) ids, sorted.
+# --------------------------------------------------------------------------
+def _fleet_runs(results: dict[str, list[dict]], method: str) -> list[dict]:
+    return results.get(method, [])
+
+
+def _cold_start_node_id(node_ids: list[str]) -> str:
+    return sorted(node_ids)[-1]
+
+
+def _s5_quorum_no_deadlock(results):
+    runs = _fleet_runs(results, "fedqpnt")
+    if not runs:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' fleet runs")
+    aborted = [bool((r.get("fleet") or {}).get("aborted")) for r in runs]
+    val = float(np.mean([not a for a in aborted]))
+    skipped = [int((r.get("fleet") or {}).get("rounds_skipped") or 0) for r in runs]
+    return dict(passed=bool(val == 1.0), value=val,
+                detail=f"P(no deadlock/ABORT)={val:.3f} (==1 required); "
+                       f"mean ROUND_SKIPPED events/run={np.mean(skipped):.2f} (graceful degrade, not a failure)")
+
+
+def _s5_auc_drop(results):
+    a = _method_series(results, "fedqpnt", "auc")           # with 30% node failures + delays
+    b = _method_series(results, "fedqpnt_nofault", "auc")   # reference: same config, no failures
+    if a.size == 0:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' fleet runs")
+    if b.size == 0 or b.size != a.size:
+        return dict(passed=None, value=None,
+                     detail="no matched 'fedqpnt_nofault' reference runs (run the same scenario/seeds "
+                            "with failure_round/delay_window cleared to populate this baseline)")
+    drop = float(np.nanmean(b - a))
+    return dict(passed=bool(drop <= 0.02), value=drop,
+                detail=f"AUC drop (nofault - withfault)={drop:.4f} (bound <=0.02) [ASSUMPTION: seed-to-seed spread]")
+
+
 S5 = Scenario(
     id="S5", title="Partial node failure / delayed FL updates", fleet_size=10, duration_s=600.0,
-    world="flat", cai_grade="field", attack=None, methods=("fedqpnt_local", "baseline_a"),
-    criteria=(Criterion("quorum_or_skip_no_deadlock", "FL must degrade gracefully",
-                         _not_runnable("requires_fl: multi-node federation harness not available "
-                                       "to this agent (fedqpnt/fl out of scope)")),
-              Criterion("auc_drop_le_0_02", "0.02 AUC within seed-to-seed spread [ASSUMPTION]",
-                         _not_runnable("requires_fl"))),
+    world="flat", cai_grade="field", attack=None, methods=("fedqpnt", "baseline_a"),
+    criteria=(Criterion("quorum_or_skip_no_deadlock", "FL must degrade gracefully", _s5_quorum_no_deadlock),
+              Criterion("auc_drop_le_0_02", "0.02 AUC within seed-to-seed spread [ASSUMPTION]", _s5_auc_drop)),
     requires_fl=True,
 )
 
@@ -274,20 +327,90 @@ S7 = Scenario(
                          _s7_ncyc),),
 )
 
+def _s8_within_2_rounds(results):
+    runs = _fleet_runs(results, "fedqpnt")
+    if not runs:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' fleet runs")
+    hits = []
+    for r in runs:
+        nodes = r.get("nodes") or {}
+        if not nodes:
+            continue
+        cs_id = _cold_start_node_id(list(nodes.keys()))
+        prov = (nodes.get(cs_id) or {}).get("provenance") or []
+        active = [p for p in prov if p.get("n_local_samples", 0) or p.get("installed")]
+        if not active:
+            continue
+        join_r = active[0]["round"]
+        installed = [p["round"] for p in active if p.get("installed")]
+        hits.append(bool(installed and (installed[0] - join_r) <= 2))
+    if not hits:
+        return dict(passed=None, value=None, detail="no cold-start node provenance recorded")
+    val = float(np.mean(hits))
+    return dict(passed=bool(val >= 0.95), value=val,
+                detail=f"P(cold-start receives global model within 2 rounds of joining)={val:.3f} (>=0.95)")
+
+
+def _s8_first_attack_auc(results):
+    runs = _fleet_runs(results, "fedqpnt")
+    if not runs:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' fleet runs")
+    diffs = []
+    for r in runs:
+        nodes = r.get("nodes") or {}
+        if len(nodes) < 2:
+            continue
+        cs_id = _cold_start_node_id(list(nodes.keys()))
+        cs_auc = nodes.get(cs_id, {}).get("auc")
+        veteran_aucs = [v.get("auc") for k, v in nodes.items()
+                         if k != cs_id and isinstance(v.get("auc"), (int, float)) and np.isfinite(v.get("auc"))]
+        if not isinstance(cs_auc, (int, float)) or not np.isfinite(cs_auc) or not veteran_aucs:
+            continue
+        diffs.append(float(cs_auc) - float(np.mean(veteran_aucs)))
+    if not diffs:
+        return dict(passed=None, value=None, detail="insufficient per-node AUC data for cold-start vs veteran")
+    val = float(np.mean(diffs))
+    return dict(passed=bool(val >= -0.05), value=val,
+                detail=f"mean(cold-start AUC - veteran AUC)={val:.4f} (bound >=-0.05) "
+                       f"[approximation: mission-level per-node AUC, not first-attack-only]")
+
+
 S8 = Scenario(
     id="S8", title="Cold-start node at T/2", fleet_size=5, duration_s=600.0, world="flat", cai_grade="field",
     attack=dict(kind="drift_spoof", onset_s=330.0, duration_s=120.0, severity=0.6),
-    methods=("fedqpnt_local",),
-    criteria=(Criterion("global_model_within_2_rounds", "Tests FL knowledge transfer",
-                         _not_runnable("requires_fl")),
-              Criterion("first_attack_auc", "Cold-start AUC vs veteran - 0.05", _not_runnable("requires_fl"))),
+    methods=("fedqpnt",),
+    criteria=(Criterion("global_model_within_2_rounds", "Tests FL knowledge transfer", _s8_within_2_rounds),
+              Criterion("first_attack_auc", "Cold-start AUC vs veteran - 0.05", _s8_first_attack_auc)),
     requires_fl=True,
 )
 
+
+def _s9_no_deadlock_auc_bound(results):
+    runs = _fleet_runs(results, "fedqpnt")
+    if not runs:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' fleet runs")
+    aborted = [bool((r.get("fleet") or {}).get("aborted")) for r in runs]
+    no_deadlock = float(np.mean([not a for a in aborted]))
+    ref = _fleet_runs(results, "fedqpnt_noloss")
+    if ref:
+        a = _method_series(results, "fedqpnt", "auc")
+        b = _method_series(results, "fedqpnt_noloss", "auc")
+        if a.size and a.size == b.size:
+            drop = float(np.nanmean(b - a))
+            passed = bool(no_deadlock == 1.0 and drop <= 0.03)
+            return dict(passed=passed, value=drop,
+                        detail=f"P(no deadlock)={no_deadlock:.3f}, AUC drop (no-loss - lossy)={drop:.4f} "
+                               f"(bound <=0.03)")
+    passed = True if no_deadlock == 1.0 else False
+    return dict(passed=passed, value=no_deadlock,
+                detail=f"P(no deadlock/ABORT)={no_deadlock:.3f} (AUC-drop leg not evaluable: no "
+                       f"'fedqpnt_noloss' reference runs)")
+
+
 S9 = Scenario(
     id="S9", title="Comms dropouts", fleet_size=5, duration_s=600.0, world="flat", cai_grade="field",
-    attack=None, methods=("fedqpnt_local",),
-    criteria=(Criterion("no_deadlock_auc_bound", "Robustness of the FL protocol", _not_runnable("requires_fl")),),
+    attack=None, methods=("fedqpnt",),
+    criteria=(Criterion("no_deadlock_auc_bound", "Robustness of the FL protocol", _s9_no_deadlock_auc_bound),),
     requires_fl=True,
 )
 
@@ -325,11 +448,24 @@ S11 = Scenario(
     criteria=(Criterion("all_runs_finite_P_spd", "Numerical robustness; no divergence", _s11_finite_bound),),
 )
 
+def _s12_auc_drop_f20(results):
+    a = _method_series(results, "fedqpnt", "auc")          # f=20% poisoned nodes (fleet_adapter default)
+    b = _method_series(results, "fedqpnt_clean", "auc")     # reference: same config, no poisoning
+    if a.size == 0:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' (poisoned) fleet runs")
+    if b.size == 0 or b.size != a.size:
+        return dict(passed=None, value=None,
+                     detail="no matched 'fedqpnt_clean' reference runs (run with poison_kind cleared)")
+    drop = float(np.nanmean(b - a))
+    return dict(passed=bool(drop <= 0.05), value=drop,
+                detail=f"AUC drop (clean - poisoned)={drop:.4f} (bound <=0.05 at f=20%, TRIM-NB-R)")
+
+
 S12 = Scenario(
     id="S12", title="Trust-score / model poisoning", fleet_size=10, duration_s=600.0, world="flat",
-    cai_grade="field", attack=None, methods=("fedqpnt_local",),
+    cai_grade="field", attack=None, methods=("fedqpnt",),
     criteria=(Criterion("auc_drop_le_0_05_at_f20", "Theory: trimmed mean robust for f < beta",
-                         _not_runnable("requires_fl")),),
+                         _s12_auc_drop_f20),),
     requires_fl=True,
 )
 
@@ -367,12 +503,42 @@ S14 = Scenario(
     blocked_by_D047=True,
 )
 
+def _s15_quarantine_and_far(results):
+    runs = _fleet_runs(results, "fedqpnt")
+    if not runs:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' fleet runs")
+    zero_q, far_margins = [], []
+    for r in runs:
+        fleet = r.get("fleet") or {}
+        zero_q.append((fleet.get("quarantine_events") or 0) == 0)
+        nodes = r.get("nodes") or {}
+        if not nodes:
+            continue
+        ids = sorted(nodes.keys())
+        n_attacked = max(1, round(0.3 * len(ids)))
+        clean_ids = ids[n_attacked:]
+        clean_far = [nodes[i].get("far_per_hour") for i in clean_ids
+                     if isinstance(nodes[i].get("far_per_hour"), (int, float))
+                     and np.isfinite(nodes[i]["far_per_hour"])]
+        if clean_far:
+            far_margins.append(float(np.mean(clean_far)))
+    q_frac = float(np.mean(zero_q)) if zero_q else float("nan")
+    far_val = float(np.mean(far_margins)) if far_margins else float("nan")
+    if not np.isfinite(q_frac):
+        return dict(passed=None, value=None, detail="no quarantine-event data")
+    far_ok = np.isfinite(far_val) and far_val <= 1.5   # S1 FAR bound (1/h) + 0.5/h slack
+    passed = bool(q_frac >= 0.9 and far_ok) if np.isfinite(far_val) else None
+    return dict(passed=passed, value=far_val,
+                detail=f"P(quarantine_events==0)={q_frac:.3f} (>=0.9); "
+                       f"mean unattacked-node FAR={far_val:.3f}/h (bound <=1.5)")
+
+
 S15 = Scenario(
     id="S15", title="Simultaneous attacks on fleet subset", fleet_size=10, duration_s=600.0, world="flat",
     cai_grade="field", attack=dict(kind="drift_spoof", onset_s=60.0, duration_s=300.0, severity=0.6),
-    methods=("fedqpnt_local",),
+    methods=("fedqpnt",),
     criteria=(Criterion("attacked_meet_s2_unattacked_far_bound", "Robust aggregator must not punish honest "
-                         "heterogeneity", _not_runnable("requires_fl")),),
+                         "heterogeneity", _s15_quarantine_and_far),),
     requires_fl=True,
 )
 
