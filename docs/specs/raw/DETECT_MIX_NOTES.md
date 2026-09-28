@@ -150,6 +150,62 @@ non-v2-specific clean-run false-alarm at that seed/method combo, carried
 forward as-is (not a new v2 regression: it hits fixed_trust and undefended
 too, methods v2 doesn't change the NIS-gate/trust-weight config of).
 
+## D-055 diagnostic: why FedQPNT is 22x worse than undefended at s=0
+
+No code changes. `scripts/diag_s0_gate_localization.py`: wraps
+`agent.eskf.correct` (read-only) to recover the exact NIS-gate decision it
+makes internally (same H, R_nom recovered from the already-public
+Innovation.S, R_eff=R_nom/max(w,w_min), nis_eff vs chi2 -- Sec 2.7) and the
+`gnss_law._core_v2.state`, without editing `fedqpnt/fusion/eskf.py`.
+Same 3 seeds x 10 min, drift spoof, cn0_sig_scale=0, as the D-053b s=0 RMSE
+check, now also methods fixed_trust/undefended/bprime/baseline_b_bin
+(node_id matched to `fedqpnt.node.runner`'s default so seeds reproduce the
+identical missions).
+
+| method | mean RMSE_h_att (m) | per-seed | frac GNSS NIS-rejected (attack window) | longest reject run (s) | frac DISTRUST/PROBE | mean p (attack) |
+|---|---|---|---|---|---|---|
+| undefended (gate OFF) | 106.0 | 105/108/105 | 0.0 | 0 | n/a | 0.065 |
+| baseline_b_bin | 106.2 | 105/108/105 | 0.015 | 8 | n/a | 0.065 |
+| fixed_trust (w≡1, gate ON) | 1402.2 | 105/108/**3993** | 0.331 | 179 | n/a | 0.064 |
+| bprime | 1434.1 | 106/108/**4089** | 0.285 | 140 | n/a | 0.312 |
+| fedqpnt_local | 2294.4 | 114/**2803**/**3966** | 0.537 | 141 | 0.878 | 0.742 |
+
+**Conclusion: the Master's hypothesis is CONFIRMED as the primary
+mechanism, with one compounding factor.** `fixed_trust` -- w≡1 always, no
+trust law, no detector in the loop at all -- ALSO blows up on seed 9602
+(RMSE 3993 m, 99.4% of the attack-window GNSS epochs NIS-gate-rejected, one
+continuous 179 s reject run = essentially the whole attack). That is the
+shared-core `ESKF.correct` NIS gate (Sec 2.7) alone: once the undetected
+(s=0) drift grows past the chi2 bound on the RAW (unweighted) innovation
+covariance, the gate starts rejecting the GNSS correction outright and the
+node free-inertial-coasts on MEMS, exactly as hypothesised -- this is not a
+FedQPNT-specific defect.
+
+FedQPNT is worse than fixed_trust though (fails on 2/3 seeds, not 1/3 --
+including seed 9601, where fixed_trust is FINE at 108 m / 0% rejected but
+FedQPNT is already catastrophic at 2803 m / 78% rejected). The added factor:
+FedQPNT's own detector, trained exclusively on s=1 (signature-present)
+missions, is badly off-distribution at s=0 and outputs an elevated mean
+p=0.74 during the attack (vs 0.06-0.07 for every method that doesn't feed
+detector output into the law) -- consistent with the D-053b sweep's AUC=
+0.129 "inversion" result. That spurious p drives 88% DISTRUST/PROBE dwell,
+which adds the trust-law's OWN exclusion path (w<w_excl) on top of the
+shared gate, so FedQPNT loses GNSS correction more often and on more seeds
+than the shared-gate mechanism alone would cause.
+
+`baseline_b_bin` is the outlier that stays healthy on all 3 seeds (106 m,
+<=4.4% rejected even on the worst seed) DESPITE an equally uninformative
+detector (mean p=0.065, same as fixed_trust/undefended -- no real detection
+at s=0 for this method either). Mechanism: b_bin's binary law jumps w
+straight to `w_min` (0.02) once distrust fires, which inflates
+`R_eff=R_nom/w_min` by ~50x -- and a hugely inflated R_eff makes
+`nis_eff` SMALL even under a large true drift, so the gate rarely trips.
+b_bin ends up still applying a heavily-downweighted-but-present GNSS
+correction that anchors position, instead of the gate excluding GNSS
+entirely and leaving the node on free-inertial IMU-only propagation. So
+b_bin's robustness here is a side-effect of its exclusion law's R-inflation
+structurally avoiding gate lockout, not better detection.
+
 ## Regression
 
 `pytest tests/test_trust_*.py tests/test_attacks_*.py

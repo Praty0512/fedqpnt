@@ -1,0 +1,280 @@
+{
+  "label": "D-055 diagnostic; kappa_R PROVISIONAL; tuning seeds; NO code changes",
+  "seeds": [
+    9600,
+    9601,
+    9602
+  ],
+  "duration_s": 600.0,
+  "attack": {
+    "kind": "drift_spoof",
+    "onset_s": 60.0,
+    "duration_s": 180.0,
+    "severity": 0.5,
+    "cn0_sig_scale": 0.0
+  },
+  "by_method": {
+    "fixed_trust": {
+      "mean_rmse_h_att": 1402.2322247535049,
+      "per_seed_rmse_h_att": [
+        105.41989266370443,
+        107.81956184613377,
+        3993.457219750677
+      ],
+      "mean_frac_nis_rejected": 0.3314814814814815,
+      "per_seed_frac_nis_rejected": [
+        0.0,
+        0.0,
+        0.9944444444444445
+      ],
+      "max_longest_continuous_gate_reject_run_s": 179.0,
+      "per_seed_longest_run_s": [
+        0.0,
+        0.0,
+        179.0
+      ],
+      "mean_frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06428823030343042
+    },
+    "undefended": {
+      "mean_rmse_h_att": 105.9887800043581,
+      "per_seed_rmse_h_att": [
+        105.49031114876135,
+        107.85245361690295,
+        104.62357524741005
+      ],
+      "mean_frac_nis_rejected": 0.0,
+      "per_seed_frac_nis_rejected": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_longest_continuous_gate_reject_run_s": 0.0,
+      "per_seed_longest_run_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mean_frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06475011291604899
+    },
+    "fedqpnt_local": {
+      "mean_rmse_h_att": 2294.40073734171,
+      "per_seed_rmse_h_att": [
+        113.95135947253651,
+        2803.3537412497835,
+        3965.897111302809
+      ],
+      "mean_frac_nis_rejected": 0.5370370370370371,
+      "per_seed_frac_nis_rejected": [
+        0.05555555555555555,
+        0.7833333333333333,
+        0.7722222222222223
+      ],
+      "max_longest_continuous_gate_reject_run_s": 141.0,
+      "per_seed_longest_run_s": [
+        10.0,
+        141.0,
+        139.0
+      ],
+      "mean_frac_time_distrust_or_probe": 0.8777777777777778,
+      "mean_detector_p_attack": 0.7418336422244725
+    },
+    "bprime": {
+      "mean_rmse_h_att": 1434.1169912928242,
+      "per_seed_rmse_h_att": [
+        105.52599514039291,
+        107.69170696301816,
+        4089.133271775061
+      ],
+      "mean_frac_nis_rejected": 0.28518518518518515,
+      "per_seed_frac_nis_rejected": [
+        0.0,
+        0.0,
+        0.8555555555555555
+      ],
+      "max_longest_continuous_gate_reject_run_s": 140.0,
+      "per_seed_longest_run_s": [
+        0.0,
+        0.0,
+        140.0
+      ],
+      "mean_frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.3116745322300405
+    },
+    "baseline_b_bin": {
+      "mean_rmse_h_att": 106.18939194879431,
+      "per_seed_rmse_h_att": [
+        105.35274849121132,
+        107.77279887018909,
+        105.4426284849825
+      ],
+      "mean_frac_nis_rejected": 0.014814814814814815,
+      "per_seed_frac_nis_rejected": [
+        0.0,
+        0.0,
+        0.044444444444444446
+      ],
+      "max_longest_continuous_gate_reject_run_s": 8.0,
+      "per_seed_longest_run_s": [
+        0.0,
+        0.0,
+        8.0
+      ],
+      "mean_frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06486810094697588
+    }
+  },
+  "raw_rows": [
+    {
+      "method": "fixed_trust",
+      "seed": 9600,
+      "rmse_h_att": 105.41989266370443,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06795236318997544
+    },
+    {
+      "method": "fixed_trust",
+      "seed": 9601,
+      "rmse_h_att": 107.81956184613377,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06157090027686755
+    },
+    {
+      "method": "fixed_trust",
+      "seed": 9602,
+      "rmse_h_att": 3993.457219750677,
+      "frac_gnss_epochs_nis_rejected": 0.9944444444444445,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 179.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06334142744344828
+    },
+    {
+      "method": "undefended",
+      "seed": 9600,
+      "rmse_h_att": 105.49031114876135,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06795241134535825
+    },
+    {
+      "method": "undefended",
+      "seed": 9601,
+      "rmse_h_att": 107.85245361690295,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.0615708717689125
+    },
+    {
+      "method": "undefended",
+      "seed": 9602,
+      "rmse_h_att": 104.62357524741005,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06472705563387622
+    },
+    {
+      "method": "fedqpnt_local",
+      "seed": 9600,
+      "rmse_h_att": 113.95135947253651,
+      "frac_gnss_epochs_nis_rejected": 0.05555555555555555,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 10.0,
+      "frac_time_distrust_or_probe": 0.6444444444444445,
+      "mean_detector_p_attack": 0.23591947753739825
+    },
+    {
+      "method": "fedqpnt_local",
+      "seed": 9601,
+      "rmse_h_att": 2803.3537412497835,
+      "frac_gnss_epochs_nis_rejected": 0.7833333333333333,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 141.0,
+      "frac_time_distrust_or_probe": 0.9944444444444445,
+      "mean_detector_p_attack": 0.9944185463364075
+    },
+    {
+      "method": "fedqpnt_local",
+      "seed": 9602,
+      "rmse_h_att": 3965.897111302809,
+      "frac_gnss_epochs_nis_rejected": 0.7722222222222223,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 139.0,
+      "frac_time_distrust_or_probe": 0.9944444444444445,
+      "mean_detector_p_attack": 0.9951629027996116
+    },
+    {
+      "method": "bprime",
+      "seed": 9600,
+      "rmse_h_att": 105.52599514039291,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.0012977934248019991
+    },
+    {
+      "method": "bprime",
+      "seed": 9601,
+      "rmse_h_att": 107.69170696301816,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.0004132820781868416
+    },
+    {
+      "method": "bprime",
+      "seed": 9602,
+      "rmse_h_att": 4089.133271775061,
+      "frac_gnss_epochs_nis_rejected": 0.8555555555555555,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 140.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.9333125211871326
+    },
+    {
+      "method": "baseline_b_bin",
+      "seed": 9600,
+      "rmse_h_att": 105.35274849121132,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06805792820527924
+    },
+    {
+      "method": "baseline_b_bin",
+      "seed": 9601,
+      "rmse_h_att": 107.77279887018909,
+      "frac_gnss_epochs_nis_rejected": 0.0,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 0.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06166258831420244
+    },
+    {
+      "method": "baseline_b_bin",
+      "seed": 9602,
+      "rmse_h_att": 105.4426284849825,
+      "frac_gnss_epochs_nis_rejected": 0.044444444444444446,
+      "n_attack_window_gnss_epochs": 180,
+      "longest_continuous_gate_reject_run_s": 8.0,
+      "frac_time_distrust_or_probe": 0.0,
+      "mean_detector_p_attack": 0.06488378632144597
+    }
+  ]
+}

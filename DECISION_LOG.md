@@ -33,6 +33,25 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-057 · 2026-09-28 · The s = 0 harm is a shared-core hard NIS gate lockout → adopt SOFT (covariance-inflating) gating in the pre-M4 filter session
+- **Diagnostic** (drift spoof, s = 0, 3 seeds × 10 min; attack-phase RMSE_h):
+
+  | Method | Mean RMSE_h | Notes |
+  |---|---|---|
+  | undefended (gate off) | 106 m | |
+  | B-bin | 106 m | |
+  | **fixed_trust (gate on, no detector)** | 1402 m | one seed 3993 m, with 99.4% of GNSS gate-rejected for 179 s continuously |
+  | B′ | 1434 m | |
+  | FedQPNT | 2294 m | 2/3 seeds catastrophic; the off-distribution detector gives p ≈ 0.74 and 88% DISTRUST/PROBE dwell, compounding the problem |
+
+  B-bin survives because distrust sets w = w_min, inflating R_eff by 50×, which keeps NIS under the gate, so GNSS keeps anchoring the position with low weight.
+- **Root cause:** the §2.7 hard gate *drops* GNSS when a slowly dragged fix exceeds the χ² bound, giving MEMS free-inertial coasting (km within minutes). It is aggravated by the ψ/b overconfidence (D-047), which shrinks S and trips the gate earlier. This is a shared-core defect affecting all gated methods.
+- **Decision:** replace the hard gate with **soft gating**. If NIS > χ²_α, scale R so the effective NIS equals χ²_α (a Huber/covariance-scaling robust update), bounding the per-update pull *without discarding the measurement*. The same core applies to all methods (fairness). "Undefended" remains gate-off.
+  - Must re-verify: S1 (M1 criteria), abrupt-spoof mitigation (soft gating admits partial pull; E_s and the trust law still handle it), and the s = 0 case (target: every defended method ≤ undefended + 3σ_nom, per the D-055 safety principle).
+  - Implement in the **pre-M4 filter session**, together with D-046/D-047 (overconfidence) and D-043 (the eigenvalue clip), **after H2-SUBRULE finishes** (it runs the node pipeline; no eskf.py edits mid-run).
+- **Open inconsistency to check:** mean p ≈ 0.74 during the attack alongside a sweep AUC of 0.129 at s = 0 implies clean-period p is even higher at s = 0. Verify the FAR at s = 0 in that session.
+- **Owner:** Master
+
 ### D-056 · 2026-09-28 · M2 FL sanity PASSES; H2 evaluation redesigned to isolate the learned contribution
 - **Accepted** (Master re-ran 56 tests; the agent said 58):
   - Provenance hash logging: parameters change every round, and the arms end with different θ.
