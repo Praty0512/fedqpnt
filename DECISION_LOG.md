@@ -33,6 +33,22 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-058 · 2026-09-28 · E_s position term is self-contaminated → replace it with a trust-independent GNSS-vs-IMU short-baseline jump test; a combined core-robustness session
+- **H2-SUBRULE finding:** no attack parameterisation makes drift/meaconing sub-rule. E_s fires on 99.4% (drift) and 98.3% (meaconing) of attack epochs, invariant to cn0_sig_scale, bump and delay. Decomposition: the **position_event term dominates (0.87–0.88)**. It fires one epoch after onset, as w_gnss collapses to about 0.06, then free-inertial coasting diverges the filter's own state, which produces large innovations. **E_s was designed by the Master to be independent physical evidence but is coupled to the trust law's own exclusion dynamics** (a Master design flaw in D-051 §C.3).
+- H2/H4 on drift/meaconing are not run (correct per the D-056 fallback). Instrumentation added (additive): `last_raw_p`, `last_es_evidence`, and `auc_detector_only` / `es_fire_frac` per node.
+- The control (abrupt) is partial (2/5 seeds): E_s < 1% and FedQPNT ≈ B-cont (design check OK). It is finishing in the background.
+- **Decision:**
+  1. Redefine the E_s position term as a **short-baseline jump test independent of the accumulated filter state**: Δp_GNSS(t_k − t_{k−1}) − Δp_INS(t_k − t_{k−1}) (IMU-propagated over the same 1 s), χ²₃ at 99.9% using the fix covariances plus the short-term INS covariance. An abrupt spoof trips it; slow drift and self-divergence do not.
+  2. **Core-robustness session** (one work package, shared core, all methods):
+     - (a) soft covariance-scaling gating (D-057);
+     - (b) the E_s short-baseline jump test;
+     - (c) the `_hygiene` eigenvalue clip (D-043);
+     - (d) the ψ/b overconfidence investigation (D-046/D-047: time alignment, CAI-update on/off block NEES);
+     - (e) re-verify: M1 criteria (S1, the smoke matrix, defended ≤ undefended), the s-sweep safety principle (all defended methods ≤ undefended + 3σ_nom at s ∈ {0, 0.25, 0.5, 1}), and the κ_R re-tune.
+     - Then re-attempt the H2 sub-rule verification.
+  3. Sequencing: start after the H2 control run finishes (it uses the node pipeline).
+- **Owner:** Master
+
 ### D-057 · 2026-09-28 · The s = 0 harm is a shared-core hard NIS gate lockout → adopt SOFT (covariance-inflating) gating in the pre-M4 filter session
 - **Diagnostic** (drift spoof, s = 0, 3 seeds × 10 min; attack-phase RMSE_h):
 

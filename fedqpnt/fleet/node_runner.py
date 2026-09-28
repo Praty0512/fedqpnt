@@ -145,6 +145,8 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
     rows_t, rows_pos, rows_vel, rows_cov = [], [], [], []
     rows_w_gnss, rows_detected, rows_true_pos, rows_true_vel, rows_active = [], [], [], [], []
     rows_score: list[float] = []   # H2/H4 preview: max detector anomaly score per tick (AUC)
+    rows_raw_p: list[float] = []   # D-056 metric (a): raw calibrated detector p, E_s excluded
+    rows_es: list[bool] = []       # D-056 metric (d): whether E_s (physical spoof evidence) fired
     round_installs = 0
     current_round = 0
     provenance: list[dict] = []   # D-054 provenance diagnostic: per-round param hashes
@@ -230,6 +232,9 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             rows_active.append(bool(tick.label.spoofing or tick.label.jamming))
             scores = atick.trust.anomaly_scores
             rows_score.append(float(max(scores.values())) if scores else 0.0)
+            raw_p = agent.trust.last_raw_p
+            rows_raw_p.append(float(raw_p) if raw_p is not None else 0.0)
+            rows_es.append(bool(agent.trust.last_es_evidence))
 
             target_round = min(int(t // spec.round_period_s), spec.n_rounds)
             while current_round < target_round:
@@ -259,6 +264,12 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
         active = np.array(rows_active, dtype=bool)
         detected = np.array(rows_detected, dtype=bool)
         scores = np.array(rows_score, dtype=float)
+        raw_p_arr = np.array(rows_raw_p, dtype=float)
+        es_arr = np.array(rows_es, dtype=bool)
+        # D-056 (d): fraction of ATTACK epochs where E_s (physical spoof
+        # evidence) fired -- logging only, computed from the read-only
+        # last_es_evidence side channel added to TrustEngineImpl.update.
+        es_fire_frac_attack = float(np.mean(es_arr[active])) if active.any() else float("nan")
         e_h = M.horizontal_error(pos_est, pos_true)
         e_3 = M.full3d_error(pos_est, pos_true)
         e_v = M.velocity_error(vel_est, vel_true)
@@ -274,6 +285,11 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             t_dist=M.time_to_distrust(t_arr, w_gnss, phases),
             mean_w_gnss=float(np.mean(w_gnss)),
             auc=M.roc_auc(scores, active),
+            # D-056 metrics (a)/(d): learned-detector-only AUC (E_s excluded,
+            # raw calibrated p vs the operational p_bar-derived `auc` above)
+            # and the fraction of attack epochs where E_s fired. Logging only.
+            auc_detector_only=M.roc_auc(raw_p_arr, active),
+            es_fire_frac_attack=es_fire_frac_attack,
             **M.false_alarm_rate(t_arr, detected, active),
         ))
     node_result_q.put(result)

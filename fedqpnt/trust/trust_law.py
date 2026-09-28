@@ -619,6 +619,12 @@ class TrustEngineImpl:
         self.quantum_trust = QuantumTrust(cycle_time_s=self.cfg.quantum_cycle_time_s,
                                            law_mode=self.cfg.law_mode) if self.cfg.quantum_enabled else None
         self._last_valid_gnss_t: float | None = None
+        # D-056 metric logging ONLY (item 1): the raw calibrated detector p
+        # (E_s excluded) and whether E_s fired, for the tick just processed.
+        # Read-only side channel -- never fed back into any control flow, so
+        # it cannot change runtime behaviour (detector/trust-law design).
+        self.last_raw_p: float | None = None
+        self.last_es_evidence: bool = False
 
     def config(self) -> dict:
         return dict(method=self.cfg.method, law_mode=self.cfg.law_mode,
@@ -632,6 +638,8 @@ class TrustEngineImpl:
         if self.quantum_trust is not None:
             self.quantum_trust.reset()
         self._last_valid_gnss_t = None
+        self.last_raw_p = None
+        self.last_es_evidence = False
 
     def _gnss_p(self, raw: np.ndarray) -> float:
         if self.cfg.p_source == "bprime":
@@ -672,6 +680,8 @@ class TrustEngineImpl:
                 xtilde = self.detector.normalizer.normalize(raw)
                 features_nominal = bool(np.all(np.abs(xtilde[2:11]) <= _FEATURES_NOMINAL_Z))
                 es_evidence = self._physical_spoof_evidence(raw) if self.gnss_law._uses_v2 else False
+                self.last_raw_p = p              # D-056 metric (a): logging only, not consumed downstream
+                self.last_es_evidence = es_evidence  # D-056 metric (d): logging only
                 gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal,
                                              nis_value=float(raw[_IDX_NIS_POS]), es_evidence=es_evidence)
 
