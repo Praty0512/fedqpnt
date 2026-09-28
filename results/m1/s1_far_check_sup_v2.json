@@ -1,0 +1,133 @@
+{
+  "label": "S1 false-alarm + criterion check, tuning seeds, not for publication",
+  "seeds": [
+    500,
+    501,
+    502,
+    503,
+    504
+  ],
+  "duration_s": 1800.0,
+  "kappa_R": 40.0,
+  "weights_used": "results\\m1\\detector_weights_sup_v2.npz",
+  "wall_s": 1012.2250535488129,
+  "far_per_hour_by_method": {
+    "fedqpnt_local": {
+      "mean_far_per_hour": 0.0,
+      "per_seed_far": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass_far": true,
+      "mean_anees_pos": 1.3055594340393795,
+      "mean_w_gnss": 0.9713361784743283
+    },
+    "baseline_a": {
+      "mean_far_per_hour": 1.6000000000014551,
+      "per_seed_far": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        8.000000000007276
+      ],
+      "pass_far": false,
+      "mean_anees_pos": 1.3512561652987745,
+      "mean_w_gnss": 0.9992777777777778
+    },
+    "baseline_b_bin": {
+      "mean_far_per_hour": 0.0,
+      "per_seed_far": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass_far": true,
+      "mean_anees_pos": 1.3406903957075602,
+      "mean_w_gnss": 0.9997222222222222
+    },
+    "baseline_b_cont": {
+      "mean_far_per_hour": 0.0,
+      "per_seed_far": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass_far": true,
+      "mean_anees_pos": 1.3055594340393795,
+      "mean_w_gnss": 0.9713361784743283
+    },
+    "bprime": {
+      "mean_far_per_hour": 0.0,
+      "per_seed_far": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pass_far": true,
+      "mean_anees_pos": 1.3371100633335815,
+      "mean_w_gnss": 0.9970810189042287
+    },
+    "fixed_trust": {
+      "mean_far_per_hour": 1.6000000000014551,
+      "per_seed_far": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        8.000000000007276
+      ],
+      "pass_far": false,
+      "mean_anees_pos": 1.4954482165091332,
+      "mean_w_gnss": 0.9997222222222222
+    },
+    "undefended": {
+      "mean_far_per_hour": 1.6000000000014551,
+      "per_seed_far": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        8.000000000007276
+      ],
+      "pass_far": false,
+      "mean_anees_pos": 1.4881063014968263,
+      "mean_w_gnss": 0.9997222222222222
+    }
+  },
+  "s1_rmse_criterion": {
+    "per_seed_ratio": [
+      0.9904021540512951,
+      1.047315845863587,
+      0.9913754956859827,
+      0.988576263223729,
+      0.9837141651853653
+    ],
+    "median_ratio": 0.9904021540512951,
+    "threshold": 1.05,
+    "PASS": true,
+    "fedqpnt_rmse_h_pre_by_seed": {
+      "500": 2.5145471424968147,
+      "501": 1.997938346306586,
+      "502": 3.843801723924213,
+      "503": 3.6429878300423617,
+      "504": 3.762053891115758
+    },
+    "fixed_trust_rmse_h_pre_by_seed": {
+      "500": 2.5389152600394898,
+      "501": 1.9076750859805265,
+      "502": 3.8772410057043953,
+      "503": 3.685085274213084,
+      "504": 3.8243364020348927
+    }
+  }
+}

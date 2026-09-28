@@ -33,6 +33,20 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-055 · 2026-09-28 · D-053 accepted; a signature-strength failure boundary found; safety principle
+- **Accepted** (Master re-ran 66 tests passing):
+  - Rebalanced training: ≥ 577 positives per family. The jamming root cause was geometry: every severity was full denial. Fixed by varying jammer EIRP.
+  - Detector v2 AUC: overall 0.953; jam_cw 0.996; jam_wb 0.988; jam→spoof 0.997; drift 0.998; meaconing 0.999; **abrupt 0.691 (regressed from 0.754, follow-up)**. Brier 0.068.
+  - S1 v2 PASS (FAR 0/h, ratio 0.990, ANEES 1.31).
+  - PD1 (jam duration 240 s) accepted.
+- **Signature-strength sweep** (detector trained at s = 1):
+  - Drift AUC: s = 1.0 → 0.999; 0.75 → 0.999; 0.5 → 0.995; **0.25 → 0.524 (chance); 0 → 0.129 (inverted)**.
+  - At s = 0, FedQPNT attack-phase RMSE_h is **2360 m vs undefended 108 m (22× worse)**: 2/3 seeds catastrophic.
+  - Meaconing is flat at 0.999 (a control).
+- **Master hypothesis:** the harm comes from the shared-core NIS gate rejecting the slowly dragged GNSS, then MEMS free-inertial coasting, aggravated by ψ/b overconfidence (D-047). The detector is not the cause. A diagnostic across methods at s = 0 is ordered.
+- **Safety principle (adopted):** a defended method must never be substantially worse than undefended across the stated threat envelope. **The paper must state the minimum signature strength (s ≳ 0.5) as an explicit operating assumption**, report the s < 0.5 failure boundary, and include the harm analysis. Any fix (e.g. gate-lockout recovery) is a shared-core change affecting all gated methods, to be decided after the diagnostic, and it is likely tied to the parked filter session (D-046).
+- **Owner:** Master
+
 ### D-054 · 2026-09-28 · Fleet data path accepted; H2/H4 previews INVALID; θ0 protocol and FL sanity checks
 - **Accepted** (Master re-ran 56 tests; the agent said 58):
   - The surrogate path is removed. Each node's local dataset is built offline in the parent via the shared real-feature builder, and nodes receive plain arrays.

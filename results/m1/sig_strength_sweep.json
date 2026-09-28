@@ -1,0 +1,117 @@
+{
+  "label": "kappa_R PROVISIONAL; tuning seeds; D-053b signature-strength sweep",
+  "weights_used": "C:\\Users\\DELL\\Downloads\\FEDQPNT\\results\\m1\\detector_weights_sup_v2.npz",
+  "drift_seeds": [
+    9500,
+    9501,
+    9502,
+    9503,
+    9504
+  ],
+  "meaconing_seeds": [
+    9505,
+    9506,
+    9507,
+    9508,
+    9509
+  ],
+  "sweep_duration_s": 300.0,
+  "auc_vs_s": {
+    "0.0": {
+      "auc_drift": 0.1286105420003725,
+      "ci95_drift": [
+        0.11062723940527909,
+        0.15020076140053024
+      ],
+      "n_drift": 1500,
+      "auc_meaconing": 0.9994038720460561,
+      "ci95_meaconing": [
+        0.9986820933446048,
+        0.9999062138597673
+      ],
+      "n_meaconing": 1500
+    },
+    "0.25": {
+      "auc_drift": 0.523943006146396,
+      "ci95_drift": [
+        0.4944672461027084,
+        0.5579547431708048
+      ],
+      "n_drift": 1500,
+      "auc_meaconing": 0.9994038720460561,
+      "ci95_meaconing": [
+        0.9986820933446048,
+        0.9999062138597673
+      ],
+      "n_meaconing": 1500
+    },
+    "0.5": {
+      "auc_drift": 0.9952914881728442,
+      "ci95_drift": [
+        0.9930242946057742,
+        0.9972130183128093
+      ],
+      "n_drift": 1500,
+      "auc_meaconing": 0.9994038720460561,
+      "ci95_meaconing": [
+        0.9986820933446048,
+        0.9999062138597673
+      ],
+      "n_meaconing": 1500
+    },
+    "0.75": {
+      "auc_drift": 0.9987427826410877,
+      "ci95_drift": [
+        0.997249869804358,
+        0.9997837912984138
+      ],
+      "n_drift": 1500,
+      "auc_meaconing": 0.9994038720460561,
+      "ci95_meaconing": [
+        0.9986820933446048,
+        0.9999062138597673
+      ],
+      "n_meaconing": 1500
+    },
+    "1.0": {
+      "auc_drift": 0.9989923635686347,
+      "ci95_drift": [
+        0.9977611494823174,
+        0.9998674180845168
+      ],
+      "n_drift": 1500,
+      "auc_meaconing": 0.9994038720460561,
+      "ci95_meaconing": [
+        0.9986820933446048,
+        0.9999062138597673
+      ],
+      "n_meaconing": 1500
+    }
+  },
+  "rmse_seeds": [
+    9600,
+    9601,
+    9602
+  ],
+  "rmse_duration_s": 600.0,
+  "s0_rmse_h_att_comparison": {
+    "fedqpnt_local": {
+      "per_seed_rmse_h_att": [
+        115.44386100345618,
+        2876.351723771465,
+        4087.6737619727755
+      ],
+      "mean_rmse_h_att": 2359.8231155825656
+    },
+    "undefended": {
+      "per_seed_rmse_h_att": [
+        107.1906733349077,
+        109.5369410831866,
+        106.3121613204059
+      ],
+      "mean_rmse_h_att": 107.67992524616675
+    },
+    "ratio_fedqpnt_over_undefended": 21.91516301843432
+  },
+  "wall_s": 1769.9504969120026
+}

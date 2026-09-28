@@ -158,6 +158,13 @@ class DriftInSpoof:
     common_spoofer_cn0_dbhz: float = 45.0         # ASSUMPTION (single generator's nominal output level)
     common_cn0_fluct_sigma_db: float = 1.0        # ASSUMPTION
     common_cn0_fluct_tau_s: float = 20.0          # ASSUMPTION
+    # D-053b signature-strength sweep: scales BOTH the shared-fluctuation
+    # sigma and the post-capture convergence toward the common level. 1.0
+    # (default) reproduces the D-018 signature exactly (unchanged
+    # behaviour/tests); 0.0 removes it entirely (each PRN keeps its own
+    # individually-boosted, still-elevation-dependent C/N0, no cross-PRN
+    # correlation induced by this term). Intermediate values interpolate.
+    cn0_sig_scale: float = 1.0
 
     _atmos_mismatch: dict = field(default_factory=dict, repr=False)   # prn -> e_spoofer [m]
     _last_t: float | None = field(default=None, repr=False)
@@ -175,7 +182,8 @@ class DriftInSpoof:
                     common_cn0_convergence_tau_s=self.common_cn0_convergence_tau_s,
                     common_spoofer_cn0_dbhz=self.common_spoofer_cn0_dbhz,
                     common_cn0_fluct_sigma_db=self.common_cn0_fluct_sigma_db,
-                    common_cn0_fluct_tau_s=self.common_cn0_fluct_tau_s)
+                    common_cn0_fluct_tau_s=self.common_cn0_fluct_tau_s,
+                    cn0_sig_scale=self.cn0_sig_scale)
 
     def _power_bump_db(self) -> float:
         lo, hi = self.power_bump_db_range
@@ -244,8 +252,10 @@ class DriftInSpoof:
         # spoofed PRN comes off the same single-antenna signal chain, so a
         # fluctuation in that chain's output power hits all of them together.
         self._shared_cn0_fluct = _gm_step(self._shared_cn0_fluct, dt,
-                                           self.common_cn0_fluct_tau_s, self.common_cn0_fluct_sigma_db, rng)
-        conv_frac = 1.0 - np.exp(-max(t - drag_start, 0.0) / self.common_cn0_convergence_tau_s) if t >= drag_start else 0.0
+                                           self.common_cn0_fluct_tau_s,
+                                           self.common_cn0_fluct_sigma_db * self.cn0_sig_scale, rng)
+        conv_frac_full = 1.0 - np.exp(-max(t - drag_start, 0.0) / self.common_cn0_convergence_tau_s) if t >= drag_start else 0.0
+        conv_frac = self.cn0_sig_scale * conv_frac_full
         common_target = self.common_spoofer_cn0_dbhz + self._shared_cn0_fluct
 
         new_obs = []

@@ -34,12 +34,78 @@ from fedqpnt.trust.features import EwmaStack
 G0 = 9.80665
 HOLD_S = 30.0
 
-FAMILY_ATTACKS = [
-    ("drift", dict(kind="drift_spoof", onset_s=60.0, duration_s=180.0, severity=0.5)),
-    ("meaconing", dict(kind="meaconing", onset_s=60.0, duration_s=180.0, severity=0.5)),
-    ("abrupt", dict(kind="abrupt_spoof", onset_s=60.0, duration_s=180.0, severity=0.5)),
-    ("jamming", dict(kind="jam_cw", onset_s=60.0, duration_s=180.0, severity=0.5)),
+# D-053a rebalance: 6 families (was 4; jamming had only 8 positive epochs
+# under the old severity=0.5-only "jamming"=jam_cw plan). Root cause (traced
+# empirically, see EXECUTION_LOG / DETECT_MIX_NOTES): at the default jammer
+# geometry (jammer_pos_enu=(500,0,0), jammer_eirp_dbw=10), `severity` only
+# rescales EIRP by 10*log10(severity) -- a few dB -- while free-space path
+# loss at 500 m already yields a J/S so large that EVEN severity=0.15 drives
+# effective C/N0 to roughly -10 dB-Hz (fedqpnt.attacks.jamming.
+# effective_cn0_dbhz), far below the receiver's 25 dB-Hz lock threshold
+# (fedqpnt/gnss/receiver.py CN0_LOCK_THRESHOLD_DBHZ) for every satellite at
+# once -> `Agent.step` immediately maps the invalid fix to `fix=None`
+# (fedqpnt/node/agent.py) -> the trust extractor is never called that tick
+# -> zero captured (feature, label) pairs, regardless of `severity` in
+# [0,1]. This is NOT the detector/trust-law design (frozen, D-026/D-051);
+# it is an EXPERIMENT PARAMETER (jammer_eirp_dbw, already an AttackSpec
+# param, no code change) that was previously left at a value which makes
+# the whole [0,1] severity range saturate at "full denial". D-053a fixes
+# this by choosing a `jammer_eirp_dbw` per severity level so the resulting
+# J/S actually spans partial (fix stays valid, degraded C/N0) through full
+# denial -- computed from the module's own effective_cn0_dbhz formula
+# (verified numerically before use; see DETECT_MIX_NOTES). Distance is left
+# at the class default (500 m); ASSUMPTION spacing/values otherwise.
+FAMILY_NAMES = ["drift", "meaconing", "abrupt", "jam_cw", "jam_wideband", "jam_then_spoof"]
+# (severity, jammer_eirp_dbw), empirically calibrated at distance=500m,
+# env=1 (see DETECT_MIX_NOTES.md for the calibration run: fraction of the
+# 180s attack window with a still-valid fix, out of 181 epochs at 1 Hz):
+#   -55 dBW -> 181/181 valid (clean-ish)     -45 -> 181/181 valid (mild)
+#   -38 dBW -> 181/181 valid (partial)       -33 -> 150/181 valid (partial, some drop)
+#   -30 dBW ->  99/181 valid (transition)    +5/+20 dBW -> ~0-2/181 (full denial)
+JAM_LEVELS = [
+    (0.15, -55.0),
+    (0.25, -45.0),
+    (0.35, -38.0),
+    (0.45, -33.0),
+    (0.55, -30.0),
+    (0.80,   5.0),
+    (1.00,  20.0),
 ]
+
+
+def _family_attacks(family: str, seed: int) -> list[dict]:
+    sev_jam, eirp_jam = JAM_LEVELS[seed % len(JAM_LEVELS)]
+    if family == "drift":
+        return [dict(kind="drift_spoof", onset_s=60.0, duration_s=180.0, severity=0.5)]
+    if family == "meaconing":
+        return [dict(kind="meaconing", onset_s=60.0, duration_s=180.0, severity=0.5)]
+    if family == "abrupt":
+        return [dict(kind="abrupt_spoof", onset_s=60.0, duration_s=180.0, severity=0.5)]
+    if family == "jam_cw":
+        # duration bumped 180->240s vs the spoof families (D-053a): the
+        # measured TRAIN-pool run (results/m1/detector_train_sup_v2_report
+        # .json, first pass) landed jam_wideband at 397 positive epochs,
+        # short of the >=500 target; +33% window on both jam families
+        # restores headroom without touching seed assignment/severity mix.
+        return [dict(kind="jam_cw", onset_s=60.0, duration_s=240.0, severity=sev_jam,
+                     params=dict(jammer_eirp_dbw=eirp_jam))]
+    if family == "jam_wideband":
+        return [dict(kind="jam_wideband", onset_s=60.0, duration_s=240.0, severity=sev_jam,
+                     params=dict(jammer_eirp_dbw=eirp_jam))]
+    if family == "jam_then_spoof":
+        # jam forces lock loss, spoof captures the reacquiring receiver once
+        # jamming eases (Psiaki & Humphreys 2016, qualitative pattern; see
+        # fedqpnt.attacks.jamming.JamThenSpoof docstring). Built here as two
+        # chained AttackSpecs in NodeEnvironment's attack list (both apply()
+        # each epoch, both label()s OR-combined by NodeEnvironment._label)
+        # rather than via JamThenSpoof directly, since JamThenSpoof is not
+        # wired into the environment's generic single-kind attack builder
+        # (fedqpnt/node/environment.py PROPOSED-DECISION) -- equivalent
+        # effect, no environment.py edit needed.
+        return [dict(kind="jam_wideband", onset_s=60.0, duration_s=60.0, severity=sev_jam,
+                     params=dict(jammer_eirp_dbw=eirp_jam)),
+                dict(kind="drift_spoof", onset_s=100.0, duration_s=180.0, severity=0.5)]
+    raise ValueError(f"unknown family {family!r}")
 
 
 def _level_att(f_b_mean: np.ndarray) -> tuple[float, float]:
@@ -49,16 +115,15 @@ def _level_att(f_b_mean: np.ndarray) -> tuple[float, float]:
     return phi, theta
 
 
-def plan_for(seed: int, pool: str) -> tuple[str, dict | None]:
-    """1-in-5 clean, else cycles the 4 attack families -- same convention as
-    the earlier (pseudo-label) pipeline, scripts/recalibrate_and_retrain_v2.py,
-    kept for continuity of the tuning-seed partitioning."""
-    if pool == "clean":
+def plan_for(seed: int, pool: str) -> tuple[str, list[dict] | None]:
+    """D-053a: 1-in-10 clean (seed % 10 == 0, or pool=="clean" literal), else
+    round-robins the 6 attack families by seed % 6. Same seed->family
+    assignment across TRAIN/PLATT/HELDOUT blocks (each is a disjoint
+    contiguous seed range) so every block gets even family coverage."""
+    if pool == "clean" or seed % 10 == 0:
         return "clean", None
-    idx = seed % 5
-    if idx == 0:
-        return "clean", None
-    return FAMILY_ATTACKS[(seed // 5) % 4]
+    family = FAMILY_NAMES[seed % len(FAMILY_NAMES)]
+    return family, _family_attacks(family, seed)
 
 
 def collect_run(args: tuple[int, str, float]) -> dict:
@@ -69,10 +134,10 @@ def collect_run(args: tuple[int, str, float]) -> dict:
     perturbed by an in-training detector's own (as yet untrained) output --
     this is data COLLECTION, not evaluation of a trust law."""
     seed, pool, duration_s = args
-    family, atk = plan_for(seed, pool)
+    family, atk_list = plan_for(seed, pool)
     env_cfg = EnvConfig(platform="ground", world="flat", imu_grade="industrial_mems",
                          quantum_grade="field", gnss_rate_hz=1.0, hold_s=HOLD_S,
-                         heading_noise_deg=2.0, attacks=[atk] if atk else [])
+                         heading_noise_deg=2.0, attacks=atk_list or [])
     env = NodeEnvironment(env_cfg, seed=seed, node_id="sup", dt=0.01, duration_s=duration_s)
     agent_cfg = make_agent_config("fixed_trust", kappa_R=40.0, kappa_Q=1.0, world="flat",
                                    quantum_enabled=True, detector_weights_path=None)
