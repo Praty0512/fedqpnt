@@ -64,7 +64,7 @@ def platt_apply(p_raw, a, b):
     return 1.0 / (1.0 + np.exp(-(a * z + b)))
 
 
-def _collect_family(kind: str, seed: int, s: float, duration_s: float) -> dict:
+def _collect_family(kind: str, seed: int, s: float, duration_s: float, kappa_R: float = 40.0) -> dict:
     """One real closed-loop mission with a SINGLE attack (drift_spoof with
     cn0_sig_scale=s, or meaconing unaffected by s), method=fixed_trust (same
     data-collection convention as build_supervised_dataset.collect_run --
@@ -89,7 +89,7 @@ def _collect_family(kind: str, seed: int, s: float, duration_s: float) -> dict:
                          attacks=[dict(kind=atk["kind"], onset_s=atk["onset_s"], duration_s=atk["duration_s"],
                                        severity=atk["severity"], params=atk.get("params"))])
     env = NodeEnvironment(env_cfg, seed=seed, node_id="sweep", dt=0.01, duration_s=duration_s)
-    agent_cfg = make_agent_config("fixed_trust", kappa_R=40.0, kappa_Q=1.0, world="flat",
+    agent_cfg = make_agent_config("fixed_trust", kappa_R=kappa_R, kappa_Q=1.0, world="flat",
                                    quantum_enabled=True, detector_weights_path=None)
     agent = Agent(agent_cfg, env.imu.config(), node_id="sweep")
 
@@ -149,7 +149,7 @@ def score_with_detector(detector, c: dict):
     return p_cal, np.array(c["y_spoof"], dtype=float)
 
 
-def run_sweep(weights_path: Path) -> dict:
+def run_sweep(weights_path: Path, kappa_R: float = 40.0) -> dict:
     from fedqpnt.trust.detector import TrustDetector
     detector = TrustDetector(arch="mlp", seed=0)
     params = dict(np.load(weights_path, allow_pickle=True))
@@ -159,14 +159,14 @@ def run_sweep(weights_path: Path) -> dict:
     for s in SIG_SCALES:
         drift_p, drift_y = [], []
         for seed in DRIFT_SEEDS:
-            c = _collect_family("drift", seed, s, SWEEP_DURATION_S)
+            c = _collect_family("drift", seed, s, SWEEP_DURATION_S, kappa_R=kappa_R)
             if not c["t"]:
                 continue
             p, y = score_with_detector(detector, c)
             drift_p.append(p); drift_y.append(y)
         meacon_p, meacon_y = [], []
         for seed in MEACON_SEEDS:
-            c = _collect_family("meaconing", seed, s, SWEEP_DURATION_S)
+            c = _collect_family("meaconing", seed, s, SWEEP_DURATION_S, kappa_R=kappa_R)
             if not c["t"]:
                 continue
             p, y = score_with_detector(detector, c)
@@ -181,7 +181,7 @@ def run_sweep(weights_path: Path) -> dict:
     return sweep_report
 
 
-def run_rmse_comparison(weights_path: Path, n_workers: int) -> dict:
+def run_rmse_comparison(weights_path: Path, n_workers: int, kappa_R: float = 40.0) -> dict:
     from fedqpnt.node.runner import RunSpec, run_many
     specs = []
     for seed in RMSE_SEEDS:
@@ -193,7 +193,7 @@ def run_rmse_comparison(weights_path: Path, n_workers: int) -> dict:
                 heading_noise_deg=2.0,
                 attack=dict(kind="drift_spoof", onset_s=60.0, duration_s=180.0, severity=0.5,
                             params=dict(cn0_sig_scale=0.0)),
-                kappa_R=40.0, kappa_Q=1.0,
+                kappa_R=kappa_R, kappa_Q=1.0,
                 detector_weights_path=str(weights_path) if weights_path.exists() else None,
                 record=False,
             ))
@@ -215,20 +215,22 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--weights", type=str, default=str(DETECTOR_WEIGHTS_V2))
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--kappa-r", type=float, default=40.0)
     ap.add_argument("--out", type=str, default=str(ROOT / "results" / "m1" / "sig_strength_sweep.json"))
     args = ap.parse_args()
     weights_path = Path(args.weights)
     t0 = time.time()
 
-    sweep_report = run_sweep(weights_path)
+    sweep_report = run_sweep(weights_path, kappa_R=args.kappa_r)
     print(f"[{time.time()-t0:.0f}s] sweep done")
 
-    rmse_report = run_rmse_comparison(weights_path, args.workers)
+    rmse_report = run_rmse_comparison(weights_path, args.workers, kappa_R=args.kappa_r)
     print(f"[{time.time()-t0:.0f}s] s=0 RMSE comparison done:", json.dumps(rmse_report, indent=2))
 
     out = dict(
-        label="kappa_R PROVISIONAL; tuning seeds; D-053b signature-strength sweep",
-        weights_used=str(weights_path),
+        label=f"tuning seeds; D-053b signature-strength sweep; kappa_R={args.kappa_r} "
+              "(re-tuned post D-043/D-057/D-058 core-robust session)",
+        weights_used=str(weights_path), kappa_R=args.kappa_r,
         drift_seeds=DRIFT_SEEDS, meaconing_seeds=MEACON_SEEDS, sweep_duration_s=SWEEP_DURATION_S,
         auc_vs_s=sweep_report,
         rmse_seeds=RMSE_SEEDS, rmse_duration_s=RMSE_DURATION_S, s0_rmse_h_att_comparison=rmse_report,

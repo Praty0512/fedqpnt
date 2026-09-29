@@ -85,13 +85,54 @@ def test_gnss_partial_trust_intermediate_update():
     assert 0.0 < nav_partial.pos[0] < nav_full.pos[0] < 2.0
 
 
-def test_nis_gate_rejects_50m_jump():
-    eskf, _, _ = _fresh_eskf()
+def test_nis_gate_rejects_50m_jump_hard_gating_ablation():
+    # D-057: "hard" gating is the old drop-on-gate behaviour, kept only for
+    # ablation (default is now "soft" -- see the soft-gating tests below).
+    eskf, _, _ = _fresh_eskf(config=ESKFConfig(gating="hard"))
     fix = _fix([50.0, 0.0, 0.0])
     innov = eskf.innovations(0.0, fix, None)
     assert innov[0].accepted is False
     nav = eskf.correct(0.0, innov, _trust())
     assert np.allclose(nav.pos, 0.0, atol=1e-6)
+
+
+def test_soft_gating_default_never_fully_rejects_abrupt_50m_jump():
+    # D-057: default gating="soft" keeps the measurement (inflating R_eff so
+    # the effective NIS == the chi2 gate) instead of dropping it outright.
+    # The state is pulled by a bounded amount, never the full 50 m, and
+    # never zero either.
+    eskf, _, _ = _fresh_eskf()
+    assert eskf.cfg.gating == "soft"
+    fix = _fix([50.0, 0.0, 0.0])
+    innov = eskf.innovations(0.0, fix, None)
+    assert innov[0].accepted is False  # still flagged as gate-exceeding...
+    nav = eskf.correct(0.0, innov, _trust())
+    assert 0.0 < nav.pos[0] < 50.0  # ...but not fully rejected, and bounded
+
+
+def test_soft_gating_slowly_dragged_fix_never_fully_rejected():
+    # A fix dragged slowly (small per-epoch innovation, well inside the
+    # gate) is accepted normally; even once it eventually exceeds the gate
+    # it must still move the state (D-057's regression target: no
+    # free-inertial coasting from a hard-rejected slow drag).
+    eskf, imu, rng = _fresh_eskf()
+    t = 0.0
+    drag_rate = 2.0  # m/s of fake GNSS bias drift per second
+    pulled_any = False
+    for step in range(200):
+        t = (step + 1) * 0.1
+        s = imu.step(_still_truth(t), rng)
+        eskf.propagate(t, s)
+        drifted_pos = np.array([drag_rate * t, 0.0, 0.0])
+        fix = _fix(drifted_pos, t=t)
+        innov = eskf.innovations(t, fix, None)
+        pos_before = eskf.p.copy()
+        eskf.correct(t, innov, _trust())
+        if not innov[0].accepted:
+            # gate-exceeding epoch: soft gating must still move p toward the fix
+            assert eskf.p[0] > pos_before[0]
+            pulled_any = True
+    assert pulled_any  # sanity: the drag rate did eventually exceed the gate
 
 
 def test_nis_gate_accepts_small_consistent_fix():
@@ -101,6 +142,35 @@ def test_nis_gate_accepts_small_consistent_fix():
     assert innov[0].accepted is True
     nav = eskf.correct(0.0, innov, _trust())
     assert nav.pos[0] > 0.0
+
+
+def test_hygiene_eigenvalue_clip_exact_single_source_delta_ba():
+    # D-043: _hygiene() must symmetrise + clip only negative eigenvalues to
+    # 0, with NO additive floor. Regression: a single-source delta b_a case
+    # (P0 nonzero ONLY in one b_a axis, zero IMU noise, static level
+    # attitude) must give an exact analytic sqrt(P_v) = sigma_ba * t at
+    # 300 s (the old additive-floor bug injected ~3x the real per-step
+    # gyro-bias process noise whenever P went near-singular, growing P_v
+    # ~1.5x above this exact value via t^4 amplification through psi).
+    zero_noise = dict(random_walk_per_sqrt_s=0.0, bias_instability_gm1_sigma=0.0,
+                       bias_instability_gm1_tau_c_s=1.0, turn_on_bias_std=0.0,
+                       scale_factor_std=0.0, misalignment_std_rad=0.0)
+    imu_cfg = dict(accel_noise_SI=dict(zero_noise), gyro_noise_SI=dict(zero_noise))
+    sigma_ba = 0.01  # m/s^2
+    eskf = ESKF(imu_cfg)
+    eskf.initialize_static(0.0, np.zeros(3), np.zeros(3))
+    eskf.P = np.zeros((eskf.N, eskf.N))
+    eskf.P[9, 9] = sigma_ba ** 2  # single source: b_a x-axis only
+
+    dt = 0.1
+    t = 0.0
+    for _ in range(3000):  # 300 s
+        t += dt
+        eskf.propagate(t, ImuSample(t=t, f_b=np.array([0.0, 0.0, G]), omega_b=np.zeros(3)))
+
+    assert np.linalg.eigvalsh(eskf.P).min() >= 0.0
+    expected = sigma_ba * t
+    assert np.isclose(np.sqrt(eskf.P[3, 3]), expected, rtol=1e-6)
 
 
 def test_gnss_invalid_fix_produces_no_innovation():

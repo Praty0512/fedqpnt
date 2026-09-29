@@ -54,6 +54,18 @@ class ESKFConfig:
     w_min: float = 0.02             # Sec 2.7
     w_excl: float = 0.05            # Sec 2.7
     alpha_gate: float = 1e-4        # Sec 2.7
+    gating: str = "soft"            # D-057: "soft" (default) inflates R_eff of a
+                                     # gate-exceeding measurement so its effective
+                                     # NIS == chi2_alpha (measurement kept, never
+                                     # dropped); "hard" is the old drop-on-gate
+                                     # behaviour, kept only for ablation. Root cause
+                                     # (D-057): the hard gate drops a slowly-dragged
+                                     # GNSS fix once it exceeds the chi2 bound, so
+                                     # MEMS free-inertial coasting follows (km within
+                                     # minutes) -- a shared-core defect for every
+                                     # gated method. "undefended" is unaffected
+                                     # (alpha_gate=0.0 makes the threshold infinite
+                                     # regardless of this switch).
     sigma_win_g: float = 1e-5       # [ASSUMPTION; swept over {1e-6,1e-5,1e-4}] x G0, Sec 2.5 CAI window mismatch
     cai_buffer_min_s: float = 5.0   # Sec 2.5: IMU buffer length = max(5s, 2*cycle_time)
     model_sf_mis: bool = False      # D-030: Master's dt-correlation-time PSD choice was wrong
@@ -134,6 +146,7 @@ class ESKF:
             "type": "ESKF", "world": self.cfg.world, "kappa_R": self.cfg.kappa_R,
             "kappa_Q": self.cfg.kappa_Q, "kappa_zoh": self.cfg.kappa_zoh,
             "w_min": self.cfg.w_min, "w_excl": self.cfg.w_excl, "alpha_gate": self.cfg.alpha_gate,
+            "gating": self.cfg.gating,
             "sigma_win_g": self.cfg.sigma_win_g, "vrw": self.vrw, "arw": self.arw,
             "q_ba": self.q_ba, "q_bg": self.q_bg, "tau_a": self.tau_a, "tau_g": self.tau_g,
             "model_sf_mis": self.cfg.model_sf_mis, "bias_model": self.cfg.bias_model,
@@ -298,10 +311,18 @@ class ESKF:
             self._imu_buffer = [(ti, fi) for ti, fi in self._imu_buffer if ti >= tmin]
 
     def _hygiene(self) -> None:
+        """D-043: symmetrise, then clip ONLY negative eigenvalues to 0
+        (P = V max(Lambda, 0) V^T). No additive floor -- the old 1e-12*I
+        floor injected un-modelled noise (~3x the real per-step gyro-bias
+        process noise) whenever P went near-singular, which the single-
+        source delta b_a regression test (t^4 amplification through
+        psi -> v via gravity) exposed as a ~1.5x P_v excess at 300 s."""
         self.P = 0.5 * (self.P + self.P.T)
-        w = np.linalg.eigvalsh(self.P)
-        if w.min() < 1e-12:
-            self.P = self.P + 1e-12 * np.eye(self.N)
+        w, V = np.linalg.eigh(self.P)
+        if w.min() < 0.0:
+            w = np.maximum(w, 0.0)
+            self.P = (V * w) @ V.T
+            self.P = 0.5 * (self.P + self.P.T)
 
     # ------------------------------------------------------------------
     def innovations(self, t: float, fix: GnssFix | None, quantum: QuantumSample | None) -> list[Innovation]:
@@ -382,8 +403,19 @@ class ESKF:
             R_eff = R_nom / max(w, self.cfg.w_min)
             S_eff = H @ self.P @ H.T + R_eff
             nis_eff = float(nu @ np.linalg.solve(S_eff, nu))
-            if nis_eff > chi2.ppf(1.0 - self.cfg.alpha_gate, dof):
-                continue  # NIS gate reject (Sec 2.7)
+            gate = chi2.ppf(1.0 - self.cfg.alpha_gate, dof)
+            if nis_eff > gate:
+                if self.cfg.gating == "hard":
+                    continue  # NIS gate reject (Sec 2.7, ablation-only path)
+                # D-057 soft gating (default): scale R_eff up so the
+                # effective NIS becomes exactly `gate` -- the measurement is
+                # kept (never dropped), just down-weighted proportionally to
+                # how far it exceeds the gate. nu^T S_eff^-1 nu scales as
+                # 1/scale when R_eff (hence S_eff) is scaled by `scale`, so
+                # scale = nis_eff / gate makes the new NIS == gate exactly.
+                scale = nis_eff / gate
+                R_eff = R_eff * scale
+                S_eff = H @ self.P @ H.T + R_eff
             K = self.P @ H.T @ np.linalg.inv(S_eff)
             dx = K @ nu
             IKH = np.eye(self.N) - K @ H

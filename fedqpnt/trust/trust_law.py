@@ -89,6 +89,34 @@ class TrustLawConfig:
     es_xsat_quantile_z: float = 1.96
     es_cn0_band_excess_db: float = 3.0
     es_position_gate_quantile: float = 0.999
+    # D-058: the position-evidence term is now a short-baseline GNSS-vs-INS
+    # jump test, not the filter's own NIS (self-contaminated by the
+    # filter's own P -- see _physical_spoof_evidence). es_ins_short_sigma_pos
+    # is an [ASSUMPTION]-grade per-axis 1-sigma bound on how much a
+    # short-baseline (one GNSS epoch, ~1 s) pure-INS position propagation
+    # can drift by mechanisation/integration noise alone (MEMS-class,
+    # conservative). It is a small, dt-independent-of-filter-history
+    # physical constant, NOT read from the filter's P, so it cannot inherit
+    # any filter self-divergence or overconfidence.
+    es_ins_short_sigma_pos: float = 0.05
+    # D-058 follow-up (Master-directed jam-recovery diagnostic): the
+    # position-evidence baseline (_last_gnss_pos/_last_gnss_cov/
+    # _last_p_prior) is only valid across ONE ordinary GNSS epoch. After a
+    # gap (e.g. a jamming-induced GNSS outage), the baseline is stale by
+    # the whole gap, not one epoch, so Delta p_INS wrongly includes the
+    # entire outage's accumulated INS drift while Delta p_GNSS is a normal
+    # one-epoch difference -- a huge, spurious mismatch that falsely fires
+    # E_s on the very first fix after every outage (confirmed by trace:
+    # scripts/core_robust_jam_recovery_trace.py). Any gap longer than
+    # ``es_gap_reset_factor`` x this nominal epoch interval resets the
+    # baseline instead of testing it (treated as "insufficient history",
+    # matching the existing no-history case) -- the position term is
+    # skipped for exactly one epoch (the first fix after the gap), then
+    # resumes normally from a fresh baseline. [ASSUMPTION: 1.0 Hz matches
+    # the project's standard nominal GNSS rate used throughout the eval
+    # scripts/tests; 1.5x per Master's directive.]
+    es_nominal_epoch_s: float = 1.0
+    es_gap_reset_factor: float = 1.5
 
     @property
     def nis_clean_threshold(self) -> float:
@@ -604,6 +632,31 @@ def make_method_config(method: str, **overrides) -> TrustEngineConfig:
 
 _FEATURES_NOMINAL_Z = 1.96  # 95% two-sided normal quantile (x3..x11 "inside 95% nominal quantiles")
 
+_FALLBACK_COV_POS = np.diag([9.0, 9.0, 25.0])  # matches ESKF's fallback_cov_pos default
+
+
+def _p_prior_from_innovations(fix: GnssFix, innovations: list[Innovation]) -> np.ndarray | None:
+    """D-058: this epoch's PRE-correction filter position estimate,
+    p_prior = fix.pos + nu_pos (nu_pos = p_prior - fix.pos, the nominal-R
+    "gnss_pos" innovation already computed by the filter). None if there is
+    no gnss_pos innovation this tick."""
+    inv = next((iv for iv in innovations if iv.sensor == "gnss_pos"), None)
+    if inv is None:
+        return None
+    return np.asarray(fix.pos, dtype=float) + np.asarray(inv.nu, dtype=float)
+
+
+def _spd_cov_or_fallback(cov: np.ndarray) -> np.ndarray:
+    """D-058: symmetrise a fix's cov_pos for the short-baseline jump test;
+    fall back to a conservative diagonal if it's missing/non-finite/wrong
+    shape (mirrors ``fedqpnt.fusion.eskf._spd_or_fallback``'s contract,
+    reimplemented here since this module must stay independent of the
+    filter)."""
+    cov = np.asarray(cov, dtype=float)
+    if cov.shape != (3, 3) or not np.all(np.isfinite(cov)):
+        return _FALLBACK_COV_POS.copy()
+    return 0.5 * (cov + cov.T)
+
 
 class TrustEngineImpl:
     """Implements the ``fedqpnt.core.interfaces.TrustEngine`` protocol."""
@@ -619,6 +672,30 @@ class TrustEngineImpl:
         self.quantum_trust = QuantumTrust(cycle_time_s=self.cfg.quantum_cycle_time_s,
                                            law_mode=self.cfg.law_mode) if self.cfg.quantum_enabled else None
         self._last_valid_gnss_t: float | None = None
+        # D-058: previous accepted GNSS epoch's raw fix position/cov_pos,
+        # kept ONLY for the short-baseline jump test (Delta p_GNSS side) --
+        # never the filter's own state/P.
+        self._last_gnss_pos: np.ndarray | None = None
+        self._last_gnss_cov: np.ndarray | None = None
+        # D-058: previous epoch's PRE-correction filter estimate p_prior =
+        # fix.pos + nu_pos, exactly one GNSS epoch old by construction
+        # (unlike nav_prior, which is only one IMU tick old -- see
+        # _physical_spoof_evidence's docstring for why that distinction
+        # matters).
+        self._last_p_prior: np.ndarray | None = None
+        # D-058 follow-up: number of upcoming epochs (including the current
+        # one, if just triggered) for which the position-evidence term is
+        # forced off, set by a gap-reset (see update()). One epoch was not
+        # enough on its own: the FIRST post-gap epoch typically applies a
+        # large corrective pull (soft gating never fully rejects it), and
+        # since ``_last_p_prior`` stores the PRE-correction estimate, the
+        # epoch AFTER that pull sees an artificially huge Delta p_INS (the
+        # pull itself, not real INS growth) and false-fires again -- traced
+        # empirically (scripts/core_robust_jam_recovery_trace.py: post-gap
+        # epoch recovers cleanly, but the NEXT epoch still fired,
+        # stat=763 vs gate=16.27). Quarantining 2 epochs covers the pull
+        # epoch and the one immediately after it.
+        self._es_position_quarantine: int = 0
         # D-056 metric logging ONLY (item 1): the raw calibrated detector p
         # (E_s excluded) and whether E_s fired, for the tick just processed.
         # Read-only side channel -- never fed back into any control flow, so
@@ -638,6 +715,10 @@ class TrustEngineImpl:
         if self.quantum_trust is not None:
             self.quantum_trust.reset()
         self._last_valid_gnss_t = None
+        self._last_gnss_pos = None
+        self._last_gnss_cov = None
+        self._last_p_prior = None
+        self._es_position_quarantine = 0
         self.last_raw_p = None
         self.last_es_evidence = False
 
@@ -648,14 +729,52 @@ class TrustEngineImpl:
         p_spoof, p_jam, _u = self.detector.score(self.extractor._last_t or 0.0, raw)
         return max(p_spoof, p_jam)
 
-    def _physical_spoof_evidence(self, raw: np.ndarray) -> bool:
+    def _physical_spoof_evidence(self, raw: np.ndarray, fix: GnssFix,
+                                  nav_prior: NavSolution | None,
+                                  innovations: list[Innovation],
+                                  skip_position: bool = False) -> bool:
         """D-051 sec C: E_s, the physical spoof-evidence set. Uses the
         detector's own running normalizer (updated only on pseudo-label-
         negative samples) as the "clean reference" mu/sd -- the same idea
         as the labeller's quantile_mu/sd, but the node-local, runtime
         version of it, with the same D-051 sigma floors applied so a
         near-degenerate sd here cannot make this evidence spuriously easy
-        to trigger either."""
+        to trigger either.
+
+        D-058: the position term is the short-baseline GNSS-vs-INS jump
+        test, not the filter's own NIS (raw[_IDX_NIS_POS]) -- that NIS uses
+        S = H P H^T + R, so it is self-contaminated by the filter's own
+        (possibly wrong, possibly attack-shrunk) P and cannot tell a real
+        spoof jump apart from filter self-divergence/overconfidence. The
+        replacement, d = Delta p_GNSS - Delta p_INS over ONE GNSS epoch,
+        depends only on: this epoch's and the previous epoch's raw GNSS fix
+        position (Delta p_GNSS), and this epoch's and the previous epoch's
+        PRE-correction filter estimate p_prior = fix.pos + nu_pos (Delta
+        p_INS -- the filter's own continuous propagation between the two
+        epochs, entirely independent of what either epoch's correction
+        then does with it) -- never the filter's accumulated P.
+
+        IMPORTANT: this must NOT use ``nav_prior`` (the previous AGENT
+        TICK's corrected NavSolution) as the Delta p_INS baseline -- GNSS
+        ticks are sparse relative to IMU ticks (e.g. 1 Hz vs 100 Hz), so
+        ``nav_prior`` is only ONE IMU dt (~0.01s) older than this tick, not
+        one GNSS epoch (~1s) older. Using it as the baseline was tried and
+        measured to fire on ~80% of clean nominal epochs (the "Delta p_INS"
+        it produced covered only the last ~0.01s while "Delta p_GNSS"
+        covered the full ~1s epoch, so d was dominated by ordinary vehicle
+        motion, not spoofing) -- see docs/specs/raw/CORE_ROBUST_NOTES.md.
+        The fix: track this engine's OWN previous-epoch p_prior
+        (``_last_p_prior``), which is exactly one GNSS epoch old by
+        construction, regardless of the IMU tick rate.
+
+        A slow drag stays small epoch-to-epoch (no fire); an abrupt jump
+        appears entirely in this one epoch's Delta p_GNSS (fires); filter
+        self-divergence accumulated over many epochs does not show up in a
+        ONE-epoch delta at all (no fire).
+
+        ``skip_position`` (D-058 follow-up): forces this term off for
+        epochs quarantined after a gap reset -- see
+        ``_es_position_quarantine``'s docstring."""
         c = self.gnss_law.cfg
         clk_event = (raw[_IDX_CLK_JUMP] >= c.es_clk_sigma) or (raw[_IDX_DRIFT_JUMP] >= c.es_clk_sigma)
         mu = self.detector.normalizer.mu
@@ -663,7 +782,20 @@ class TrustEngineImpl:
         xsat_event = raw[_IDX_XSAT_CORR] > (mu[_IDX_XSAT_CORR] + c.es_xsat_quantile_z * sd[_IDX_XSAT_CORR])
         cn0_event = raw[_IDX_CN0_MEAN] > (mu[_IDX_CN0_MEAN] + c.es_xsat_quantile_z * sd[_IDX_CN0_MEAN]
                                           + c.es_cn0_band_excess_db)
-        position_event = raw[_IDX_NIS_POS] > c.position_gate_threshold
+
+        position_event = False
+        p_prior = _p_prior_from_innovations(fix, innovations)
+        if (not skip_position and p_prior is not None and self._last_p_prior is not None
+                and self._last_gnss_pos is not None and self._last_gnss_cov is not None):
+            delta_ins = p_prior - self._last_p_prior
+            delta_gnss = np.asarray(fix.pos, dtype=float) - self._last_gnss_pos
+            d = delta_gnss - delta_ins
+            cov_pos_now = _spd_cov_or_fallback(fix.cov_pos)
+            cov_ins_short = (c.es_ins_short_sigma_pos ** 2) * np.eye(3)
+            S_d = cov_pos_now + self._last_gnss_cov + cov_ins_short
+            stat = float(d @ np.linalg.solve(S_d, d))
+            position_event = stat > chi2.ppf(c.es_position_gate_quantile, 3)
+
         return bool(clk_event or xsat_event or cn0_event or position_event)
 
     def update(self, t: float, fix: GnssFix | None, imu: ImuSample | None,
@@ -675,21 +807,55 @@ class TrustEngineImpl:
         if fix is not None:
             raw = self.extractor.step(fix, innovations)
             if raw is not None and fix.valid:
+                gap = float("inf") if self._last_valid_gnss_t is None else (t - self._last_valid_gnss_t)
+                gap_reset_threshold = (self.gnss_law.cfg.es_gap_reset_factor
+                                       * self.gnss_law.cfg.es_nominal_epoch_s)
+                if gap > gap_reset_threshold:
+                    # D-058 follow-up: the position-evidence baseline is
+                    # stale by the whole gap (e.g. a jamming outage), not
+                    # one epoch -- reset it so the position term is skipped
+                    # this epoch (treated as insufficient history) instead
+                    # of comparing a multi-epoch Delta p_INS against a
+                    # one-epoch Delta p_GNSS (see TrustLawConfig.es_gap_
+                    # reset_factor's docstring for the false-fire this
+                    # prevents).
+                    self._last_gnss_pos = None
+                    self._last_gnss_cov = None
+                    self._last_p_prior = None
+                    # 2 epochs: this one (naturally skipped, no history) and
+                    # the next one (the epoch after this one's large
+                    # corrective pull -- see _es_position_quarantine's
+                    # docstring for why one epoch alone is not enough).
+                    self._es_position_quarantine = 2
+
+                skip_position = self._es_position_quarantine > 0
+                if skip_position:
+                    self._es_position_quarantine -= 1
+
                 p = self._gnss_p(raw)
                 nis_ok = raw[0] <= self.gnss_law.cfg.nis_clean_threshold
                 xtilde = self.detector.normalizer.normalize(raw)
                 features_nominal = bool(np.all(np.abs(xtilde[2:11]) <= _FEATURES_NOMINAL_Z))
-                es_evidence = self._physical_spoof_evidence(raw) if self.gnss_law._uses_v2 else False
+                es_evidence = (self._physical_spoof_evidence(raw, fix, nav_prior, innovations,
+                                                              skip_position=skip_position)
+                               if self.gnss_law._uses_v2 else False)
                 self.last_raw_p = p              # D-056 metric (a): logging only, not consumed downstream
                 self.last_es_evidence = es_evidence  # D-056 metric (d): logging only
                 gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal,
                                              nis_value=float(raw[_IDX_NIS_POS]), es_evidence=es_evidence)
 
-                gap = float("inf") if self._last_valid_gnss_t is None else (t - self._last_valid_gnss_t)
                 if gap > self.gnss_law.cfg.T_gap:
                     self.gnss_law.apply_reacquisition_cap()
                     gnss_w = self.gnss_law.w
                 self._last_valid_gnss_t = t
+                # D-058: keep this epoch's raw fix pos/cov for NEXT epoch's
+                # short-baseline test (stored after use above, so the test
+                # above still compares against the PREVIOUS epoch).
+                self._last_gnss_pos = np.asarray(fix.pos, dtype=float).copy()
+                self._last_gnss_cov = _spd_cov_or_fallback(fix.cov_pos)
+                p_prior_now = _p_prior_from_innovations(fix, innovations)
+                if p_prior_now is not None:
+                    self._last_p_prior = p_prior_now
 
         quantum_w = 1.0
         if self.quantum_trust is not None:

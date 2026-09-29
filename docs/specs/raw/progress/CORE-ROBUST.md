@@ -1,5 +1,222 @@
 # CORE-ROBUST progress (resume notes)
 
+## MASTER REJECTED ITEM 6 (round 2): jam non-recovery, meaconing, drift regressions found
+Master's own read of smoke_matrix_core_robust_v2.json: fedqpnt_local WORSE than undefended in
+every attack (drift 121.7 vs 107.7; meaconing 22.3 vs 2.5; jam_cw att 282 vs 269 AND
+post-attack 314 vs 3.1 -- never recovers). Directed to diagnose 4 questions in order with
+per-epoch traces, NOT "pass vs threshold" framing. Constraint: <=4 worker processes (H2-ABRUPT
+needs CPU).
+
+### Q1 jam non-recovery: CONFIRMED Master's hypothesis, plus a SECOND bug, BOTH FIXED
+Trace script `scripts/core_robust_jam_recovery_trace.py` (fedqpnt_local, seed 500, jam_cw
+onset=120 dur=180 sev=0.5, kappa_R=60). Log: `scratchpad/jam_trace_v2.txt` (pre-fix),
+`scratchpad/jam_trace_v4.txt` (post-fix).
+
+Pre-fix trace: during the ~180s outage (fix invalid throughout), w_gnss FROZEN at 0.9998
+(gnss_law.step never called when fix invalid -- expected), err_h grows unbounded to ~167m
+(pure INS coasting, also expected/correct given no valid fix). At t=302 (first valid fix after
+outage): es_evidence=1, stat=936.83 vs gate=16.27 (confirms Master's hypothesis exactly:
+`_last_p_prior`/`_last_gnss_pos` stale from before the outage, so Delta p_INS spans the WHOLE
+outage while Delta p_GNSS spans one epoch). This false-fires E_s, locks w_gnss to ~0.02-0.03.
+SECOND, EXTRA bug found: even after implementing Master's fix (reset baseline on long gap),
+ONE MORE false fire occurred at the NEXT epoch (t=303, stat=763 vs gate=16.27) -- because
+`_last_p_prior` stores the PRE-correction estimate, and the first post-gap epoch applies a
+large corrective pull (soft gating never fully rejects it, err_h dropped 122.9->13.5m in ONE
+epoch); the epoch after that pull sees the pull itself as "Delta p_INS", causing a second
+false fire and re-locking trust for another ~10 epochs.
+
+FIX CHOSEN: Master's option (a) -- reset the baseline (not scale the gate by elapsed-time
+covariance) -- PLUS a 2-epoch quarantine (not just 1) to cover both the stale-baseline epoch
+AND the corrective-pull epoch that follows it. New `TrustLawConfig.es_nominal_epoch_s`
+(=1.0s [ASSUMPTION, matches project's standard GNSS rate]) and `es_gap_reset_factor` (=1.5,
+per Master's directive). New `TrustEngineImpl._es_position_quarantine` counter. New
+`_physical_spoof_evidence(..., skip_position=...)` parameter. All in
+`fedqpnt/trust/trust_law.py`.
+
+POST-FIX trace (`jam_trace_v4.txt`): es never fires during the whole recovery; w_gnss climbs
+SMOOTHLY and MONOTONICALLY from 0.50 (t=302) to 0.91 (t=323) to ~1.0 shortly after; err_h
+converges to ~1.3-1.5m by t=313 (13s after the outage ends) and stays there. No lockout, no
+re-firing, no oscillation.
+
+New regression test: `tests/test_trust_law_es_position.py::test_post_gap_reset_prevents_jam_recovery_lockout`
+(4-epoch scenario: normal -> 180s-gap epoch with ~150m apparent INS drift -> quarantined
+epoch -> quarantine-expired epoch with a genuine abrupt jump that MUST still fire, proving the
+fix doesn't disable detection permanently). Full `tests/test_trust_law_es_position.py` (8
+tests) PASSES. Full suite re-run in progress: `scratchpad/suite_after_jamfix.log` (background
+task bwg9sapji).
+
+### Q2 meaconing: DIAGNOSED (design limitation, not a quick-fix bug; no code change applied)
+Trace: `scripts/core_robust_attack_trace.py meaconing`, log `scratchpad/meaconing_trace.txt`.
+At onset (t=121): x8 (clk_jump feature) spikes to 250.1 sigma (>> es_clk_sigma=5.0) -> E_s
+clk_event correctly fires (a REAL clock-bias jump IS present -- meaconing's common-mode replay
+delay is physically a clock artifact, Psiaki & Humphreys 2016). w_gnss crashes to w_min=0.02
+within 4 epochs and STAYS there (w < w_excl=0.05 in eskf.correct -> GNSS position update is
+FULLY EXCLUDED every epoch, not soft-gated -- w_excl is a separate Sec 2.7 mechanism from the
+D-057 NIS soft-gating fix; soft gating never even gets a chance to run). Meanwhile x1 (nis_pos,
+the position innovation) STAYS TINY throughout (0.001-0.37, same order as clean nominal) --
+the GNSS position fix itself is essentially undisturbed by meaconing (physically expected: a
+common-mode range delay across all satellites is nearly degenerate with clock bias in the
+navigation solution geometry, so it barely perturbs position). err_h grows from ~2m to ~32m
+over 60s purely from the resulting free-inertial coasting (position corrections excluded),
+NOT from a bad GNSS fix. undefended's 2.5m is NOT "soft gating neutralising meaconing" (its
+alpha_gate=0, w=1 always -- gating/trust play no role at all for undefended); it is simply
+that the underlying fix stays good, so blindly accepting it costs nothing.
+ROOT CAUSE: a single scalar "gnss" trust weight conflates POSITION trust and CLOCK trust. A
+genuine clock-only anomaly (meaconing) correctly triggers distrust, but the current design has
+no way to keep trusting position while distrusting clock, so trust correctly detecting an
+attack forces an unnecessarily large position-side cost. This is an ARCHITECTURAL limitation
+(TrustState.weights has one "gnss" weight consumed by both ESKF position/velocity correction
+and ClockKF), not a localized bug in trust_law.py/eskf.py. NO FIX APPLIED without further
+Master direction -- flagged as PROPOSED-DECISION in the final report.
+
+### Q3 drift: DIAGNOSED (correct, intended full-exclusion defence; not a bug)
+Trace: `scripts/core_robust_attack_trace.py drift_spoof`, log `scratchpad/drift_trace.txt`.
+raw_p (ML detector's calibrated spoof/jam probability) rises to 0.85-0.99 within 1-2 epochs of
+onset and STAYS high throughout -- the detector correctly identifies the drift attack (via
+C/N0/other features, NOT via nis_pos: x1 stays tiny, 0.001-0.09, confirming drift_spoof's
+smooth carry-off deliberately produces almost no per-epoch position-innovation signature, by
+design -- ARCHITECTURE.md's whole point of a "drift-in" attack). w_gnss correctly crashes to
+w_min=0.02 and stays there (same w_excl full-exclusion mechanism as Q2) for the entire attack:
+this IS the intended, correct response to sustained, confidently-detected spoofing. The
+resulting error growth (to ~31.7m by 60s into the attack, in the fixed run) is pure
+free-inertial MEMS coasting drift, traded against undefended's behavior of simply following
+the spoof's own (bounded, ramped) drift-off from truth. For THIS attack configuration
+(severity=0.5, 180s), the two costs are comparable in magnitude (fedqpnt_local's coasting-drift
+cost is only modestly larger than undefended's spoof-following cost) -- this is the SAME
+tension already flagged in item 6(ii)'s D-055 safety-principle sweep (1-5% RMSE excess vs
+undefended failing the literal 3sigma_nom bound). NOT a new bug; NO FIX APPLIED (there is no
+"wrong exclusion" here -- the exclusion is correct and working as designed; the cost is
+inherent to correctly rejecting a confidently-detected, sustained spoof with an inertial-only
+navigation fallback).
+
+### D-062 git state (recorded at launch and end of the Q4 runs)
+Launch: HEAD=112bfcfe7708e5c1a6ddae7c3398b595acf52bfc, `git status --porcelain fedqpnt/` = M
+fedqpnt/fusion/eskf.py, M fedqpnt/trust/trust_law.py (my own items 1/2/3+jam-fix edits, nothing
+else). End (after both runs completed): SAME HEAD, SAME two modified files -- confirmed no
+fedqpnt/ edits happened while the evaluation runs were live.
+
+### Q4 RESULTS (DONE)
+`results/m1/smoke_matrix_core_robust_v3.json` (wall=1855.9s, --workers 4) and
+`results/m1/s1_far_check_core_robust_v3.json` (wall=1404.5s, --workers 4), both post-jam-fix.
+S1: fedqpnt_local FAR=0.0/h, ANEES_pos=0.875, mean_w_gnss=0.971, RMSE ratio (fedqpnt/fixed_trust)
+= 0.9877. Smoke matrix drift_spoof/meaconing unchanged from pre-fix (121.7/107.7 and 22.3/2.5 --
+expected, no code change applied to those paths). jam_cw IMPROVED: att RMSE 282.4 (same as
+before -- during-attack behavior unaffected, expected), **post RMSE 314.29 -> 35.53** (8.8x
+better), max_post 1163.4 -> 156.7, mean_w_gnss(att) 0.817 -> 0.883. Residual gap vs
+baseline_b_bin's post=3.07 remains (not fully matching a hard-switch law's recovery speed) --
+not chased further this session. Full report SENT to Master via SubagentHandback with the raw
+table (no PASS/FAIL framing) and the Q1-Q3 diagnosis.
+
+## D-063 ROUND 3 (Master accepted the jam fix; commit pending; NO fedqpnt/ edits until told)
+Git state at start of round 3: HEAD=112bfcfe7708e5c1a6ddae7c3398b595acf52bfc,
+`git status --porcelain fedqpnt/` = M fedqpnt/fusion/eskf.py, M fedqpnt/trust/trust_law.py
+(same as end of round 2 -- unchanged).
+
+Tasks (order A -> B -> C(proposal only) -> D(design note)), <=4 processes, NO fedqpnt/ edits:
+
+**Task A (coasting envelope + tactical smoke matrix)**: LAUNCHED, background task **b9exmk10b**.
+- New script `scripts/core_robust_coasting_envelope.py`: forces gnss_epoch=None for an exact
+  180s window (no attack model involved -- pure measurement), grid imu_grade
+  {industrial_mems, tactical} x CAI {on, off}, 5 seeds (500-504), reports RMSE/max over the
+  outage + err_h at +60/120/180s. Log: `scratchpad/taskA_coasting_envelope.log`.
+- Edited `scripts/run_m1_smoke.py` (scripts/, not fedqpnt/ -- allowed) to add `--imu-grade` and
+  `--methods` CLI flags (previously hardcoded to industrial_mems and all 7 methods).
+- Then runs `run_m1_smoke.py --imu-grade tactical --methods fedqpnt_local undefended
+  baseline_b_bin bprime --workers 4` -> `results/m1/smoke_matrix_tactical_v1.json`, log
+  `scratchpad/taskA_smoke_tactical.log`.
+- Partial result so far (industrial_mems/CAI-ON row only): RMSE=257.05 max=645.45 @60s=36.71
+  @120s=218.96 @180s=8.18 (mean across 5 seeds; per-seed @180s=[4.97,1.57,9.73,19.05,5.59] --
+  high seed-to-seed variance, expected for a coasting-error metric that depends on trajectory
+  dynamics during the outage window).
+
+**Task B (ClockKF under meaconing): DONE.** `scripts/core_robust_clock_meaconing_trace.py`
+(v2, first version had a units bug -- logged every IMU tick instead of every GNSS epoch, fixed
+by gating on `tick.gnss_epoch is not None`). Log: `scratchpad/taskB_clock_meaconing_v2.log`.
+
+CONFIRMED from reading `fedqpnt/fusion/clock.py` (READ ONLY): ClockKF.step DOES consume
+w_gnss (`R = diag(r_bias,r_drift) / max(w_gnss, w_min)`) -- distrust inflates R, it does not
+hard-skip the update.
+
+ROOT CAUSE FOUND: `ClockKFConfig.q_bias = 1.0` (m^2/s continuous-time PSD) is a LARGE,
+UNCONDITIONAL process-noise term added to P every epoch via `Q = q_bias*dt` in `_propagate`,
+REGARDLESS of the trust weight. During meaconing, fix.clk_bias jumps to ~753m (matches
+replay_delay_m=1500*severity(0.5)=750m) at onset. w_gnss crashes to w_min=0.02 within 4
+epochs (as expected/correct), inflating R_eff to ~450 (=9/0.02) -- but P keeps growing by
+q_bias*dt=1.0 m^2 EVERY epoch regardless, so the Kalman gain K=P/(P+R_eff) creeps back UP
+over time even though R_eff itself never changes. Traced values (fedqpnt_local, seed 500):
+est_bias climbs from 4.0m (t=120) through 46.5/59.7/69.2/79.3/90.7/103.3/117.2/132.1m
+(t=121..128), i.e. the PER-EPOCH increment is GROWING (9.5, 10.1, 11.3, 12.6, 13.9, 14.9m/epoch)
+even at w pinned at the 0.02 floor -- P is winning the tug-of-war against R_eff's inflation
+the longer the attack persists. RESULT: attack-window RMSE_t = 2298.7ns for fedqpnt_local
+(vs undefended's 2480.2ns -- only marginally better, because the "protection" from distrust
+decays over the 180s window instead of holding). Nominal (no-attack) whole-mission RMSE_t =
+13.7ns for BOTH methods (confirms the clock model itself is fine; the 1.3us number is
+attack-specific, not a baseline artifact). POST-attack RMSE_t: fedqpnt_local=387.7ns is WORSE
+than undefended's 198.6ns -- undefended's full-trust (w=1) fix snaps the KF back quickly once
+meaconing ends (high gain, fast convergence); fedqpnt_local's elevated P (grown during the
+"protected" period) takes longer to shrink back down even after trust returns to 1, since P
+only shrinks via well-gained corrections, not just the passage of time. Whole-mission RMSE_t:
+fedqpnt_local=1291.6ns, undefended=1366.5ns (matches the two numbers Master quoted almost
+exactly, 1284 vs 1358ns).
+ANSWER to "why is the timing error ~1.3us even when GNSS is excluded": it's NOT because
+exclusion fails to work at all -- w_gnss correctly crashes to 0.02 -- it's because
+ClockKFConfig.q_bias's UNCONDITIONAL (not trust-scaled) process noise lets P grow unbounded
+during a sustained low-trust period, so the SAME w_min floor that fully protects the ESKF's
+position states (which use w_excl-based hard exclusion, not just R-inflation) only partially
+and TEMPORARILY protects the clock bias, because ClockKF has no w_excl-style hard-exclusion
+floor -- it only ever inflates R (soft-scoring), which is exactly what q_bias's continuous
+growth eventually overwhelms. PROPOSED-DECISION (no fix applied -- awaiting Master's commit
++ go-ahead): scale q_bias (and/or q_drift) down by the trust weight too (e.g.
+`Q = q_bias*dt*max(w_gnss, w_min)` or similar), or add a w_excl-style hard skip to ClockKF
+matching the ESKF's Sec 2.7 convention, so P does not grow unboundedly while GNSS is
+confidently distrusted.
+
+**Task C (post-jam residual)**: NOT YET STARTED. Plan: trace the recovery path with the ALREADY
+-ACCEPTED jam fix (E_s gap-reset + 2-epoch quarantine) active, check whether the SensorTrustLaw
+v2 PROBE state (T_probe=10s, w_probe=0.3 fixed during PROBE) is what caps the recovery slope
+even once E_s stops firing (i.e. is a PROBE ramp, not E_s, now the bottleneck for the residual
+35.5m vs 3.1m gap found in round 2's Q4). Propose a fix; DO NOT IMPLEMENT until Master's commit
+lands and gives the go-ahead.
+
+**Task D (position/clock trust split design note)**: NOT YET STARTED. Write
+`docs/specs/raw/TRUST_SPLIT_DESIGN.md` covering w_pos/w_clk split, which evidence drives which
+weight, state-machine implications, affected files/tests, effect on
+`patent/CLAIMS_SKELETON.md` (READ ONLY), and flag whether a displaced-meaconer scenario variant
+is needed (current meaconing model is effectively co-located -- position barely disturbed).
+
+### Q4 re-verification: LAUNCHED (background task b858j98ql)
+Full suite re-run after the jam fix CONFIRMED GREEN (`scratchpad/suite_after_jamfix.log`, exit
+0, no F/E markers). Smoke matrix (`scratchpad/v3_smoke_matrix.log` ->
+`results/m1/smoke_matrix_core_robust_v3.json`) THEN S1 far check
+(`scratchpad/v3_s1_far_check.log` -> `results/m1/s1_far_check_core_robust_v3.json`), both
+`--workers 4` per Master's CPU constraint. When done, read both, build the raw-numbers table
+(no PASS/FAIL framing) with drift_spoof/meaconing/jam_cw x rmse_h_att/rmse_h_post/max_h_att/
+max_h_post/mean_w_gnss for fedqpnt_local vs undefended (and the other methods for context),
+and send the structured report per Master's 4 questions.
+
+### Q4 re-verification: IN PROGRESS (superseded by "LAUNCHED" above; keeping for history)
+Re-run smoke matrix + S1 far check with the Q1 fix applied, `--workers 4` (Master's CPU
+constraint for H2-ABRUPT), full table including post-attack column, RAW NUMBERS ONLY (no
+PASS/FAIL framing). Full suite re-run after the jam fix (`scratchpad/suite_after_jamfix.log`,
+background task bwg9sapji) still running as of this checkpoint -- confirm green before/while
+launching Q4's heavier campaign. NOT YET LAUNCHED as of this checkpoint.
+
+Planned commands (run sequentially, not parallel, per the earlier BrokenProcessPool lesson):
+```
+python -u scripts/run_m1_smoke.py --kappa-r 60 --weights results/m1/detector_weights_sup_v2.npz --workers 4 --out results/m1/smoke_matrix_core_robust_v3.json > scratchpad/v3_smoke_matrix.log 2>&1
+python -u scripts/run_m1_s1_far_check.py --kappa-r 60 --weights results/m1/detector_weights_sup_v2.npz --workers 4 --out results/m1/s1_far_check_core_robust_v3.json > scratchpad/v3_s1_far_check.log 2>&1
+```
+(scratchpad path prefix omitted above for brevity -- use the full path as in earlier commands.)
+
+## STATUS: SESSION COMPLETE (STALE -- see "MASTER REJECTED ITEM 6" section above; item 6 is
+back open, do not treat this file's older "COMPLETE" marker below as current)
+All 6 items done. Final report sent via SubagentHandback. Full test suite green (final run,
+`scratchpad/final_full_suite.log`, exit 0, no failure markers -- the earlier
+test_fleet_adapter.py::test_local_only_detector_hash_changes_across_rounds failure, which was
+pre-existing/out-of-scope (D-059), is no longer present in this final run). See
+`docs/specs/raw/CORE_ROBUST_NOTES.md` for the terse writeup.
+
+
 Scratchpad dir (all logs live here):
 `C:\Users\DELL\AppData\Local\Temp\claude\C--Users-DELL-Downloads-FEDQPNT\c48dadfb-ab52-4d01-a3c2-95547b6c76be\scratchpad`
 
