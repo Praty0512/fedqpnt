@@ -148,9 +148,37 @@ onset dominates the fire count at these severities more than raw jump size;
    existing severity=0.5 result under a new `auc_by_severity` key).
    **Severity=0.15 result (same 13 seeds, n=1534 epochs, 1157 positive):
    AUC=0.805** -- BELOW Master's 0.85 low-headroom threshold, so per the
-   pre-registered decision rule, H2/H4 run "as planned" (not flagged
-   low-headroom). Still waiting on 0.1 and 0.2 (reported for context per
-   Master's request) before the job finishes.
+   pre-registered decision rule, **H2/H4 run "as planned" (not flagged
+   low-headroom)** -- CONFIRMED by Master's follow-up message ("AUC 0.805
+   at severity 0.15 is accepted"). **Job b1mcfth4f now DONE, full table:**
+
+   | severity | jump (80m x sev) | AUC (13 seeds, n=1534, 1157 pos) |
+   |---|---|---|
+   | 0.1  | 8 m  | 0.819 |
+   | 0.15 (fleet severity, ACCEPTED) | 12 m | 0.805 |
+   | 0.2  | 16 m | 0.783 |
+   | 0.5 (training-pool default, not fleet-matched) | 40 m | 0.898 |
+
+   All three explicit-severity values sit in a narrow 0.78-0.82 band, well
+   below the 0.5-severity 0.898 and below Master's 0.85 threshold --
+   meaningful headroom for FL to add value exists at the fleet's chosen
+   severity (0.15). Written to `results/fleet/h2_abrupt_theta0_auc_check.json`.
+
+## Wait-loop bug found + fixed (Master's second message)
+Master identified the original wait-loop (task bg6yh1t5m, condition "total
+python.exe <=4") could NEVER fire: 6 orphaned idle worker processes from
+2026-09-28 10:29 (PIDs 22248, 34792, 6288, 19688, 31960, 33460; parent 7460)
+are permanently alive, user-owned, and must NOT be killed by me. Stopped
+bg6yh1t5m via TaskStop (it had NOT yet launched the fleet driver -- confirmed
+safe, no orphaned fleet processes from my side). Rewrote
+`<scratchpad>/h2_abrupt_wait_and_run.sh` to explicitly exclude those 6 PIDs
+from the count (condition now: <=4 OTHER python.exe, i.e. excluding the 6
+known orphans). Relaunched as task **bdoo5lti3**
+(log `h2_abrupt_wait_and_run_v2.log`). Current count (8 other processes):
+CORE-ROBUST's `defended_vs_undefended` job (PID 5800 + its 6 workers
+34340/33040/27112/32324/25068/22388) + my own severity-AUC job (PID 17020,
+"fine" per Master, will exit on its own once severity=0.2 finishes). In
+practice the gate is waiting for PID 5800's job to finish, per Master's note.
 2. Pre-registered decision rule (DO NOT change after seeing fleet results):
    if zero-shot AUC at sev 0.15 >= 0.85 -> still run H2/H4 as planned but
    label it 'low-headroom' and ALSO report per-severity AUC deltas (FL

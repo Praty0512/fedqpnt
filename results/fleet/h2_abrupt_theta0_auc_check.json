@@ -17,5 +17,26 @@
   ],
   "n_epochs": 1534,
   "n_pos": 1157,
-  "auc_abrupt_heldout": 0.8980923407055199
+  "auc_abrupt_heldout": 0.8980923407055199,
+  "note_by_severity": "D-061a item 1 (Master ruling): theta0_noabrupt held-out abrupt AUC at EXPLICIT severities (same 13 seeds as the 0.5-default-severity 0.898 result above), matching the H2/H4 fleet severity (0.15) plus 0.1/0.2 for context. auc_abrupt_heldout (0.898) above was measured at the training pool's DEFAULT severity=0.5, NOT 0.15.",
+  "auc_by_severity": {
+    "0.15": {
+      "severity": 0.15,
+      "n_epochs": 1534,
+      "n_pos": 1157,
+      "auc": 0.8052507055427808
+    },
+    "0.1": {
+      "severity": 0.1,
+      "n_epochs": 1534,
+      "n_pos": 1157,
+      "auc": 0.818500695799298
+    },
+    "0.2": {
+      "severity": 0.2,
+      "n_epochs": 1534,
+      "n_pos": 1157,
+      "auc": 0.7829083264364759
+    }
+  }
 }
