@@ -33,6 +33,23 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-061 · 2026-09-29 · CORE-ROBUST items 1–4 accepted (κ_R = 60; effective-bias b_a truth); item 6 REJECTED: defended is worse than undefended on the new core; the test-seed gate stays closed
+- **Accepted:**
+  - eigenvalue-clip hygiene (D-043);
+  - soft gating (D-057);
+  - the E_s short-baseline jump test (D-058), with the nav_prior bug fix;
+  - κ_R = 60 (ANEES_pos 0.95);
+  - b_a NEES is reported against the **effective-bias truth** (turn-on + GM + RRW + SF/misalignment aliasing): 522 → 19; the ~6× residual is a stated limitation;
+  - E_s firing 21% on drift at severity 0.5 is plausible (real kinematic inconsistency), noted.
+- **Rejected (Master's review of `smoke_matrix_core_robust_v2.json`; the agent had reported "PASS vs threshold"):**
+  - fedqpnt_local is worse than undefended in every attack: drift 121.7 vs 107.7 m; meaconing 22.3 vs 2.5 m; jam_cw during the attack 282 vs 269 m;
+  - **after jamming ends: 314 vs 3.1 m** (no recovery; this violates D-051).
+  - Master's hypothesis: the stale `_last_p_prior` baseline across GNSS outages makes E_s fire on the first fix after jamming.
+  - Diagnosis assigned to CORE-ROBUST.
+- **Safety-principle bound (proposed relaxation) — ruled NOT relaxed:** the D-055 bound (undefended + 3σ_nom) is kept as pre-registered and the FAILs are reported as measured. Note: σ_nom comes from the nominal scenario (0.24 m), not from the spread of attack-phase RMSE across seeds; a revised criterion may only be pre-registered prospectively before M4, labelled as defined after the tuning data.
+- **Gate:** results/GATE_D047.json stays `cleared: false` until defended ≥ undefended is shown on tuning seeds (or the failure is understood and accepted as a stated result).
+- **Owner:** Master
+
 ### D-061a · 2026-09-29 · H2-ABRUPT design rulings: severity 0.15, pre-registered headroom check, old sub-rule notes superseded
 - **Decision:** (1) Abrupt severity 0.15 is accepted for the E_s-quiet regime (E_s fires 0% at 0.15/0.1, and 9.8–15.6% at >= 0.2). (2) Before the fleet runs, report θ0_noabrupt's zero-shot abrupt AUC per severity (0.1/0.15/0.2). **Pre-registered rule:** if AUC(0.15) >= 0.85, H2 is labelled 'low-headroom' and per-severity FL-minus-zero-shot deltas are reported; either way the results are reported as measured (D-002). (3) The abrupt numbers in H2_SUBRULE_NOTES.md are marked SUPERSEDED (measured on the pre-D-058 core), not deleted.
 - **Rationale:** Zero-shot abrupt AUC is 0.898 at the old severities, so the "novel family" may already be covered by transfer from other families. Leakage check (Master): jam_then_spoof uses drift_spoof, not abrupt, so there is no direct contamination.

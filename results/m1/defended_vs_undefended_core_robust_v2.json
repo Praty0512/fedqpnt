@@ -1,0 +1,212 @@
+{
+  "label": "D-048 defended-vs-undefended check, tuning seeds, kappa_R PROVISIONAL",
+  "seeds": [
+    500,
+    501,
+    502,
+    503,
+    504
+  ],
+  "duration_s": 600.0,
+  "kappa_R": 60.0,
+  "weights_used": "results\\m1\\detector_weights_sup_v2.npz",
+  "wall_s": 657.9688744544983,
+  "scenarios": {
+    "nominal": {
+      "metric": "rmse_h_pre",
+      "sigma_nom": 0.8164025052390976,
+      "mean_undefended": 2.8251412940482012,
+      "methods": {
+        "fedqpnt_local": {
+          "metric": "rmse_h_pre",
+          "mean": 2.7906428183801757,
+          "per_seed": [
+            1.6340948672720037,
+            2.7453052194071503,
+            2.5122789750365406,
+            3.332301308825257,
+            3.729233721359927
+          ],
+          "threshold_undefended_plus_3sigma": 5.274348809765494,
+          "PASS": true
+        },
+        "baseline_a": {
+          "metric": "rmse_h_pre",
+          "mean": 2.757911057213417,
+          "per_seed": [
+            1.5179091196397387,
+            2.604552873931966,
+            2.4528241522353547,
+            3.3914290191257352,
+            3.822840121134292
+          ],
+          "threshold_undefended_plus_3sigma": 5.274348809765494,
+          "PASS": true
+        },
+        "baseline_b_bin": {
+          "metric": "rmse_h_pre",
+          "mean": 2.82306020421494,
+          "per_seed": [
+            1.569992689003145,
+            2.826328366582161,
+            2.4877926105381394,
+            3.5009762185717346,
+            3.7302111363795203
+          ],
+          "threshold_undefended_plus_3sigma": 5.274348809765494,
+          "PASS": true
+        },
+        "baseline_b_cont": {
+          "metric": "rmse_h_pre",
+          "mean": 2.7906428183801757,
+          "per_seed": [
+            1.6340948672720037,
+            2.7453052194071503,
+            2.5122789750365406,
+            3.332301308825257,
+            3.729233721359927
+          ],
+          "threshold_undefended_plus_3sigma": 5.274348809765494,
+          "PASS": true
+        },
+        "bprime": {
+          "metric": "rmse_h_pre",
+          "mean": 2.7744111433499237,
+          "per_seed": [
+            1.6251896748442904,
+            2.7446488111829543,
+            2.4777471977943257,
+            3.344843294709639,
+            3.6796267382184076
+          ],
+          "threshold_undefended_plus_3sigma": 5.274348809765494,
+          "PASS": true
+        },
+        "fixed_trust": {
+          "metric": "rmse_h_pre",
+          "mean": 2.8234374533587614,
+          "per_seed": [
+            1.6106890569171823,
+            2.521124448354353,
+            2.541514257287904,
+            3.5248037419386193,
+            3.919055762295748
+          ],
+          "threshold_undefended_plus_3sigma": 5.274348809765494,
+          "PASS": true
+        },
+        "undefended": {
+          "metric": "rmse_h_pre",
+          "mean": 2.8251412940482012,
+          "per_seed": [
+            1.6087807531162452,
+            2.5306650423684345,
+            2.54382270480222,
+            3.519643416705979,
+            3.9227945532481274
+          ],
+          "threshold_undefended_plus_3sigma": 5.274348809765494,
+          "PASS": true
+        }
+      }
+    },
+    "jam_cw": {
+      "metric": "rmse_h_att",
+      "sigma_nom": 55.400203725700834,
+      "mean_undefended": 268.9256886124193,
+      "methods": {
+        "fedqpnt_local": {
+          "metric": "rmse_h_att",
+          "mean": 282.3803069373736,
+          "per_seed": [
+            238.33377171140333,
+            209.95281095370473,
+            304.1291814918649,
+            386.1255359269261,
+            273.3602346029691
+          ],
+          "threshold_undefended_plus_3sigma": 435.1262997895218,
+          "PASS": true
+        },
+        "baseline_a": {
+          "metric": "rmse_h_att",
+          "mean": 745.6629088428265,
+          "per_seed": [
+            547.1107390966087,
+            475.2299913169069,
+            449.4001127254558,
+            1100.0948575102902,
+            1156.4788435648707
+          ],
+          "threshold_undefended_plus_3sigma": 435.1262997895218,
+          "PASS": false
+        },
+        "baseline_b_bin": {
+          "metric": "rmse_h_att",
+          "mean": 269.2128666101327,
+          "per_seed": [
+            230.18279897585788,
+            195.44749235914654,
+            298.74513123792684,
+            354.6886616159948,
+            267.00024886173776
+          ],
+          "threshold_undefended_plus_3sigma": 435.1262997895218,
+          "PASS": true
+        },
+        "baseline_b_cont": {
+          "metric": "rmse_h_att",
+          "mean": 282.3803069373736,
+          "per_seed": [
+            238.33377171140333,
+            209.95281095370473,
+            304.1291814918649,
+            386.1255359269261,
+            273.3602346029691
+          ],
+          "threshold_undefended_plus_3sigma": 435.1262997895218,
+          "PASS": true
+        },
+        "bprime": {
+          "metric": "rmse_h_att",
+          "mean": 269.67688071757476,
+          "per_seed": [
+            237.92225435260366,
+            199.98417348763053,
+            295.7915120286318,
+            351.4892510001907,
+            263.19721271881707
+          ],
+          "threshold_undefended_plus_3sigma": 435.1262997895218,
+          "PASS": true
+        },
+        "fixed_trust": {
+          "metric": "rmse_h_att",
+          "mean": 269.0185514088037,
+          "per_seed": [
+            232.70519770103394,
+            193.35695098585035,
+            299.88993822722506,
+            355.3461768682834,
+            263.7944932616257
+          ],
+          "threshold_undefended_plus_3sigma": 435.1262997895218,
+          "PASS": true
+        },
+        "undefended": {
+          "metric": "rmse_h_att",
+          "mean": 268.9256886124193,
+          "per_seed": [
+            232.65688809748147,
+            193.38703200226064,
+            299.88993822722506,
+            354.6120771152137,
+            264.0825076199158
+          ],
+          "threshold_undefended_plus_3sigma": 435.1262997895218,
+          "PASS": true
+        }
+      }
+    }
+  }
+}
