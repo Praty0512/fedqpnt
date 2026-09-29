@@ -41,6 +41,8 @@ the method roster but not this exact wiring; flag for Master review.
 """
 from __future__ import annotations
 
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R
+
 import json
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -151,7 +153,7 @@ def _s15_kwargs(node_ids: list[str], attack: dict, attack_frac: float = 0.3) -> 
 
 def build_fleet_scenario_config(scenario, method: str, seed: int, *, n_nodes: int | None = None,
                                  duration_s: float | None = None, n_rounds: int = 10,
-                                 round_period_s: float | None = None, kappa_R: float = 40.0,
+                                 round_period_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R,
                                  kappa_Q: float = 1.0) -> FleetScenarioConfig:
     """Scenario -> FleetScenarioConfig, per ARCHITECTURE.md section 6.1's
     S5/S8/S9/S12/S15 rows (fault injection: failures, cold start, comms
@@ -272,7 +274,7 @@ def _run_local_only_fleet(cfg: FleetScenarioConfig, theta0: dict[str, np.ndarray
 
 def run_fleet_task(scenario, method: str, seed: int, *, run_root: str = "runs",
                     duration_s: float | None = None, n_nodes: int | None = None, n_rounds: int = 10,
-                    kappa_R: float = 40.0, kappa_Q: float = 1.0,
+                    kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                     join_timeout_s: float = 1800.0) -> dict[str, Any]:
     """Runs one fleet (scenario, method, seed) via ``run_fleet`` and writes
     a campaign-schema result file. Mirrors

@@ -20,6 +20,8 @@ across the whole ``fedqpnt`` package, and confirms this module is outside
 """
 from __future__ import annotations
 
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R
+
 import multiprocessing as mp
 from concurrent.futures import ProcessPoolExecutor
 
@@ -139,7 +141,7 @@ def collect_run(args: tuple[int, str, float]) -> dict:
                          quantum_grade="field", gnss_rate_hz=1.0, hold_s=HOLD_S,
                          heading_noise_deg=2.0, attacks=atk_list or [])
     env = NodeEnvironment(env_cfg, seed=seed, node_id="sup", dt=0.01, duration_s=duration_s)
-    agent_cfg = make_agent_config("fixed_trust", kappa_R=40.0, kappa_Q=1.0, world="flat",
+    agent_cfg = make_agent_config("fixed_trust", kappa_R=DEFAULT_KAPPA_R, kappa_Q=1.0, world="flat",
                                    quantum_enabled=True, detector_weights_path=None)
     agent = Agent(agent_cfg, env.imu.config(), node_id="sup")
 

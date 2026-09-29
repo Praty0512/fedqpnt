@@ -19,6 +19,7 @@ import torch
 
 torch.set_num_threads(1)
 
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R
 from fedqpnt.core.types import GlobalModel
 from fedqpnt.eval import metrics as M
 from fedqpnt.fl.client import ClientConfig, FLClient
@@ -60,7 +61,7 @@ class FleetNodeSpec:
     hold_s: float = 30.0
     heading_noise_deg: float = 2.0
     attack: dict | None = None
-    kappa_R: float = 40.0
+    kappa_R: float = DEFAULT_KAPPA_R
     kappa_Q: float = 1.0
     method: str = "fedqpnt_local"
     round_period_s: float = 60.0

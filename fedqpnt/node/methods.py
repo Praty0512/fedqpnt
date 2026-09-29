@@ -33,7 +33,7 @@ from fedqpnt.node.agent import AgentConfig
 from fedqpnt.fusion.clock import ClockKFConfig
 from fedqpnt.trust.trust_law import TrustEngineConfig, make_method_config
 
-DEFAULT_KAPPA_R = 40.0   # PROVISIONAL per D-023, chosen by scripts/tune_kappa_r.py (section 7.6).
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R  # noqa: E402  (D-061/D-067: kappa_R = 60, single source)
 # D-028: fedqpnt/fusion/eskf.py's process model is being changed concurrently
 # (dynamics-dependent Q inflation for unmodelled IMU scale-factor/misalignment,
 # another agent). That changes the propagated P this value was tuned against,

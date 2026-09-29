@@ -17,6 +17,8 @@ gate clears).
 """
 from __future__ import annotations
 
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R
+
 import hashlib
 import json
 import subprocess
@@ -62,7 +64,7 @@ def gate_cleared(path: Path | str = GATE_D047_PATH) -> bool:
 # Run spec construction (Scenario -> fedqpnt.node.runner.RunSpec dict)
 # --------------------------------------------------------------------------
 def build_spec_dict(scenario: SC.Scenario, method: str, seed: int, *, duration_s: float | None = None,
-                     kappa_R: float = 40.0, kappa_Q: float = 1.0,
+                     kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                      detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS,
                      record: bool = False, record_root: str = "runs_raw") -> dict[str, Any]:
     return dict(
@@ -98,7 +100,7 @@ class RunTask:
 
 
 def generate_tasks(scenario_ids: list[str], methods: list[str] | None, seeds: list[int], *,
-                    duration_s: float | None = None, kappa_R: float = 40.0, kappa_Q: float = 1.0,
+                    duration_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                     detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS,
                     n_rounds: int = 10, n_nodes: int | None = None) -> list[RunTask]:
     """Cross product scenario x method x seed, methods defaulting to each
@@ -149,7 +151,7 @@ def _execute_one_fleet(task: "RunTask", run_root: str) -> dict[str, Any]:
     from fedqpnt.eval import fleet_adapter as FA
     scenario = SC.get(task.scenario_id)
     return FA.run_fleet_task(scenario, task.method, task.seed, run_root=run_root,
-                              duration_s=task.spec.get("duration_s"), kappa_R=task.spec.get("kappa_R", 40.0),
+                              duration_s=task.spec.get("duration_s"), kappa_R=task.spec.get("kappa_R", DEFAULT_KAPPA_R),
                               kappa_Q=task.spec.get("kappa_Q", 1.0), n_rounds=task.spec.get("n_rounds", 10),
                               n_nodes=task.spec.get("fleet_size"))
 
@@ -200,7 +202,7 @@ def _execute_one(task_dict: dict[str, Any], run_root: str, python_exe: str) -> d
 
 
 def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str] | None = None,
-                  run_root: str = "runs", duration_s: float | None = None, kappa_R: float = 40.0,
+                  run_root: str = "runs", duration_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R,
                   kappa_Q: float = 1.0, n_workers: int | None = None, final: bool = False,
                   gate_cleared_flag: bool = False, python_exe: str | None = None,
                   n_rounds: int = 10, n_nodes: int | None = None) -> list[dict[str, Any]]:

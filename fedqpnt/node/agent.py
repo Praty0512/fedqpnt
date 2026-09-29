@@ -31,6 +31,7 @@ from typing import Any
 
 import numpy as np
 
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R
 from fedqpnt.core.types import GnssFix, ImuSample, Innovation, NavSolution, QuantumSample, TrustState
 from fedqpnt.fusion.eskf import ESKF, ESKFConfig
 from fedqpnt.fusion.clock import ClockKF, ClockKFConfig, ClockSolution
@@ -62,7 +63,7 @@ def _split_gnss_innovation(innovations: list[Innovation]) -> list[Innovation]:
 @dataclass
 class AgentConfig:
     world: str = "flat"
-    kappa_R: float = 40.0            # PROVISIONAL (D-023/D-027 tuning-seed procedure, section 7.6).
+    kappa_R: float = DEFAULT_KAPPA_R  # D-061/D-067 (was PROVISIONAL 40) (D-023/D-027 tuning-seed procedure, section 7.6).
                                       # D-028: the ESKF process model is being changed concurrently
                                       # (dynamics-dependent Q inflation), which changes the P this
                                       # value was tuned against -- re-tune with scripts/tune_kappa_r.py

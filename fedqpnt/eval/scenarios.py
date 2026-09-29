@@ -8,7 +8,7 @@ acceptance criteria as executable checks over the campaign's aggregated,
 per-method, per-seed results.
 
 D-046/D-047: results depending only on position/velocity (RMSE_h, latency,
-detector/trust behaviour) may proceed under kappa_R = 40 PROVISIONAL.
+detector/trust behaviour) may proceed under kappa_R = 60 (D-061; was 40 PROVISIONAL).
 Claims depending on attitude/bias estimates -- GNSS-outage drift, the
 CAI/H3 benefit, S6 (CAI bias drift), S14 (multi-hour stability) -- are
 BLOCKED until the ESKF psi/b consistency issue (D-047) is fixed. Every
@@ -27,7 +27,7 @@ import numpy as np
 # kappa_R_status stamp (D-046/D-047): every artefact this module's callers
 # produce (campaign run records, report tables) must carry this literal.
 # --------------------------------------------------------------------------
-KAPPA_R_STATUS = "PROVISIONAL_D047_kappa_R=40"
+KAPPA_R_STATUS = "D-061_kappa_R=60"
 
 METHOD_ALL = ("fedqpnt_local", "baseline_a", "baseline_b_bin", "baseline_b_cont",
               "bprime", "fixed_trust", "undefended")

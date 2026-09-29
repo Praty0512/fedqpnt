@@ -9,6 +9,8 @@ result file per (scenario_id, method, seed) matching
 """
 from __future__ import annotations
 
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R
+
 import hashlib
 import json
 import multiprocessing as mp
@@ -52,7 +54,7 @@ class FleetScenarioConfig:
     failure_round: dict[str, int] = field(default_factory=dict)     # S5
     delay_window: dict[str, tuple[int, int]] = field(default_factory=dict)   # S5
     poison_kind: dict[str, str] = field(default_factory=dict)       # S12/S15 (node-local: sign_flip/label_flip)
-    kappa_R: float = 40.0
+    kappa_R: float = DEFAULT_KAPPA_R
     kappa_Q: float = 1.0
     gnss_rate_hz: float = 1.0
     hold_s: float = 30.0

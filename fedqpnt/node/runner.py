@@ -20,6 +20,7 @@ from typing import Any
 
 import numpy as np
 
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R
 from fedqpnt.core.seeding import stream
 from fedqpnt.eval import metrics as M
 from fedqpnt.node.agent import Agent
@@ -47,7 +48,7 @@ class RunSpec:
     hold_s: float = 30.0
     heading_noise_deg: float = 2.0
     attack: dict | None = None          # {"kind","onset_s","duration_s","severity","params"}
-    kappa_R: float = 40.0
+    kappa_R: float = DEFAULT_KAPPA_R
     kappa_Q: float = 1.0
     detector_weights_path: str | None = None
     record: bool = False

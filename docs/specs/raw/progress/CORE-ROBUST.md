@@ -131,6 +131,12 @@ Done (non-fedqpnt): docs/REFERENCES.md entry "[TO VERIFY by user]" (not in refs.
 tests/test_clock_nees_consistency.py (xfail-marked): truth/filter share values and mean clock NEES
 over 20 seeds x 600 epochs within chi2_2 bounds. STILL waiting for "H2 telemetry landed" (no
 fedqpnt/ edits yet).
+CITATIONS VERIFIED by user (Consensus): h0=2e-19 s, h_-2=2e-20 1/s (h_-1=7e-21 not modelled),
+attributed to Brown & Hwang in Krawinkel & Schon 2021, NAVIGATION, doi:10.1002/navi.444;
+q_b=h0/2 and q_d=2*pi^2*h_-2 from Qin et al. 2021, Sensors 21:466, doi:10.3390/s21020466.
+q_drift=3.55e-2 m^2/s^3 (note: my docstring in tests says ~3.6e-2, fine). Use all three in
+change (i) provenance comments. REFS agent edits REFERENCES.md/refs.bib: I must NOT touch them (my
+earlier "[TO VERIFY]" REFERENCES.md entry is theirs to reconcile). Still waiting for "H2 telemetry landed".
 ORDER after go: (i) ClockKF holdover, (ii) shadow probe + reacq consistency, (iii) trust split
 (weights["gnss"]=min alias; mean_w_pos/mean_w_clk over attack window AND whole mission), each with
 tests + full suite green + git state per D-062; then ONE combined re-verification at MEMS+tactical
@@ -462,3 +468,21 @@ the Bash tool with `run_in_background: true` (do NOT nohup+disown -- that detach
 tool's own tracking and notifications never fire). To wait without polling manually, wrap in a
 `run_in_background: true` Bash call with an `until grep ...; do sleep N; done` loop, then end the
 turn.
+
+## D-067 change (0): kappa_R=60 single source of truth (BEFORE (i)); still waiting for H2 telemetry go
+Hardcoded-40 sites found (all in fedqpnt/): node/methods.py:36 (DEFAULT_KAPPA_R), node/runner.py:50,
+node/agent.py:65 (AgentConfig), eval/scenarios.py:30 (KAPPA_R_STATUS + docstring l.11),
+eval/campaign.py:65,101,152,203, eval/fleet_adapter.py:154,275, fleet/orchestrator.py:55,
+fleet/node_runner.py:63 (H2-ABRUPT still editing this file: touch only after it lands),
+training/build_supervised_dataset.py:142. Plan: DEFAULT_KAPPA_R=60.0 in node/methods.py (D-061
+provenance comment), others import it (check scenarios.py import-cycle note l.39), KAPPA_R_STATUS=
+"D-061_kappa_R=60"; ESKFConfig stays 1.0; historical scripts untouched. Test written (xfail-marked,
+remove when landed): tests/test_kappa_r_default.py. Order then: (0),(i),(ii),(iii).
+
+## CHANGE (0) IMPLEMENTED (awaiting full-suite result, then Master commits)
+New leaf fedqpnt/core/defaults.py (DEFAULT_KAPPA_R=60.0, D-061 provenance); node/methods.py re-exports it
+(avoids methods<->agent import cycle); agent.py, runner.py, campaign.py (4 defaults), fleet_adapter.py,
+fleet/orchestrator.py, fleet/node_runner.py, training/build_supervised_dataset.py now use it;
+eval/scenarios.py KAPPA_R_STATUS="D-061_kappa_R=60". tests/test_kappa_r_default.py xfail removed, 7 pass.
+Full suite log: scratchpad/suite_change0.log (bg task bjb0v4dcp). Start HEAD=77d4ff79a3707318da94fa5974379dfc651553e0.
+CHANGE (0) READY TO COMMIT: full suite green (xfail-pending tests for (i)/(ii) only; 0 failures). Git: HEAD=6b32975e37c889cb202a06cb6086623e2b2413b8. My files: core/defaults.py (new), node/{methods,agent,runner}.py, eval/{campaign,fleet_adapter,scenarios}.py, fleet/{orchestrator,node_runner}.py, training/build_supervised_dataset.py, tests/test_kappa_r_default.py. NOT mine (MEACON agent): node/environment.py, attacks/meaconing_displaced.py. PAUSED for Master's commit before (i).
