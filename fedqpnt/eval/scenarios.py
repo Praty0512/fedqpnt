@@ -39,7 +39,8 @@ METHOD_ALL = ("fedqpnt_local", "baseline_a", "baseline_b_bin", "baseline_b_cont"
 # Must match fedqpnt.eval.fleet_adapter._METHOD_MAP's keys exactly -- kept
 # as a literal tuple here (not imported) to avoid scenarios.py depending on
 # fleet_adapter, which itself imports this module for KAPPA_R_STATUS.
-FLEET_METHOD_ALL = ("fedqpnt", "fedavg_ablation", "baseline_a", "baseline_b_cont", "baseline_b_bin")
+FLEET_METHOD_ALL = ("fedqpnt", "fedavg_ablation", "baseline_a", "baseline_b_cont", "baseline_b_bin",
+                    "fedqpnt_clean", "fedqpnt_nofault", "fedqpnt_noloss")
 
 
 @dataclass
@@ -451,23 +452,71 @@ def _s5_auc_drop(results):
 
 S5 = Scenario(
     id="S5", title="Partial node failure / delayed FL updates", fleet_size=10, duration_s=600.0,
-    world="flat", cai_grade="field", attack=None, methods=("fedqpnt", "baseline_a"),
+    world="flat", cai_grade="field", attack=None, methods=("fedqpnt", "baseline_a", "fedqpnt_nofault"),
     criteria=(Criterion("quorum_or_skip_no_deadlock", "FL must degrade gracefully", _s5_quorum_no_deadlock),
               Criterion("auc_drop_le_0_02", "0.02 AUC within seed-to-seed spread [ASSUMPTION]", _s5_auc_drop)),
     requires_fl=True,
 )
 
+def _s6_never_worse(results):
+    leg = _never_worse_leg(results)
+    return dict(passed=leg["passed"], value=leg["value"], detail=leg["detail"])
+
+
+def _s6_latency_eff_descriptive(results):
+    """H3 is tested in report.confirmatory_tests (paired latency_eff per grade, Holm family). Here: descriptive only."""
+    return dict(passed=None, value=None,
+                detail="H3 primary (paired latency_eff vs abl_minus_quantum, per grade) is evaluated in the "
+                       "confirmatory family; no pass/fail here")
+
+
 S6 = Scenario(
-    id="S6", title="CAI bias drift, long duration (Schuler world)", fleet_size=1, duration_s=14400.0,
-    world="schuler_tangent", cai_grade="field",
-    attack=dict(kind="drift_spoof", onset_s=600.0, duration_s=None, severity=0.05),
-    methods=("fedqpnt_local", "baseline_b_cont"),
-    criteria=(Criterion("rmse_h_vs_minus_quantum", "Graceful degradation: CAI must never worsen the system",
-                         _not_runnable("BLOCKED by D-047 (CAI/H3, attitude/bias)"), blocked_by_D047=True),
-              Criterion("w_q_lt_0_5_within_10_cycles", "CAI must be down-weighted once it drifts",
-                         _not_runnable("BLOCKED by D-047 (CAI/H3, attitude/bias)"), blocked_by_D047=True)),
+    id="S6", title="CAI benefit under gradual spoofing (Schuler world) -- the H3 scenario", fleet_size=1,
+    duration_s=1500.0, world="schuler_tangent", cai_grade="field",
+    attack=dict(kind="drift_spoof", onset_s=300.0, duration_s=900.0, severity=0.3),
+    methods=("fedqpnt_local", "abl_minus_quantum", "undefended"),
+    criteria=(Criterion("h3_latency_eff", "H3: CAI shortens latency_eff (confirmatory, see report)",
+                         _s6_latency_eff_descriptive),
+              Criterion("never_worse", "Defence never worse than undefended + 3 sigma_nom (per grade)",
+                         _s6_never_worse)),
     blocked_by_D047=True,
-    notes="CAI/H3 benefit claim; BLOCKED per D-046/D-047.",
+    notes="""D-070 registration. Replaces the earlier S6 (a GNSS drift with no -quantum arm, which could not answer
+    H3 or the ARCH S6 row). RATIONALE: H3 (ARCH 6.2) is FedQPNT(CAI) < -quantum on latency_eff for GRADUAL
+    spoofing. Severity 0.3 is a slow carry-off: the offset stays small relative to the inertial coast error for a
+    long time, so how early the GNSS/INS innovation becomes inconsistent depends on the quality of the inertial
+    (+CAI) prediction -- the D-063 diagnosis (on MEMS, 180 s of inertial coasting is as bad as following the spoof)
+    and the D-065 coasting envelope (CAI cuts max coasting error 2.1-3.4x). Run at grades industrial_mems and
+    tactical (result ids S6@<grade>); primary = paired latency_eff per grade (2 of the 8 confirmatory tests);
+    safety = never-worse leg. PARAMETERS (Schuler world, 1500 s, onset 300 s, duration 900 s, severity 0.3) WERE
+    FIXED BEFORE ANY TEST-SEED DATA (D-070), after the tuning data existed. The ARCH-literal 'CAI bias drift,
+    w_q < 0.5 within 10 cycles' leg is NOT tested: no CAI fault injector exists and none was approved (D-070);
+    narrowed in the paper. Still BLOCKED by D-047 (CAI/H3 claim) until the gate clears.""",
+)
+
+# S6-coast: EXPLORATORY (D-070), NOT in the Holm family. 180 s forced outage; max coasting error with/without CAI.
+S6_COAST_ARMS = ("fedqpnt_local", "abl_minus_quantum")
+
+
+def _s6c_coast_ratio(results):
+    a = _method_series(results, "fedqpnt_local", "max_h_att")
+    b = _method_series(results, "abl_minus_quantum", "max_h_att")
+    if a.size == 0 or b.size == 0 or a.size != b.size:
+        return dict(passed=None, value=None, detail="missing fedqpnt_local/abl_minus_quantum")
+    ratio = float(np.median(b / np.where(a == 0, np.nan, a)))
+    return dict(passed=None, value=ratio,
+                detail=f"EXPLORATORY: median max coasting error ratio (-quantum / CAI)={ratio:.3f} "
+                       f"(D-065 tuning envelope 2.1-3.4x); no pass/fail")
+
+
+S6_COAST = Scenario(
+    id="S6-coast", title="CAI coasting envelope, 180 s forced outage (EXPLORATORY)", fleet_size=1,
+    duration_s=1200.0, world="schuler_tangent", cai_grade="field",
+    attack=dict(kind="jam_wideband", onset_s=600.0, duration_s=180.0, severity=1.0),
+    methods=S6_COAST_ARMS, base_id="S6", group="S6",
+    criteria=(Criterion("coast_ratio_exploratory", "D-065 coasting envelope with/without CAI (exploratory)",
+                         _s6c_coast_ratio, blocked_by_D047=True),),
+    blocked_by_D047=True,
+    notes="EXPLORATORY (D-070): not part of the 8-test Holm family. Parameters fixed before test data.",
 )
 
 
@@ -596,7 +645,7 @@ def _s9_no_deadlock_auc_bound(results):
 
 S9 = Scenario(
     id="S9", title="Comms dropouts", fleet_size=5, duration_s=600.0, world="flat", cai_grade="field",
-    attack=None, methods=("fedqpnt",),
+    attack=None, methods=("fedqpnt", "fedqpnt_noloss"),
     criteria=(Criterion("no_deadlock_auc_bound", "Robustness of the FL protocol", _s9_no_deadlock_auc_bound),),
     requires_fl=True,
 )
@@ -702,13 +751,13 @@ def _s12_auc_drop(f: float):
 def _make_s12(f: float) -> Scenario:
     return Scenario(
         id=f"S12-f{int(round(f * 100))}", title=f"Trust-score / model poisoning (sign-flip, f={f:.0%})",
-        fleet_size=10, duration_s=600.0, world="flat", cai_grade="field", attack=None, methods=("fedqpnt",),
+        fleet_size=10, duration_s=600.0, world="flat", cai_grade="field", attack=None, methods=("fedqpnt", "fedqpnt_clean"),
         criteria=(Criterion(f"auc_drop_f{int(round(f * 100))}", "Theory: trimmed mean robust for f < beta",
                              _s12_auc_drop(f)),),
         requires_fl=True, poison_frac=f, base_id="S12", group="S12",
         notes="sign_flip only; the ARCH row's other 3 SS4.5 poisoning types are covered by scripts/run_fl_s12_full.py "
-              "outside the campaign registry (D-068 scope: sign_flip at the ARCH fractions). The 'fedqpnt_clean' "
-              "reference arm is not in fleet_adapter._METHOD_MAP, so the AUC-drop leg is unevaluable until added.")
+              "outside the campaign registry (D-068 scope: sign_flip at the ARCH fractions). 'fedqpnt_clean' = "
+              "same federation with no poisoned nodes (D-070).")
 
 
 S12_VARIANTS = tuple(_make_s12(f) for f in (0.2, 0.4))
@@ -850,7 +899,7 @@ S2_DM = _make_spoof_scenario(
 
 
 REGISTRY: dict[str, Scenario] = {s.id: s for s in
-                                 (S1, S2_LOW, S2_MED, S2_HIGH, S2_DM, S3, S4, S5, S6, *S7_VARIANTS, S8, S9,
+                                 (S1, S2_LOW, S2_MED, S2_HIGH, S2_DM, S3, S4, S5, S6, S6_COAST, *S7_VARIANTS, S8, S9,
                                   *S10_VARIANTS, S11, *S12_VARIANTS, S13, S14, S15)}
 
 

@@ -88,7 +88,13 @@ _METHOD_MAP: dict[str, tuple[str, str, bool]] = {
     "baseline_a": ("trim_nb_r", "baseline_a", False),
     "baseline_b_cont": ("fedavg", "baseline_b_cont", True),
     "baseline_b_bin": ("fedavg", "baseline_b_bin", True),
+    # D-070 reference arms for the AUC-drop legs of S5/S9/S12: the SAME federated node/aggregator as
+    # "fedqpnt" with one fault class removed (see _REFERENCE_KIND). Paired with "fedqpnt" by seed.
+    "fedqpnt_clean": ("trim_nb_r", "fedqpnt_local", False),     # no attacked/poisoned nodes
+    "fedqpnt_nofault": ("trim_nb_r", "fedqpnt_local", False),   # no node failures / update delays
+    "fedqpnt_noloss": ("trim_nb_r", "fedqpnt_local", False),    # lossless comms (D-059 lossless path)
 }
+_REFERENCE_KIND = {"fedqpnt_clean": "clean", "fedqpnt_nofault": "nofault", "fedqpnt_noloss": "noloss"}
 
 FLEET_METHOD_ALL = tuple(_METHOD_MAP.keys())
 
@@ -187,6 +193,18 @@ def build_fleet_scenario_config(scenario, method: str, seed: int, *, n_nodes: in
     elif fam == "S15":
         kwargs.update(_s15_kwargs(node_ids, scenario.attack or dict(kind="drift_spoof", onset_s=60.0,
                                                                       duration_s=dur - 60.0, severity=0.6)))
+
+    ref = _REFERENCE_KIND.get(method)
+    if ref == "clean":
+        kwargs.pop("poison_kind", None)
+        kwargs.pop("attacks", None)
+    elif ref == "nofault":
+        kwargs.pop("failure_round", None)
+        kwargs.pop("delay_window", None)
+    elif ref == "noloss":
+        # both legs: the node uplink AND the server's separate downlink config (D-059 addendum)
+        kwargs["comms_cfg"] = _LOSSLESS_COMMS
+        kwargs["server_cfg"] = ServerConfig(aggregator=aggregator, seed=seed, comms=_LOSSLESS_COMMS)
 
     return FleetScenarioConfig(scenario_id=scenario.id, method=agent_method, seed=seed, node_ids=node_ids,
                                 n_rounds=rounds, round_period_s=rp, duration_s=dur, aggregator=aggregator,

@@ -241,3 +241,71 @@ def test_provenance_banner_in_report(tmp_path):
     CP.record_provenance(tmp_path, dict(valid=False, reasons=["dirty"], start={}, end={}))
     md = RP.render_markdown(["S1"], str(tmp_path))
     assert "INVALID RUN (D-062)" in md
+
+
+# ---------------- D-070: S6 = H3 scenario, S6-coast, fleet reference arms ----------------
+def test_s6_is_the_h3_scenario():
+    s = SC.get("S6")
+    assert s.world == "schuler_tangent" and s.duration_s == 1500.0
+    assert (s.attack["kind"], s.attack["onset_s"], s.attack["duration_s"], s.attack["severity"]) == \
+        ("drift_spoof", 300.0, 900.0, 0.3)
+    assert s.methods == ("fedqpnt_local", "abl_minus_quantum", "undefended")
+    assert "FIXED BEFORE ANY TEST-SEED DATA" in s.notes and "gradual" in s.notes.lower()
+    tasks = CP.generate_tasks(["S6"], None, [500], imu_grades=["industrial_mems", "tactical"])
+    assert {t.scenario_id for t in tasks} == {"S6@industrial_mems", "S6@tactical"}
+    q = {t.method: t.spec["quantum_grade"] for t in tasks}
+    assert q["abl_minus_quantum"] is None and q["fedqpnt_local"] == "field"
+    assert all(t.spec["world"] == "schuler_tangent" for t in tasks)
+
+
+def test_s6_coast_exploratory_not_in_family():
+    s = SC.get("S6-coast")
+    assert s.attack["kind"] == "jam_wideband" and s.attack["duration_s"] == 180.0
+    assert "EXPLORATORY" in s.notes
+    r = s.criteria[0].check({"fedqpnt_local": [dict(max_h_att=100.0)], "abl_minus_quantum": [dict(max_h_att=300.0)]})
+    assert r["passed"] is None and r["value"] == pytest.approx(3.0)
+    assert not any(t.scenario.startswith("S6-coast") for t in RP.CONFIRMATORY_FAMILY)
+
+
+def test_fleet_reference_arms_registered():
+    from fedqpnt.eval import fleet_adapter as FA
+    for m in ("fedqpnt_clean", "fedqpnt_nofault", "fedqpnt_noloss"):
+        assert m in FA._METHOD_MAP and m in FA.FLEET_METHOD_ALL and m in SC.FLEET_METHOD_ALL
+    assert set(SC.FLEET_METHOD_ALL) == set(FA.FLEET_METHOD_ALL)
+
+
+def test_fleet_clean_arm_has_no_poison():
+    from fedqpnt.eval import fleet_adapter as FA
+    p = FA.build_fleet_scenario_config(SC.get("S12-f20"), "fedqpnt", 500)
+    c = FA.build_fleet_scenario_config(SC.get("S12-f20"), "fedqpnt_clean", 500)
+    assert p.poison_kind and not c.poison_kind
+    assert (c.method, c.aggregator, c.node_ids) == (p.method, p.aggregator, p.node_ids)
+
+
+def test_fleet_nofault_arm_has_no_failures_or_delays():
+    from fedqpnt.eval import fleet_adapter as FA
+    p = FA.build_fleet_scenario_config(SC.get("S5"), "fedqpnt", 500)
+    c = FA.build_fleet_scenario_config(SC.get("S5"), "fedqpnt_nofault", 500)
+    assert p.failure_round and p.delay_window
+    assert not c.failure_round and not c.delay_window
+
+
+def test_fleet_noloss_arm_uses_lossless_comms_both_legs():
+    from fedqpnt.eval import fleet_adapter as FA
+    p = FA.build_fleet_scenario_config(SC.get("S9"), "fedqpnt", 500)
+    c = FA.build_fleet_scenario_config(SC.get("S9"), "fedqpnt_noloss", 500)
+    assert p.comms_cfg.loss_b == 0.9
+    assert c.comms_cfg == FA._LOSSLESS_COMMS
+    assert c.server_cfg is not None and c.server_cfg.comms == FA._LOSSLESS_COMMS
+
+
+def test_auc_drop_legs_now_evaluable():
+    r = SC.get("S5").criteria[1].check({"fedqpnt": [dict(auc=0.80)], "fedqpnt_nofault": [dict(auc=0.81)]})
+    assert r["passed"] is True
+    r = SC.get("S9").criteria[0].check({"fedqpnt": [dict(auc=0.7, fleet=dict(aborted=False))],
+                                        "fedqpnt_noloss": [dict(auc=0.8)]})
+    assert r["passed"] is False           # drop 0.1 > 0.03
+    r = SC.get("S12-f20").criteria[0].check({"fedqpnt": [dict(auc=0.85)], "fedqpnt_clean": [dict(auc=0.88)]})
+    assert r["passed"] is True
+    for sid, ref in (("S5", "fedqpnt_nofault"), ("S9", "fedqpnt_noloss"), ("S12-f20", "fedqpnt_clean")):
+        assert ref in SC.get(sid).methods

@@ -91,3 +91,10 @@ P3 (new) fields for scenario legs (metrics.py functions already exist: consisten
 - Observation: fleet references fedqpnt_clean / fedqpnt_nofault / fedqpnt_noloss are read by S5/S9/S12 criteria but are not in
   fleet_adapter._METHOD_MAP, so those AUC-drop legs are unevaluable until added (not fixed: outside the D-068 list).
 - S5 N=5 rounding gives 40% (documented as-is, D-068). S7 bound still 3600/26.1 = 137.9 (D-068: re-derive at the freeze).
+
+## D-070 update (Master rulings applied, not committed)
+- S6 re-registered as the H3 scenario exactly as proposed (rationale + "parameters fixed before test data" in Scenario.notes); S6-coast added EXPLORATORY (not in Holm family).
+- CAI fault injector NOT approved: ARCH "CAI bias drift" w_q leg narrowed in the paper.
+- fleet_adapter._METHOD_MAP += fedqpnt_clean (no poison/attacks), fedqpnt_nofault (no failure_round/delay_window),
+  fedqpnt_noloss (lossless comms on both legs, D-059); S5/S9/S12 method lists include them so the AUC-drop legs are evaluable.
+- P1-P3 still queued for the "runner window open" message.
