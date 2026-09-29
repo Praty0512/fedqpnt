@@ -36,19 +36,44 @@
 - `python -m pytest tests/test_eval_*.py -q` at the end: **57 passed** (1 pre-existing unrelated scipy
   RuntimeWarning in test_eval_stats.py, not from this session's changes).
 
-## Known limitation (flagged, not fixed here -- out of my owned scope)
-- `baseline_b_cont`/`baseline_b_bin` mapped to `n_rounds=0` skips FL rounds entirely inside
-  `node_runner._run_fleet_node`'s tick loop, which ALSO skips that node's local `client.local_round`
-  training call (it's invoked only from `_do_fl_round`). So these "local-only" fleet runs currently
-  mean "frozen theta0, no local adaptation at all", not "local training without federation" as D-054
-  intends. Fixing this needs a small additive hook in `fedqpnt/fleet/node_runner.py` (out of my owned
-  files without a PD) -- flagged to Master.
-- AUC-drop criteria (S5/S9/S12) need "no-fault"/"no-loss"/"clean" reference arms that the plumbing
-  dry-run does not execute (kept minimal per the task's exact method list); they report
+## D-059 FIX (applied, no longer a limitation)
+Master ruled the earlier `n_rounds=0` mapping for `baseline_b_cont`/`baseline_b_bin` a BLOCKING bug
+(frozen theta0, not "local training without federation" -- node_runner only calls
+`client.local_round` from inside `_do_fl_round`, so 0 rounds meant 0 local training too). Fixed
+WITHOUT touching `fedqpnt/fleet/node_runner.py`:
+- `fedqpnt/eval/fleet_adapter.py`: `_METHOD_MAP` now carries a `local_only: bool` flag instead of an
+  `n_rounds` override; local-only methods keep the SAME `n_rounds`/`round_period_s` as `fedqpnt`.
+  New `_run_local_only_fleet(cfg, theta0, param_names, join_timeout_s)`: for each node in
+  `cfg.node_ids`, builds its OWN 1-node `FleetScenarioConfig` (`node_ids=[node]`,
+  `aggregator="fedavg"` -- with N=1 this IS local training, no trimming/clipping reference exists),
+  carrying over that node's own fault-injection kwargs (join_round/failure_round/delay_window/
+  poison_kind/attacks/local_train_seeds), runs all N sub-federations in parallel
+  (`ThreadPoolExecutor`, capped at `MAX_LOCAL_ONLY_PARALLEL=8`), then merges the N independent
+  `FleetResult`s into one fleet-shaped result (same schema `write_campaign_result` expects).
+  An `assert` inside the merge enforces the no-cross-node-leak invariant per sub-result.
+  `run_fleet_task` branches on `is_local_only(method)` to call this instead of `run_fleet`.
+- New `tests/test_fleet_adapter.py` (2 tests, real multiprocessing, ~5-10s each):
+  `test_local_only_no_update_leaves_its_1node_federation` (merge produces exactly the requested node
+  ids, nothing leaked) and `test_local_only_detector_hash_changes_across_rounds` (asserts
+  `hash_pre != hash_post_train` for at least one round -- the direct regression check for the D-059
+  bug -- plus `round_installs >= 1` with comms loss zeroed out on both the node uplink AND the
+  server's OWN downlink config (`ServerConfig.comms`, a separate knob from
+  `FleetScenarioConfig.comms_cfg` -- tripped me up once, noted in the test file).
+- Verified on a real run: S8 seed 500 `baseline_b_cont`, per-node provenance now shows `hash_pre !=
+  hash_post_train` on 2-4 of 4 rounds per node (previously 0/4, frozen) and
+  `mean(round_installs)=1.33/4` (previously 0/4 always).
+- Re-ran the S8 + S15 dry-runs for `{fedqpnt, baseline_b_cont}` (seeds 500-501, N=3, 120s, 4 rounds):
+  8/8 tasks `status="ok"`. `fedqpnt` results untouched (only `baseline_b_cont`'s old
+  frozen-theta0 files were deleted and regenerated). Full report regenerated at
+  `results/eval_fleet_dryrun/report.md` (still PLUMBING ONLY).
+- `python -m pytest tests/test_eval_*.py tests/test_fleet_adapter.py -q`: **59 passed**.
+
+## Known limitation (unchanged, out of my owned scope)
+- AUC-drop criteria (S5/S9/S12) still need "no-fault"/"no-loss"/"clean" reference arms that the
+  plumbing dry-run does not execute (kept minimal per the task's exact method list); they report
   `passed=None` until those reference runs exist.
 
 ## Next
-- Master/FL-agent: decide on the `baseline_b_cont` local-training hook.
 - Run the paired reference arms (`fedqpnt_nofault`, `fedqpnt_noloss`, `fedqpnt_clean`) once compute
   budget allows, to make the AUC-drop criteria evaluable.
 - Widen the dry run to full tuning-seed range once M2/M3 compute budget is confirmed free.

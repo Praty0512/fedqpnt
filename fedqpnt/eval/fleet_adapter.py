@@ -8,9 +8,12 @@ single-node runs and consumed unchanged by
 ``fedqpnt.eval.campaign.load_results`` / ``fedqpnt.eval.report``.
 
 EVALUATOR-ONLY: imports only ``fedqpnt.fleet.orchestrator``'s public
-``FleetScenarioConfig`` / ``run_fleet`` / ``write_campaign_result`` and
-``fedqpnt.node.methods.load_detector_weights`` -- no edits to
-``fedqpnt/fleet/*`` internals.
+``FleetScenarioConfig`` / ``FleetResult`` / ``run_fleet`` /
+``write_campaign_result`` and ``fedqpnt.node.methods.load_detector_weights``
+-- no edits to ``fedqpnt/fleet/*`` internals (D-059's local-only fix is
+built entirely from repeated calls to the existing ``run_fleet`` public
+entry point, one per node, never a change to ``fleet/node_runner.py`` or
+``fleet/orchestrator.py``'s own dispatch logic).
 
 Method variants (D-054, task item 3), all starting from the SAME theta0
 (``results/fleet/theta0_d054.npz``, D-054.1: pretrained on seeds 400-449,
@@ -19,12 +22,18 @@ restricted family set):
   - ``fedavg_ablation``  FedAvg aggregator (no trimming), same node config
   - ``baseline_a``       TRIM-NB-R aggregator, baseline_a (FL + detect-and-
                           exclude) node/agent config
-  - ``baseline_b_cont`` / ``baseline_b_bin``  LOCAL-ONLY: n_rounds=0, so no
-    FL round is ever exchanged (see node_runner._run_fleet_node's round
-    loop: ``current_round < spec.n_rounds`` is false at n_rounds=0) -- the
-    node still runs through the same fleet pipeline (comms/server spawned,
-    0 rounds) so metrics stay directly comparable, rather than diverging
-    onto a different code path for these methods.
+  - ``baseline_b_cont`` / ``baseline_b_bin``  LOCAL-ONLY (D-059 fix): each
+    node runs as its OWN 1-node federation (``node_ids=[node]``,
+    ``aggregator="fedavg"`` -- with N=1 that IS local training: no
+    clipping/trimming reference points exist, so the "aggregate" is the
+    identity on that one update), same ``n_rounds``/``round_period_s`` as
+    the ``fedqpnt`` arm, so the node keeps doing real local SGD every
+    round. An N-node fleet scenario therefore runs N independent 1-node
+    federations for these methods (``_run_local_only_fleet`` below), never
+    one shared N-node federation -- no cross-node update ever happens by
+    construction (each sub-federation's ``node_ids`` has exactly one
+    entry). D-059 SUPERSEDES the earlier n_rounds=0 "frozen theta0"
+    mapping (Master: that was a blocking bug -- see EXECUTION_LOG).
 
 PROPOSED-DECISION: the mapping above (aggregator + node-config-method per
 fleet "method" name) is this agent's own choice, made because D-054 names
@@ -33,6 +42,7 @@ the method roster but not this exact wiring; flag for Master review.
 from __future__ import annotations
 
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -41,22 +51,32 @@ import numpy as np
 from fedqpnt.eval import scenarios as SC
 from fedqpnt.fl.client import ClientConfig
 from fedqpnt.fl.comms import CommsConfig
-from fedqpnt.fleet.orchestrator import FleetScenarioConfig, run_fleet, write_campaign_result
+from fedqpnt.fleet.orchestrator import FleetResult, FleetScenarioConfig, run_fleet, write_campaign_result
 from fedqpnt.node.methods import load_detector_weights
 
 FLEET_SCENARIO_IDS = ("S5", "S8", "S9", "S12", "S15")
 THETA0_PATH = Path("results/fleet/theta0_d054.npz")
+MAX_LOCAL_ONLY_PARALLEL = 8   # D-059: cap on concurrent 1-node federations for B-cont/B-bin
 
-# fleet "method" name -> (aggregator, node/agent-config method name, n_rounds override or None)
-_METHOD_MAP: dict[str, tuple[str, str, int | None]] = {
-    "fedqpnt": ("trim_nb_r", "fedqpnt_local", None),
-    "fedavg_ablation": ("fedavg", "fedqpnt_local", None),
-    "baseline_a": ("trim_nb_r", "baseline_a", None),
-    "baseline_b_cont": ("trim_nb_r", "baseline_b_cont", 0),   # local-only: 0 FL rounds
-    "baseline_b_bin": ("trim_nb_r", "baseline_b_bin", 0),     # local-only: 0 FL rounds
+# fleet "method" name -> (aggregator, node/agent-config method name, local_only)
+# local_only=True (D-059): run via _run_local_only_fleet (N independent
+# 1-node federations, aggregator forced to "fedavg" per sub-federation)
+# instead of run_fleet (one shared N-node federation). ``aggregator`` here
+# is cosmetic bookkeeping on the outer "shape" FleetScenarioConfig for
+# local_only methods -- the real per-node run always uses "fedavg".
+_METHOD_MAP: dict[str, tuple[str, str, bool]] = {
+    "fedqpnt": ("trim_nb_r", "fedqpnt_local", False),
+    "fedavg_ablation": ("fedavg", "fedqpnt_local", False),
+    "baseline_a": ("trim_nb_r", "baseline_a", False),
+    "baseline_b_cont": ("fedavg", "baseline_b_cont", True),
+    "baseline_b_bin": ("fedavg", "baseline_b_bin", True),
 }
 
 FLEET_METHOD_ALL = tuple(_METHOD_MAP.keys())
+
+
+def is_local_only(method: str) -> bool:
+    return _METHOD_MAP[method][2]
 
 
 class FleetTheta0Error(RuntimeError):
@@ -122,12 +142,19 @@ def build_fleet_scenario_config(scenario, method: str, seed: int, *, n_nodes: in
     loss, poisoning, attacked-subset)."""
     if method not in _METHOD_MAP:
         raise ValueError(f"unknown fleet method {method!r}; expected one of {FLEET_METHOD_ALL}")
-    aggregator, agent_method, n_rounds_override = _METHOD_MAP[method]
+    aggregator, agent_method, _local_only = _METHOD_MAP[method]
     n = n_nodes or scenario.fleet_size
     node_ids = _node_ids(n)
     dur = float(duration_s if duration_s is not None else scenario.duration_s)
     rp = round_period_s if round_period_s is not None else max(10.0, dur / max(n_rounds, 1))
-    rounds = n_rounds if n_rounds_override is None else n_rounds_override
+    # D-059: local-only methods keep the SAME n_rounds/round_period_s as
+    # fedqpnt (no more forcing rounds=0 -- that froze theta0 and starved
+    # node_runner's local training, which only fires from inside an FL
+    # round). This cfg's own .n_rounds/.aggregator/.node_ids are used as
+    # the outer "shape" (path/hash/duration/node-count bookkeeping); for
+    # local_only methods the actual execution is N independent 1-node
+    # federations, see _run_local_only_fleet.
+    rounds = n_rounds
 
     kwargs: dict[str, Any] = {}
     if scenario.id == "S5":
@@ -145,6 +172,67 @@ def build_fleet_scenario_config(scenario, method: str, seed: int, *, n_nodes: in
     return FleetScenarioConfig(scenario_id=scenario.id, method=agent_method, seed=seed, node_ids=node_ids,
                                 n_rounds=rounds, round_period_s=rp, duration_s=dur, aggregator=aggregator,
                                 kappa_R=kappa_R, kappa_Q=kappa_Q, **kwargs)
+
+
+def _run_local_only_fleet(cfg: FleetScenarioConfig, theta0: dict[str, np.ndarray], param_names: list[str],
+                           join_timeout_s: float, max_parallel: int = MAX_LOCAL_ONLY_PARALLEL) -> FleetResult:
+    """D-059: run each of ``cfg.node_ids`` as its OWN 1-node federation
+    (``node_ids=[node_id]``, ``aggregator="fedavg"``) instead of one shared
+    N-node federation, so B-cont/B-bin nodes keep doing real local SGD
+    every round (node_runner only calls ``client.local_round`` from inside
+    an FL round) while structurally never exchanging an update with any
+    other node -- a 1-node federation has no other node to exchange with.
+    Sub-federations run in parallel (thread pool fanning out separate
+    ``run_fleet`` calls, each of which does its own real multiprocessing
+    spawn), capped at ``max_parallel``. Merges the N independent
+    ``FleetResult``s into one fleet-shaped result so the rest of the
+    pipeline (``write_campaign_result``, §6.1 criteria) sees the same
+    shape as a real N-node federation."""
+    def _one(node_id: str) -> tuple[str, FleetResult]:
+        sub = FleetScenarioConfig(
+            scenario_id=cfg.scenario_id, method=cfg.method, seed=cfg.seed, node_ids=[node_id],
+            n_rounds=cfg.n_rounds, round_period_s=cfg.round_period_s, duration_s=cfg.duration_s,
+            dt=cfg.dt, aggregator="fedavg", server_cfg=cfg.server_cfg, client_cfg=cfg.client_cfg,
+            comms_cfg=cfg.comms_cfg,
+            attacks=({node_id: cfg.attacks[node_id]} if node_id in cfg.attacks else {}),
+            join_round=({node_id: cfg.join_round[node_id]} if node_id in cfg.join_round else {}),
+            failure_round=({node_id: cfg.failure_round[node_id]} if node_id in cfg.failure_round else {}),
+            delay_window=({node_id: cfg.delay_window[node_id]} if node_id in cfg.delay_window else {}),
+            poison_kind=({node_id: cfg.poison_kind[node_id]} if node_id in cfg.poison_kind else {}),
+            kappa_R=cfg.kappa_R, kappa_Q=cfg.kappa_Q, gnss_rate_hz=cfg.gnss_rate_hz, hold_s=cfg.hold_s,
+            local_train_seeds=({node_id: cfg.local_train_seeds[node_id]} if node_id in cfg.local_train_seeds
+                                else {}),
+            local_train_pool=({node_id: cfg.local_train_pool[node_id]} if node_id in cfg.local_train_pool
+                               else {}),
+            local_train_duration_s=cfg.local_train_duration_s, local_train_workers=cfg.local_train_workers)
+        return node_id, run_fleet(sub, theta0, param_names, join_timeout_s=join_timeout_s)
+
+    sub_results: dict[str, FleetResult] = {}
+    with ThreadPoolExecutor(max_workers=min(max_parallel, max(1, len(cfg.node_ids)))) as ex:
+        for node_id, res in ex.map(_one, cfg.node_ids):
+            sub_results[node_id] = res
+
+    node_results: dict[str, dict] = {}
+    server_log: list[dict] = []
+    aborted = False
+    abort_reasons: list[str] = []
+    wall_s = 0.0
+    for node_id, res in sub_results.items():
+        # Invariant (D-059 test): a local-only sub-federation has exactly
+        # ONE node, so nothing it produced could have come from -- or been
+        # sent to -- any other node.
+        assert list(res.node_results.keys()) in ([node_id], []), \
+            f"local-only sub-federation for {node_id!r} leaked another node's result: {res.node_results.keys()}"
+        node_results.update(res.node_results)
+        for e in res.server_log:
+            server_log.append(dict(e, node_id=node_id))
+        aborted = aborted or res.aborted
+        if res.abort_reason:
+            abort_reasons.append(f"{node_id}: {res.abort_reason}")
+        wall_s = max(wall_s, res.wall_s)   # ran in parallel: elapsed time, not the sum
+
+    return FleetResult(node_results=node_results, server_log=server_log, aborted=aborted,
+                        abort_reason="; ".join(abort_reasons), wall_s=wall_s, final_theta=None)
 
 
 def run_fleet_task(scenario, method: str, seed: int, *, run_root: str = "runs",
@@ -175,7 +263,10 @@ def run_fleet_task(scenario, method: str, seed: int, *, run_root: str = "runs",
 
     cfg = build_fleet_scenario_config(scenario, method, seed, n_nodes=n_nodes, duration_s=duration_s,
                                        n_rounds=n_rounds, kappa_R=kappa_R, kappa_Q=kappa_Q)
-    result = run_fleet(cfg, theta0, param_names, join_timeout_s=join_timeout_s)
+    if is_local_only(method):
+        result = _run_local_only_fleet(cfg, theta0, param_names, join_timeout_s=join_timeout_s)
+    else:
+        result = run_fleet(cfg, theta0, param_names, join_timeout_s=join_timeout_s)
 
     # write_campaign_result derives its output path from cfg.scenario_id/
     # cfg.method/cfg.seed, but cfg.method is the node/agent-config method
