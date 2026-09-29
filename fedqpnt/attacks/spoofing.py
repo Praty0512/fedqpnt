@@ -94,6 +94,17 @@ def _geom_delta(sat_pos: np.ndarray, sat_vel: np.ndarray, fake_pos: np.ndarray, 
     return r_fake - r_true, rate_fake - rate_true
 
 
+def _with_offset_meta(meta: dict, offset_enu) -> dict:
+    """Truth-side channel (environment-private, stripped by ``for_agent``):
+    injected position offset = reported minus true [m]. Convention: keys are
+    present only on ACTIVE attack epochs; consumers use ``.get(k, 0.0)``."""
+    off = np.asarray(offset_enu, dtype=float)
+    m = dict(meta)
+    m["injected_offset_m"] = float(np.linalg.norm(off))
+    m["injected_offset_enu_m"] = off.tolist()
+    return m
+
+
 def _apply_spoof_delta(o, fake_pos, fake_vel, truth: TruthState, cn0_new: float,
                         e_spoof_m: float, rng: np.random.Generator):
     """Build one spoofed SatObs as a delta on the clean o (never mutates o)."""
@@ -282,7 +293,8 @@ class DriftInSpoof:
             new_obs.append(o2)
 
         return GnssEpoch(t=epoch.t, obs=new_obs, agc_db=epoch.agc_db,
-                          noise_floor_db=epoch.noise_floor_db, meta=dict(epoch.meta))
+                          noise_floor_db=epoch.noise_floor_db,
+                          meta=_with_offset_meta(epoch.meta, pos_offset if self.mode == "position" else np.zeros(3)))
 
 
 @dataclass
@@ -335,8 +347,10 @@ class MeaconingReplay:
             o2.pseudorange = o.pseudorange + delay   # common-mode jump -> receiver clock-bias jump
             o2.cn0_dbhz = o.cn0_dbhz + bump
             new_obs.append(o2)
+        # co-located meaconer: no position offset injected (common delay -> clock only)
         return GnssEpoch(t=epoch.t, obs=new_obs, agc_db=epoch.agc_db + 0.3 * env,
-                          noise_floor_db=epoch.noise_floor_db, meta=dict(epoch.meta))
+                          noise_floor_db=epoch.noise_floor_db,
+                          meta=_with_offset_meta(epoch.meta, np.zeros(3)))
 
 
 @dataclass
@@ -407,4 +421,5 @@ class AbruptSpoof:
                 o2.tracked = False
             new_obs.append(o2)
         return GnssEpoch(t=epoch.t, obs=new_obs, agc_db=epoch.agc_db,
-                          noise_floor_db=epoch.noise_floor_db, meta=dict(epoch.meta))
+                          noise_floor_db=epoch.noise_floor_db,
+                          meta=_with_offset_meta(epoch.meta, jump))

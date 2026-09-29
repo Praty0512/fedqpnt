@@ -115,7 +115,7 @@ def test_determinism_under_seed():
 
 def test_existing_meaconing_unchanged():
     """MeaconingReplay path: pr = pr_clean + replay_delay*severity*env, cn0 bump,
-    no position change, no injected-offset channel (bit-exact arithmetic)."""
+    no position change, injected offset 0.0 (bit-exact arithmetic)."""
     atk = MeaconingReplay(onset_s=20.0, duration_s=60.0, severity=0.6)
     rows = _run(atk, static_truth, duration_s=60.0)
     for r in rows:
@@ -124,4 +124,69 @@ def test_existing_meaconing_unchanged():
                 assert o.pseudorange == c.pseudorange + 1500.0 * 0.6 * 1.0
                 assert o.cn0_dbhz == c.cn0_dbhz + 4.0
                 assert o.pseudorange_rate == c.pseudorange_rate
-            assert "injected_offset_m" not in r["meta"]
+            assert r["meta"]["injected_offset_m"] == 0.0
+
+
+# ---- injected_offset_m channel on the other spoof classes (D-068) ----------
+def _epoch_stream(attack, seed=11, duration_s=60.0):
+    from fedqpnt.attacks.spoofing import DriftInSpoof, AbruptSpoof  # noqa: F401
+    rng_sig = stream(seed, "n", "gnss")
+    rng_atk = stream(seed, "n", "attack")
+    model = GnssSignalModel(rate_hz=1.0)
+    out = []
+    for k in range(int(duration_s / 0.5)):
+        truth = const_vel_truth(k * 0.5, speed_mps=5.0)
+        ep = model.step(truth, rng_sig)
+        if ep is None:
+            continue
+        out.append((truth, attack.apply(ep, truth, rng_atk)))
+    return out
+
+
+def _strip(ep):
+    return (ep.t, ep.agc_db, ep.noise_floor_db,
+            [(o.prn, o.pseudorange, o.pseudorange_rate, o.cn0_dbhz, o.tracked) for o in ep.obs])
+
+
+def _mkall():
+    from fedqpnt.attacks.spoofing import DriftInSpoof, AbruptSpoof
+    return [lambda: DriftInSpoof(onset_s=10.0, align_s=5.0, duration_s=30.0, severity=0.8),
+            lambda: DriftInSpoof(onset_s=10.0, align_s=5.0, duration_s=30.0, severity=0.8, mode="time"),
+            lambda: AbruptSpoof(onset_s=10.0, duration_s=30.0, severity=0.7),
+            lambda: MeaconingReplay(onset_s=10.0, duration_s=30.0, severity=0.6)]
+
+
+def test_offset_channel_does_not_alter_epochs_and_matches_truth():
+    """Epoch content (excluding meta) must equal an independent re-run with the
+    meta keys ignored (determinism), and the meta key matches the closed form."""
+    for mk in _mkall():
+        a = _epoch_stream(mk())
+        b = _epoch_stream(mk())
+        assert [_strip(e) for _, e in a] == [_strip(e) for _, e in b]
+        atk = mk()
+        for truth, e in a:
+            active = atk.label(e.t).spoofing
+            if not active:
+                assert "injected_offset_m" not in e.meta
+                continue
+            assert set(("injected_offset_m", "injected_offset_enu_m")) <= set(e.meta)
+            off = np.array(e.meta["injected_offset_enu_m"])
+            assert abs(np.linalg.norm(off) - e.meta["injected_offset_m"]) < 1e-9
+            assert "clk_bias_m" in e.meta      # original meta preserved
+
+
+def test_offset_channel_values():
+    from fedqpnt.attacks.spoofing import DriftInSpoof, AbruptSpoof
+    ab = AbruptSpoof(onset_s=10.0, duration_s=30.0, severity=0.7)
+    for _, e in _epoch_stream(ab):
+        if ab.label(e.t).spoofing:
+            assert abs(e.meta["injected_offset_m"] - 56.0) < 1e-9    # 80 m * 0.7
+    dr = DriftInSpoof(onset_s=10.0, align_s=5.0, duration_s=30.0, severity=0.8)
+    for _, e in _epoch_stream(dr):
+        if dr.label(e.t).spoofing:
+            exp = dr.expected_offset(e.t)[0]
+            assert np.allclose(e.meta["injected_offset_enu_m"], exp)
+    mc = MeaconingReplay(onset_s=10.0, duration_s=30.0, severity=0.6)
+    for _, e in _epoch_stream(mc):
+        if mc.label(e.t).spoofing:
+            assert e.meta["injected_offset_m"] == 0.0
