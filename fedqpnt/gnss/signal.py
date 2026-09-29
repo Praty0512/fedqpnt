@@ -53,8 +53,13 @@ class ClockState:
     bias_m: float = 0.0
     drift_mps: float = 0.0
     # TCXO-class process noise (ASSUMPTION, see module docstring)
-    sigma_bias_rw: float = 3.0e-2     # m/sqrt(s) equiv. white freq noise driving bias
-    sigma_drift_rw: float = 3.0e-3    # m/s/sqrt(s) driving drift (freq aging/random walk)
+    # D-066 addendum: TCXO two-state model, same provenance as fedqpnt/fusion/clock.py
+    # ClockKFConfig (Brown & Hwang 4th ed. 2012 h0 = 2e-19 s, h_-2 = 2e-20 1/s, cited in
+    # Krawinkel & Schon 2021 doi:10.1002/navi.444; q_b = h0/2, q_d = 2 pi^2 h_-2 from Qin et al.
+    # 2021 doi:10.3390/s21020466; range units via c^2). sigma^2 = q, so truth and filter agree.
+    # (Was 3e-2 / 3e-3 [ASSUMPTION], ~4000x too quiet in drift PSD for a TCXO.)
+    sigma_bias_rw: float = float(np.sqrt(0.5 * C_LIGHT ** 2 * 2e-19))                 # m/sqrt(s)
+    sigma_drift_rw: float = float(np.sqrt(C_LIGHT ** 2 * 2.0 * np.pi ** 2 * 2e-20))   # m/s/sqrt(s)
 
     def step(self, dt: float, rng: np.random.Generator) -> None:
         self.drift_mps += rng.normal(0.0, self.sigma_drift_rw * np.sqrt(dt))

@@ -12,7 +12,7 @@ from fedqpnt.core.types import GnssFix
 from fedqpnt.fusion.clock import ClockKF, ClockKFConfig
 from fedqpnt.gnss.signal import ClockState
 
-pytestmark = pytest.mark.xfail(reason="D-066 pending implementation (remove when landed)", strict=False)
+
 
 C = 299_792_458.0
 

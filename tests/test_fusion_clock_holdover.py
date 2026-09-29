@@ -13,7 +13,7 @@ from fedqpnt.core.types import GnssFix
 from fedqpnt.fusion.clock import ClockKF, ClockKFConfig
 
 
-pytestmark = pytest.mark.xfail(reason="D-066 pending implementation (remove when landed)", strict=False)
+
 
 
 def _fix(t, clk_bias, clk_drift):

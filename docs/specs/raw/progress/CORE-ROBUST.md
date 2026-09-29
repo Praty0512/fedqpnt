@@ -486,3 +486,14 @@ fleet/orchestrator.py, fleet/node_runner.py, training/build_supervised_dataset.p
 eval/scenarios.py KAPPA_R_STATUS="D-061_kappa_R=60". tests/test_kappa_r_default.py xfail removed, 7 pass.
 Full suite log: scratchpad/suite_change0.log (bg task bjb0v4dcp). Start HEAD=77d4ff79a3707318da94fa5974379dfc651553e0.
 CHANGE (0) READY TO COMMIT: full suite green (xfail-pending tests for (i)/(ii) only; 0 failures). Git: HEAD=6b32975e37c889cb202a06cb6086623e2b2413b8. My files: core/defaults.py (new), node/{methods,agent,runner}.py, eval/{campaign,fleet_adapter,scenarios}.py, fleet/{orchestrator,node_runner}.py, training/build_supervised_dataset.py, tests/test_kappa_r_default.py. NOT mine (MEACON agent): node/environment.py, attacks/meaconing_displaced.py. PAUSED for Master's commit before (i).
+
+## CHANGE (i) IMPLEMENTED (awaiting full suite: scratchpad/suite_change_i.log, bg task bmljx1m0s)
+Edited: fedqpnt/fusion/clock.py (ClockKFConfig q_bias=c^2*h0/2=8.99e-3, q_drift=c^2*2pi^2*h_-2=3.55e-2
+with Brown&Hwang / Krawinkel&Schon 2021 doi:10.1002/navi.444 / Qin 2021 doi:10.3390/s21020466
+provenance; new w_excl=0.05; update skipped when w_gnss<w_excl, Q untrusted-scaled), fedqpnt/gnss/signal.py
+(ClockState sigma_bias_rw/sigma_drift_rw = sqrt of same q, same provenance). Tests: holdover (3) +
+NEES/consistency (2) xfail removed, pass with tests/test_node_clock.py (10 pass). XPASS name (pre-change):
+tests/test_fusion_clock_holdover.py::test_above_w_excl_still_updates = regression guard for existing
+w=1 update behaviour, intentionally passes before the change (kept, not a defect). Not touched: eval/*, attacks/*, environment.py.
+Timing baselines (rmse_t_ns 13.7 nominal, 1284/1358 meaconing) are PRE-change; re-measure in combined run.
+PAUSE for Master commit after suite green, then (ii).
