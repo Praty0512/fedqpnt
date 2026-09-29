@@ -280,7 +280,7 @@ scans the Agent-side packages for forbidden imports of truth or label types. A n
 tick; at each tick the IMU and, when scheduled, the quantum sensor and GNSS receiver are stepped, giving
 a fixed per-tick sequence (truth $\rightarrow$ sensors $\rightarrow$ optional attack $\rightarrow$
 receiver $\rightarrow$ filter propagation/innovations $\rightarrow$ feature extraction $\rightarrow$
-detector $\rightarrow$ trust update $\rightarrow$ filter correction $\rightarrow$ pseudo-labelling and FL
+detector $\rightarrow$ trust update $\rightarrow$ filter correction $\rightarrow$ FL round
 buffering). Nodes exchange only federated-learning model updates with a server, on a fixed round
 schedule (Section~\ref{sec:method}); navigation never blocks on the availability of a fresh global
 model, so a node that has lost communications keeps navigating and detecting with its last-known
@@ -333,9 +333,9 @@ $n$ to bias a naive weighted average.
 
 \subsection{What never leaves a node}
 No raw sensor stream, trajectory, or attack label ever leaves a node. The only object that crosses a node
-boundary to the server is a federated \texttt{ModelUpdate}: a detector weight delta (882 floating-point
-parameters, about 3.5~kB), a coordinate-wise running mean/standard-deviation pair for feature
-normalisation, and a small set of scalar training metrics (sample counts, loss, pseudo-label rate). The
+boundary to the server is a federated \texttt{ModelUpdate}: a detector weight delta (1010 floating-point
+parameters, about 4~kB), a coordinate-wise running mean/standard-deviation pair for feature
+normalisation, and a small set of scalar training metrics (sample counts, loss, positive-label rate). The
 server never receives ground truth, position, velocity, or raw features. Trust-law hyperparameters and
 the fusion filter itself are not learned or shared in this version of the system; they are fixed,
 identical across every method under comparison, and tuned once, before any test-seed result is examined,
@@ -345,117 +345,618 @@ on a disjoint range of tuning seeds (Section~\ref{sec:setup}).
 \section{Method}
 \label{sec:method}
 %=====================================================================
-\todo[inline]{This section is an equation-level outline; the surrounding exposition, worked examples and
-figures are to be expanded in a later drafting pass.}
+This section specifies the components as implemented in the reference simulator. Parameters are tagged
+by provenance: \emph{measured} (fitted to the real cold-atom data of \cite{darmagnac2024atom}),
+\emph{datasheet} (a manufacturer figure), or \emph{assumed} (a design value that is swept or
+stress-tested in the evaluation rather than claimed). Section~\ref{sec:trustlaw} (the trust law) is
+deliberately a skeleton: the law is being revised and is described only after it is frozen.
 
-\subsection{Fusion filter and trust-to-covariance coupling}
-The shared 15-state error-state Kalman filter processes GNSS position/velocity and the CAI-derived
-hybridisation residual as independent innovations. For a sensor $s$ with continuous trust weight
-$w_s \in [w_{\min}, 1]$, trust couples into the filter only through the effective measurement covariance
-and an exclusion rule, so that every method (including a fixed-trust baseline) shares one fusion core:
+%---------------------------------------------------------------------
+\subsection{Sensor models}
+\label{sec:sensors}
+%---------------------------------------------------------------------
+All sensors are driven by one $100\,\mathrm{Hz}$ simulation tick. The IMU runs at $100\,\mathrm{Hz}$,
+the GNSS receiver at $1\,\mathrm{Hz}$ by default, and the CAI at the reciprocal of its measured cycle
+time. Each sensor consumes the specific force and angular rate of the simulated trajectory with gravity
+already removed upstream, so no sensor model recomputes gravity.
+
+\paragraph{Classical IMU.}
+The accelerometer and gyroscope of each axis share one error budget in the IEEE Std~952 style
+\cite{TODO-ieee952}: a per-run constant turn-on bias, a first-order Gauss--Markov (GM1) bias-instability
+process, white noise (velocity/angle random walk), per-run constant scale-factor and misalignment errors,
+quantisation and saturation. The GM1 standard deviation is set to $\sigma_{\mathrm{GM}} = B/0.664$ for a
+datasheet in-run stability $B$ and a chosen correlation time $\tau_c$, so that the process's
+Allan-deviation minimum equals $B$ \cite{TODO-elsheimy2008}. Two grades are evaluated and always reported
+separately (Table~\ref{tab:imu}): an industrial MEMS grade and a tactical grade. A consumer MEMS grade
+exists in the code but is not part of the evaluation.
+
+\begin{table}[t]
+\centering
+\caption{IMU grades. ``D'' = manufacturer datasheet figure, ``A'' = assumed. Both grades run at
+$100\,\mathrm{Hz}$. Industrial MEMS follows an ADIS16470-class part and tactical an HG1700~AG58-class part
+\protect\cite{TODO-adis16470-datasheet,TODO-hg1700-datasheet}.}
+\label{tab:imu}
+\small
+\begin{tabular}{lcc}
+\toprule
+Parameter & Industrial MEMS & Tactical \\
+\midrule
+Gyro in-run bias stability & 8$^\circ$/h (D) & 1$^\circ$/h (D) \\
+Gyro angular random walk & 0.34$^\circ/\sqrt{\mathrm{h}}$ (D) & 0.125$^\circ/\sqrt{\mathrm{h}}$ (D) \\
+Accel in-run bias stability & 13\,$\mu$g (D) & 30\,$\mu$g (A) \\
+Accel white-noise density & 25\,$\mu$g/$\sqrt{\mathrm{Hz}}$ (A) & 15\,$\mu$g/$\sqrt{\mathrm{Hz}}$ (A) \\
+Bias correlation time $\tau_c$ & 200\,s (A) & 300\,s (A) \\
+Accel turn-on bias & 10\,mg (A) & 2\,mg (A) \\
+Gyro turn-on bias & 0.1$^\circ$/s (A) & 0.01$^\circ$/s (A) \\
+Scale factor / misalignment & 500\,ppm / 0.3\,mrad (A) & 100\,ppm / 0.1\,mrad (A) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{GNSS receiver.}
+The constellation is a synthetic Walker-like GPS almanac with a $10^\circ$ elevation mask, so eight to nine
+satellites are visible from the reference origin. Per satellite the simulator generates a pseudorange,
+a pseudorange rate, a carrier-to-noise-density ratio (C/N0, rising linearly from $38\,\mathrm{dB\,Hz}$ at
+$10^\circ$ elevation to $48\,\mathrm{dB\,Hz}$ at zenith; the curve shape is assumed) and an automatic-gain-control
+(AGC) reading. The pseudorange error is one elevation- and C/N0-dependent user-equivalent-range-error
+budget composed of code thermal noise, a Gauss--Markov ionospheric residual, a tropospheric delay and
+multipath \cite{kaplan2017understanding}. The receiver tracks each satellite with a $25\,\mathrm{dB\,Hz}$
+lock threshold and a $1\,\mathrm{s}$ reacquisition delay, and solves a position/velocity/clock
+\emph{fix} by weighted least squares with weights equal to the inverse of the same error budget
+\cite{misra2006global}, followed by a snapshot residual-based receiver autonomous integrity monitoring
+(RAIM) $\chi^2$ statistic \cite{TODO-parkinson1988raim}. A fix needs at least four locked satellites. It carries the
+position and velocity covariances, the clock bias and drift, and the per-satellite C/N0 and elevation that
+the detector uses (Section~\ref{sec:detector}).
+
+\paragraph{Cold-atom accelerometer (CAI).}
+The CAI is a Mach--Zehnder light-pulse interferometer whose phase is $\phi = k_{\mathrm{eff}}\,a\,T^2$ with
+$k_{\mathrm{eff}} = 1.61\times10^{7}\,\mathrm{rad/m}$ for the $^{87}$Rb D$_2$ Raman pair. The fringe is
+observed only modulo $2\pi$ (a fringe period of $3.9\times10^{-3}\,\mathrm{m/s^2}$ at $T = 10\,\mathrm{ms}$),
+so the model resolves the fringe order with a classical companion accelerometer, as in hybrid
+matter-wave/classical sensors \cite{wright2022cold}. The acceleration response is a triangular weighting
+over $[t-2T,\,t]$, followed by a dead time to the end of the cycle. The primary (FIELD) grade is anchored to
+the real shot data of \cite{darmagnac2024atom,darmagnac2024dataset} through four fitted elements
+(Table~\ref{tab:cai}):
+
+\begin{enumerate}
+\item \emph{Noise level.} The per-shot noise is Gaussian with the robust (MAD-based) standard deviation
+  measured at $2T = 20\,\mathrm{ms}$, $\sigma_{\mathrm{shot}} = 5.60\,\mu g$ (bootstrap 95\% CI
+  $[5.04, 6.40]\,\mu g$, $n = 491$ shots). This equals $6.97\,\mu g/\sqrt{\mathrm{Hz}}$ at the measured
+  per-shot cycle time of $1.548\,\mathrm{s}$. Other interrogation times use the measured per-$2T$ values,
+  interpolated linearly in $2T$ and explicitly \emph{not} scaled as $1/T^2$, because the measured
+  $10\rightarrow 20\,\mathrm{ms}$ improvement is only about $1.9\times$ (a vibration-limited regime).
+\item \emph{Bursty outliers.} A per-axis two-state Gilbert--Elliott channel reproduces the measured
+  outlier statistics: a stationary bad-state probability of $9.0\%$ (95\% CI $[6.7, 11.8]\%$) and a
+  persistence $P(\mathrm{bad}\,|\,\mathrm{bad}) = 65.9\%$, i.e.\ $7.4\times$ more outlier adjacency than
+  independence would give. In the bad state a random-signed magnitude drawn from the 44 empirical
+  outliers ($\approx 30$--$270\,\mu g$) is added. The shot-noise draws that feed the model are the
+  outlier-free ones, so outliers are never double counted.
+\item \emph{Contrast loss with rotation.} The contrast is $C = C_0\exp\!\big(-(\Omega_\perp/\Omega_c)^2\big)$,
+  where $\Omega_\perp$ is the rms rate about the two body axes orthogonal to the sensed axis over the cycle.
+  The rigid-mirror fit gives $C_0 = 0.394 \pm 0.017$ and $\Omega_c = 48.2 \pm 2.5\,\mathrm{mrad/s}$ at
+  $2T = 12\,\mathrm{ms}$. Because the Coriolis phase scales as $\Omega\,T^2$, $\Omega_c$ is scaled as
+  $1/T^2$ from this single measured point to $17.3\,\mathrm{mrad/s}$ at $T = 10\,\mathrm{ms}$. This scaling
+  is physics-derived and unverified away from $T\approx 6\,\mathrm{ms}$.
+\item \emph{Cycle time.} $1.548\,\mathrm{s}$ per shot, the interlaced $k_D/k_U$ output interval of the
+  instrument.
+\end{enumerate}
+The sample is flagged invalid when $C < 0.08$ (assumed; about $\Omega_\perp \gtrsim 22\,\mathrm{mrad/s}$
+at FIELD) or when $|a|$ exceeds the dynamic range of $2g$ (assumed). The sample is \emph{not} flagged
+invalid during an outlier burst: the sensor is silently wrong, as the real instrument would be, and its
+reported variance excludes the burst. The classical Thales-MICAL accelerometer record of the same dataset is
+never used as a quantum-noise source. A ``lab'' grade (a short-$T$ compact hybrid, not a best-sensitivity
+instrument) and a ``near-future'' roadmap grade exist only for sensitivity sweeps and are labelled as such.
+The default pointing mode is rigid; an inertial-pointing mode is an assumption-based extrapolation and is
+not used for primary results.
+
+\begin{table}[t]
+\centering
+\caption{CAI FIELD-grade parameters. M = measured from \cite{darmagnac2024atom,darmagnac2024dataset}
+(Section~\ref{sec:sensors}), A = assumed.}
+\label{tab:cai}
+\small
+\begin{tabular}{lcc}
+\toprule
+Quantity & Value & Basis \\
+\midrule
+Interrogation time $2T$ & 20\,ms & M (paper's operating point) \\
+Cycle time & 1.548\,s & M \\
+Shot noise $\sigma_{\mathrm{shot}}$ & 5.60\,$\mu$g & M \\
+Outlier rate / persistence & 9.0\% / 65.9\% & M \\
+Contrast $C_0$, $\Omega_c$ ($T{=}6$\,ms) & 0.394, 48.2\,mrad/s & M \\
+$\Omega_c$ at $T{=}10$\,ms & 17.3\,mrad/s & $1/T^2$ scaling \\
+Contrast threshold; range & 0.08; $2g$ & A \\
+Slow bias residual (GM1) & 3\,$\mu$g, $\tau_c{=}300$\,s & A \\
+Scale-factor error & $10^{-5}$ & A \\
+Classical companion accel.\ noise; turn-on bias & $10^{-5}$; $5{\times}10^{-4}$\,m/s$^2$ & A \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%---------------------------------------------------------------------
+\subsection{Fusion filter}
+\label{sec:fusion}
+%---------------------------------------------------------------------
+All methods share one loosely coupled 15-state error-state extended Kalman filter (ESKF). The nominal state
+is position $p$ and velocity $v$ in a local ENU frame, the attitude matrix $C$, and the accelerometer and
+gyroscope biases $b_a, b_g$; the error state is
+$\delta x = [\delta p,\ \delta v,\ \psi,\ \delta b_a,\ \delta b_g] \in \mathbb{R}^{15}$, where $\psi$ is the
+navigation-frame attitude error \cite{TODO-sola2017}. Strapdown mechanisation uses trapezoidal integration
+of bias-corrected specific force and rate with a coning correction. The process model has the standard
+error-propagation blocks $F$ and noise-input blocks $G$ and continuous noise
+$Q_c = \mathrm{diag}(\mathrm{VRW}^2 I_3,\ \mathrm{ARW}^2 I_3,\ q_{b_a} I_3,\ q_{b_g} I_3)$ read from the IMU's
+own configuration, with $q_b = 2\sigma_{\mathrm{GM}}^2/\tau_c$. During IMU dropouts the last sample is held
+and $Q_c$ is inflated by a factor of $10$ ($100$ beyond a $0.1\,\mathrm{s}$ gap). The initial covariance is
+$P_0 = \mathrm{diag}\big((3\,\mathrm{m})^2, (0.1\,\mathrm{m/s})^2,\ (1,1,35\,\mathrm{mrad})^2,\ \sigma_{b_a,0}^2,\ \sigma_{b_g,0}^2\big)$
+with the turn-on bias standard deviations of Table~\ref{tab:imu}.
+
+\paragraph{Bias model.}
+The default bias blocks of $F$ are zero, i.e.\ $b_a$ and $b_g$ are random walks. Applying the GM1 decay
+$-I/\tau_c$ to the whole bias error state also decays the share of the prior that comes from the
+non-decaying per-run turn-on bias; $P$ then shrinks toward the small GM1 stationary variance while the true
+error does not, which produced a severe pure-inertial covariance inconsistency (a factor $e^{-2t/\tau}$).
+The mean-reverting form is retained only for ablation, and $q_b$ is kept as an over-bound of the GM1 part.
+
+\paragraph{Measurement updates.}
+The GNSS fix is processed as one six-dimensional position/velocity update, $\nu_{\mathrm{g}} = [\hat p - p_{\mathrm{g}};\ \hat v - v_{\mathrm{g}}]$,
+$H_{\mathrm{g}} = [I_6\ \ 0]$, with a zero lever arm and
+\begin{equation}
+R_{\mathrm{g}} = \kappa_R\,\mathrm{blkdiag}\big(\Sigma_{p}^{\mathrm{fix}},\ \Sigma_{v}^{\mathrm{fix}}\big),
+\label{eq:rgnss}
+\end{equation}
+where $\Sigma^{\mathrm{fix}}$ are the covariances reported by the receiver (a fixed diagonal fallback is
+used when they are not symmetric positive definite). The inflation $\kappa_R$ compensates the
+time-correlated error of a loosely coupled fix (ionosphere, troposphere, multipath), which the update
+treats as white. It is set once, on tuning seeds, identically for every method, so that the nominal
+horizontal ANEES is close to one, and is $\kappa_R = 60$ in the current configuration, to be frozen before the test sweep. We do not add a
+correlated-error state, because a slow drift spoof would be absorbed into it as ``correlated noise''.
+The attitude and bias states remain over-confident at this $\kappa_R$ (against the effective-bias truth,
+which includes turn-on bias, GM1, random-walk and scale-factor/misalignment aliasing, the residual
+accelerometer-bias NEES is about six times its nominal value on tuning seeds); this is a stated limitation
+(Section~\ref{sec:limitations}).
+
+The CAI enters as a direct observation of the classical accelerometer bias. Over the sample's response
+window $W$ (length $T_W = 2T$), the filter forms the same-window, triangularly weighted mean of the
+bias-corrected IMU specific force, $\bar f_{\mathrm{IMU}}$, and the innovation is
+$\nu_{\mathrm{q}} = \bar f_{\mathrm{Q}} - \bar f_{\mathrm{IMU}} \approx \delta b_a + (\text{CAI noise})$,
+with $H_{\mathrm{q}} = [0\ 0\ 0\ I\ 0]$ on the sensed axes and
+\begin{equation}
+R_{\mathrm{q}} = \mathrm{diag}(\sigma_{\mathrm{shot}}^2) + \frac{\mathrm{VRW}^2}{T_W}\,I + \sigma_{\mathrm{win}}^2 I,
+\qquad \sigma_{\mathrm{win}} = 10^{-5}\,g\ \text{(assumed)},
+\label{eq:rq}
+\end{equation}
+where $\sigma_{\mathrm{win}}$ covers window mismatch and misalignment. Because both instruments sense the
+same specific force in the same window, gravity, attitude and trajectory cancel in $\nu_{\mathrm{q}}$. The
+update is skipped when the sample is flagged invalid.
+
+\paragraph{Trust coupling and gating.}
+For a sensor $s$ with trust weight $w_s \in [w_{\min}, 1]$, trust enters only through the effective
+covariance and an exclusion rule,
+\begin{equation}
+R_{\mathrm{eff},s} = \frac{R_s}{\max(w_s,\,w_{\min})},\qquad \text{skip the update if } w_s < w_{\mathrm{excl}},
+\label{eq:reff}
+\end{equation}
+with $w_{\min} = 0.02$ and $w_{\mathrm{excl}} = 0.05$ (assumed). A $\chi^2$ gate at level
+$\alpha_{\mathrm{gate}} = 10^{-4}$ is part of the shared core, so every method except the deliberately
+gate-free ``undefended'' reference has it. With $S_{\mathrm{eff}} = H P H^{\top} + R_{\mathrm{eff}}$ and
+$\mathrm{NIS}_{\mathrm{eff}} = \nu^{\top} S_{\mathrm{eff}}^{-1}\nu$, an update whose NIS exceeds
+$\chi^2_{m,\,1-\alpha_{\mathrm{gate}}}$ is not dropped but \emph{softly} gated: its covariance is scaled,
+\begin{equation}
+R_{\mathrm{eff}} \leftarrow R_{\mathrm{eff}}\cdot \frac{\mathrm{NIS}_{\mathrm{eff}}}{\chi^2_{m,\,1-\alpha_{\mathrm{gate}}}},
+\label{eq:softgate}
+\end{equation}
+so its effective NIS equals the gate (a Huber-type covariance-scaling robust update). We adopted this after
+diagnosing that a hard gate drops a slowly dragged GNSS fix once it leaves the $\chi^2$ region, after which
+inertial coasting diverges; this is a defect of the shared core that affected every gated method, and the
+hard gate is kept only as an ablation. Updates use the Joseph form. After each propagation and update the
+covariance is symmetrised and only its negative eigenvalues are clipped, $P \leftarrow V\max(\Lambda,0)V^{\top}$,
+with no additive floor: an earlier additive $10^{-12} I$ floor injected unmodelled noise of the order of the
+real per-step gyro-bias process noise, and replacing it by the eigenvalue clip removed a covariance excess measured in a single-source regression test.
+
+\paragraph{Clock filter.}
+Timing is estimated by a standalone two-state Kalman filter (\texttt{ClockKF}) on the clock bias $b$ and
+drift $d$ (metres and metres per second, i.e.\ $c$ times the physical quantities) with
+$b_{k+1} = b_k + d_k\Delta t$ and a random-walk drift. It is aided by the fix's clock estimates with
+$R_{\mathrm{clk}} = \mathrm{diag}(3^2\,\mathrm{m}^2,\ 0.2^2\,(\mathrm{m/s})^2)/\max(w_{\mathrm{gnss}}, w_{\min})$,
+the same trust convention as Eq.~\eqref{eq:reff}, and coasts on its drift model when there is no valid fix.
+Its process-noise densities ($1\,\mathrm{m^2/s}$ on the bias and $10^{-3}\,(\mathrm{m/s})^2/\mathrm{s}$ on the drift)
+are assumed. \todo{ClockKF hold-over on exclusion (D-065) is decided but not yet in the code; update
+this paragraph after the freeze, and verify $q_{\mathrm{bias}}$ against a cited oscillator model.}
+
+%---------------------------------------------------------------------
+\subsection{Learned detector}
+\label{sec:detector}
+%---------------------------------------------------------------------
+\paragraph{Features.}
+At each GNSS epoch a causal, stateful extractor produces a $15$-dimensional feature vector from the fix
+and the filter's \emph{nominal-$R$} pre-correction innovations. Nominal-$R$ innovations are used so a
+feature cannot depend on its own trust output. The features are: (1--2) the position and velocity
+normalised innovation squares divided by their degrees of freedom; (3) the RAIM statistic divided by
+$\max(n_{\mathrm{sat}}-4, 1)$; (4--5) the mean C/N0 relative to $45\,\mathrm{dB\,Hz}$ and its
+cross-satellite standard deviation; (6) the C/N0 rate; (7) the AGC reading; (8--9) the clock-bias and
+clock-drift jumps against a constant-drift prediction, in units of $3\,\mathrm{m}$ and $0.2\,\mathrm{m/s}$;
+(10) the WLS residual rms; (11) the change in the number of satellites; (12) a Page CUSUM of feature~1,
+$S_j = \max(0, S_{j-1} + x_{1,j} - 1.5)$; (13) an indicator that the previous epoch was an outage;
+(14) the mean pairwise correlation of per-satellite C/N0 over a 20-epoch window; and (15) the slope of C/N0 on
+elevation across tracked satellites. Features 14 and 15 encode the single-antenna spoofing signature
+(common-mode C/N0 fluctuation and loss of the elevation dependence) reported in field data
+\cite{rados2024recent}. Features that remain observable during an outage (C/N0, AGC, satellite count) are
+kept then, because they carry the strongest jamming evidence; only the fit-dependent ones are zeroed.
+Each raw vector is normalised with running means and standard deviations updated on negative samples only,
+and expanded to a $60$-dimensional input
+$u_j = [\tilde x_j,\ \mathrm{EWMA}_{2\,\mathrm{s}}(\tilde x)_j,\ \mathrm{EWMA}_{20\,\mathrm{s}}(\tilde x)_j,\ \tilde x_j - \tilde x_{j-1}]$
+with time constants in seconds so that the detector does not depend on the GNSS rate.
+
+\paragraph{Architecture and calibration.}
+The detector is a multilayer perceptron $60 \rightarrow 16\ (\tanh) \rightarrow 2\ (\mathrm{sigmoid})$ with a
+spoofing head and a jamming head ($1010$ parameters, about $4\,\mathrm{kB}$ in \texttt{float32}). A
+logistic-regression detector ($60\rightarrow 2$) is the required ablation. Each head's output is Platt
+calibrated on the logit, $p = \sigma\!\big(a\,\mathrm{logit}(p_{\mathrm{raw}}) + b\big)$, with $(a,b)$ fitted at
+the natural class ratio on held-out tuning missions and applied at runtime, so the trust engine consumes
+calibrated probabilities \cite{TODO-platt1999}. The detector output is $p = \max(p_{\mathrm{spoof}}, p_{\mathrm{jam}})$.
+
+\paragraph{Supervised training with oracle labels.}
+The detector of every learning method is trained on ground-truth-labelled \emph{training missions}, the
+same supervision used by the supervised FL detectors we compare against \cite{khan2025enhancing,chai2025navigation}.
+Missions are run through the real closed-loop pipeline (real ESKF innovations, receiver and CAI, with a
+fixed-trust, non-detecting configuration so the mission is not perturbed by an untrained detector), and the
+oracle label is joined to the feature stream by timestamp \emph{offline}, in a single module that lies
+outside the agent's import graph (enforced by a static test). At deployment and on every evaluation
+mission no label reaches a node. The training mix has six attack families (gradual spoofing, meaconing,
+abrupt spoofing, continuous-wave jamming, wideband jamming, and jam-then-spoof), with one mission in ten
+clean and the families assigned round-robin by seed. Jamming severities are set through the jammer's
+effective isotropic radiated power so that the range spans partial degradation (the fix stays valid)
+through full denial; at the default geometry every severity would otherwise saturate at full denial, which
+had left the earlier mix with too few jamming positives. The mix targets at least $500$ positive epochs
+per family. The loss is a class-weighted binary cross-entropy per head, optimised by stochastic gradient
+descent (learning rate $0.05$, batch $64$). Two stabilising rules apply. The positive fraction is capped
+at $50\%$ by down-sampling (or, when fewer than ten negatives exist, all samples are used with class
+weights, closing a dead zone in which a node with few negatives previously skipped training). The
+inverse-frequency class weights $w_c = \min(N/(2N_c),\,10)$ are capped at $10$, to bound the update norm when one
+class is a tiny minority of a batch; an honest node's update with a norm $20$--$70$ times its peers' had motivated the cap. A label-free variant, using hindsight pseudo-labels from heuristic physical rules and a
+CAI-aided-inertial divergence statistic, was the original design; its measured pseudo-label precision
+failed its acceptance gate on tuning missions, so it is retained only as a reported ablation and is not part
+of H1--H4.
+
+%---------------------------------------------------------------------
+\subsection{Trust engine}
+\label{sec:trustlaw}
+%---------------------------------------------------------------------
+The trust engine turns the calibrated detector probability into continuous per-sensor weights
+$w_{\mathrm{gnss}}$ and $w_{\mathrm{quantum}}$ that enter the filter through Eq.~\eqref{eq:reff}, using an
+asymmetric (fast-distrust, slow-recovery) recursion with a bounded exclusion time and a recovery gate, and a
+small set of rule-based physical evidence used as a safety floor. \todo{Trust law: equations, states,
+parameters, the chattering bound $T_{\mathrm{cyc}}$, the position/clock split and the quantum-trust rule are
+to be written after the D-065 revision is frozen; the current abstract, introduction and scenario S7
+statements about a $26.1\,\mathrm{s}$ cycle bound must be re-derived for the final law.}
+%% PENDING D-065: trust law is being revised (probe-during-spoof fix, position/clock trust split); fill after freeze
+
+%---------------------------------------------------------------------
+\subsection{Federated learning}
+\label{sec:fl}
+%---------------------------------------------------------------------
+\paragraph{What is shared.}
+The only trained object is the detector. Each node uploads a \texttt{ModelUpdate}: the weight delta
+$\Delta_i = \theta_i - \theta_g$, absolute running normalisation statistics (mean and standard deviation per
+feature), and scalar training metrics; a leakage guard rejects any array whose shape does not match the
+detector parameters and any non-scalar metric. The uploaded sample count is self-reported and therefore
+untrusted. Trust-law and filter hyperparameters are not learned.
+
+\paragraph{Rounds and local training.}
+Rounds are bulk-synchronous in simulation time with period $T_{\mathrm{round}} = 60\,\mathrm{s}$. At each
+round boundary a live node trains for $E = 2$ epochs (SGD, learning rate $0.05$, batch $64$) on a replay
+buffer of at most $20{,}000$ labelled samples, with an optional FedProx term
+$\tfrac{\mu}{2}\lVert\theta-\theta_g\rVert^2$ \cite{TODO-fedprox}; a node with fewer than $64$ labelled
+samples sends a heartbeat instead. A node installs a received global model at the first GNSS epoch after
+the simulated uplink and downlink delays, and its trust state is never reset by a model swap.
+Communications are simulated in simulation time: a log-normal delay (median $0.2\,\mathrm{s}$, log-scale
+$0.5$) plus a serialisation term at $1\,\mathrm{Mbit/s}$, and a Gilbert--Elliott loss channel
+($P_{G\rightarrow B} = 0.02$, $P_{B\rightarrow G} = 0.3$, loss $1\%$ in the good and $90\%$ in the bad
+state). The round hyperparameters ($E=2$, learning rate $0.05$, $\mu=0$, $R=10$ rounds) were chosen on
+tuning seeds by the sanity check below, identically for all FL methods.
+
+\paragraph{Aggregators.}
+FedAvg \cite{TODO-fedavg} aggregates with weights $n_i(1+s_i)^{-1/2}$, where $n_i$ is the self-reported
+sample count and $s_i$ the staleness in rounds. Updates with $s_i > 3$ are discarded, and a round is skipped
+(logged, never silent) unless at least $\lceil 0.5\,N_{\mathrm{live}}\rceil$ fresh updates arrive. FedProx
+aggregates as FedAvg; its proximal term acts only on the client. TRIM-NB-R proceeds as follows, on the
+flattened weight delta:
 \begin{align}
-R_{\mathrm{eff},s} &= \frac{R_s}{\max(w_s,\, w_{\min})}, \label{eq:reff}\\
-&\text{skip the update entirely if } w_s < w_{\mathrm{excl}}. \label{eq:excl}
+\tilde\Delta_i &= \Delta_i \cdot \min\!\Big(1,\ \frac{c\cdot \mathrm{median}_j\lVert\Delta_j\rVert}{\lVert\Delta_i\rVert}\Big),
+   && c=2,\ \text{or } c=1 \text{ for a node's first two rounds,} \label{eq:clip}\\
+\Delta &= \begin{cases}
+   \mathrm{TrimMean}_{\beta=0.2}\big(\{(1+s_i)^{-1/2}\tilde\Delta_i\}_{i\in\mathrm{live}}\big) & N_{\mathrm{live}} \ge 5\\
+   \mathrm{Median}\big(\{(1+s_i)^{-1/2}\tilde\Delta_i\}_{i\in\mathrm{live}}\big) & N_{\mathrm{live}} < 5,
+   \end{cases} \label{eq:trim}\\
+r_i &\leftarrow \rho\,r_i + (1-\rho)\max\!\big(0,\ \cos(\tilde\Delta_i,\Delta)\big), && \rho = 0.8, \label{eq:reputation}\\
+\theta_g &\leftarrow \theta_g + \eta_s\Delta,\qquad \eta_s=1. \label{eq:serverstep}
 \end{align}
-A $\chi^2$ normalised-innovation-squared (NIS) gate, evaluated with $R_{\mathrm{eff}}$, is applied to
-every sensor and every method alike, so a low-trust sensor can still contribute a small, gated update
-rather than being invisibly discarded.
+The trimmed mean removes $\lfloor\beta N_{\mathrm{live}}\rfloor$ values from each tail per coordinate.
+A node whose reputation stays below $0.2$ for three consecutive rounds is quarantined and excluded for the
+next ten rounds. Reputation therefore acts only through quarantine and not as an aggregation weight.
+Normalisation statistics are aggregated by coordinate-wise median. The sample count never enters the robust
+aggregator, which is exactly the quantity a poisoning node can misreport, and FedAvg's use of it is why it is
+the vulnerable reference. The simulated poisoning attacks are sign flip (a factor of $-5$),
+Gaussian noise at ten times the median honest update norm, label flip, and ``A Little Is Enough''
+\cite{TODO-alie} using a closed-form $z$ (a simplification of the original bookkeeping).
 
-\subsection{Continuous, asymmetric trust law}
-Trust is updated at each GNSS evidence event $j$ from a smoothed detector output $\bar p_j$ (an
-exponentially smoothed version of the learned detector's spoof/jam probability) via a target trust
-$\tau^*_j$ and an asymmetric, hysteresis-gated recursion toward it:
-\begin{align}
-\bar p_j &= \bar p_{j-1} + \beta_j\,(p_j - \bar p_{j-1}), && \beta_j = 1 - e^{-\Delta t_j/\tau_p}, \label{eq:smooth}\\
-\tau^*_j &= w_{\min} + (1-w_{\min})\,\mathrm{clip}\!\left(\frac{\theta_{\mathrm{hi}} - \bar p_j}{\theta_{\mathrm{hi}} - \theta_{\mathrm{lo}}},\,0,\,1\right), \label{eq:target}\\
-w_j &=
-\begin{cases}
-w_{j-1} + (1-e^{-\Delta t_j/\tau_d})(\tau^*_j - w_{j-1}) & \text{if } \tau^*_j < w_{j-1} \\
-w_{j-1} + (1-e^{-\Delta t_j/\tau_r})(\tau^*_j - w_{j-1}) & \text{if } \tau^*_j > w_{j-1} \wedge G_j \\
-w_{j-1} & \text{otherwise,}
-\end{cases} \label{eq:trustlaw}
-\end{align}
-where $G_j$ is a recovery gate requiring both a sustained clean detector output and a run of
-nominal-range NIS values before trust is allowed to recover, and the fast distrust time constant
-$\tau_d$ is much smaller than the slow recovery time constant $\tau_r$. Equation~\eqref{eq:trustlaw} is a
-convex combination of $w_{j-1}$ and $\tau^*_j \in [w_{\min}, 1]$ at every step, so $w$ is bounded in
-$[w_{\min}, 1]$ by construction, and for constant $\tau^*$ the law is a contraction with exponential,
-overshoot-free convergence. Counting a ``trust cycle'' as a downward crossing of $w=0.5$ followed by an
-upward crossing of $w=0.9$, the recovery gate's minimum dwell time on the smoothed statistic implies a
-provable lower bound on the cycle period, $T_{\mathrm{cyc}} \geq 26.1\,\mathrm{s}$, for any input
-sequence, including an adversarial one -- this is what bounds trust chattering (evaluated in scenario
-S7, Section~\ref{sec:setup}) independent of the detector's own quality.
+\paragraph{The $\theta_0$ protocol and sanity check.}
+Every FL method and the local-only baselines start from the same $\theta_0$, pretrained offline on a
+disjoint pretraining seed range with a \emph{restricted} family set that excludes the family used as the
+``novel'' family in the H2 and H4 tests, so that ``the detector has never seen this family'' is true of
+$\theta_0$ and of the target node's local data and false only of its peers' data. This requirement was added
+after two earlier previews, in which $\theta_0$ was trained on every family and the arms agreed to about five
+decimals, were rejected as evidence. Before any H2 or H4 run, an FL sanity check requires FedAvg and
+TRIM-NB-R on IID nodes that all see all families to reach at least $0.95\times$ the AUC of the centrally
+trained detector on the union of their data; only FL hyperparameters are tuned to meet it, on tuning seeds.
+Each evaluated detector also logs a parameter hash per arm and per round, and the arms are asserted to
+differ after the first install.
 
-\subsection{TRIM-NB-R: trust-aware robust federated aggregation}
-Each round, live nodes submit a detector weight delta $\Delta_i$. The server aggregates as follows:
-\begin{align}
-\Delta_i &\leftarrow \Delta_i \cdot \min\!\left(1,\; \frac{c \cdot \mathrm{median}_j \lVert \Delta_j\rVert}{\lVert \Delta_i \rVert}\right), && c = 2, \label{eq:clip}\\
-\Delta &= \mathrm{coordinate\text{-}wise\ trimmed\ mean}_{\beta=0.2}(\{\Delta_i\}_{i\ \mathrm{live}}), \label{eq:trim}\\
-r_i &\leftarrow \rho\, r_i + (1-\rho)\max(0, \cos(\Delta_i, \Delta)), && \rho = 0.8, \label{eq:reputation}\\
-\theta_g &\leftarrow \theta_g + \eta_s \Delta, && \eta_s = 1, \label{eq:serverstep}
-\end{align}
-with nodes whose reputation $r_i$ falls below a threshold for several consecutive rounds quarantined for
-a fixed number of subsequent rounds. Norm clipping bounds any single node's influence before aggregation;
-the trimmed mean (falling back to a coordinate-wise median when too few nodes are live to trim safely)
-tolerates up to a designed fraction $\beta = 20\%$ of Byzantine nodes; the reputation and quarantine step
-adds a slower, cross-round defense against nodes that are individually within norm but persistently
-inconsistent with the consensus update direction. FedAvg and FedProx are retained as reference
-aggregators (the former weights by each node's self-reported sample count, which is exactly the
-untrusted quantity a poisoning node can misreport, and is expected to be the more vulnerable reference
-for that reason).
-
-\subsection{Local training and pseudo-labels}
-No node ever has access to a ground-truth attack label. Each node trains its detector locally against
-\emph{hindsight pseudo-labels}: an epoch is labelled positive if a sustained innovation-based CUSUM
-statistic, computed against the CAI-aided filter as a slowly drifting but trustworthy hindsight
-reference, crosses a threshold within a fixed look-ahead window, or if AGC, RAIM or clock-jump features
-cross conservative, independently justified thresholds; it is labelled negative only if every feature
-stays within its nominal range for the entire window; otherwise it is not used for training. This is the
-specific mechanism by which the quantum sensor contributes to the learning problem, not only to
-navigation: a CAI-aided inertial reference that drifts far more slowly than GNSS position error under
-denial is a more trustworthy hindsight label source than GNSS alone, and federated learning is what lets
-one node's hindsight-labelled experience of an attack family improve the shared detector's real-time,
-causal decision at a node that has not yet experienced that family.
+\paragraph{Fleet runner.}
+A fleet mission spawns one server process and $N$ node processes (\texttt{spawn} context, message queues,
+one thread each). Each node is a full Environment$+$Agent pair whose federated client wraps the live
+detector object of the agent, so an installed model is used from the next tick. The server aggregates in
+node-identifier order rather than arrival order and draws the downlink outcome from its own random stream,
+so a repeated FL run is bit-identical (unit-tested). A node's local training dataset comes from oracle-labelled training
+missions, generated in the parent process before the node is spawned and passed as plain arrays; the node
+process never imports the label-join module (static test). Local-only baselines (B-cont, B-bin) are run as
+$N$ independent one-node federations with FedAvg, which is the identity for one node, and lossless,
+zero-delay communications, so that they do train locally without any exchange and are not handicapped by
+simulated network faults that they would not have.
 
 %=====================================================================
-\section{Experimental Setup}
+\section{Evaluation Protocol}
 \label{sec:setup}
 %=====================================================================
-\todo[inline]{Expand with concrete parameter tables, hardware/runtime budget, and exact seed ranges once
-the M1/M2 integration described in the project log completes.}
+This section is the protocol; no result is given. Every choice below was fixed before any test-seed run,
+and where a rule was set after inspecting tuning data this is said explicitly.
 
-Every method under comparison -- FedQPNT and its baselines and ablations (A, A0, B-bin, B-cont, B$'$,
-and the $-$quantum, $-$FL, fixed-trust, binary, $-$recovery-gate, logreg and FedAvg ablations) --
-shares the same sensor noise realisations (paired, seed-indexed
-random number generator streams), the same fusion filter and NIS gate, the same detector architecture and
-initial weights, and the same tuning budget, so that a difference in outcome can be attributed to the
-mechanism under test rather than to incidental implementation differences (a design constraint drawn
-directly from the project's scientific-integrity rule that results must be reported exactly as measured,
-with no scenario dropped after the fact). \todo[inline]{Table: baseline/ablation matrix (FedQPNT, A, A0,
-B-bin, B-cont, B$'$, $-$quantum, $-$FL, fixed-trust, binary, $-$recovery-gate, logreg, FedAvg) with
-detector-training / trust-law / CAI / aggregator columns.}
-
-\subsection{Hypotheses}
-Four pre-registered, falsifiable hypotheses are reported whatever their outcome:
-H1 (FedQPNT improves on Baseline A, FL detect-and-exclude, on $\mathrm{RMSE}_h(P_{\mathrm{att}})$ and
-$\mathrm{MAX}_h(P_{\mathrm{att}})$); H2 (FedQPNT improves on B-cont, the strongest single-node
-continuous-trust competitor, on the same metrics and on detection latency for attack families a given
-node has not yet experienced); H3 (FedQPNT with quantum aiding improves on the $-$quantum ablation on
-detection latency for gradual spoofing); H4 (FedQPNT improves on B-cont on a cold-start node's detection
-probability and latency). The pre-registered primary metrics are $\mathrm{RMSE}_h(P_{\mathrm{att}})$
-(horizontal position RMSE during the active-attack phase) and $\mathrm{latency}_{\mathrm{on}}$
-(time from attack onset to sustained detection); all other metrics are secondary.
-
+%---------------------------------------------------------------------
 \subsection{Scenario matrix}
-Fifteen scenarios (nominal operation; gradual spoofing at three severities; sudden jamming; combined
-jam-then-spoof at reacquisition; partial node failure/delayed FL updates; long-duration CAI bias drift;
-trust chattering under toggled spoofing; cold-start node join; communications dropouts; sample-rate
-mismatch; extreme sensor noise; trust-score/model poisoning at two Byzantine fractions; post-attack
-recovery; multi-hour stability; and simultaneous attacks on a fleet subset) exercise the system along
-axes independent of the scientific hypotheses, each with its own pre-registered, pass/fail engineering
-acceptance criterion evaluated over 30 paired test seeds with a Wilcoxon signed-rank test as the primary
-statistical test and Holm--Bonferroni correction across the confirmatory family
-$\{H1,\ldots,H4\}\times\{\text{primary metrics}\}$.
+\label{sec:scenarios}
+%---------------------------------------------------------------------
+Fifteen scenarios (seventeen registry entries, because S2 has three severities) exercise the system along
+axes independent of the scientific hypotheses (Table~\ref{tab:scenarios}). Each has an executable
+engineering acceptance criterion; a criterion that fails is reported as measured and never tuned away.
+The Byzantine fraction $f$ in S12 is $20\%$ and $40\%$; the $40\%$ case lies beyond the trimmed mean's
+design fraction $\beta$ and is reported without a threshold. All scenarios use the FIELD-grade CAI. The
+platform is a ground vehicle unless stated.
+
+\begin{table*}[t]
+\centering
+\caption{Scenario matrix as registered in the code. ``Nodes'' is the fleet size; attack onsets in seconds.
+$\dagger$ marks scenarios whose attitude/bias-dependent claims are gated (see text).}
+\label{tab:scenarios}
+\small
+\begin{tabular}{llrrl}
+\toprule
+ID & Scenario & Nodes & Duration (s) & Attack (severity, onset, duration) \\
+\midrule
+S1 & Nominal & 1 & 600 & none \\
+S2 & Gradual spoofing: low / medium / high & 1 & 600 & drift spoof; 0.3 / 0.6 / 0.9; 60; 300 \\
+S3$^\dagger$ & Sudden jamming & 1 & 300 & wideband jam; 1.0; 60; 60 \\
+S4$^\dagger$ & Jam-then-spoof at reacquisition & 1 & 400 & (jam leg registered; see text) \\
+S5 & Partial node failure / delayed FL updates & 10 & 600 & none (30\% node failure at $T/2$) \\
+S6$^\dagger$ & Long-duration CAI bias drift (Schuler world) & 1 & 14\,400 & drift spoof; 0.05; 600; open \\
+S7 & Trust chattering & 1 & 3600 & drift spoof toggled every 10\,s; 0.5; 60 \\
+S8 & Cold-start node at $T/2$ & 5 & 600 & drift spoof; 0.6; 330; 120 \\
+S9 & Communications dropouts & 5 & 600 & none (Gilbert--Elliott loss sweep) \\
+S10 & Sample-rate mismatch & 1 & 300 & none (GNSS rate $\times$ CAI cycle grid) \\
+S11 & Extreme noise (filter not told) & 1 & 300 & abrupt spoof; 1.0; 60; 60 \\
+S12 & Trust-score / model poisoning ($f{=}20\%,40\%$) & 10 & 600 & none (4 poisoning types) \\
+S13 & Recovery after attack & 1 & 300 & abrupt spoof; 0.8; 60; 60 \\
+S14$^\dagger$ & Multi-hour stability (Schuler world) & 1 & 14\,400 & none \\
+S15 & Simultaneous attacks on a fleet subset (30\%) & 10 & 600 & drift spoof; 0.6; 60; 300 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The code still marks the attitude- and bias-dependent scenarios (S3, S4, S6, S14) as gated behind the
+filter-consistency gate and the test-seed gate (Section~\ref{sec:seeds}); their claims are reported only if
+the gate clears. \todo{Confirm after the core freeze which of S3/S4/S6/S14 are unblocked (the code still stamps
+$\kappa_R = 40$ provisional), and register a true jam-then-spoof attack for S4: the registered S4 attack is
+currently the jam leg only.}
+
+%---------------------------------------------------------------------
+\subsection{Methods and baselines}
+\label{sec:methods}
+%---------------------------------------------------------------------
+Baselines are \emph{mechanism classes}, not re-implementations of specific papers, and each is defined by a
+configuration difference over one code path that shares the sensors, the noise realisations (paired
+seed-indexed random streams), the filter with its soft NIS gate, the features, the detector architecture,
+$\theta_0$, and the tuning budget (Table~\ref{tab:methods}). The papers named are class representatives
+only. Beating the strongest variant of each class is a stronger claim than beating a loose replica.
+
+\begin{table}[t]
+\centering
+\caption{Methods. Detector training: FL = federated, Local = single node from the same $\theta_0$, --- = none.
+Every method except ``undefended'' has the shared soft NIS gate.}
+\label{tab:methods}
+\footnotesize
+\begin{tabular}{p{2.0cm}p{1.0cm}p{3.5cm}p{1.3cm}}
+\toprule
+Method & Detector & Trust action & Aggregator \\
+\midrule
+FedQPNT & FL & continuous law (Sec.~\ref{sec:trustlaw}) & TRIM-NB-R \\
+A \cite{khan2025enhancing,chai2025navigation} & FL & $w{=}1$ if $p{<}0.5$ else $w{=}0$ (memoryless) & TRIM-NB-R \\
+A0 & FL & $w{\equiv}1$ (alarm only) & TRIM-NB-R \\
+B-bin \cite{pardhasaradhi2022gps} & Local & detect, exclude, coast until the recovery gate passes & --- \\
+B-cont \cite{ren2020adaptive} & Local & the FedQPNT law & --- \\
+B$'$ \cite{mehra1970identification} & --- & the FedQPNT law with $p = F_{\chi^2_3}(3x_1)$ & --- \\
+$-$quantum & FL & continuous law, CAI off & TRIM-NB-R \\
+Fixed trust & FL & $w{\equiv}1$, gate on & TRIM-NB-R \\
+Undefended & FL & $w{\equiv}1$, \emph{gate off} & TRIM-NB-R \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+B-cont is the strongest single-node competitor: it is the FedQPNT law with a local-only detector, identical to
+the $-$FL ablation, and it isolates the federation contribution exactly. H2 is tested against B-cont;
+B-bin is reported alongside. B$'$ is the classical innovation-based adaptive-filter representative.
+``Undefended'' is the reference for the safety principle and for the S1 cost check. The remaining
+ablations (binary trust, $-$recovery-gate, logistic-regression detector, FedAvg aggregation) are registered in
+the trust-law method table; FedAvg is the only aggregator ablation with an evaluation arm in the fleet
+runner, and FedProx is implemented but, with the frozen $\mu = 0$, coincides with FedAvg.
+\todo{Table of all ablations with their detector/trust/CAI/aggregator columns, once the trust law is frozen.}
+
+%---------------------------------------------------------------------
+\subsection{Hypotheses}
+\label{sec:hypotheses}
+%---------------------------------------------------------------------
+Four pre-registered, falsifiable hypotheses are reported whatever their outcome:
+H1 (FedQPNT improves on Baseline A on $\mathrm{RMSE}_h(P_{\mathrm{att}})$ and $\mathrm{MAX}_h(P_{\mathrm{att}})$);
+H2 (FedQPNT improves on B-cont on the same metrics and on detection latency for an attack family a given
+node has not experienced); H3 (quantum aiding improves detection latency for gradual spoofing over the
+$-$quantum ablation); H4 (FedQPNT improves on B-cont on a cold-start node's detection probability and
+latency). The pre-registered primary metrics are $\mathrm{RMSE}_h(P_{\mathrm{att}})$ and
+$\mathrm{latency}_{\mathrm{on}}$; all others are secondary and labelled exploratory. The IMU-grade dimension
+(Section~\ref{sec:grade}) applies to H3.
+
+%---------------------------------------------------------------------
+\subsection{Metrics}
+\label{sec:metrics}
+%---------------------------------------------------------------------
+Navigation output is evaluated at $10\,\mathrm{Hz}$. From the truth labels, $t_{\mathrm{on}}$ is the first
+labelled attack sample, $t_{\mathrm{off}}$ the last plus one epoch, and the phases are
+$P_{\mathrm{pre}} = [60\,\mathrm{s}, t_{\mathrm{on}})$ (the alignment transient is excluded),
+$P_{\mathrm{att}} = [t_{\mathrm{on}}, t_{\mathrm{off}})$ and $P_{\mathrm{post}} = [t_{\mathrm{off}}, T]$.
+With $e_h(t) = \lVert \hat p_{EN}(t) - p_{EN}(t)\rVert_2$:
+$\mathrm{RMSE}_h(P) = \sqrt{\mathrm{mean}_{t\in P}\,e_h^2}$, $\mathrm{MAX}_h(P)$ and $\mathrm{P95}_h(P)$, with
+analogous three-dimensional and velocity errors. Filter consistency is
+$\mathrm{ANEES}_{\mathrm{pos}} = \mathrm{mean}\ \delta p^{\top}P_{pos}^{-1}\delta p/3$ (ideal $1$).
+Detection uses the trust engine's binary alarm: $t_{\mathrm{det}}$ is the first time from $t_{\mathrm{on}}$
+at which the alarm holds for $T_{\mathrm{sus}} = 1\,\mathrm{s}$, $\mathrm{latency}_{\mathrm{on}} = t_{\mathrm{det}} - t_{\mathrm{on}}$,
+and a miss is censored at $t_{\mathrm{off}} - t_{\mathrm{on}}$. $P_D$ is the fraction of attacked runs with a
+hit. For gradual spoofs, whose onset is physically undetectable, $\mathrm{latency}_{\mathrm{eff}}$ is measured from
+$t_{\mathrm{eff}}$, the first time the spoof-induced position offset (truth side) exceeds $3\sigma_{\mathrm{nom}}$.
+False alarms are rising alarm edges with no active label within $\pm T_{\mathrm{sus}}$, and
+$\mathrm{FAR}$ is their count per clean hour. Detector quality is the ROC-AUC of $p$ against the label
+(evaluator only). Trust behaviour is the time to distrust ($w_{\mathrm{gnss}} < 0.5$ after onset), the
+recovery time $t_{\mathrm{rec}}$ (the first $\tau$ after $t_{\mathrm{off}}$ from which $e_h < \max(2\,\mathrm{RMSE}_h(P_{\mathrm{pre}}),3\,\mathrm{m})$ for
+$10\,\mathrm{s}$), the number $N_{\mathrm{cyc}}$ of trust cycles per hour (a downward crossing of $w=0.5$
+followed by an upward crossing of $w=0.9$) and the total variation of $w$ per hour. Because PNT includes
+timing, clock-bias and clock-drift errors in nanoseconds give $\mathrm{RMSE}_t$ and $\mathrm{MAX}_t$; these are
+secondary except that meaconing scenarios report $\mathrm{RMSE}_t$ alongside the primaries, since meaconing
+is chiefly a timing attack. FL metrics are the global-model AUC per round on a fixed labelled evaluation set
+(evaluator only), rounds skipped and quarantined-node counts. Ground truth and labels are read only by the
+evaluator, after the mission, from the recorded files. \todo{$\mathrm{latency}_{\mathrm{eff}}$ is specified
+but not yet computed by the evaluation code; implement before the H3 analysis.}
+
+%---------------------------------------------------------------------
+\subsection{Statistics}
+\label{sec:stats}
+%---------------------------------------------------------------------
+Each scenario--method cell uses $30$ test master seeds, paired across methods by the seed-indexed random
+streams so that sensor and attack noise are identical between methods. With $n = 30$ a paired test has
+$80\%$ power at $\alpha = 0.05$ (two-sided) for a standardised effect $d_z \approx 0.53$. If a pilot on
+seeds $600$--$609$ shows $d_z < 0.5$ on a primary metric, $n$ is raised to
+$\lceil (z_{0.975}+z_{0.8})^2/d_z^2\rceil + 2$, decided before any test seed is examined. The unit of analysis
+is the per-run value averaged over the nodes of the run, since nodes within a run are not independent.
+The primary test is the two-sided Wilcoxon signed-rank test on paired per-seed differences
+\cite{TODO-wilcoxon1945}; the paired $t$-test is reported in addition only when a Shapiro--Wilk test on the
+differences gives $p > 0.05$. Effect sizes are the Hodges--Lehmann median of paired differences
+\cite{TODO-hodgeslehmann1963} with a $95\%$ BCa bootstrap interval ($10{,}000$ resamples, a dedicated
+seeded stream) \cite{TODO-efron1987bca}, the matched-pairs rank-biserial correlation, and Cohen's $d_z$.
+Multiple methods in one scenario use a Friedman test with Nemenyi post-hoc \cite{TODO-demsar2006}; binary
+outcomes use the exact McNemar test; proportions carry Wilson $95\%$ intervals. Censored latencies (misses)
+take the censoring value and are handled by the rank tests. Holm--Bonferroni \cite{TODO-holm1979}
+controls the family-wise error over the confirmatory family $\{\mathrm{H1},\ldots,\mathrm{H4}\}\times\{\text{primary
+metrics}\}$ (scenarios where applicable); secondary metrics carry unadjusted $p$-values labelled
+exploratory. \todo{Reconcile the implemented confirmatory family with this specification: the report code
+currently lists five tests on S2-medium and S8, excludes H3 while it is gated, and uses only
+$\mathrm{latency}_{\mathrm{on}}$ for H4.}
+
+%---------------------------------------------------------------------
+\subsection{Seed protocol and code freeze}
+\label{sec:seeds}
+%---------------------------------------------------------------------
+Seed ranges are disjoint by purpose and fixed in advance.
+\emph{Pretraining} (seeds 400--449) trains $\theta_0$.
+\emph{Tuning} (500--599) is used for $\kappa_R$, the trust and filter defaults, supervised detector training
+(500--549), Platt calibration (550--574), held-out detector checks (575--599), the FL sanity check, and
+smoke and safety-principle checks.
+A further disjoint tuning-class range (9500--9699) is used for per-design studies such as the
+signature-strength sweep. The pilot for the power rule uses 600--609.
+\emph{Test} (10000 and above; 10000--10029 for the $30$-seed cells) is held out behind a gate: the campaign
+runner refuses any test seed unless it is invoked with both a final flag and a gate-cleared flag \emph{and}
+a gate file records that the gate is cleared; the file currently records that it is not, and it is cleared
+only after the filter-consistency condition is met or its failure is understood and accepted as a stated
+result. The protocol requires every campaign or fleet run to record the repository revision and the state of the package tree at
+launch and at completion, and a run is valid only if the tree is clean and unchanged throughout; core
+changes are made only when no evaluation run is live. Trust-law and filter hyperparameters are frozen with
+their configuration hash logged before the test sweep, and all random streams derive hierarchically from
+the master seed, node identifier and component name. \todo{State the frozen $\kappa_R$ (the campaign, runner and fleet defaults are still $40$ although $60$ was accepted) and the configuration hash
+after the freeze.}
+
+%---------------------------------------------------------------------
+\subsection{H2/H4 event-level protocol (pre-registered)}
+\label{sec:h2prereg}
+%---------------------------------------------------------------------
+The H2 and H4 tests isolate the learned contribution, not the rule-based physical evidence, which by itself
+detects some attack families regardless of the detector. Three quantities are therefore reported
+separately: the learned-detector-only AUC (calibrated $p$, rule evidence excluded), the operational-score
+AUC, and the detection latency. The novel family is evaluated in a regime where the rule evidence does
+not fire, with the family absent from $\theta_0$ and from the target node's data and present in its peers'.
+For the abrupt-spoofing family the following was registered \emph{before any valid run}, and is fixed:
+\begin{itemize}
+\item \emph{Setting.} $\theta_0$ pretrained on seeds 400--449 from clean, gradual-spoofing and jamming missions
+  (abrupt spoofing and meaconing excluded); abrupt spoof of severity $0.15$ (a $12\,\mathrm{m}$ jump, chosen
+  because the rule evidence does not fire at that severity); $N=5$ nodes, $600\,\mathrm{s}$ missions,
+  $60\,\mathrm{s}$ rounds, $10$ rounds; FL hyperparameters as in Section~\ref{sec:fl}; live seeds 500--509
+  ($n=10$, raised from $5$ for power).
+\item \emph{Primary.} Event-level detection: $P_D@10\,\mathrm{s}$, the fraction of attack events for which the
+  raw detector score $p$ crosses a threshold $\tau$ within $[t_{\mathrm{on}}, t_{\mathrm{on}}+10\,\mathrm{s}]$.
+  $\tau$ is set \emph{per arm} to give a clean false-alarm rate of $1$/h, calibrated on clean missions from
+  seeds 580--599 (at least $5\,\mathrm{h}$ per arm, disjoint from the live seeds) with the arm's final
+  installed model, which gives an equal-FAR comparison. Onset latency (time to the first crossing, censored at
+  $60\,\mathrm{s}$ with the number of censored events stated) is reported with it.
+\item \emph{Secondary.} AUC of onset-window positives $[t_{\mathrm{on}}, t_{\mathrm{on}}+N]$ against pre-onset
+  negatives only, for $N = 10\,\mathrm{s}$ and $N = 5\,\mathrm{s}$. We disclose that $N=10\,\mathrm{s}$ was
+  chosen after inspecting the trace of one tuning seed.
+\item \emph{Tertiary (descriptive).} Full-window AUC, with an explanation, and a post-attack ``recovery alarm
+  rate'' reported separately and not pooled into the negatives.
+\item \emph{Statistics.} Paired Wilcoxon on $P_D@10\,\mathrm{s}$ and latency across the $10$ seeds, with the
+  per-seed values reported.
+\item \emph{Sampling.} Every metric is computed on the $1\,\mathrm{Hz}$ detector-update epochs (the ticks at
+  which the detector is scored), not on the $100\,\mathrm{Hz}$ ticks; an earlier invalid run mixed the two.
+\end{itemize}
+The re-run is parked until the core is frozen, because the pending trust revision changes the closed-loop
+features. \todo{result: H2/H4 event-level outcome, after the core freeze.}
+
+%---------------------------------------------------------------------
+\subsection{IMU grade as an evaluation dimension}
+\label{sec:grade}
+%---------------------------------------------------------------------
+The value of a defence that excludes GNSS depends on how well the platform coasts, and the CAI's benefit is
+expected to be small with MEMS gyros, whose tilt error dominates within about a minute, and larger with
+tactical-grade gyros. The IMU grade is therefore an explicit, pre-registered evaluation dimension: the
+attack scenarios are run with both the industrial MEMS and the tactical grade, with the CAI on and off, and
+\emph{both} grades are reported. The default grade is not switched to whichever one favours the method.
+A coasting-envelope measurement (a forced GNSS outage of $180\,\mathrm{s}$, maximum horizontal error with the CAI
+on and off, per grade) characterises the quantum contribution under denial. \todo{result: coasting envelope
+and H3 by grade on test seeds.}
+
+%---------------------------------------------------------------------
+\subsection{Safety principle}
+\label{sec:safety}
+%---------------------------------------------------------------------
+A defended method must never be substantially worse than the undefended reference across the stated threat
+envelope. This is pre-registered as
+\begin{equation}
+\mathrm{RMSE}_h^{\mathrm{def}}(P_{\mathrm{att}}) \le \mathrm{RMSE}_h^{\mathrm{undef}}(P_{\mathrm{att}}) + 3\sigma_{\mathrm{nom}},
+\label{eq:safety}
+\end{equation}
+for every defended method and every attack scenario, where $\sigma_{\mathrm{nom}}$ is the across-seed standard
+deviation of the undefended method's nominal-scenario $\mathrm{RMSE}_h$, measured once and identically for
+all methods. It is a noise floor, not the spread of attack-phase errors. Detection of a drifting spoofer
+depends on the strength $s$ of its single-antenna C/N0 signature (the shared common-mode fluctuation and its
+convergence, scaled from $s=0$ to $s=1$). The paper therefore states a minimum signature strength,
+$s \gtrsim 0.5$, as an explicit operating assumption, reports the $s < 0.5$ failure boundary with a harm
+analysis, and includes signature strengths $s\in\{0,0.25,0.5,1\}$ in the protocol. Failures of
+Eq.~\eqref{eq:safety} are reported as measured and are not tuned away. A relaxed criterion may be adopted
+only if pre-registered prospectively, before the test sweep, and labelled as defined after the tuning data.
+\todo{result: safety-principle table over $s$ and methods; failure boundary. State the recovery-after-jamming
+requirement (jamming must not slow recovery) with its result.}
 
 %=====================================================================
 \section{Results}

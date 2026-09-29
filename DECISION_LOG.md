@@ -33,6 +33,17 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-067 · 2026-09-29 · Rulings on the PAPER agent's spec/code mismatch audit (15 items)
+- **κ_R default (critical):** D-061's κ_R = 60 was never made the default. node/methods.py DEFAULT_KAPPA_R = 40, so the campaign, fleet and H2 runs used 40. Fix: a single source of truth, DEFAULT_KAPPA_R = 60, imported everywhere, with a test. This is CORE-ROBUST change (0), before (i).
+- **Detector and θ0 retrain after the freeze:** the supervised data was collected at κ_R = 40 on the old core, and the filter-derived features (NIS etc.) change. Detector v3 and θ0_noabrupt are retrained at the freeze, before the H2 re-run and M4.
+- **FedProx:** with μ = 0 it equals FedAvg, and there is no fleet arm. It is dropped from the evaluated methods and claims (mentioned only as not evaluated).
+- **Seed namespaces:** the test range is formally [10000, 20000); fleet local-training seeds (100000+) are a disjoint derived namespace. The gate code must enforce the range, not "≥ 10000". The benign overlaps (H2 live 500–509 vs detector training 500–549; τ 580–599 vs M1 held-out) are stated in the results.
+- **Confirmatory family, σ_nom definition, the S7 chattering bound, latency_eff:** must be reconciled and pre-registered before M4. The EVAL-CONSIST agent proposes; the Master rules.
+- **Chattering bound (T_cyc ≥ 26.1 s)** in the abstract/contributions: marked 	odo; it is re-derived for the post-D-066 trust law.
+- **Doc drift** (Platt logit form, FEDERATION sign-flip/ALIE wording, EVALUATION scenario descriptions, REAL_DATA 48 mrad/s superseded by D-020): corrected by EVAL-CONSIST.
+- **Paper:** Sections IV–V accepted as a draft. 15 references are marked \cite{TODO-…} pending user verification. pdflatex is not installed; installing a TeX distribution needs user approval.
+- **Owner:** Master
+
 ### D-066 · 2026-09-29 · Probe-during-spoof confirmed → shadow probe; consistency-based reacquisition; position/clock trust split approved; displaced meaconer added
 - **Trace (tactical, seed 500, drift):**
   - Defence works until the first PROBE (t = 180: err 6 m vs spoof offset 25 m).

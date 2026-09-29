@@ -128,6 +128,10 @@ Example from this list:
 
 ---
 
-## Pending user verification (D-066 addendum)
+## Receiver clock models and Kalman filtering (D-066 addendum)
 
-- Brown, R. G., Hwang, P. Y. C. *Introduction to Random Signals and Applied Kalman Filtering*, 4th ed. Wiley, 2012. **[TO VERIFY by user]** - used for the two-state clock model (S_f = h0/2, S_g = 2 pi^2 h_-2) and the TCXO h-parameters h0 = 2e-19 s, h_-2 = 2e-20 1/s behind ClockKFConfig.q_bias / q_drift and the simulated truth clock (fedqpnt/gnss/signal.py ClockState). Not yet in refs.bib.
+26. Krawinkel, T., Schön, S. "Improved high-precision GNSS navigation with a passive hydrogen maser," *NAVIGATION (Journal of the Institute of Navigation)*. DOI: [10.1002/navi.444](https://doi.org/10.1002/navi.444) **[verified 2026-09-29 via Consensus]** — Used for: FedQPNT receiver clock model (D-066 addendum): TCXO truth clock and ClockKF process noise, q_bias = c²h0/2 ≈ 9e-3 m²/s, q_drift = c²·2π²h-2 ≈ 3.55e-2 m²/s³. Reports Brown & Hwang TCXO power-law coefficients h0 = 2e-19 s, h-1 = 7e-21, h-2 = 2e-20 1/s.
+
+27. Qin, W.-J., Wang, X., Su, H., Zhang, Z., Li, X., Yang, X. "The Benefits of Receiver Clock Modelling in Satellite Timing," *Sensors*, 21(2):466, 2021. DOI: [10.3390/s21020466](https://doi.org/10.3390/s21020466) **[verified 2026-09-29 via Consensus]** — Used for: FedQPNT receiver clock model (D-066 addendum): TCXO truth clock and ClockKF process noise, q_bias = c²h0/2 ≈ 9e-3 m²/s, q_drift = c²·2π²h-2 ≈ 3.55e-2 m²/s³. Two-state clock model with q_b = h0/2 and q_d = 2π² h-2.
+
+28. Brown, R. G., Hwang, P. Y. C. *Introduction to Random Signals and Applied Kalman Filtering*, 4th ed. Wiley, 2012. **[verified 2026-09-29 via Consensus: values as reported by Krawinkel & Schön 2021]** — Used for: FedQPNT receiver clock model (D-066 addendum): TCXO truth clock and ClockKF process noise, q_bias = c²h0/2 ≈ 9e-3 m²/s, q_drift = c²·2π²h-2 ≈ 3.55e-2 m²/s³. Two-state clock model (S_f = h0/2, S_g = 2π² h-2) and TCXO h-parameters h0 = 2e-19 s, h-2 = 2e-20 1/s underlying ClockKFConfig.q_bias / q_drift and simulated truth clock (fedqpnt/gnss/signal.py ClockState).

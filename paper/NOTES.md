@@ -84,9 +84,230 @@ Every cell is sourced as follows:
 - "FL threat surface: fraction f Byzantine nodes, sign-flip/Gaussian/label-flip/ALIE; self-reported n untrusted." → ARCHITECTURE.md §4.5 (Aggregators, attack list), §4.1 ("ModelUpdate.n_samples is self-reported... FedAvg does weight by it").
 
 ### III.D What never leaves a node
-- "Only object crossing to server: ModelUpdate — detector delta (882 params, ~3.5kB), norm stats, scalar metrics." → ARCHITECTURE.md §3.2 (882 parameters, ~3.5 kB), §4.1 (table of shared items).
+- "Only object crossing to server: ModelUpdate — detector delta (1010 params, ~4kB), norm stats, scalar metrics." → CORRECTED against code: `fedqpnt/trust/detector.py` (`TrustMLP.n_params` = 1010 for the 15-feature, 60-d input; verified by running it); ARCHITECTURE.md §3.2/§4.1 still say 882 (13 features, 52-d) — spec drift, see "Spec/code mismatches" #1. §4.1 (table of shared items).
+- (Edit log) III.A per-tick sequence: "pseudo-labelling and FL buffering" changed to "FL round buffering" and III.D "pseudo-label rate" to "positive-label rate" → D-052 (supervised training is primary; pseudo-labelling demoted to an ablation); `fedqpnt/fl/client.py` metrics (`n_pos`, `n_neg`, `loss`, `pl_rate`, `w_pos`, `w_neg`, `base_round`).
 - "Server never receives ground truth, position, velocity, raw features." → ARCHITECTURE.md §4.4 (leakage guards); §0 (node boundary).
 - "Trust-law hyperparameters and fusion filter fixed, identical across methods, tuned once on disjoint tuning seeds before test seeds." → ARCHITECTURE.md §4.1 ("Trust-law hyper-parameters... not learned in v1... fixed, identical across methods"); §7.6 tuning discipline (item 6 in Statistical protocol, §7).
 
 ## Uncited-but-relevant items flagged for Master (not used in main.tex per the citation hard rule)
 - FedAvg (McMahan et al. 2017), FedProx (Li et al. 2020), trimmed-mean (Yin et al. 2018), norm-clipping (Sun et al. 2019), ALIE (Baruch et al. 2019), Krum (Blanchard et al. 2017), FLTrust (Cao et al. 2021), FedAsync staleness (Xie et al. 2019), CUSUM (Page 1954), reset Jacobian (Solà 2017), Wilcoxon (1945), Holm (1979), Demšar (2006), Anderson & Moore (1979), Lautier (2014), Cheiney (2018), Templier (2022), Wang (2021), Klobuchar (1987), Saastamoinen (1972), Vig (1992), Parkinson & Axelrad (1988) — all appear in ARCHITECTURE.md/GNSS_AND_ATTACKS.md as method citations but are **not** in docs/REFERENCES.md, so they are described in main.tex only by mechanism name, without a `\cite`, per the HARD RULE restricting citations to docs/REFERENCES.md.
+
+---
+
+# Claim → Evidence map for Sections IV (Method) and V (Evaluation Protocol)
+
+Written by the PAPER agent, 2026-09-29. Same format as above. Code paths are relative to the repo root. Provenance tags in main.tex
+(M = measured, D = datasheet, A = assumed) are taken from the code comments and docs cited in each entry.
+Section IV.D (trust engine) is a skeleton by instruction (D-065 revision pending); nothing about the current state machine is claimed.
+The old IV (equation-level outline: trust-law recursion, 26.1 s bound, pseudo-label training) and old V ("Experimental Setup") were
+REPLACED; their claims are no longer in main.tex (see "Stale statements elsewhere in main.tex" below).
+
+## Section IV. Method
+
+### IV.A Sensor models
+- "All sensors driven by one 100 Hz tick; IMU 100 Hz, GNSS 1 Hz default, CAI at 1/cycle." → ARCHITECTURE.md §1.2 (rates table); `fedqpnt/sensors/imu.py` (`rate_hz=100.0`), `fedqpnt/node/environment.py` (`gnss_rate_hz`), `fedqpnt/sensors/quantum.py` (`rate_hz = 1/cycle_time`).
+- "Sensors consume specific force/rate with gravity removed upstream; no sensor recomputes gravity." → `fedqpnt/sensors/quantum.py` and `imu.py` comments on the `world` argument (contract v0.2, C-5).
+- "IMU error budget (turn-on bias, GM1 bias instability, white noise, scale factor, misalignment, quantisation, saturation), IEEE Std 952 style." → `fedqpnt/sensors/imu.py` module docstring. IEEE 952 is not in refs.bib → `\cite{TODO-ieee952}`.
+- "GM1 σ_GM = B/0.664 for datasheet stability B and chosen τ_c." → `imu.py` docstring (El-Sheimy, Hou & Niu 2008, Table II) and `quantum.py` (`sigma_gm = bias_instability/0.664`). Not in refs.bib → `\cite{TODO-elsheimy2008}`.
+- "Two IMU grades reported separately; consumer MEMS exists in code but is not evaluated." → `imu.py` `GRADES` (consumer_mems, industrial_mems, tactical); D-063 (IMU grade an explicit evaluation dimension: MEMS and tactical); ARCHITECTURE.md §2.5 honest-expectation bullet.
+- Table I (IMU grades): every cell → `imu.py` `_industrial_mems()` / `_tactical()`. Datasheet (D) cells: gyro bias stability 8 °/h and ARW 0.34 °/√h, accel bias stability 13 µg (ADIS16470 Rev. C, as recorded in the code comments); gyro 1 °/h and ARW 0.125 °/√h (HG1700 AG58). Everything else is tagged ASSUMPTION in the code (accel VRW 25 / 15 µg/√Hz; tactical accel bias stability 30 µg; τ_c 200/300 s; turn-on 10 mg, 0.1 °/s, 2 mg, 0.01 °/s; SF 500/100 ppm; misalignment 0.3/0.1 mrad). Vendor datasheets → `\cite{TODO-adis16470-datasheet,TODO-hg1700-datasheet}`.
+- "Synthetic Walker-like GPS almanac, 10° mask, 8–9 satellites visible." → docs/GNSS_AND_ATTACKS.md "GPS constellation" table.
+- "Per-satellite pseudorange, rate, C/N0 (38 dB-Hz at 10° to 48 dB-Hz at zenith, shape assumed), AGC." → docs/GNSS_AND_ATTACKS.md "Signal-to-noise observables" table ("C/N0 vs elevation ... [ASSUMPTION]"); `fedqpnt/gnss/signal.py`.
+- "One UERE budget: code thermal noise, GM iono residual, tropo delay, multipath." → docs/GNSS_AND_ATTACKS.md "Unified UERE budget" and "Atmospheric error models"; `kaplan2017understanding` (formula source per the doc).
+- "25 dB-Hz lock threshold, 1 s reacquisition delay, ≥ 4 satellites for a fix." → `fedqpnt/gnss/receiver.py` (`CN0_LOCK_THRESHOLD_DBHZ=25.0`, `REACQUISITION_DELAY_S=1.0`, `min_sats=4`).
+- "WLS fix weighted by inverse of the same error budget." → `receiver.py` docstring; `misra2006global` (Ch. 6, as cited in the code).
+- "Snapshot residual RAIM χ² statistic." → `receiver.py` docstring (Parkinson & Axelrad 1988; not in refs.bib → `\cite{TODO-parkinson1988raim}`).
+- "Fix carries covariances, clock bias/drift, per-satellite C/N0 and elevation." → `fedqpnt/core/types.py` `GnssFix` (`cov_pos`, `cov_vel`, `clk_bias`, `clk_drift`, `cn0_per_sat`, `elev_per_sat`); D-022.
+- "CAI phase φ = k_eff a T², k_eff = 1.61e7 rad/m for the Rb-87 D2 Raman pair." → `quantum.py` docstring and `K_EFF_RB87` (1.6098e7 rad/m); docs/REAL_DATA_JARLAUD2024.md step 3 (1.611e7).
+- "Fringe period 3.9e-3 m/s² at T = 10 ms." → derived: 2π/(k_eff T²) = 2π/(1.6098e7 · 1e-4) = 3.903e-3 m/s² (`QuantumAccelerometer.fringe_period_m_s2`).
+- "Fringe order resolved with a classical companion accelerometer (hybrid)." → `quantum.py` step() (`a_coarse`, `n_fringe`); `wright2022cold` for the hybrid-sensor context (the code itself cites Lautier 2014, Cheiney 2018, Templier 2022, which are NOT in refs.bib; see Missing references).
+- "Triangular weighting over [t−2T, t], dead time after." → `quantum.py` comment on contract v0.2 C-2; ARCHITECTURE.md §2.5.
+- "FIELD grade: σ_shot = 5.60 µg, 95% CI [5.04, 6.40], n = 491, robust MAD; = 6.97 µg/√Hz at cycle 1.548 s." → docs/REAL_DATA_JARLAUD2024.md "Per-2T robust statistics"; D-015, D-019; D-021 (6.97 µg/√Hz); recomputed 5.6033e-6 · 9.80665 · √1.548 = 6.84e-5 m/s²/√Hz.
+- "Per-2T values interpolated linearly in 2T, not 1/T²; measured 10→20 ms only ~1.9×, vibration-limited." → `quantum.py` `_sigma_shot_ug_interp` and comment; D-015, D-019.
+- "Gilbert–Elliott channel: stationary bad 9.0% (CI [6.7, 11.8]%), persistence 65.9%, 7.4× excess adjacency." → docs/REAL_DATA_JARLAUD2024.md "Outlier process"; `quantum.py` `JARLAUD_OUTLIER_STATIONARY_RATE`, `JARLAUD_OUTLIER_PERSISTENCE`; D-019 item 2.
+- "Bad state adds a random-signed magnitude from the 44 empirical outliers (~30–270 µg); per-axis independent chains." → `quantum.py` `_load_outlier_magnitudes_ug`, step() outlier block; REAL_DATA doc ("44 outliers", "Range ~30–270 µg"). Transition probabilities from `_ge_transition_probs` (p_gb ≈ 0.034, p_bb = 0.659; derived).
+- "Shot-noise draws are outlier-free so outliers are never double counted." → `quantum.py` comment "added SEPARATELY ... never double-counted"; REAL_DATA doc "Replay usage (D-019)".
+- "Contrast C = C0 exp(−(Ω⊥/Ω_c)²), Ω⊥ = rms of the other two body rates; C0 = 0.394 ± 0.017; Ω_c = 48.2 ± 2.5 mrad/s at 2T = 12 ms." → REAL_DATA doc "Rigid-mode fit"; `quantum.py` (`JARLAUD_C0`, `JARLAUD_OMEGA_C_RAD_S`, contrast loop in step()).
+- "Ω_c scaled 1/T² from T = 6 ms to 17.3 mrad/s at T = 10 ms; unverified away from T ≈ 6 ms." → D-020; `quantum.py` `_scale_omega_c` docstring (48.178 mrad/s · 0.36 = 17.34 mrad/s; "Only ONE measured (T, Omega_c) pair exists").
+- "Cycle time 1.548 s per shot (interlaced kD/kU output interval)." → D-020; `JARLAUD_CYCLE_TIME_S`; `_field()` comment.
+- "Invalid when C < 0.08 (assumed) i.e. Ω⊥ ≳ 22 mrad/s, or |a| > 2g (assumed)." → `quantum.py` `_field()` (`contrast_threshold=0.08` ASSUMPTION, `dynamic_range_m_s2 = 2·9.80665` ASSUMPTION). 22 mrad/s derived: 17.34 · sqrt(ln(0.394/0.08)) = 21.9 mrad/s.
+- "Not flagged invalid during a burst; reported variance excludes it." → `quantum.py` step() comment ("valid is NOT forced False"); `_report_variance = σ_shot²`; D-019.
+- "MICAL classical record never used as quantum noise." → D-014; REAL_DATA doc "Important note (D-014)".
+- "Lab grade is a short-T compact hybrid, not best-sensitivity; near-future roadmap only; used only in sweeps." → D-021; `quantum.py` `_lab()` / `_near_future()`.
+- "Default pointing rigid; inertial-pointing is an assumption-based extrapolation." → `quantum.py` `pointing="rigid"` default and `_inertial_pointing_omega_c` docstring (ASSUMPTION, "NOT an independently fit contrast law").
+- Table II (CAI FIELD): 2T = 20 ms, cycle 1.548 s, σ_shot, outlier stats, C0/Ω_c (M) → REAL_DATA doc and `_field()`; Ω_c(10 ms) → D-020; contrast threshold 0.08, range 2g, bias instability 3 µg with τ_c = 300 s, scale factor 1e-5, companion accelerometer noise 1e-5 m/s² and turn-on bias 5e-4 m/s² (A) → `_field()` comments tagged ASSUMPTION.
+
+### IV.B Fusion filter
+- "One loosely coupled 15-state ESKF shared by all methods; state δx = [δp, δv, ψ, δb_a, δb_g]." → `fedqpnt/fusion/eskf.py` docstring; ARCHITECTURE.md §2.1–2.2. Error-state reference (Solà 2017) is cited in ARCHITECTURE §2.8 but is not in refs.bib → `\cite{TODO-sola2017}`.
+- "Trapezoid mechanisation with coning correction." → `eskf.py` `propagate()` ("mechanisation (Sec 2.3): trapezoid + coning").
+- "Q_c = diag(VRW², ARW², q_ba, q_bg) from the IMU's own config; q_b = 2σ_GM²/τ_c." → `eskf.py` `_read_imu_noise`, `propagate()` (`Qc`); ARCHITECTURE §2.4.
+- "During IMU dropouts Q inflated ×10 (×100 beyond 0.1 s)." → `eskf.py` `ESKFConfig.kappa_zoh=10`, `max_gap_s=0.1`, and `Qc * kappa_zoh * 10` in `propagate()`.
+- "P0 = diag((3 m)², (0.1 m/s)², (1,1,35 mrad)², turn-on bias variances)." → `eskf.py` `initialize_static`; ARCHITECTURE §2.9.
+- "Bias blocks of F zero (random walk); mean-reverting GM1 form kept for ablation; q_b kept as over-bound." → D-035; `eskf.py` `ESKFConfig.bias_model` comment and `propagate()`. "Factor e^(−2t/τ)": D-035 ("confirmed analytically as e^(-2t/tau)").
+- "GNSS fix processed as a 6-D pos/vel update, H = [I6 0], zero lever arm, R = κ_R blkdiag(cov_pos, cov_vel), fallback diag if not SPD." → `eskf.py` `innovations()` and `_spd_or_fallback`; ARCHITECTURE §2.5 ("Lever arm = 0 [ASSUMPTION]").
+- "κ_R compensates time-correlated LC-fix error; tuned once on tuning seeds for all methods to nominal ANEES ≈ 1; κ_R = 60." → ARCHITECTURE §2.1, §7.6; D-061 (κ_R = 60, ANEES_pos 0.95 on tuning seeds). MISMATCH: code defaults are 40 (#2). "To be frozen before the test sweep" follows D-062/D-061 (gate closed).
+- "No correlated-error state because a drift spoof would be absorbed." → ARCHITECTURE §2.1 ("No GNSS error-state (Gauss–Markov) is added ... deliberately avoided").
+- "Attitude/bias states remain over-confident; effective-bias b_a NEES ~6× nominal on tuning seeds; stated limitation." → D-061 (b_a NEES vs effective-bias truth 522 → 19; "the ~6× residual is a stated limitation"); D-047.
+- "CAI enters as a direct observation of the classical accelerometer bias: same-window triangular-weighted IMU mean; ν_q = f̄_Q − f̄_IMU ≈ δb_a; H = [0 0 0 I 0]; gravity/attitude/trajectory cancel." → `eskf.py` `innovations()` (quantum branch); ARCHITECTURE §2.5 ("Key property").
+- Eq. (R_q): R_q = diag(variance) + VRW²/T_W + σ_win², σ_win = 1e-5 g (assumed). → `eskf.py` (`R_q`, `sigma_win_g=1e-5`, ASSUMPTION swept over {1e-6,1e-5,1e-4}); ARCHITECTURE §2.5. T_W = 2T for the triangular response (`win_len`).
+- "Update skipped when the sample is flagged invalid." → `eskf.py` (`if quantum is not None and quantum.valid`).
+- Eq. (R_eff) and exclusion: R_eff = R/max(w, w_min), skip if w < w_excl; w_min = 0.02, w_excl = 0.05 (assumed). → `eskf.py` `correct()` and `ESKFConfig`; ARCHITECTURE §2.7 ([ASSUMPTION; swept]).
+- "χ² gate α = 1e-4 in the shared core; every method except undefended has it." → `eskf.py` `alpha_gate=1e-4`; `fedqpnt/node/methods.py` (`alpha_gate = 0.0 if method == "undefended"`); ARCHITECTURE §2.7, §6.1.
+- Eq. (softgate): R_eff ← R_eff · NIS_eff/χ²; effective NIS equals the gate; Huber-type covariance scaling. → `eskf.py` `correct()` (`scale = nis_eff/gate`); D-057 (adopted; hard gate kept for ablation).
+- "Hard gate dropped a slowly dragged fix, after which inertial coasting diverged; a shared-core defect for every gated method." → D-057 root cause.
+- "Joseph form." → `eskf.py` `correct()` (`IKH P IKH^T + K R K^T`).
+- "Symmetrise then clip only negative eigenvalues; earlier additive 1e-12 I floor injected unmodelled noise; excess measured in a single-source regression test." → D-043; `eskf.py` `_hygiene` docstring ("~1.5x P_v excess at 300 s").
+- "ClockKF: 2-state (bias, drift) in metres and m/s, b_{k+1} = b_k + d_k Δt, random-walk drift, R_clk = diag(3², 0.2²)/max(w_gnss, w_min); coasts when no valid fix; q_bias = 1 m²/s, q_drift = 1e-3 (m/s)²/s assumed." → `fedqpnt/fusion/clock.py` (`ClockKFConfig`, `step()`); D-027, D-025. q_bias is [ASSUMPTION; not yet swept]; D-065 asks for verification against a cited oscillator model (left as \todo).
+- "ClockKF hold-over (D-065) not yet in code." → D-065 ("ClockKF gets a w_excl hard-exclusion holdover") vs `fusion/clock.py` at HEAD (no w_excl branch). \todo placed.
+
+### IV.C Learned detector
+- "15-dim feature vector from the fix and nominal-R pre-correction innovations." → `fedqpnt/trust/features.py` (`FEATURE_NAMES`, `N_FEATURES = 15`, module docstring "nominal-R / w=1 innovations only"); ARCHITECTURE §3.1 (13 features; x14, x15 added by D-022/D-018).
+- Feature list: x1/x2 NIS/dof; x3 RAIM/max(n−4,1); x4 mean C/N0 − 45 dB-Hz; x5 std C/N0; x6 C/N0 rate; x7 AGC; x8/x9 clock jumps in units of 3 m / 0.2 m/s; x10 residual rms; x11 Δ satellites; x12 CUSUM S_j = max(0, S_{j−1} + x1 − 1.5); x13 outage indicator; x14 mean pairwise C/N0 correlation over a 20-epoch window; x15 C/N0-vs-elevation slope. → `features.py` (`MU_CN0_REF_DBHZ = 45`, `SIGMA_CLK_BIAS_M = 3`, `SIGMA_CLK_DRIFT_MPS = 0.2`, `K_CUSUM = 1.5`, `CORR_WINDOW_EPOCHS = 20`, `step()`).
+- "Features 14–15 encode the single-antenna spoofing signature reported in field data." → D-018; docs/GNSS_AND_ATTACKS.md; `rados2024recent` (already cited in II.E).
+- "Outage-observable features kept; only fit-dependent ones zeroed." → `features.py` `step()` comment (bug fixed per D-022 review).
+- "Normaliser: running mean/std updated on negatives only; input u = [x̃, EWMA_2s, EWMA_20s, Δx̃] (60-d); time constants in seconds." → `fedqpnt/trust/detector.py` `FeatureNormalizer`; `features.py` `EwmaStack` (`tau_fast_s=2`, `tau_slow_s=20`, `STACK_DIM = 4·N_FEATURES = 60`); ARCHITECTURE §3.1.
+- "MLP 60→16 tanh→2 sigmoid, spoof and jam heads, 1010 params, ~4 kB float32; logistic-regression ablation 60→2." → `detector.py` `TrustMLP`, `LogRegDetector`; verified by running: N_FEATURES 15, STACK_DIM 60, `TrustMLP.n_params` = 1010, logreg 122. 1010 · 4 B = 4040 B. Spec says 882 (#1).
+- "Platt calibration on the logit: p = σ(a·logit(p_raw) + b), per head, fit at natural class ratio on held-out tuning missions, applied at runtime." → `detector.py` `_platt_apply`; `scripts/train_supervised_v2.py` `platt_fit`; D-051 §B. docs/TRAINING.md writes σ(a·p + b); the code uses the logit form (#4). Platt reference → `\cite{TODO-platt1999}`.
+- "Detector output p = max(p_spoof, p_jam)." → `fedqpnt/trust/trust_law.py` `_gnss_p`.
+- "Supervised training on ground-truth-labelled training missions for every learning method; matches Khan/Chai; no label reaches a node at deployment." → D-052; `fedqpnt/training/build_supervised_dataset.py` module docstring; docs/TRAINING.md; `khan2025enhancing`, `chai2025navigation` (D-052 rationale: both train supervised detectors).
+- "Missions run in the real closed loop with a fixed-trust configuration; label joined offline by timestamp in one module outside the agent's import graph; static test." → `build_supervised_dataset.py` (`collect_run`, method="fixed_trust"); `tests/test_training_leakage_guard.py` (docs/TRAINING.md: 3 tests).
+- "Six families; one mission in ten clean; round-robin by seed." → `build_supervised_dataset.py` `FAMILY_NAMES`, `plan_for`; D-053a.
+- "Jamming severities via jammer EIRP spanning partial degradation to full denial; at the default geometry every severity saturated at full denial." → `build_supervised_dataset.py` `JAM_LEVELS` and the long comment; D-055 ("jamming root cause was geometry").
+- "≥ 500 positive epochs per family target." → D-053 (next work package (a)); D-055; docs/TRAINING.md table.
+- "Class-weighted BCE per head, SGD lr 0.05, batch 64." → `detector.py` `train_local` (defaults `lr=0.05`, `batch_size=64`); ARCHITECTURE §3.2.
+- "Positive fraction capped at 50% by down-sampling; if < 10 negatives use all samples with class weights (dead-zone fix)." → `detector.py` `train_local` (`max_pos_fraction=0.5`, `n_min=10`); D-039, D-026.
+- "Class weights min(N/(2N_c), 10); motivated by an honest update 20–70× its peers'." → `detector.py` (`class_weight_cap = 10.0`); D-050 (delta_norm 6.88 vs 0.1–0.3; likely cause hypothesised, cap decided as a stability fix).
+- "Label-free pseudo-label variant: original design; measured precision failed its gate on tuning missions; retained as an ablation, not part of H1–H4." → D-052 (precision 0.214 vs 0.80 target, third consecutive failure); docs/TRAINING.md "Label-Free Ablation".
+
+### IV.D Trust engine
+- Skeleton only. "Converts calibrated detector probability into continuous per-sensor weights w_gnss and w_quantum entering via Eq. (R_eff); asymmetric fast-distrust/slow-recovery recursion with bounded exclusion time and a recovery gate; rule-based physical evidence as a safety floor." → ARCHITECTURE §3.3 / docs/specs/TRUST_DESIGN_V2.md §C; D-056 ("The rules give a safety floor"). `\todo` and the required `%% PENDING D-065` comment placed. Nothing else to source until the law is frozen.
+
+### IV.E Federated learning
+- "Only trained object is the detector; upload = delta, absolute norm stats, scalar metrics; leakage guard rejects mismatched arrays and non-scalar metrics." → `fedqpnt/fl/client.py` `local_round`; `fedqpnt/fl/transport.py` `enforce_leakage_guard`; docs/FEDERATION.md "Leakage Guard"; ARCHITECTURE §4.1.
+- "n_samples self-reported and untrusted; trust-law/filter hyperparameters not learned." → ARCHITECTURE §4.1.
+- "Bulk-synchronous rounds, T_round = 60 s; E = 2 epochs, lr 0.05, batch 64; replay ≤ 20,000; FedProx term (μ/2)‖θ−θ_g‖²; < 64 samples → heartbeat." → `fl/client.py` `ClientConfig` (`local_epochs=2`, `lr=0.05`, `batch_size=64`, `min_samples=64`, `max_replay=20_000`); `detector.py` prox term; ARCHITECTURE §4.2; `\cite{TODO-fedprox}`.
+- "Install at first GNSS epoch after simulated delays; trust state never reset by a model swap." → ARCHITECTURE §4.2, §8.
+- "Comms: log-normal delay (median 0.2 s, σ_ln 0.5) + serialisation at 1 Mbit/s; Gilbert–Elliott loss P(G→B) = 0.02, P(B→G) = 0.3, loss 1%/90%." → docs/FEDERATION.md "Communications Model"; `fedqpnt/fl/comms.py`.
+- "Round hyperparameters (E = 2, lr 0.05, μ = 0, R = 10) chosen on tuning seeds by the sanity check, identically for all FL methods." → D-056; docs/FLEET.md.
+- "FedAvg weights n_i (1+s_i)^(−1/2); s > 3 discarded; quorum ⌈0.5 N_live⌉; skipped rounds logged." → `fl/aggregator.py` `fedavg`, `staleness_weight`; `fl/server.py` (`max_staleness=3`, `quorum_frac=0.5`, ROUND_SKIPPED); `\cite{TODO-fedavg}`. Staleness weight after FedAsync (Xie 2019; not in refs.bib, described by mechanism only).
+- "FedProx aggregates as FedAvg; proximal term client-side." → `fl/aggregator.py` (`fedprox_aggregate = fedavg`).
+- Eq. (clip): Δ̃_i = Δ_i · min(1, c·median‖Δ‖/‖Δ_i‖), c = 2, or c = 1 for a node's first two rounds. → `aggregator.py` `trim_nb_r_aggregate` (`clip_c=2.0`, `probation_rounds=2`, `probation_clip_c=1.0`); norms over the flattened model-weight vector (norm stats excluded).
+- Eq. (trim): trimmed mean β = 0.2 for N_live ≥ 5 (⌊βN⌋ removed per tail), else coordinate-wise median; staleness weight applied to clipped deltas; quarantined nodes excluded. → `aggregator.py`.
+- Eq. (reputation): r ← ρ r + (1−ρ) max(0, cos(Δ̃_i, Δ)), ρ = 0.8; quarantine if r < 0.2 for 3 consecutive rounds, for 10 rounds; reputation acts only through quarantine. → `aggregator.py` (`rep_rho=0.8`, `rep_q=0.2`, `quarantine_streak=3`, `quarantine_rounds=10`).
+- Eq. (serverstep): θ_g ← θ_g + η_s Δ, η_s = 1. → `aggregator.py` `server_lr=1.0`; `server.py` (`theta[k] += delta[k]`).
+- "Normalisation statistics aggregated by coordinate-wise median." → `fl/server.py` (`np.median(... norm_mu/norm_sd)`); ARCHITECTURE §4.1.
+- "Poisoning: sign flip ×(−5), Gaussian at 10× median honest norm, label flip, ALIE with closed-form z." → `fl/poisoning.py` (`sign_flip(factor=-5.0)`, `gaussian_noise`, `label_flip`, `alie_z`); `fl/server.py` `_poison_fresh_updates` (10× median). ALIE = "A Little Is Enough" (Baruch 2019) → `\cite{TODO-alie}`. docs/FEDERATION.md mis-states sign flip as "x → x − 5" and ALIE as "Automated Lie Injection" (#10).
+- "θ0 pretrained on a disjoint seed range with a restricted family set excluding the novel family; absent from the target node's data, present in peers'." → D-054 §1; D-056 §3; docs/FLEET.md; `scripts/pretrain_theta0_d054.py`, `scripts/h2_abrupt_pretrain_theta0.py`.
+- "Two earlier previews with θ0 trained on all families agreed to about five decimals and were rejected as evidence." → D-054 (H2 preview 0.708 = 0.708; H4 0.40985 vs 0.40984; "INVALID (rejected as evidence)"). No result number is claimed in main.tex.
+- "FL sanity check: FedAvg/TRIM-NB-R on IID all-family nodes ≥ 0.95× centralised AUC; tune only FL hyperparameters on tuning seeds; parameter hash per arm per round, arms asserted to differ." → D-054 §2–3; D-056 (the PASS itself is a tuning-seed result and is not reported as a finding).
+- "Fleet runner: 1 server + N node processes (spawn, queues, one thread each); node = Environment + Agent; FL client wraps the live detector; aggregation in node-id order; downlink drawn from server stream; repeated FL run bit-identical (unit-tested)." → `fedqpnt/fleet/orchestrator.py`, `fleet/node_runner.py` docstring; ARCHITECTURE §8; docs/FEDERATION.md "Determinism" (`test_determinism_bit_identical_across_runs`, an FL-stack test, not a fleet-runner test).
+- "Node local dataset from oracle-labelled training missions built in the parent process and passed as arrays; node process never imports the label-join module (static test)." → `fleet/local_data.py` docstring; D-054 §4 and closing note; `tests/test_fleet_leakage_guard.py::test_node_runner_never_reaches_the_builder` (as cited in the code).
+- "Local-only baselines run as N independent 1-node federations with FedAvg (identity), lossless zero-delay comms." → D-059 + addendum; `fedqpnt/eval/fleet_adapter.py` (`_run_local_only_fleet`, `_LOSSLESS_COMMS`).
+
+## Section V. Evaluation Protocol
+
+### V.A Scenario matrix
+- "15 scenarios, 17 registry entries (S2 has three severities)." → `fedqpnt/eval/scenarios.py` `REGISTRY` (S1, S2_LOW/MED/HIGH, S3–S15); docs/EVALUATION.md ("17 total entries").
+- "Each scenario has an executable acceptance criterion; failures are reported, not tuned away." → `scenarios.py` `Criterion`; ARCHITECTURE §6.1; D-002.
+- "S12: f = 20% and 40%; 40% beyond design fraction β and reported without a threshold." → ARCHITECTURE §6.1 S12 row; `scenarios.py` S12 (only the f = 20% criterion is coded).
+- "All scenarios use the FIELD-grade CAI; ground vehicle unless stated." → `scenarios.py` (`cai_grade="field"` everywhere); `fedqpnt/node/environment.py` (`platform: "ground"` default).
+- Table III rows (fleet size, duration, attack parameters) → `scenarios.py`: S1 1/600 s; S2 1/600 s drift_spoof onset 60, duration 300, severity 0.3/0.6/0.9; S3 1/300 wideband jam severity 1.0 onset 60 dur 60; S4 1/400 jam_wideband onset 60 dur 40; S5 10/600; S6 1/14400 Schuler drift severity 0.05 onset 600 open; S7 1/3600 drift 0.5 onset 60 toggle 10 s; S8 5/600 drift 0.6 onset 330 dur 120; S9 5/600; S10 1/300; S11 1/300 abrupt severity 1.0 onset 60 dur 60; S12 10/600; S13 1/300 abrupt 0.8 onset 60 dur 60; S14 1/14400 Schuler nominal; S15 10/600 drift 0.6 onset 60 dur 300. Descriptions for S5 (30% failure at T/2), S9 (Gilbert–Elliott sweep), S10 (rate grid), S12 (4 poisoning types), S15 (30% subset) → ARCHITECTURE §6.1.
+- "Code still gates S3, S4, S6, S14 behind the D-047 filter-consistency gate; test-seed gate not cleared." → `scenarios.py` (`blocked_by_D047=True`, `KAPPA_R_STATUS = "PROVISIONAL_D047_kappa_R=40"`); `results/GATE_D047.json` = {"cleared": false}; D-061 ("the test-seed gate stays closed"). `\todo` placed (S4's registered attack is the jam leg only; #5).
+
+### V.B Methods and baselines
+- "Baselines are mechanism classes, not re-implementations; papers named as representatives; beating the strongest variant is a stronger claim." → D-011.
+- "Shared sensors, noise realisations, filter with soft gate, features, detector, θ0, tuning budget." → ARCHITECTURE §5 opening; D-005; D-057.
+- Table IV: A = detect-and-exclude, w = 1 if p < 0.5 else 0, memoryless → `trust_law.py` `fixed_exclude` branch of `SensorTrustLaw.step`; ARCHITECTURE §5; representatives `khan2025enhancing`, `chai2025navigation` (D-011, D-013). A0, w ≡ 1 alarm-only → `_METHOD_TABLE["a0"]`. B-bin, detect / exclude / coast until recovery gate → `detect_switch` branch; `pardhasaradhi2022gps` (D-011). B-cont = the FedQPNT law with a local-only detector = −FL → D-011; `ren2020adaptive` (ARCHITECTURE §5 note). B′, p = F_χ²₃(3x1) → `_gnss_p` (`chi2.cdf(3·raw[0], df=3)`); `mehra1970identification`. −quantum (CAI off), fixed trust (w ≡ 1, gate on), undefended (w ≡ 1, gate off) → `_METHOD_TABLE`, `node/methods.py`.
+- "H2 tested against B-cont; B-bin reported alongside." → D-011.
+- "FedAvg is the only aggregator ablation with a fleet-runner arm; FedProx implemented but with frozen μ = 0 coincides with FedAvg." → `fleet_adapter._METHOD_MAP` (fedqpnt, fedavg_ablation, baseline_a, baseline_b_cont, baseline_b_bin); D-056 (μ = 0). #10.
+- "Remaining ablations (binary trust, −recovery-gate, logistic-regression detector, FedAvg) registered in the trust-law method table." → `trust_law.py` `_METHOD_TABLE` (`abl_binary`, `abl_minus_recovery_gate`, `abl_logreg`, `abl_fedavg`).
+
+### V.C Hypotheses
+- H1–H4 wording and primary metrics RMSE_h(P_att), latency_on → ARCHITECTURE §6.2 (unchanged from the previous Section V text). "IMU-grade dimension applies to H3" → D-063.
+
+### V.D Metrics
+- "Nav output evaluated at 10 Hz; phases P_pre = [60 s, t_on), P_att, P_post; t_on first labelled sample; t_off last + one epoch." → ARCHITECTURE §6; `fedqpnt/eval/metrics.py` `compute_phases` (`T_ALIGN_S = 60.0`).
+- "RMSE_h, MAX_h, P95_h; analogous 3-D and velocity errors; ANEES_pos." → `metrics.py` (`horizontal_error`, `rmse`, `max_err`, `p95_err`, `full3d_error`, `velocity_error`, `anees_pos`). Note `anees_pos` takes the covariance diagonal (`cov_pos_diag`), i.e. a diagonal-covariance ANEES; ARCHITECTURE writes the full-P form.
+- "Detection: first time from t_on that the alarm holds for T_sus = 1 s; latency_on; misses censored at t_off − t_on; P_D." → `metrics.py` `_sustained_true`, `detection_latency`, `detection_probability` (`T_SUS_S = 1.0`).
+- "latency_eff measured from t_eff, first time the spoof-induced offset exceeds 3σ_nom." → ARCHITECTURE §6. NOT IMPLEMENTED in `eval/metrics.py`; `report.py` `H3_ENTRY` uses `latency_on` (#8). `\todo` placed.
+- "False alarms = rising edges with no label within ±T_sus; FAR per clean hour." → `metrics.py` `false_alarm_rate`.
+- "ROC-AUC of p against the label (evaluator only)." → `metrics.py` `roc_auc`; ARCHITECTURE §6.
+- "Time to distrust (w_gnss < 0.5), t_rec with E_thr = max(2 RMSE_pre, 3 m) and hold 10 s; N_cyc (down-cross 0.5 then up-cross 0.9); TV_w per hour." → `metrics.py` `time_to_distrust`, `recovery_time` (`T_HOLD_S = 10`, `e_thr_floor = 3.0`), `trust_cycles`, `total_variation_per_hour`.
+- "Timing metrics RMSE_t, MAX_t (ns), secondary except that meaconing reports RMSE_t with the primaries." → D-025; `metrics.py` `clock_bias_error_ns`, `rmse_t_ns`, `max_t_ns`.
+- "FL metrics: global-model AUC per round on a fixed labelled set, rounds skipped, quarantined-node counts." → ARCHITECTURE §6; `scenarios.py` fleet criteria (`rounds_skipped`, `quarantine_events`).
+- "Truth and labels read only by the evaluator, post hoc." → `metrics.py` module docstring ("EVALUATOR-ONLY"); D-025 (truth clock from `GnssEpoch.meta`, evaluator only).
+
+### V.E Statistics
+- "30 test master seeds per cell, paired by seed-indexed streams; 80% power at α = 0.05 for d_z ≈ 0.53; pilot 600–609; n raised to ⌈(z_.975+z_.8)²/d_z²⌉ + 2 before looking at test seeds." → ARCHITECTURE §7.1; `fedqpnt/eval/stats.py` `required_sample_size`; D-005.
+- "Unit of analysis is the per-run value averaged over nodes." → ARCHITECTURE §7.2.
+- "Wilcoxon signed-rank two-sided primary; paired t added only if Shapiro–Wilk p > 0.05." → `stats.py` `paired_test`; docs/EVALUATION.md; ARCHITECTURE §7.3. `\cite{TODO-wilcoxon1945}`.
+- "Hodges–Lehmann median of paired differences, 95% BCa bootstrap (10,000 resamples, dedicated seeded stream), rank-biserial r, Cohen's d_z." → `stats.py` `hodges_lehmann`, `bca_bootstrap_ci` (`n_resamples=10_000`, stream(master_seed, "eval", "bootstrap")), `rank_biserial_matched`, `cohens_dz`. `\cite{TODO-hodgeslehmann1963,TODO-efron1987bca}`.
+- "Friedman + Nemenyi; exact McNemar; Wilson CI; censored latencies take the censoring value." → `stats.py` `friedman_test`, `nemenyi_posthoc`, `mcnemar_exact`, `wilson_ci`, `censor_latencies`. `\cite{TODO-demsar2006}`.
+- "Holm–Bonferroni over {H1..H4} × {primary metrics}; secondary metrics unadjusted and exploratory." → `stats.py` `holm_bonferroni`; ARCHITECTURE §7.5; `\cite{TODO-holm1979}`. `report.py` `CONFIRMATORY_FAMILY` differs (5 tests on S2-med and S8; H3 excluded; H4 latency only) → #9; `\todo` placed.
+
+### V.F Seed protocol and code freeze
+- "400–449 pretraining (θ0)." → D-054; docs/REPRODUCE.md.
+- "500–599 tuning: κ_R, defaults, detector training 500–549, Platt 550–574, held-out 575–599, FL sanity check, smoke and safety checks." → D-002; `scripts/train_supervised_v2.py` (TRAIN/PLATT/HELDOUT seeds); D-054 §3; docs/EVALUATION.md "Seed Ranges".
+- "9500–9699 disjoint tuning-class range for per-design studies (signature-strength sweep)." → docs/EVALUATION.md "Seed Ranges" (labelled "still tuning range").
+- "Pilot 600–609." → ARCHITECTURE §7.1.
+- "Test 10000+ (10000–10029 for 30-seed cells) held out; campaign refuses test seeds unless final + gate-cleared flags and gate file cleared; file currently not cleared." → `fedqpnt/eval/campaign.py` (`TEST_SEED_MIN = 10000`, refusal logic, `GATE_D047_PATH`); `results/GATE_D047.json` `{"cleared": false}`; D-061; ARCHITECTURE §7.1 (10000–10029).
+- "Protocol requires each campaign/fleet run to record repository revision and tree state at launch and completion; valid only if clean and unchanged; core edits only when no run is live." → D-062 (new process rule). Whether the tooling already records this is not verified; the text says "the protocol requires".
+- "Trust/filter hyperparameters frozen with config hash logged before the test sweep; hierarchical RNG streams." → ARCHITECTURE §7.6; D-005; `campaign.py` `config_hash`; `fedqpnt/core/seeding.py`.
+
+### V.G H2/H4 event-level protocol
+- All bullets → docs/specs/raw/H2_PREREG.md (verbatim D-064 ruling) and D-064; D-061a (severity 0.15, headroom rule); D-056 (three quantities; sub-rule regime; claim framing). Specifics: θ0 = theta0_noabrupt from seeds 400–449 with families {clean, drift, jam_cw, jam_wideband, jam_then_spoof} (abrupt, meaconing excluded); severity 0.15 ("12 m jump"); N = 5, 600 s, round period 60 s, 10 rounds, local_epochs 2, lr 0.05, μ = 0; live seeds 500–509 (n = 10); τ calibrated per arm at clean FAR 1/h on seeds 580–599 (≥ 5 h/arm) with the arm's final installed model; P_D@10 s and latency (censored at 60 s, count stated); secondary onset-window AUC N = 10 s and N = 5 s ("N chosen after seeing one seed's trace" disclosed; the three-N numbers are not quoted); tertiary full-window AUC and separate "recovery alarm rate"; paired Wilcoxon with per-seed values; all metrics on 1 Hz detector-update epochs (an earlier invalid run mixed 1 Hz and 100 Hz).
+- "The rule evidence does not fire at severity 0.15." → D-061a (E_s fires 0% at 0.15/0.1). The abrupt-family choice rests on D-058 item 4.
+- "Re-run parked until the core is frozen." → D-064; D-062; D-065.
+- Seed-overlap notes for the reviewer (not in main.tex): H2 live seeds 500–509 fall inside the M1-detector training seeds 500–549 and τ seeds 580–599 overlap the M1 held-out seeds 575–599; the H2 arms use θ0 (400–449) plus FL, not the M1 detector, so there is no train/test leakage, but state this when results are reported.
+
+### V.H IMU grade
+- "Value of a GNSS-excluding defence depends on coasting; CAI benefit small for MEMS (tilt dominates within ~a minute), larger for tactical." → D-063 (diagnosis 2); ARCHITECTURE §2.5 "Honest expectation" (MEMS gyro ε ≥ 10°/h, tilt dominates within about 60 s).
+- "Both grades, CAI on/off, both reported; default grade not switched to the favourable one." → D-063; D-002; PROJECT_STATE R-6.
+- "Coasting-envelope measurement: 180 s forced outage, max horizontal error with CAI on/off per grade." → D-065 (protocol only; the D-065 numbers are tuning-seed results and are not quoted).
+
+### V.I Safety principle
+- "Defended method must never be substantially worse than undefended across the stated threat envelope; Eq. (safety) RMSE_h ≤ undefended + 3σ_nom." → D-055 (adopted principle); D-061 ("the D-055 bound (undefended + 3σ_nom) is kept as pre-registered ... FAILs reported as measured"; relaxation ruled NOT adopted).
+- "σ_nom = across-seed std of the undefended nominal-scenario RMSE_h, measured once for all methods; a noise floor, not the spread of attack-phase errors." → D-061 note; `scripts/core_robust_safety_principle_sweep.py` (`sigma_nom = np.nanstd(nominal_undef)`). MISMATCH: `scenarios.py` S2 uses a constant 5 m; docs/EVALUATION.md/D-048 say per-run RMSE_h(P_pre) (#7).
+- "Detection of a drifting spoofer depends on signature strength s (shared common-mode fluctuation and its convergence), scaled 0→1; minimum s ≳ 0.5 stated as an operating assumption; failure boundary and harm analysis reported; s ∈ {0, 0.25, 0.5, 1} in the protocol." → D-055; D-053 (b); D-058 item 2(e); docs/TRAINING.md "Signature-Strength Parameter" (`DriftInSpoof.cn0_sig_scale`). No AUC-versus-s numbers are quoted (tuning results).
+- "A relaxed criterion only if pre-registered prospectively before M4 and labelled as defined after the tuning data; failures reported as measured." → D-061.
+
+## Spec/code mismatches found (follow-the-code applied)
+1. Detector size: code has 15 features, 60-d stacked input, 1010 parameters (`fedqpnt/trust/features.py`, `detector.py`; verified by running). ARCHITECTURE §3.1–3.2/§4.1, `detector.py` docstring and `fl/client.py` docstring say 13 / 52 / 882. Fixed III.D in main.tex (882 → 1010, 3.5 kB → 4 kB); ARCHITECTURE §4.1 should be updated by its owner.
+2. κ_R: D-061 accepted 60; `node/runner.py` (RunSpec), `eval/campaign.py`, `eval/fleet_adapter.py`, `fleet/orchestrator.py`, `node/methods.py` (`DEFAULT_KAPPA_R`) and `training/build_supervised_dataset.py` all default to 40.0, `ESKFConfig.kappa_R` defaults to 1.0, and `scenarios.KAPPA_R_STATUS` still says "PROVISIONAL_D047_kappa_R=40" (docs/EVALUATION.md, TRAINING.md likewise). The CORE-ROBUST scripts pass 60 explicitly. main.tex states 60 as "the current configuration, to be frozen" with a \todo.
+3. Trust-side quantum cycle time: `make_agent_config(quantum_cycle_time_s=1.0)` and `TrustEngineConfig.quantum_cycle_time_s = 1.0` versus the FIELD sensor's 1.548 s. The known ARCHITECTURE §1.2 drift (1 s) is already corrected in the file (it lists 1.548 s for FIELD); the trust-side default of 1.0 s should be checked when the trust law is frozen.
+4. Platt calibration: docs/TRAINING.md writes σ(a·p + b); the code applies it to logit(p) (`detector.py`, `train_supervised_v2.py`). main.tex follows the code.
+5. Scenario registry vs docs: docs/EVALUATION.md describes S4 as "outage legs", S5 as "single-node failure mid-mission", S6 as "receiver aiding" and S15 as "replay detection"; `scenarios.py` (and ARCHITECTURE §6.1) have S4 jam-then-spoof (but the registered attack is `jam_wideband` only, 40 s), S5 partial node failure/delayed updates, S6 long-duration CAI bias drift, S15 simultaneous attacks on a fleet subset. main.tex follows the code/ARCHITECTURE. S11 is titled "Extreme noise (filter not told)" but the registry carries only an abrupt-spoof attack (no noise scaling visible in the registry).
+6. S7 chattering bound: `scenarios.py` and `metrics.py` use 3600/26.1 ≈ 138 /h (ARCHITECTURE §6.1); docs/EVALUATION.md and D-052 quote 52 /h (v2 law, 70 s). main.tex makes no numeric S7 claim (trust law pending).
+7. σ_nom definition: three versions (S2 code: constant 5 m assumed; docs/EVALUATION.md D-048 ruling: per-run RMSE_h(P_pre); D-061 and the safety-sweep script: across-seed std of the undefended nominal RMSE_h). main.tex uses the D-061/sweep-script definition; the S2 criterion in code should be reconciled.
+8. latency_eff: pre-registered (ARCHITECTURE §6, H3) but not implemented in `eval/metrics.py`; `report.py` `H3_ENTRY` uses `latency_on` on S6 (which is gated). `\todo` in V.D.
+9. Confirmatory family: `report.py` `CONFIRMATORY_FAMILY` has five tests (H1 ×2 and H2 ×2 on S2-medium, H4 latency on S8), excludes H3, and uses no novel-family design; ARCHITECTURE §6.2/§7.5 specify {H1..H4} × {primary metrics}, and the H2/H4 evaluation was re-designed in D-056/D-064. `\todo` in V.E.
+10. FedProx and poisoning docs: FedProx has no fleet-runner arm and μ = 0 is frozen (so it equals FedAvg), although Section I lists FedProx among the reference aggregators evaluated under poisoning; docs/FEDERATION.md writes sign-flip as "x → x − 5" (code: ×(−5)) and ALIE as "Automated Lie Injection" (it is "A Little Is Enough"). The FL poisoning table in FEDERATION.md compares FedAvg vs TRIM-NB-R only.
+11. ClockKF: D-065 decided a w_excl hold-over; `fusion/clock.py` at HEAD has none. \todo in IV.B.
+12. Fleet default local-training seeds: `fleet/orchestrator.py` `_default_local_train_seeds` = 100000 + scenario_seed·100 + idx·10, i.e. numerically ≥ 10000 (the test range) although distinct from 10000–10029; document a separate training-seed range before the test sweep.
+13. Seed overlaps (H2 live 500–509 vs M1 train 500–549; τ 580–599 vs M1 held-out 575–599): benign for H2 (uses θ0) but should be stated in the results section.
+14. docs/REAL_DATA_JARLAUD2024.md "Related decisions" D-014 bullet still states the 48 mrad/s consequence; D-020 supersedes (17.3 mrad/s at FIELD). main.tex follows D-020 and the code.
+15. `scripts/train_supervised_v2.py` and `build_supervised_dataset.py` collect training data at κ_R = 40 while the accepted core uses κ_R = 60; the feature distribution (x1, x2) shifts with κ_R, so the detector must be retrained after the freeze (the D-049 lesson).
+
+## Stale statements elsewhere in main.tex (not edited; owner decision)
+- Abstract and Contributions (Section I) state "a proven chattering bound (T_cyc ≥ 26.1 s)" and "formally bounded chattering". D-051/D-052 replaced the law with an evidence-bounded v2 whose bound is 70 s (52 /h) and D-065 is revising it again; re-derive after the freeze. Section IV no longer states the bound.
+- Section I "Contributions" lists FedAvg and FedProx references under sign-flip/Gaussian/label-flip/ALIE poisoning; see #10.
+- Discussion limitation on κ_R and the abstract's "root cause still under investigation" should be reconciled with D-043/D-047/D-061 (receiver velocity covariance shown honest; κ_R = 60 gives ANEES_pos ≈ 0.95 on tuning seeds but attitude/bias states stay over-confident).
+- Section III.A (per-tick sequence: "pseudo-labelling and FL buffering" → "FL round buffering") and III.D (parameter count, "positive-label rate") were edited to match D-052 and the code; the rest of Section III is unchanged.
+
+## Missing references (cited as `\cite{TODO-...}` in main.tex; not in refs.bib)
+- `TODO-ieee952` — IEEE Std 952-1997 / 1293-1998 error-term conventions (Section IV.A).
+- `TODO-elsheimy2008` — El-Sheimy, Hou, Niu, "Analysis and modeling of inertial sensors using Allan variance", IEEE Trans. Instrum. Meas. 57(1):140–149, 2008 (GM1 tuning; named in `sensors/imu.py`).
+- `TODO-adis16470-datasheet` — Analog Devices ADIS16470 datasheet, Rev. C.
+- `TODO-hg1700-datasheet` — Honeywell HG1700 (AG58 variant) datasheet M61-0115-000-003.
+- `TODO-parkinson1988raim` — Parkinson & Axelrad, "Autonomous GPS integrity monitoring using the pseudorange residual", Navigation 35(2), 1988.
+- `TODO-sola2017` — Solà, "Quaternion kinematics for the error-state Kalman filter", arXiv:1711.02508.
+- `TODO-platt1999` — Platt, "Probabilistic outputs for support vector machines ...", 1999.
+- `TODO-fedavg` — McMahan et al., "Communication-efficient learning of deep networks from decentralized data", AISTATS 2017.
+- `TODO-fedprox` — Li et al., "Federated optimization in heterogeneous networks", MLSys 2020.
+- `TODO-alie` — Baruch, Baruch, Goldberg, "A little is enough: circumventing defenses for distributed learning", NeurIPS 2019.
+- `TODO-wilcoxon1945` — Wilcoxon, "Individual comparisons by ranking methods", Biometrics Bulletin 1:80–83, 1945.
+- `TODO-hodgeslehmann1963` — Hodges & Lehmann, "Estimates of location based on rank tests", Ann. Math. Statist. 34:598–611, 1963.
+- `TODO-efron1987bca` — Efron, "Better bootstrap confidence intervals", JASA 82:171–185, 1987.
+- `TODO-demsar2006` — Demšar, "Statistical comparisons of classifiers over multiple data sets", JMLR 7:1–30, 2006.
+- `TODO-holm1979` — Holm, "A simple sequentially rejective multiple test procedure", Scand. J. Statist. 6:65–70, 1979.
+- Not yet cited but needed if the text is extended: Lautier et al. 2014, Cheiney et al. 2018, Templier et al. 2022 (CAI hybridisation; named in `sensors/quantum.py`), Page 1954 (CUSUM, feature 12), Yin et al. 2018 (trimmed mean), Sun et al. 2019 (norm clipping), Xie 2019 (FedAsync staleness weight), and a cited oscillator model for ClockKF q_bias (D-065 requirement). Bibliographic details above are from memory of the standard citations, not verified here; the Master must verify each entry (D-012) before it is added to refs.bib.
