@@ -31,6 +31,7 @@ from fedqpnt.sensors.quantum import QuantumAccelerometer
 from fedqpnt.gnss.signal import GnssSignalModel
 from fedqpnt.attacks.spoofing import AbruptSpoof, DriftInSpoof, MeaconingReplay
 from fedqpnt.attacks.jamming import Jamming
+from fedqpnt.attacks.meaconing_displaced import DisplacedMeaconing
 
 G0 = 9.80665
 
@@ -44,6 +45,7 @@ G0 = 9.80665
 _ATTACK_CTORS = {
     "drift_spoof": DriftInSpoof,
     "meaconing": MeaconingReplay,
+    "meaconing_displaced": DisplacedMeaconing,
     "abrupt_spoof": AbruptSpoof,
     "jam_cw": lambda **kw: Jamming(kind="jam_cw", **kw),
     "jam_wideband": lambda **kw: Jamming(kind="jam_wideband", **kw),
