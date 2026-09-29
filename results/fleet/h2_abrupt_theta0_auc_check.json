@@ -1,0 +1,21 @@
+{
+  "theta0": "results\\fleet\\theta0_noabrupt.npz",
+  "abrupt_seeds": [
+    506,
+    512,
+    518,
+    524,
+    536,
+    542,
+    548,
+    554,
+    566,
+    572,
+    578,
+    584,
+    596
+  ],
+  "n_epochs": 1534,
+  "n_pos": 1157,
+  "auc_abrupt_heldout": 0.8980923407055199
+}

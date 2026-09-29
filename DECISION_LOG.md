@@ -33,6 +33,12 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-061a · 2026-09-29 · H2-ABRUPT design rulings: severity 0.15, pre-registered headroom check, old sub-rule notes superseded
+- **Decision:** (1) Abrupt severity 0.15 is accepted for the E_s-quiet regime (E_s fires 0% at 0.15/0.1, and 9.8–15.6% at >= 0.2). (2) Before the fleet runs, report θ0_noabrupt's zero-shot abrupt AUC per severity (0.1/0.15/0.2). **Pre-registered rule:** if AUC(0.15) >= 0.85, H2 is labelled 'low-headroom' and per-severity FL-minus-zero-shot deltas are reported; either way the results are reported as measured (D-002). (3) The abrupt numbers in H2_SUBRULE_NOTES.md are marked SUPERSEDED (measured on the pre-D-058 core), not deleted.
+- **Rationale:** Zero-shot abrupt AUC is 0.898 at the old severities, so the "novel family" may already be covered by transfer from other families. Leakage check (Master): jam_then_spoof uses drift_spoof, not abrupt, so there is no direct contamination.
+- **Alternatives:** Pick a different novel family (meaconing). Deferred until the 0.15 AUC is known.
+- **Owner:** Master
+
 ### D-060 · 2026-09-29 · PERF rotations fast path REJECTED (not bit-identical); ESKF-level speedups deferred to post-CORE-ROBUST
 - **PERF result:** single-sample fast paths in `sim/rotations.py` (so3_exp, dcm_to_euler): rotations 2.30× faster, full node only **1.12×** (the ESKF dominates and was off-limits). The agent's 60 s × 3-seed trace check reported 114/114 arrays bit-identical.
 - **Master verification:** a direct randomised test of the fast vs the batch path found **4/40,000 mismatches** in so3_exp (1 ulp, up to 6.7e-16) for |φ| ≳ 0.026 rad. Those per-tick increments arise at ω ≳ 2.5 rad/s (aggressive UAV turns), which the agent's short traces never exercised. **This violates the hard bit-identity constraint** and would break cross-version exact reproducibility (docs/REPRODUCE.md).
