@@ -460,6 +460,83 @@ acceptable, but reporting honestly per D-002.
 ## STATUS: diagnostics complete, awaiting Master's window pre-registration
 and confirmation to re-run H2/H4/control (on frozen code, with the updated
 driver that persists full provenance + git state, per D-062 item 3).
+-- SUPERSEDED by D-064 below (Master pre-registered the metrics).
+
+## D-064 (Master ruling): metrics pre-registered; PARKED until core frozen
+Master accepted the D-062 diagnostics (arms differ, not invalid by
+construction; H4 installs by design; inversion is physical -- a held
+abrupt offset has no persistent per-epoch signature once the receiver
+re-locks). Pre-registered the full H2/H4 metric set for the abrupt family
+BEFORE any re-run (verbatim ruling + all fixed parameters in
+`docs/specs/raw/H2_PREREG.md`):
+- Primary: event-level P_D@10s (raw_p crosses a per-arm, FAR=1/h-calibrated
+  tau within [t_on, t_on+10s]) + onset latency (censored at 60s).
+- Secondary: onset-window AUC (positives=[t_on,t_on+10s], negatives=
+  pre-onset only), N=10s chosen post-hoc (disclosed), N=5 also reported.
+- Tertiary/descriptive: full-window AUC (with the D-062 explanation) +
+  recovery alarm rate (post-attack window, reported SEPARATELY, never
+  pooled into AUC negatives).
+- n=10 seeds (500-509, up from 5, for power); paired Wilcoxon on P_D@10s
+  and latency; per-seed values also reported.
+- Sampling fix: everything computed on 1 Hz detector-update epochs
+  (`tick.gnss_epoch is not None`), NOT the 100 Hz ticks node_runner.py
+  currently logs from.
+- tau calibration: seeds 580-599 (disjoint from live seeds), >=5h clean
+  data per arm, using EACH ARM'S OWN final installed model (not theta0).
+- **PARKED**: CORE-ROBUST has a post-jam fix and a position/clock trust
+  split still coming, both changing closed-loop features -- NO fleet
+  missions run until Master confirms the core is frozen.
+
+### Work done this turn (all <=1 process, no fleet missions, per Master's
+"Allowed now" list)
+1. `docs/specs/raw/H2_PREREG.md` -- the ruling verbatim + seeds/severity/
+   theta0/implementation notes. DONE.
+2. `scripts/h2_abrupt_metrics.py` -- pure-function metric code:
+   `calibrate_tau` (FAR-equalised threshold via a grid sweep over clean
+   1Hz-epoch scores), `onset_detection` (P_D@10s + censored latency,
+   dataclass `OnsetDetectionResult`), `onset_window_auc` (positives=onset
+   window, negatives=pre-onset ONLY), `full_window_auc` (descriptive,
+   matches the current node_runner.py definition), `recovery_alarm_rate`
+   (post-attack window, separate from AUC), `epochs_from_tick_trace`
+   (100Hz->1Hz down-selection helper), `paired_wilcoxon_summary` (thin
+   wrapper on the already-used `fedqpnt.eval.stats.paired_test`). Only
+   read-only imports of `fedqpnt.eval.metrics`/`fedqpnt.eval.stats` --
+   no `fedqpnt/` internals touched.
+   `tests/test_h2_abrupt_metrics.py` -- 10 unit tests, synthetic arrays,
+   **ALL PASS** (`python -m pytest tests/test_h2_abrupt_metrics.py -q`).
+   Two test-expectation bugs found+fixed during writing (not code bugs):
+   `compute_phases`'s `T_ALIGN_S=60s` excludes the first 60s from `pre`
+   (my synthetic missions' naive `n_neg==100` expectation was wrong, fixed
+   to 40); a synthetic-spike tau boundary was 1.2% over my hard-coded test
+   bound (test bound loosened, calibration behaviour itself is correct).
+3. `scripts/h2_abrupt_metrics_dryrun.py` -- DRY RUN ONLY (loudly labelled
+   in its own output, NOT results): tiny 300s clean mission (seed=999) for
+   a rough tau (nowhere near the pre-registered >=5h/arm on 580-599) +
+   one abrupt mission (seed=500, onset=120/dur=300/severity=0.15, matching
+   the pre-registered config) through the full metric pipeline. **Ran
+   successfully end-to-end** (log `<scratchpad>/h2_abrupt_metrics_dryrun.log`):
+   onset_detection detected at 2.0s latency (detected_at_10s=True,
+   censored=False); onset_window_auc N=5/10 gave 0.697/0.848 (dry-run
+   numbers only, tau from a 5-minute clean sample, not the real
+   calibration); full_window_auc=0.302 (qualitatively consistent with the
+   D-062 sub-chance finding); recovery_alarm_rate=0.716. **Proves the code
+   runs; these are explicitly NOT reported as results.**
+
+## NEXT (blocked on Master)
+Wait for Master to confirm the core (`fedqpnt/trust/trust_law.py`) is
+frozen (post-jam fix + position/clock trust split landed). Once frozen:
+run the REAL tau calibration (seeds 580-599, >=5h/arm, each arm's own
+final installed model -- requires the frozen-core re-run's actual
+installed weights per arm, not theta0), then re-run
+`scripts/h2_abrupt_h2h4_driver.py --parts h2,h4,control` (already updated
+for full provenance + git-state logging per D-062 item 3) with n=10 seeds
+(500-509), then compute all D-064 metrics via `scripts/h2_abrupt_metrics.py`
+on the resulting per-seed 1Hz-epoch traces (NOTE: the current driver/
+node_runner.py pipeline does not persist raw per-tick/per-epoch arrays,
+only aggregate scalars -- will need a small additive change to the DRIVER
+script, not fedqpnt/ internals, to also dump 1Hz raw_p/active/t arrays per
+node per seed so h2_abrupt_metrics.py's functions can consume them; flag
+this as the next implementation step once unparked).
 
 ## TASK COMPLETE (task bdoo5lti3 / driver DONE, 08:38-10:24 IST) -- WITHDRAWN
 by D-062, kept for history; see the D-062 section above for the current
