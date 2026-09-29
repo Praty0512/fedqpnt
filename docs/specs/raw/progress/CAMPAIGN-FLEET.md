@@ -68,6 +68,37 @@ WITHOUT touching `fedqpnt/fleet/node_runner.py`:
   `results/eval_fleet_dryrun/report.md` (still PLUMBING ONLY).
 - `python -m pytest tests/test_eval_*.py tests/test_fleet_adapter.py -q`: **59 passed**.
 
+## D-059 ADDENDUM (comms fairness, applied)
+Master flagged a fairness defect: local-only sub-federations inherited the scenario's SIMULATED
+comms loss/delay (`comms_cfg`/`ServerConfig.comms`), but a vehicle training locally has no network
+and must never lose/delay its own update.
+- `fedqpnt/eval/fleet_adapter.py`: `_run_local_only_fleet` now FORCES a lossless, zero-delay
+  `CommsConfig` (`_LOSSLESS_COMMS`: `loss_g=loss_b=0.0`, `p_gb=0`/`p_bg=1` pinning the Gilbert-Elliott
+  channel "good", `delay_sigma_ln=0` at `delay_mu_ln=log(1e-6)`) on BOTH the node uplink AND the
+  server's own, separate downlink config, regardless of what the calling scenario's `comms_cfg`/
+  `server_cfg` say -- S9's simulated faults now apply only to the federated arms.
+- Added a documented, non-crashing note (not a runtime assert) at the merge loop: with comms fixed,
+  the only reasons left for `round_installs < n_rounds - join_round` are scenario-scheduled
+  (join/failure) OR `FLClient`'s pre-existing, legitimate SS4.2 `min_samples` heartbeat gate (a
+  node's own accumulated local dataset not yet reaching `ClientConfig.min_samples=64` -- shared with
+  the federated arms too, NOT a comms defect). A hard runtime assert of `round_installs==n_rounds`
+  was deliberately NOT added to the library code: with the real default `min_samples=64` it would
+  raise on every real campaign run whenever early rounds haven't accumulated enough data yet, which
+  is correct, expected behaviour, not a bug.
+- Two new tests in `tests/test_fleet_adapter.py` isolate the comms-fairness invariant with
+  `ClientConfig(min_samples=1)` (removing the confound above) and assert it exactly:
+  `test_local_only_installs_every_round_with_lossless_comms` (`round_installs == n_rounds` for every
+  node) and `test_local_only_join_round_is_the_only_carve_out` (a cold-start node installs exactly
+  `n_rounds - join_round`, the one legitimate carve-out). `python -m pytest tests/test_eval_*.py
+  tests/test_fleet_adapter.py -q` -> **61 passed**.
+- Re-ran the S8 seed-500 `baseline_b_cont` check (N=3, 120s, 4 rounds, real `min_samples=64`
+  default): `round_installs` = 2/4 for every node (was 1.33/4 mean before this addendum). Per-node
+  detail: veteran nodes (node0/node1) install rounds 2-3 only (rounds 0-1 have 30/60 cumulative
+  local samples, below the real `min_samples=64` heartbeat -- NOT comms, confirmed by
+  `n_local_samples` in provenance); the cold-start node (node2, `join_round=2`) installs both of its
+  2 attempted rounds (2-3) -- exactly the fairness invariant (comms no longer drops or delays
+  anything; only real data-availability and join scheduling limit installs now).
+
 ## Known limitation (unchanged, out of my owned scope)
 - AUC-drop criteria (S5/S9/S12) still need "no-fault"/"no-loss"/"clean" reference arms that the
   plumbing dry-run does not execute (kept minimal per the task's exact method list); they report

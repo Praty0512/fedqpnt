@@ -16,6 +16,7 @@ from __future__ import annotations
 import pytest
 
 from fedqpnt.eval import fleet_adapter as FA
+from fedqpnt.fl.client import ClientConfig
 from fedqpnt.fl.comms import CommsConfig
 from fedqpnt.fl.server import ServerConfig
 from fedqpnt.fleet.orchestrator import FleetScenarioConfig
@@ -76,3 +77,41 @@ def test_local_only_detector_hash_changes_across_rounds():
                       f"(frozen theta0 -- the D-059 bug): provenance={prov}")
     # N=1 fedavg is the identity: the node always installs its own update.
     assert node.get("round_installs", 0) >= 1
+
+
+def test_local_only_installs_every_round_with_lossless_comms():
+    """D-059 addendum (Master): a local-only node trains on its own
+    vehicle with NO network, so it must never lose or delay its own
+    update. ``_run_local_only_fleet`` now forces lossless/zero-delay comms
+    on both the node uplink and the server's own downlink regardless of
+    what the calling scenario's comms_cfg/server_cfg say (S9's simulated
+    faults are for the FEDERATED arms only). ``min_samples=1`` isolates
+    that comms-fairness guarantee from FLClient's SEPARATE, legitimate
+    SS4.2 "not enough accumulated local data yet" heartbeat gate (real
+    data-availability behaviour shared with the federated arms too, not a
+    comms defect -- see fedqpnt/eval/fleet_adapter.py's note at the merge
+    loop): with real min_samples=64 the very first round or two can
+    legitimately have nothing to send yet, which is NOT what this test is
+    checking."""
+    theta0, param_names = _theta0()
+    cfg = _fast_cfg(["node0", "node1", "node2"], n_rounds=4, round_period_s=4.0, duration_s=25.0,
+                     client_cfg=ClientConfig(min_samples=1))
+    result = FA._run_local_only_fleet(cfg, theta0, param_names, join_timeout_s=300.0)
+    assert not result.aborted, result.abort_reason
+    for node_id, node in result.node_results.items():
+        assert node.get("round_installs") == cfg.n_rounds, (
+            f"{node_id}: installed {node.get('round_installs')}/{cfg.n_rounds} rounds despite "
+            f"lossless comms and no join/failure scheduling -- {node.get('provenance')}")
+
+
+def test_local_only_join_round_is_the_only_carve_out():
+    """A cold-start local-only node (join_round > 0) legitimately installs
+    fewer than cfg.n_rounds rounds -- exactly the rounds from join_round
+    onward, never more, never fewer (comms is lossless)."""
+    theta0, param_names = _theta0()
+    cfg = _fast_cfg(["node0"], n_rounds=4, round_period_s=4.0, duration_s=25.0,
+                     client_cfg=ClientConfig(min_samples=1), join_round={"node0": 2})
+    result = FA._run_local_only_fleet(cfg, theta0, param_names, join_timeout_s=300.0)
+    assert not result.aborted, result.abort_reason
+    node = result.node_results["node0"]
+    assert node.get("round_installs") == cfg.n_rounds - 2, node.get("provenance")

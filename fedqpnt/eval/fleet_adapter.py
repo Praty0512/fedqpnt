@@ -51,12 +51,28 @@ import numpy as np
 from fedqpnt.eval import scenarios as SC
 from fedqpnt.fl.client import ClientConfig
 from fedqpnt.fl.comms import CommsConfig
+from fedqpnt.fl.server import ServerConfig
 from fedqpnt.fleet.orchestrator import FleetResult, FleetScenarioConfig, run_fleet, write_campaign_result
 from fedqpnt.node.methods import load_detector_weights
 
 FLEET_SCENARIO_IDS = ("S5", "S8", "S9", "S12", "S15")
 THETA0_PATH = Path("results/fleet/theta0_d054.npz")
 MAX_LOCAL_ONLY_PARALLEL = 8   # D-059: cap on concurrent 1-node federations for B-cont/B-bin
+
+# D-059 addendum (Master): a local-only node trains on its own vehicle, with
+# NO network -- it must never lose or delay an update to/from itself. S9's
+# simulated comms faults model the FEDERATED methods' wireless link; they
+# must not leak into B-cont/B-bin's 1-node federations regardless of what
+# comms_cfg/server_cfg the calling scenario carries. Forced on BOTH legs:
+# the node's uplink (FleetScenarioConfig.comms_cfg) and the server's own,
+# SEPARATE downlink config (ServerConfig.comms, fl/server.py) -- these are
+# two independent knobs and both must be zeroed (see tests/test_fleet_
+# adapter.py's note on the same gotcha). delay_sigma_ln=0 makes the
+# log-normal delay deterministic at exp(delay_mu_ln) (~1 microsecond);
+# p_gb=0/p_bg=1 keeps the Gilbert-Elliott channel permanently in the "good"
+# state, on top of loss_g=loss_b=0.0 belt-and-braces.
+_LOSSLESS_COMMS = CommsConfig(delay_mu_ln=float(np.log(1e-6)), delay_sigma_ln=0.0, p_gb=0.0, p_bg=1.0,
+                               loss_g=0.0, loss_b=0.0)
 
 # fleet "method" name -> (aggregator, node/agent-config method name, local_only)
 # local_only=True (D-059): run via _run_local_only_fleet (N independent
@@ -192,8 +208,13 @@ def _run_local_only_fleet(cfg: FleetScenarioConfig, theta0: dict[str, np.ndarray
         sub = FleetScenarioConfig(
             scenario_id=cfg.scenario_id, method=cfg.method, seed=cfg.seed, node_ids=[node_id],
             n_rounds=cfg.n_rounds, round_period_s=cfg.round_period_s, duration_s=cfg.duration_s,
-            dt=cfg.dt, aggregator="fedavg", server_cfg=cfg.server_cfg, client_cfg=cfg.client_cfg,
-            comms_cfg=cfg.comms_cfg,
+            dt=cfg.dt, aggregator="fedavg",
+            # D-059 addendum: force lossless/zero-delay comms on BOTH legs,
+            # regardless of cfg.comms_cfg/cfg.server_cfg -- S9's simulated
+            # faults are for federated methods only, never a local-only node
+            # talking to itself.
+            server_cfg=ServerConfig(aggregator="fedavg", seed=cfg.seed, comms=_LOSSLESS_COMMS),
+            client_cfg=cfg.client_cfg, comms_cfg=_LOSSLESS_COMMS,
             attacks=({node_id: cfg.attacks[node_id]} if node_id in cfg.attacks else {}),
             join_round=({node_id: cfg.join_round[node_id]} if node_id in cfg.join_round else {}),
             failure_round=({node_id: cfg.failure_round[node_id]} if node_id in cfg.failure_round else {}),
@@ -212,6 +233,20 @@ def _run_local_only_fleet(cfg: FleetScenarioConfig, theta0: dict[str, np.ndarray
         for node_id, res in ex.map(_one, cfg.node_ids):
             sub_results[node_id] = res
 
+    # D-059 addendum fairness guarantee: with comms forced lossless/
+    # zero-delay above, a local-only node's ONLY legitimate reasons to
+    # install fewer than ``cfg.n_rounds - join_round`` rounds are
+    # scenario-scheduled (a cold-start join_round delaying its first round,
+    # a scheduled failure_round ending it early). It can still separately
+    # get NoUpdate/ROUND_SKIPPED for a round where its own accumulated
+    # local dataset hasn't yet reached ``ClientConfig.min_samples`` (SS4.2's
+    # heartbeat gate, shared with the federated arms too, since it lives in
+    # fedqpnt.fl.client.FLClient) -- that is real data-availability
+    # behaviour, not a comms defect, so it is deliberately NOT asserted away
+    # here (doing so would make every real campaign run raise). See
+    # tests/test_fleet_adapter.py::test_local_only_installs_every_round_with_lossless_comms,
+    # which isolates the comms-fairness invariant with ``min_samples=1`` and
+    # asserts ``round_installs == n_rounds`` exactly.
     node_results: dict[str, dict] = {}
     server_log: list[dict] = []
     aborted = False
