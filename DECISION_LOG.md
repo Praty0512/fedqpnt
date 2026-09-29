@@ -33,6 +33,17 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-070 · 2026-09-29 · S6 re-registered as the H3 scenario; no CAI fault injector; fleet control arms mapped
+- **S6 (H3, confirmatory, 2 of 8):** Schuler world, 1500 s; drift_spoof onset 300 s, duration 900 s, severity 0.3 (gradual-spoofing regime per ARCHITECTURE §6.2; parameters fixed before any test data); arms fedqpnt_local, abl_minus_quantum, undefended; grades industrial_mems and tactical. Primary: paired latency_eff per grade. Plus the never-worse safety leg.
+- **S6-coast (exploratory, outside the Holm family):** a 180 s forced outage; max coasting error with vs without CAI (D-065 envelope).
+- **CAI fault injector:** not built. The ARCH "CAI bias drift, w_q < 0.5 within 10 cycles" leg is narrowed in the paper.
+- **Fleet control arms** fedqpnt_clean / nofault / noloss are added to the fleet adapter, so the S5/S9/S12 AUC-drop legs become evaluable.
+- **Also recorded:**
+  - the old S7 toggle_period_s was never a constructor argument, so the old S7 could not have run as described;
+  - now five variants (S7-p2 … p60, abrupt-spoof segments at 50% duty).
+- **Narrowed in the paper:** S7 "detector noise near threshold", the S10 T_c axis/jitter, S12's other poisoning types (covered by scripts/run_fl_s12_full.py), S15's attacked-node damage legs.
+- **Owner:** Master
+
 ### D-069 · 2026-09-29 · Shadow-probe consistency threshold: pre-registered clean-data calibration rule
 - **Context:** change (ii) (18e3207). The κ_R-inflated NIS is ~100× too insensitive for a consistency test (0.28 with a 26 m spoof), so the shadow probe uses a 6-D innovation against the coasting P with the receiver's UN-inflated covariance.
 - **Risk:** κ_R = 60 exists because that covariance under-states the real time-correlated LC-fix error. Clean fixes could then fail the χ²₆(0.99) = 16.81 test, creating a new permanent lockout.
