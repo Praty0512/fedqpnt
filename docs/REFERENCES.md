@@ -125,3 +125,9 @@ All DOIs have been tested for functional resolution. Preferred citation format f
 
 Example from this list:
 > Zhou, X., Yang, Q., Liu, Q., Liang, W., Wang, K., Liu, Z., Ma, J., Jin, Q. "Spatial–Temporal Federated Transfer Learning with multi-sensor data fusion for cooperative positioning," *Information Fusion*, 2024 (published online 2023). DOI: 10.1016/j.inffus.2023.102182
+
+---
+
+## Pending user verification (D-066 addendum)
+
+- Brown, R. G., Hwang, P. Y. C. *Introduction to Random Signals and Applied Kalman Filtering*, 4th ed. Wiley, 2012. **[TO VERIFY by user]** - used for the two-state clock model (S_f = h0/2, S_g = 2 pi^2 h_-2) and the TCXO h-parameters h0 = 2e-19 s, h_-2 = 2e-20 1/s behind ClockKFConfig.q_bias / q_drift and the simulated truth clock (fedqpnt/gnss/signal.py ClockState). Not yet in refs.bib.

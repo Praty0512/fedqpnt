@@ -122,6 +122,15 @@ typical h0=2e-19 s, h_-2=2e-20 /s (Brown&Hwang Table) -> q_bias=9e-3 m^2/s, q_dr
 truth (gnss/signal.py ClockState): sigma_bias_rw=3e-2 m/sqrt(s) -> 9e-4 m^2/s, sigma_drift_rw=3e-3
 -> 9e-6. Citation source (Brown&Hwang) is NOT in refs.bib/REFERENCES as far as grepped -> flag TODO.
 Decision on changing q_bias deferred until holdover implemented and its effect measured.
+D-066 ADDENDUM (clock model): TCXO, Brown&Hwang two-state, h0=2e-19 s, h_-2=2e-20 1/s ->
+q_bias=c^2*h0/2~9e-3 m^2/s, q_drift=c^2*2pi^2*h_-2~3.6e-2 (m/s)^2/s. Set BOTH truth
+(fedqpnt/gnss/signal.py ClockState: sigma_bias_rw=sqrt(q_bias)~0.0949, sigma_drift_rw=sqrt(q_drift)
+~0.19) AND ClockKFConfig (q_bias, q_drift) as part of change (i) with holdover; provenance in code
+comments; truth was ~4000x too quiet in drift so old holdover/timing results flattered the defence.
+Done (non-fedqpnt): docs/REFERENCES.md entry "[TO VERIFY by user]" (not in refs.bib);
+tests/test_clock_nees_consistency.py (xfail-marked): truth/filter share values and mean clock NEES
+over 20 seeds x 600 epochs within chi2_2 bounds. STILL waiting for "H2 telemetry landed" (no
+fedqpnt/ edits yet).
 ORDER after go: (i) ClockKF holdover, (ii) shadow probe + reacq consistency, (iii) trust split
 (weights["gnss"]=min alias; mean_w_pos/mean_w_clk over attack window AND whole mission), each with
 tests + full suite green + git state per D-062; then ONE combined re-verification at MEMS+tactical
