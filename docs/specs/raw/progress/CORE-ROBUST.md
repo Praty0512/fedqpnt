@@ -121,6 +121,32 @@ Scratchpad dir (all logs live here):
 - Expect this chain to take a while (S1 far check alone took ~19 min pre-fix); do not poll
   manually, use a background wait-loop + end turn, per the standing instruction.
 
+## v2 campaign RESULTS so far (post rotations-revert, post E_s nav_prior-bug fix)
+- Item 4b (`v2_overconf_diag.log`): SAME numbers as the pre-revert run (CAI ON: p=3.58 v=1.98
+  psi_rp=4.64 psi_yaw=0.48 b_a=522.09 b_g=7.10; CAI OFF: p=2.84 v=2.14 psi_rp=17.60 psi_yaw=0.64
+  b_a=67.83 b_g=4.24) -- rotations.py revert did NOT change these (confirms so3_exp/so3_log
+  numerics were equivalent for this trajectory's angle range; not a wasted re-run, a needed
+  confirmation).
+- Item 4 b_a artifact check (`v2_ba_nees_artifact.log`): SAME as before (classical truth
+  522.19 -> effective-bias truth 19.04, per-axis x=9.68 y=5.51 z=3.85). CONFIRMED unaffected
+  by the rotations revert.
+- Item 5 kappa_R tuning (`v2_kappa_tuning.log`, `results/m1/kappa_r_tuning_v2.json`): SAME
+  chosen kappa_R=60 (ANEES_pos=0.9499). Full curve identical to pre-revert run.
+- Item 5 block NEES at kappa_R=60 (`v2_kappa60_block_nees.log`): SAME (p=2.61 v=2.03
+  psi_rp=4.84 psi_yaw=0.48 b_a=521.16 b_g=7.31).
+- Item 6(i) S1 far check (`v2_item6_s1_far_check.log`, `results/m1/s1_far_check_core_robust_v2.json`):
+  **MASSIVE IMPROVEMENT post E_s-bug-fix**: S1 median RMSE ratio (fedqpnt/fixed_trust) =
+  **0.9877, threshold 1.05, PASS=True** (was 5.82/FAIL before the nav_prior fix). Full
+  per-method FAR/ANEES table is in the json/log -- read it fresh for the final report (don't
+  trust my earlier partial read, get the fedqpnt_local row specifically: FAR, ANEES_pos,
+  mean_w_gnss).
+- Item 6(ii)-(iii) chain CRASHED again at the smoke matrix step (BrokenProcessPool /
+  MemoryError, default `--workers` too high e.g. 16 concurrent 600s-sim workers). RELAUNCHED
+  the remainder with `--workers 6` explicitly on every run_many-based script (background task
+  **bbbg0ztuf**): smoke_matrix -> defended_vs_undefended -> safety_sweep -> sig_strength_auc ->
+  es_firing_fraction, same log/output filenames as before (they get overwritten/appended
+  fresh). If THIS also crashes on memory, try `--workers 3` or 4 next.
+
 ## IN PROGRESS / NEXT (as of this write)
 - Item 5 kappa_R=60 per-block NEES: DONE (see above).
 - sweep_signature_strength.py: added `--kappa-r` CLI flag (threaded through `_collect_family`,
