@@ -16,24 +16,51 @@ from typing import Any
 import numpy as np
 
 from fedqpnt.eval import campaign as CP
+from fedqpnt.eval import metrics as M
 from fedqpnt.eval import scenarios as SC
 from fedqpnt.eval import stats as ST
 
 # --------------------------------------------------------------------------
-# Confirmatory family: H1-H4 x primary metrics (section 6.2/7.5). Each entry
-# is (label, scenario_id, metric_field, method_a, method_b) meaning
-# "method_a < method_b on metric_field" (lower is better for both primaries).
-# H3 is CAI/H3 -- BLOCKED by D-047 and excluded from the Holm family (still
-# computed and reported, but never as a pass/fail confirmatory claim).
+# Confirmatory family (D-068): EXACTLY 8 tests, fixed m = 8, Holm. A test that
+# cannot be evaluated (missing data, blocked scenario, sigma_nom not frozen,
+# H2 file absent) counts as NOT rejected (p = 1) and m NEVER shrinks.
+#   H1 x {RMSE_h(att), latency_on} on S2-med vs Baseline A
+#   H2 x {P_D@10 s, onset latency} (D-064 event-level primaries; the H2 RMSE test is dropped)
+#   H3 x latency_eff vs abl_minus_quantum at {industrial_mems, tactical}
+#   H4 x {P_D@10 s, onset latency} for the cold-start node (D-064 protocol)
+# Each test is two-sided paired Wilcoxon; direction is read from the Hodges-Lehmann difference (arm_a - arm_b).
 # --------------------------------------------------------------------------
-CONFIRMATORY_FAMILY: tuple[tuple[str, str, str, str, str], ...] = (
-    ("H1_rmse_h_att_vs_A", "S2-med", "rmse_h_att", "fedqpnt_local", "baseline_a"),
-    ("H1_latency_on_vs_A", "S2-med", "latency_on", "fedqpnt_local", "baseline_a"),
-    ("H2_rmse_h_att_vs_Bcont", "S2-med", "rmse_h_att", "fedqpnt_local", "baseline_b_cont"),
-    ("H2_latency_on_vs_Bcont", "S2-med", "latency_on", "fedqpnt_local", "baseline_b_cont"),
-    ("H4_latency_on_coldstart", "S8", "latency_on", "fedqpnt_local", "baseline_b_cont"),
+FAMILY_M = 8
+H2_RESULT_PATH = "results/fleet/h2_abrupt.json"
+SIGMA_NOM_PATH = SC.SIGMA_NOM_PATH
+
+
+@dataclass(frozen=True)
+class ConfTest:
+    label: str
+    hypothesis: str
+    source: str            # "campaign" (runs/<scenario>[@grade]/...) | "h2file" (H2 fleet result file)
+    scenario: str          # campaign: scenario id; h2file: block name ("h2" | "h4")
+    metric: str            # rmse_h_att | latency_on | latency_eff | pd10 | onset_latency
+    arm_a: str
+    arm_b: str
+    grade: str | None = None
+
+
+CONFIRMATORY_FAMILY: tuple[ConfTest, ...] = (
+    ConfTest("H1_rmse_h_att_vs_A", "H1", "campaign", "S2-med", "rmse_h_att", "fedqpnt_local", "baseline_a"),
+    ConfTest("H1_latency_on_vs_A", "H1", "campaign", "S2-med", "latency_on", "fedqpnt_local", "baseline_a"),
+    ConfTest("H2_pd10_vs_Bcont", "H2", "h2file", "h2", "pd10", "fedqpnt", "baseline_b_cont"),
+    ConfTest("H2_onset_latency_vs_Bcont", "H2", "h2file", "h2", "onset_latency", "fedqpnt", "baseline_b_cont"),
+    ConfTest("H3_latency_eff_mems", "H3", "campaign", "S6", "latency_eff", "fedqpnt_local", "abl_minus_quantum",
+             "industrial_mems"),
+    ConfTest("H3_latency_eff_tactical", "H3", "campaign", "S6", "latency_eff", "fedqpnt_local",
+             "abl_minus_quantum", "tactical"),
+    ConfTest("H4_pd10_coldstart", "H4", "h2file", "h4", "pd10", "fedqpnt", "baseline_b_cont"),
+    ConfTest("H4_onset_latency_coldstart", "H4", "h2file", "h4", "onset_latency", "fedqpnt", "baseline_b_cont"),
 )
-H3_ENTRY = ("H3_latency_eff_vs_minus_quantum", "S6", "latency_on", "fedqpnt_local", "baseline_b_cont")
+assert len(CONFIRMATORY_FAMILY) == FAMILY_M == 8
+
 
 SECONDARY_METRICS = ("rmse_h_pre", "max_h_pre", "rmse_h_post", "max_h_post", "rmse_3_att", "rmse_v_att",
                       "anees_pos_pre", "t_dist", "t_rec", "n_cyc_per_hour", "tv_w_per_hour", "mean_w_gnss",
@@ -82,7 +109,7 @@ def _latency_series(results: dict[str, list[dict]], method: str, field_name: str
 
 
 def build_scenario_report(scenario_id: str, run_root: str = "runs") -> ScenarioReport:
-    scenario = SC.get(scenario_id)
+    scenario = SC.get(scenario_id.split("@")[0])
     results = CP.load_results(run_root, scenario_id, list(scenario.methods))
     rows = []
     for crit in scenario.criteria:
@@ -98,53 +125,114 @@ def build_scenario_report(scenario_id: str, run_root: str = "runs") -> ScenarioR
                           n_by_method=n_by_method)
 
 
-def confirmatory_tests(run_root: str = "runs", master_seed: int = 0) -> dict[str, dict[str, Any]]:
-    """H1-H4 (+ H3, reported but excluded from Holm) over paired per-seed
-    values, with Holm-Bonferroni correction over the declared confirmatory
-    family (section 7.5). Missing data (scenario/method not yet run) yields
-    an entry with ``evaluable=False`` rather than a fabricated p-value."""
+def load_h2_block(path: str, block: str, metric: str) -> dict[str, np.ndarray]:
+    """Reads paired per-seed arrays for the H2 / H4 event-level metrics from the H2 fleet result file.
+
+    TODO(D-068, interface only -- the data format of the re-run H2/H4 result file is NOT final): the expected
+    schema is ``{block: {"seeds": [...], metric: {arm: [per-seed value, ...]}}}`` with ``block`` in
+    {"h2", "h4"}, ``metric`` in {"pd10" (0/1 per seed, P_D@10 s at the calibrated tau),
+    "onset_latency" (seconds, raw; censored HERE at 60 s, D-064)} and per-seed entries aligned across arms.
+    Raises FileNotFoundError / KeyError / ValueError when the file or block is absent or malformed; the caller
+    turns that into an unevaluable test (counts as not rejected).
+    """
+    import json
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"{p} not found (H2/H4 re-run result file not produced yet)")
+    d = json.loads(p.read_text())[block]
+    per_arm = d[metric]
+    return {arm: np.array(v, dtype=float) for arm, v in per_arm.items()}
+
+
+def _paired_stats(a_c: np.ndarray, b_c: np.ndarray, master_seed: int, **extra) -> dict[str, Any]:
+    pt = ST.paired_test(a_c, b_c)
+    diffs = a_c - b_c
+    return dict(evaluable=True, n=pt.n, wilcoxon_p=pt.wilcoxon_p, t_p=pt.t_p,
+                normal_by_shapiro=pt.normal_by_shapiro, hodges_lehmann=ST.hodges_lehmann(diffs),
+                hl_ci95=ST.bca_bootstrap_ci(diffs, master_seed=master_seed),
+                rank_biserial_r=ST.rank_biserial_matched(a_c, b_c), cohens_dz=ST.cohens_dz(a_c, b_c), **extra)
+
+
+def _latency_eff_pair(results: dict[str, list[dict]], arm_a: str, arm_b: str, sigma_nom_m: float):
+    """Paired latency_eff per seed. A seed is EXCLUDED if the attack never became effective (D-068); the
+    truth-side offset is arm-independent (D-005), so the exclusion is the same for both arms, but it is
+    applied to the pair (either arm excluded -> seed dropped). Returns (a, b, n_excluded)."""
+    ra = {r.get("_seed"): r for r in results.get(arm_a, [])}
+    rb = {r.get("_seed"): r for r in results.get(arm_b, [])}
+    seeds = sorted(set(ra) & set(rb), key=lambda x: (x is None, x))
+    a, b, excl = [], [], 0
+    for sd in seeds:
+        la = M.latency_eff_from_record(ra[sd], sigma_nom_m)
+        lb = M.latency_eff_from_record(rb[sd], sigma_nom_m)
+        if la["excluded"] or lb["excluded"]:
+            excl += 1
+            continue
+        a.append(la["latency_eff"])
+        b.append(lb["latency_eff"])
+    return np.array(a), np.array(b), excl
+
+
+def _evaluate_test(t: ConfTest, run_root: str, h2_path: str, sigma_path: str, master_seed: int) -> dict[str, Any]:
+    """Never raises for missing inputs: returns ``evaluable=False`` with the reason."""
+    try:
+        if t.source == "h2file":
+            per = load_h2_block(h2_path, t.scenario, t.metric)
+            if t.arm_a not in per or t.arm_b not in per or per[t.arm_a].shape != per[t.arm_b].shape \
+                    or per[t.arm_a].size == 0:
+                return dict(evaluable=False, detail=f"H2 file lacks paired arms {t.arm_a}/{t.arm_b} for {t.metric}")
+            a, b = per[t.arm_a], per[t.arm_b]
+            if t.metric == "onset_latency":
+                a = np.array([M.censor_event(x, np.isfinite(x)) for x in a])
+                b = np.array([M.censor_event(x, np.isfinite(x)) for x in b])
+            return _paired_stats(a, b, master_seed)
+
+        sid = t.scenario if t.grade is None else f"{t.scenario}@{t.grade}"
+        scenario = SC.get(t.scenario)
+        if scenario.blocked_by_D047:
+            return dict(evaluable=False, detail=f"{t.scenario} BLOCKED by D-046/D-047 (counted as not rejected)")
+        results = CP.load_results(run_root, sid, [t.arm_a, t.arm_b])
+        if t.metric == "latency_eff":
+            g = t.grade or "industrial_mems"
+            sig = M.load_sigma_nom(sigma_path)       # FileNotFoundError if not frozen -> caught below
+            if g not in sig:
+                return dict(evaluable=False, detail=f"sigma_nom has no entry for grade {g}")
+            a, b, n_excl = _latency_eff_pair(results, t.arm_a, t.arm_b, sig[g])
+            if a.size == 0:
+                return dict(evaluable=False, detail=f"no effective paired runs in {sid} ({n_excl} excluded)")
+            return _paired_stats(a, b, master_seed, n_excluded_never_effective=n_excl)
+        is_lat = "latency" in t.metric
+        a = _latency_series(results, t.arm_a, t.metric, scenario) if is_lat else _field(results, t.arm_a, t.metric)
+        b = _latency_series(results, t.arm_b, t.metric, scenario) if is_lat else _field(results, t.arm_b, t.metric)
+        if a.size == 0 or b.size == 0 or a.size != b.size:
+            return dict(evaluable=False, detail=f"missing/mismatched {t.arm_a} vs {t.arm_b} in {sid}")
+        return _paired_stats(a, b, master_seed)
+    except (FileNotFoundError, KeyError, ValueError) as exc:
+        return dict(evaluable=False, detail=f"{type(exc).__name__}: {exc}")
+
+
+def confirmatory_tests(run_root: str = "runs", master_seed: int = 0, *, h2_path: str = H2_RESULT_PATH,
+                       sigma_path: str = SIGMA_NOM_PATH) -> dict[str, dict[str, Any]]:
+    """The 8-test confirmatory family with Holm correction at FIXED m = 8 (D-068). Unevaluable tests get
+    p = 1.0 (never rejected) and stay in the family, so m never shrinks."""
     raw: dict[str, dict[str, Any]] = {}
     pvals: dict[str, float] = {}
-
-    def _one(label, sid, field_name, method_a, method_b):
-        scenario = SC.get(sid)
-        results = CP.load_results(run_root, sid, list(scenario.methods))
-        is_lat = "latency" in field_name
-        a = _latency_series(results, method_a, field_name, scenario) if is_lat             else _field(results, method_a, field_name)
-        b = _latency_series(results, method_b, field_name, scenario) if is_lat             else _field(results, method_b, field_name)
-        if a.size == 0 or b.size == 0 or a.size != b.size:
-            return dict(evaluable=False, detail=f"missing/mismatched {method_a} vs {method_b} in {sid}")
-        a_c, b_c = a, b
-        pt = ST.paired_test(a_c, b_c)
-        diffs = a_c - b_c
-        hl = ST.hodges_lehmann(diffs)
-        ci = ST.bca_bootstrap_ci(diffs, master_seed=master_seed)
-        r = ST.rank_biserial_matched(a_c, b_c)
-        dz = ST.cohens_dz(a_c, b_c)
-        return dict(evaluable=True, n=pt.n, wilcoxon_p=pt.wilcoxon_p, t_p=pt.t_p,
-                    normal_by_shapiro=pt.normal_by_shapiro, hodges_lehmann=hl, hl_ci95=ci,
-                    rank_biserial_r=r, cohens_dz=dz, blocked_by_D047=scenario.blocked_by_D047)
-
-    for label, sid, field_name, ma, mb in CONFIRMATORY_FAMILY:
-        raw[label] = _one(label, sid, field_name, ma, mb)
-        if raw[label]["evaluable"] and not raw[label].get("blocked_by_D047"):
-            pvals[label] = raw[label]["wilcoxon_p"]
-
-    h3_label, sid, field_name, ma, mb = H3_ENTRY
-    raw[h3_label] = _one(h3_label, sid, field_name, ma, mb)
-    raw[h3_label]["excluded_from_holm_family"] = "H3/CAI benefit BLOCKED by D-046/D-047"
-
-    holm = ST.holm_bonferroni(pvals) if pvals else {}
-    for label, (adj_p, reject) in holm.items():
+    for t in CONFIRMATORY_FAMILY:
+        r = _evaluate_test(t, run_root, h2_path, sigma_path, master_seed)
+        r["hypothesis"] = t.hypothesis
+        raw[t.label] = r
+        p = r.get("wilcoxon_p") if r.get("evaluable") else None
+        pvals[t.label] = float(p) if p is not None and np.isfinite(p) else 1.0
+    assert len(pvals) == FAMILY_M
+    for label, (adj_p, reject) in ST.holm_bonferroni(pvals).items():
         raw[label]["holm_adjusted_p"] = adj_p
-        raw[label]["holm_reject_at_0.05"] = reject
+        raw[label]["holm_reject_at_0.05"] = bool(reject and raw[label].get("evaluable"))
     return raw
 
 
 def secondary_metrics_table(scenario_ids: list[str], run_root: str = "runs") -> list[dict[str, Any]]:
     rows = []
     for sid in scenario_ids:
-        scenario = SC.get(sid)
+        scenario = SC.get(sid.split("@")[0])
         results = CP.load_results(run_root, sid, list(scenario.methods))
         for method, recs in results.items():
             for metric in SECONDARY_METRICS:
@@ -180,7 +268,7 @@ def render_markdown(scenario_ids: list[str], run_root: str = "runs", *, is_dry_r
     lines.append("## Section 6.1 acceptance criteria")
     for sid in scenario_ids:
         rep = build_scenario_report(sid, run_root)
-        scenario = SC.get(sid)
+        scenario = SC.get(sid.split("@")[0])
         lines.append(f"\n### {sid}: {scenario.title}")
         if scenario.requires_fl:
             lines.append("_requires_fl: dispatched via fedqpnt.eval.fleet_adapter to the fleet "
@@ -197,16 +285,24 @@ def render_markdown(scenario_ids: list[str], run_root: str = "runs", *, is_dry_r
             lines.append(f"| {row['criterion']} | {passed} | {val} | {row['blocked_by_D047']} | "
                           f"{row['detail']} |")
 
-    lines.append("\n## Section 6.2/7 confirmatory hypotheses (H1-H4, Holm-corrected; H3 BLOCKED, excluded)")
+    s10 = [sid for sid in scenario_ids if sid.startswith("S10-r")]
+    if len(s10) >= 2:
+        by_rate = {SC.get(sid).gnss_rate_hz: CP.load_results(run_root, sid, ["fedqpnt_local"]) for sid in s10}
+        mono = SC.s10_rmse_monotone(by_rate)
+        lines.append(f"\nS10 cross-rate check (RMSE_h(P_pre) non-increasing in GNSS rate): "
+                     f"passed={mono['passed']} -- {mono['detail']}")
+
+    lines.append("\n## Section 6.2/7 confirmatory family (8 tests, fixed m = 8, Holm; unevaluable = not rejected)")
     conf = confirmatory_tests(run_root, master_seed=master_seed)
     lines.append("| Hypothesis | Evaluable | n | Wilcoxon p | Holm-adj p | Reject@.05 | HL diff | 95% BCa CI | "
                   "d_z | rank-biserial r |")
     lines.append("|---|---|---|---|---|---|---|---|---|---|")
     for label, r in conf.items():
         if not r.get("evaluable"):
-            lines.append(f"| {label} | NO ({r.get('detail')}) | - | - | - | - | - | - | - | - |")
+            lines.append(f"| {label} | NO ({r.get('detail')}) | - | - | {r.get('holm_adjusted_p', 1.0):.4g} | "
+                          f"False | - | - | - | - |")
             continue
-        excl = " [EXCLUDED FROM HOLM FAMILY: D-046/D-047]" if r.get("excluded_from_holm_family") else ""
+        excl = ""
         holm_p = r.get("holm_adjusted_p", "-")
         reject = r.get("holm_reject_at_0.05", "-")
         ci = r.get("hl_ci95")

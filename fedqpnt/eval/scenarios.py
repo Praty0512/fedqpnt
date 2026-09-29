@@ -76,6 +76,23 @@ class Scenario:
                                      # the campaign runner cannot yet execute this scenario's fleet
                                      # semantics -- registered declaratively, execution deferred.
     notes: str = ""
+    # --- D-068 registry-vs-intent fields (all optional; defaults keep legacy behaviour) ---
+    base_id: str = ""                # family id for variants (e.g. "S10-r5" -> "S10"); "" = same as id
+    gnss_rate_hz: float = 1.0        # S10 rate grid
+    attacks: tuple = ()              # multi-attack schedule (S4 jam->spoof, S7 toggling); needs RunSpec.attacks
+    noise_scale: dict | None = None  # S11: {"imu": 10, "gnss": 5, "cai_contrast_div": 3}; needs RunSpec.noise_scale
+    poison_frac: float | None = None # S12 fleet variants (f in {0.2, 0.4}, sign_flip)
+    group: str = ""                  # variants of one ARCH row share a group (e.g. "S7", "S10")
+
+    @property
+    def family(self) -> str:
+        return self.base_id or self.id
+
+
+# D-068: method aliases resolved when a RunSpec is built (eval side only).
+# abl_minus_quantum = the full FedQPNT node with the CAI switched off (H3 reference arm).
+METHOD_ALIASES: dict[str, dict] = {"abl_minus_quantum": dict(method="fedqpnt_local", quantum_grade=None)}
+SIGMA_NOM_PATH = "results/sigma_nom.json"    # D-068: frozen file, never computed on the fly
 
 
 def _method_series(results: dict[str, list[dict]], method: str, field_name: str) -> np.ndarray:
@@ -97,6 +114,75 @@ def _paired_ratio_check(name: str, justification: str, field_name: str, method: 
         return dict(passed=passed, value=val, detail=f"{reducer.__name__}({field_name} ratio {method}/{reference}) "
                                                        f"= {val:.4f} (bound {max_ratio})")
     return Criterion(name=name, justification=justification, check=_check)
+
+
+
+def _grade_of(results: dict[str, list[dict]]) -> str:
+    for recs in results.values():
+        for r in recs:
+            if r.get("_imu_grade"):
+                return r["_imu_grade"]
+    return "industrial_mems"
+
+
+def _sigma_nom(results: dict[str, list[dict]]) -> tuple[float | None, str]:
+    """Frozen sigma_nom (D-068) for the results' IMU grade, or (None, reason)."""
+    try:
+        d = _M.load_sigma_nom(SIGMA_NOM_PATH)
+    except (FileNotFoundError, ValueError) as exc:
+        return None, f"sigma_nom not frozen: {exc}"
+    g = _grade_of(results)
+    if g not in d:
+        return None, f"sigma_nom.json has no entry for grade '{g}'"
+    return d[g], ""
+
+
+def _leg(name: str, passed, value, detail: str) -> dict[str, Any]:
+    return dict(name=name, passed=passed, value=value, detail=detail)
+
+
+def _combine(legs: list[dict[str, Any]]) -> dict[str, Any]:
+    """AND of legs; any FAILED leg -> False, else any unevaluable -> None, else True."""
+    if any(l["passed"] is False for l in legs):
+        passed = False
+    elif any(l["passed"] is None for l in legs):
+        passed = None
+    else:
+        passed = True
+    val = next((l["value"] for l in legs if l["value"] is not None), None)
+    return dict(passed=passed, value=val,
+                detail=" | ".join(f"{l['name']}: {l['detail']}" for l in legs))
+
+
+def _runs(results, method):
+    return results.get(method, [])
+
+
+def _all_runs_field(results, method, field_name):
+    """Per-run values of ``field_name`` or None if any run lacks it (runner does not emit it yet)."""
+    runs = _runs(results, method)
+    if not runs:
+        return None
+    vals = [r.get(field_name) for r in runs]
+    if any(v is None for v in vals):
+        return None
+    return np.array(vals, dtype=float)
+
+
+def _never_worse_leg(results, method="fedqpnt_local", ref="undefended", field_name="max_h_att") -> dict[str, Any]:
+    """D-068 primary safety criterion: mean_defended <= mean_undefended + 3 sigma_nom (sigma_nom frozen,
+    per grade). Unevaluable (passed=None) until sigma_nom.json exists."""
+    a = _method_series(results, method, field_name)
+    u = _method_series(results, ref, field_name)
+    if a.size == 0 or u.size == 0 or a.size != u.size:
+        return _leg("never_worse", None, None, f"missing/mismatched {method}/{ref}")
+    sig, why = _sigma_nom(results)
+    if sig is None:
+        return _leg("never_worse", None, None, why)
+    margin = float(np.nanmean(a) - np.nanmean(u))
+    return _leg("never_worse", bool(margin <= 3 * sig), margin,
+                f"mean({field_name}) defended-undefended={margin:.3f} (bound 3*sigma_nom={3*sig:.3f}, "
+                f"grade={_grade_of(results)})")
 
 
 # --------------------------------------------------------------------------
@@ -126,6 +212,14 @@ def _s1_mean_w(results):
     return dict(passed=bool(val >= 0.95), value=val, detail=f"mean w_gnss={val:.4f} (bound >=0.95)")
 
 
+def _s1_tv(results):
+    v = _method_series(results, "fedqpnt_local", "tv_w_per_hour")
+    if v.size == 0:
+        return dict(passed=None, value=None, detail="no fedqpnt_local runs")
+    val = float(np.nanmean(v))
+    return dict(passed=bool(val <= 1.0), value=val, detail=f"TV_w={val:.3f}/h (bound 1.0; ARCH S7 row 'in S1')")
+
+
 S1 = Scenario(
     id="S1", title="Nominal", fleet_size=1, duration_s=600.0, world="flat", cai_grade="field",
     attack=None, methods=METHOD_ALL,
@@ -135,6 +229,7 @@ S1 = Scenario(
         Criterion("far_le_1_per_hour", "Lenient nuisance-rate bound (RAIM-FDE Pfa with 25x slack)", _s1_far),
         Criterion("anees_in_band", "Factor-2 ANEES band tolerates correlated GNSS errors [ASSUMPTION]", _s1_anees),
         Criterion("mean_w_gnss_ge_0_95", "Trust must not distrust clean GNSS", _s1_mean_w),
+        Criterion("tv_w_le_1_per_hour", "Trust must not chatter on clean data (ARCH S7 row)", _s1_tv),
     ),
 )
 
@@ -142,46 +237,55 @@ S1 = Scenario(
 # --------------------------------------------------------------------------
 # S2: Gradual spoof, severities {low, med, high}
 # --------------------------------------------------------------------------
+def _pd_value(results, method, window):
+    runs = _runs(results, method)
+    hit = np.array([_M.detected_from_record(r, window) for r in runs], dtype=bool)
+    return float(np.mean(hit)), len(runs)
+
+
 def _make_s2(severity_name: str, severity: float, final_offset_ge_50m: bool) -> Scenario:
     attack = dict(kind="drift_spoof", onset_s=60.0, duration_s=300.0, severity=severity)
+    return _make_spoof_scenario(f"S2-{severity_name}", f"Gradual spoof ({severity_name})", attack,
+                                 final_offset_ge_50m)
+
+
+def _make_spoof_scenario(sid: str, title: str, attack: dict, final_offset_ge_50m: bool, *,
+                          duration_s: float = 600.0, base_id: str = "", notes: str = "") -> Scenario:
+    """ARCH S2 row: for final offset >= 50 m: P_D >= 0.9 and MAX_h <= 0.5 x MAX_h(undefended);
+    for ALL severities: MAX_h(defended) <= MAX_h(undefended) + 3 sigma_nom (D-068: sigma_nom is the
+    frozen per-grade value, never an assumed constant)."""
+    window = attack.get("duration_s")
 
     def _pd(results):
-        lat = _method_series(results, "fedqpnt_local", "latency_on")
-        if lat.size == 0:
+        # D-068: latency_on is CENSORED (finite) on a miss, so isfinite() was always True (P_D == 1.0).
+        if not _runs(results, "fedqpnt_local"):
             return dict(passed=None, value=None, detail="no fedqpnt_local runs")
-        # D-068: latency_on is CENSORED (finite) on a miss, so isfinite() was
-        # always True (P_D == 1.0). Use the explicit detected flag.
-        window = (attack or {}).get("duration_s")
-        hit = np.array([_M.detected_from_record(r, window) for r in results["fedqpnt_local"]], dtype=bool)
-        p_d = float(np.mean(hit))
+        p_d, n = _pd_value(results, "fedqpnt_local", window)
         crit = bool(p_d >= 0.9) if final_offset_ge_50m else None
-        return dict(passed=crit, value=p_d, detail=f"P_D={p_d:.3f} (n={lat.size})")
+        return dict(passed=crit, value=p_d, detail=f"P_D={p_d:.3f} (n={n})")
 
-    def _damage(results):
+    def _halve(results):
         a = _method_series(results, "fedqpnt_local", "max_h_att")
         u = _method_series(results, "undefended", "max_h_att")
         if a.size == 0 or u.size == 0 or a.size != u.size:
             return dict(passed=None, value=None, detail="missing fedqpnt_local/undefended")
-        if final_offset_ge_50m:
-            ratio = np.median(a / np.where(u == 0, np.nan, u))
-            passed = bool(np.isfinite(ratio) and ratio <= 0.5)
-            return dict(passed=passed, value=float(ratio), detail=f"median MAX_h ratio={ratio:.4f} (bound 0.5)")
-        sigma_nom_m = 5.0   # [ASSUMPTION]: 3-sigma nominal horizontal error margin
-        margin = np.median(a - u)
-        passed = bool(margin <= 3 * sigma_nom_m)
-        return dict(passed=passed, value=float(margin), detail=f"median(MAX_h_a - MAX_h_u)={margin:.3f} "
-                                                                 f"(bound 3*sigma_nom={3*sigma_nom_m})")
+        if not final_offset_ge_50m:
+            return dict(passed=None, value=None, detail="n/a (final offset < 50 m: halving not required)")
+        ratio = float(np.median(a / np.where(u == 0, np.nan, u)))
+        return dict(passed=bool(np.isfinite(ratio) and ratio <= 0.5), value=ratio,
+                    detail=f"median MAX_h ratio={ratio:.4f} (bound 0.5)")
 
-    return Scenario(
-        id=f"S2-{severity_name}", title=f"Gradual spoof ({severity_name})", fleet_size=1, duration_s=600.0,
-        world="flat", cai_grade="field",
-        attack=dict(kind="drift_spoof", onset_s=60.0, duration_s=300.0, severity=severity),
-        methods=METHOD_ALL,
-        criteria=(
-            Criterion("detection_prob", "Halving the damage requires detecting it first", _pd),
-            Criterion("damage_bound", "Halve the damage (or never worsen it)", _damage),
-        ),
-    )
+    def _never_worse(results):
+        leg = _never_worse_leg(results)
+        return dict(passed=leg["passed"], value=leg["value"], detail=leg["detail"])
+
+    crits = [Criterion("detection_prob", "Halving the damage requires detecting it first", _pd)]
+    if final_offset_ge_50m:
+        crits.append(Criterion("damage_halved", "Halve the damage", _halve))
+    crits.append(Criterion("damage_never_worse", "Defence never makes it worse (undefended + 3 sigma_nom)",
+                            _never_worse))
+    return Scenario(id=sid, title=title, fleet_size=1, duration_s=duration_s, world="flat", cai_grade="field",
+                    attack=attack, methods=METHOD_ALL, criteria=tuple(crits), base_id=base_id, notes=notes)
 
 
 S2_LOW = _make_s2("low", 0.3, final_offset_ge_50m=False)
@@ -192,44 +296,95 @@ S2_HIGH = _make_s2("high", 0.9, final_offset_ge_50m=True)
 # --------------------------------------------------------------------------
 # S3: Sudden jamming (outage) -- BLOCKED (D-047: outage/attitude claims)
 # --------------------------------------------------------------------------
-def _s3_tdist(results):
-    v = _method_series(results, "fedqpnt_local", "t_dist")
+T_DIST_BOUND_S = 2 * 1.0 + 1.0    # ARCH S3: 2 GNSS epochs (1 Hz) + 1 s
+W_REACQ = 0.5                      # trust cfg w_reacq (fedqpnt.trust.trust_law.TrustEngineConfig)
+
+
+def _leg_t_dist(results, method="fedqpnt_local") -> dict[str, Any]:
+    v = _method_series(results, method, "t_dist")
     if v.size == 0:
-        return dict(passed=None, value=None, detail="no fedqpnt_local runs; BLOCKED by D-047 regardless")
-    bound = 2 * 1.0 + 1.0  # 2 GNSS epochs (1 Hz) + 1 s
-    val = float(np.nanmean(v))
-    return dict(passed=None, value=val, detail=f"BLOCKED by D-047 (outage/attitude); t_dist={val:.3f}s "
-                                                f"vs design bound {bound}s")
+        return _leg("t_dist", None, None, f"no {method} runs")
+    ok = np.isfinite(v) & (v <= T_DIST_BOUND_S)
+    frac = float(np.mean(ok))
+    return _leg("t_dist", bool(frac == 1.0), float(np.nanmax(v)) if np.any(np.isfinite(v)) else float("nan"),
+                f"runs with t_dist<={T_DIST_BOUND_S:g}s: {frac:.3f} (==1 required; NaN counts as failure)")
+
+
+def _leg_consistency(results, method="fedqpnt_local") -> dict[str, Any]:
+    v = _all_runs_field(results, method, "frac_e_le_3sigma_att")
+    if v is None:
+        return _leg("consistency", None, None, "runner does not emit frac_e_le_3sigma_att yet "
+                                                "(SCENARIO-FIX proposal P3); not evaluable")
+    return _leg("consistency", bool(np.all(v >= 0.95)), float(np.min(v)),
+                f"min over runs of frac(e_h<=3 sigma_h(P_pos)) in P_att={np.min(v):.3f} (>=0.95 each run)")
+
+
+def _leg_no_update_while_jammed(results, method="fedqpnt_local") -> dict[str, Any]:
+    v = _all_runs_field(results, method, "n_gnss_accepted_jammed")
+    if v is None:
+        return _leg("no_update_while_jammed", None, None,
+                    "runner does not emit n_gnss_accepted_jammed yet (P3); not evaluable")
+    return _leg("no_update_while_jammed", bool(np.all(v == 0)), float(np.max(v)),
+                f"max GNSS updates accepted while fix.valid false={np.max(v):.0f} (==0)")
+
+
+def _s3_check(results):
+    return _combine([_leg_t_dist(results), _leg_consistency(results), _leg_no_update_while_jammed(results)])
 
 
 S3 = Scenario(
     id="S3", title="Sudden jamming", fleet_size=1, duration_s=300.0, world="flat", cai_grade="field",
     attack=dict(kind="jam_wideband", onset_s=60.0, duration_s=60.0, severity=1.0),
     methods=METHOD_ALL,
-    criteria=(Criterion("t_dist_bound", "Design latency bound; coast error must be honestly predicted",
-                         _s3_tdist, blocked_by_D047=True),),
+    criteria=(Criterion("tdist_consistency_no_update",
+                         "Design latency bound; coast error must be honestly predicted; no update while jammed",
+                         _s3_check, blocked_by_D047=True),),
     blocked_by_D047=True,
-    notes="GNSS-outage drift claim; BLOCKED per D-046/D-047 until psi/b consistency is fixed.",
+    notes="GNSS-outage drift claim; BLOCKED per D-046/D-047 until psi/b consistency is fixed. Criteria "
+          "implemented per ARCH 6.1 (D-068) and computed, but reported BLOCKED.",
 )
 
 
 # --------------------------------------------------------------------------
 # S4: Combined (jam -> spoof capture at reacquisition) -- BLOCKED
+# D-068: the spoof leg was missing (registry was jam only). Intent: jam, then a drift spoof that starts
+# when the jam ends and tries to capture the reacquiring receiver.
 # --------------------------------------------------------------------------
-def _s4_reacq(results):
-    v = _method_series(results, "fedqpnt_local", "mean_w_gnss")
-    return dict(passed=None, value=(float(np.mean(v)) if v.size else None),
-                detail="BLOCKED by D-047 (outage/attitude); reacquisition-cap check not evaluable")
+S4_JAM = dict(kind="jam_wideband", onset_s=60.0, duration_s=40.0, severity=1.0)
+S4_SPOOF = dict(kind="drift_spoof", onset_s=100.0, duration_s=200.0, severity=0.6)
+
+
+def _leg_reacq_cap(results, method="fedqpnt_local") -> dict[str, Any]:
+    v = _all_runs_field(results, method, "w_gnss_reacq_max")
+    if v is None:
+        return _leg("reacq_cap", None, None, "runner does not emit w_gnss_reacq_max yet (P3); not evaluable")
+    return _leg("reacq_cap", bool(np.all(v <= W_REACQ + 1e-9)), float(np.max(v)),
+                f"max w_gnss at reacquisition={np.max(v):.3f} (<= w_reacq={W_REACQ} in 100% of runs)")
+
+
+def _s4_check(results):
+    # S3 legs (t_dist from the union onset = jam onset) + S2 legs on the union attack window
+    # [documented approximation: phases merge jam and spoof labels] + reacquisition cap.
+    a = _method_series(results, "fedqpnt_local", "max_h_att")
+    u = _method_series(results, "undefended", "max_h_att")
+    if a.size and a.size == u.size:
+        ratio = float(np.median(a / np.where(u == 0, np.nan, u)))
+        halve = _leg("s2_damage_halved", bool(np.isfinite(ratio) and ratio <= 0.5), ratio,
+                     f"median MAX_h ratio={ratio:.3f} (<=0.5)")
+    else:
+        halve = _leg("s2_damage_halved", None, None, "missing fedqpnt_local/undefended")
+    return _combine([_leg_t_dist(results), _leg_consistency(results), halve,
+                     _never_worse_leg(results), _leg_reacq_cap(results)])
 
 
 S4 = Scenario(
     id="S4", title="Combined jam-then-spoof capture", fleet_size=1, duration_s=400.0, world="flat",
-    cai_grade="field", attack=dict(kind="jam_wideband", onset_s=60.0, duration_s=40.0, severity=1.0),
+    cai_grade="field", attack=S4_JAM, attacks=(S4_JAM, S4_SPOOF),
     methods=METHOD_ALL,
-    criteria=(Criterion("s2_s3_joint_plus_reacq_cap", "Tests the reacquisition cap", _s4_reacq,
+    criteria=(Criterion("s2_s3_joint_plus_reacq_cap", "Tests the reacquisition cap", _s4_check,
                          blocked_by_D047=True),),
     blocked_by_D047=True,
-    notes="Includes an outage (jam) leg; BLOCKED per D-046/D-047.",
+    notes="Jam leg + drift-spoof capture leg (D-068). Needs RunSpec.attacks (P3). BLOCKED per D-046/D-047.",
 )
 
 
@@ -316,23 +471,48 @@ S6 = Scenario(
 )
 
 
+S7_PERIODS_S = (2.0, 5.0, 10.0, 20.0, 60.0)      # ARCH S7 row
+S7_DURATION_S = 3600.0
+S7_T0_S = 60.0
+
+
+def toggle_attacks(period_s: float, t0_s: float, t_end_s: float, severity: float = 0.5) -> tuple[dict, ...]:
+    """Spoof toggled with the given period (50% duty): abrupt-offset segments [t0+k*P, t0+k*P+P/2).
+    (attacks/ has no native toggle parameter; the previous registration's ``params.toggle_period_s`` was
+    silently not a constructor argument, so S7 could not have run as registered -- D-068.)"""
+    n = int((t_end_s - t0_s) // period_s)
+    return tuple(dict(kind="abrupt_spoof", onset_s=t0_s + k * period_s, duration_s=period_s / 2.0,
+                      severity=severity) for k in range(n))
+
+
 def _s7_ncyc(results):
     v = _method_series(results, "fedqpnt_local", "n_cyc_per_hour")
     if v.size == 0:
         return dict(passed=None, value=None, detail="no fedqpnt_local runs")
-    bound = 3600.0 / 26.1
+    bound = _M.N_CYC_BOUND_PER_HOUR   # D-068: to be re-derived at the freeze; integer pre-registered then
     val = float(np.max(v))
     return dict(passed=bool(val <= bound), value=val, detail=f"max N_cyc/h={val:.2f} (formal bound {bound:.2f})")
 
 
-S7 = Scenario(
-    id="S7", title="Trust chattering (toggled spoof)", fleet_size=1, duration_s=3600.0, world="flat",
-    cai_grade="field", attack=dict(kind="drift_spoof", onset_s=60.0, duration_s=None, severity=0.5,
-                                    params={"toggle_period_s": 10.0}),
-    methods=("fedqpnt_local",),
-    criteria=(Criterion("n_cyc_bound", "Checks the formal chattering bound (section 3.3) holds in code",
-                         _s7_ncyc),),
-)
+def _s7_maxh(results):
+    leg = _never_worse_leg(results)     # "MAX_h <= S2 bound" = undefended + 3 sigma_nom
+    return dict(passed=leg["passed"], value=leg["value"], detail=leg["detail"])
+
+
+def _make_s7(period_s: float) -> Scenario:
+    atk = toggle_attacks(period_s, S7_T0_S, S7_DURATION_S - S7_T0_S)
+    return Scenario(
+        id=f"S7-p{period_s:g}", title=f"Trust chattering (toggled spoof, period {period_s:g} s)", fleet_size=1,
+        duration_s=S7_DURATION_S, world="flat", cai_grade="field", attack=atk[0], attacks=atk,
+        methods=("fedqpnt_local", "undefended"), base_id="S7", group="S7",
+        criteria=(Criterion("n_cyc_bound", "Checks the formal chattering bound (section 3.3) holds in code",
+                             _s7_ncyc),
+                  Criterion("max_h_never_worse", "MAX_h <= S2 bound", _s7_maxh)),
+        notes="'detector noise near threshold' variation of the ARCH row is NOT registered (narrow in paper). "
+              "Needs RunSpec.attacks (P3).")
+
+
+S7_VARIANTS = tuple(_make_s7(p) for p in S7_PERIODS_S)
 
 def _s8_within_2_rounds(results):
     runs = _fleet_runs(results, "fedqpnt")
@@ -385,7 +565,7 @@ def _s8_first_attack_auc(results):
 S8 = Scenario(
     id="S8", title="Cold-start node at T/2", fleet_size=5, duration_s=600.0, world="flat", cai_grade="field",
     attack=dict(kind="drift_spoof", onset_s=330.0, duration_s=120.0, severity=0.6),
-    methods=("fedqpnt",),
+    methods=("fedqpnt", "baseline_b_cont"),     # D-068: H4 compares fedqpnt vs B-cont on the cold-start node
     criteria=(Criterion("global_model_within_2_rounds", "Tests FL knowledge transfer", _s8_within_2_rounds),
               Criterion("first_attack_auc", "Cold-start AUC vs veteran - 0.05", _s8_first_attack_auc)),
     requires_fl=True,
@@ -430,51 +610,108 @@ def _s10_anees_band(results):
     return dict(passed=bool(0.5 <= val <= 2.0), value=val, detail=f"ANEES={val:.3f} (band [0.5,2])")
 
 
-S10 = Scenario(
-    id="S10", title="Sample-rate mismatch", fleet_size=1, duration_s=300.0, world="flat", cai_grade="field",
-    attack=None, methods=("fedqpnt_local",),
-    criteria=(Criterion("no_crash_anees_band", "Rate handling correctness", _s10_anees_band),),
-    notes="Rate/jitter sweep is a config axis (gnss_rate_hz, cycle_time); campaign expands one Scenario "
-          "per combination at run-generation time.",
-)
+S10_RATES_HZ = (1.0, 2.0, 5.0, 10.0)
 
 
-def _s11_finite_bound(results):
-    v = _method_series(results, "fedqpnt_local", "rmse_h_att")
+def _make_s10(rate_hz: float) -> Scenario:
+    return Scenario(
+        id=f"S10-r{rate_hz:g}", title=f"Sample-rate mismatch (GNSS {rate_hz:g} Hz)", fleet_size=1,
+        duration_s=300.0, world="flat", cai_grade="field", attack=None, methods=("fedqpnt_local",),
+        gnss_rate_hz=rate_hz, base_id="S10", group="S10",
+        criteria=(Criterion("no_crash_anees_band", "Rate handling correctness", _s10_anees_band),),
+        notes="GNSS-rate axis of the ARCH grid only. NOT registered (narrow in paper unless RunSpec gains "
+              "quantum_cycle_time_s / tick jitter, proposal P3): T_c in {0.5,0.73,1,2} s and +-1 tick jitter.")
+
+
+S10_VARIANTS = tuple(_make_s10(r) for r in S10_RATES_HZ)
+
+
+def s10_rmse_monotone(results_by_rate: dict[float, dict[str, list[dict]]]) -> dict[str, Any]:
+    """ARCH S10: RMSE_h(P_pre) non-increasing in GNSS rate 'within CI'. Cross-variant check, so it is not a
+    per-scenario Criterion. Operationalisation (D-068, stated before test data): for each consecutive rate
+    pair, mean RMSE_h(rate_hi) <= mean RMSE_h(rate_lo) + 1.96 * SE of the paired difference."""
+    rates = sorted(results_by_rate)
+    vals = {r: _method_series(results_by_rate[r], "fedqpnt_local", "rmse_h_pre") for r in rates}
+    if len(rates) < 2 or any(v.size == 0 for v in vals.values()):
+        return dict(passed=None, value=None, detail="need fedqpnt_local rmse_h_pre at >=2 rates")
+    ok, worst = True, 0.0
+    for lo, hi in zip(rates[:-1], rates[1:]):
+        if vals[lo].size != vals[hi].size:
+            return dict(passed=None, value=None, detail=f"unpaired runs at {lo} vs {hi} Hz")
+        d = vals[hi] - vals[lo]
+        se = float(np.std(d, ddof=1) / np.sqrt(d.size)) if d.size > 1 else 0.0
+        excess = float(np.mean(d) - 1.96 * se)     # >0 => significantly worse at the higher rate
+        worst = max(worst, excess)
+        ok = ok and excess <= 0.0
+    return dict(passed=bool(ok), value=worst, detail=f"max lower-CI excess of RMSE_h increase with rate={worst:.4g} (<=0)")
+
+
+def _s11_check(results):
+    """ARCH S11: 100% runs finite with P SPD; RMSE_h <= 1.5 x RMSE_h(GNSS-only fixes); FAR reported only."""
+    v = _method_series(results, "fedqpnt_local", "rmse_h_pre")
     if v.size == 0:
         return dict(passed=None, value=None, detail="no fedqpnt_local runs")
-    finite = np.isfinite(v)
-    val = float(np.mean(finite))
-    return dict(passed=bool(val == 1.0), value=val, detail=f"finite fraction={val:.3f}")
+    fin = float(np.mean(np.isfinite(v)))
+    legs = [_leg("finite", bool(fin == 1.0), fin, f"finite fraction={fin:.3f} (==1)")]
+    spd = _all_runs_field(results, "fedqpnt_local", "p_spd_finite")
+    legs.append(_leg("P_SPD", None if spd is None else bool(np.all(spd >= 1.0)),
+                     None if spd is None else float(np.mean(spd)),
+                     "runner does not emit p_spd_finite yet (P3); not evaluable" if spd is None
+                     else f"P finite+SPD in {np.mean(spd):.3f} of runs (==1)"))
+    raw = _all_runs_field(results, "fedqpnt_local", "rmse_h_gnss_raw_pre")
+    if raw is None:
+        legs.append(_leg("vs_raw_gnss", None, None, "runner does not emit rmse_h_gnss_raw_pre yet (P3); not evaluable"))
+    else:
+        ratio = float(np.median(v / np.where(raw == 0, np.nan, raw)))
+        legs.append(_leg("vs_raw_gnss", bool(np.isfinite(ratio) and ratio <= 1.5), ratio,
+                         f"median RMSE_h/RMSE_h(raw GNSS)={ratio:.3f} (<=1.5)"))
+    far = _method_series(results, "fedqpnt_local", "far_per_hour")
+    if far.size:
+        legs.append(_leg("far_reported", True, None, f"FAR={float(np.nanmean(far)):.3f}/h (reported, no threshold)"))
+    return _combine(legs)
 
 
 S11 = Scenario(
     id="S11", title="Extreme noise (filter not told)", fleet_size=1, duration_s=300.0, world="flat",
-    cai_grade="field", attack=dict(kind="abrupt_spoof", onset_s=60.0, duration_s=60.0, severity=1.0),
+    cai_grade="field", attack=None,     # D-068: intent has no attack (registry had an abrupt spoof)
+    noise_scale=dict(imu=10.0, gnss=5.0, cai_contrast_div=3.0),
     methods=("fedqpnt_local",),
-    criteria=(Criterion("all_runs_finite_P_spd", "Numerical robustness; no divergence", _s11_finite_bound),),
+    criteria=(Criterion("finite_spd_and_vs_raw_gnss", "Numerical robustness; no divergence below raw GNSS quality",
+                         _s11_check),),
+    notes="IMU noise x10, GNSS sigma x5, CAI contrast /3, filter NOT told. Needs RunSpec.noise_scale (P3).",
 )
 
-def _s12_auc_drop_f20(results):
-    a = _method_series(results, "fedqpnt", "auc")          # f=20% poisoned nodes (fleet_adapter default)
-    b = _method_series(results, "fedqpnt_clean", "auc")     # reference: same config, no poisoning
-    if a.size == 0:
-        return dict(passed=None, value=None, detail="no 'fedqpnt' (poisoned) fleet runs")
-    if b.size == 0 or b.size != a.size:
-        return dict(passed=None, value=None,
-                     detail="no matched 'fedqpnt_clean' reference runs (run with poison_kind cleared)")
-    drop = float(np.nanmean(b - a))
-    return dict(passed=bool(drop <= 0.05), value=drop,
-                detail=f"AUC drop (clean - poisoned)={drop:.4f} (bound <=0.05 at f=20%, TRIM-NB-R)")
+def _s12_auc_drop(f: float):
+    def _check(results):
+        a = _method_series(results, "fedqpnt", "auc")
+        b = _method_series(results, "fedqpnt_clean", "auc")     # reference: same config, no poisoning
+        if a.size == 0:
+            return dict(passed=None, value=None, detail="no 'fedqpnt' (poisoned) fleet runs")
+        if b.size == 0 or b.size != a.size:
+            return dict(passed=None, value=None,
+                         detail="no matched 'fedqpnt_clean' reference runs (run with poison_kind cleared)")
+        drop = float(np.nanmean(b - a))
+        if f <= 0.2 + 1e-9:
+            return dict(passed=bool(drop <= 0.05), value=drop,
+                        detail=f"AUC drop (clean - poisoned)={drop:.4f} (bound <=0.05 at f=20%, TRIM-NB-R)")
+        return dict(passed=None, value=drop,
+                    detail=f"AUC drop={drop:.4f} at f={f:.0%} REPORTED ONLY (beyond beta=20% breakdown)")
+    return _check
 
 
-S12 = Scenario(
-    id="S12", title="Trust-score / model poisoning", fleet_size=10, duration_s=600.0, world="flat",
-    cai_grade="field", attack=None, methods=("fedqpnt",),
-    criteria=(Criterion("auc_drop_le_0_05_at_f20", "Theory: trimmed mean robust for f < beta",
-                         _s12_auc_drop_f20),),
-    requires_fl=True,
-)
+def _make_s12(f: float) -> Scenario:
+    return Scenario(
+        id=f"S12-f{int(round(f * 100))}", title=f"Trust-score / model poisoning (sign-flip, f={f:.0%})",
+        fleet_size=10, duration_s=600.0, world="flat", cai_grade="field", attack=None, methods=("fedqpnt",),
+        criteria=(Criterion(f"auc_drop_f{int(round(f * 100))}", "Theory: trimmed mean robust for f < beta",
+                             _s12_auc_drop(f)),),
+        requires_fl=True, poison_frac=f, base_id="S12", group="S12",
+        notes="sign_flip only; the ARCH row's other 3 SS4.5 poisoning types are covered by scripts/run_fl_s12_full.py "
+              "outside the campaign registry (D-068 scope: sign_flip at the ARCH fractions). The 'fedqpnt_clean' "
+              "reference arm is not in fleet_adapter._METHOD_MAP, so the AUC-drop leg is unevaluable until added.")
+
+
+S12_VARIANTS = tuple(_make_s12(f) for f in (0.2, 0.4))
 
 
 def _s13_trec(results):
@@ -498,17 +735,68 @@ S13 = Scenario(
 )
 
 
-def _s14_stability(results):
-    return dict(passed=None, value=None, detail="BLOCKED by D-047 (multi-hour attitude/bias drift, Schuler world)")
+def _s14_check(results):
+    m = "fedqpnt_local"
+    legs = []
+    f1, fl = _all_runs_field(results, m, "rmse_h_hour_first"), _all_runs_field(results, m, "rmse_h_hour_last")
+    if f1 is None or fl is None:
+        legs.append(_leg("last_vs_first_hour", None, None, "runner does not emit rmse_h_hour_first/last yet (P3)"))
+    else:
+        ratio = float(np.median(fl / np.where(f1 == 0, np.nan, f1)))
+        legs.append(_leg("last_vs_first_hour", bool(np.isfinite(ratio) and ratio <= 1.2), ratio,
+                         f"median RMSE_h(last h)/RMSE_h(first h)={ratio:.3f} (<=1.2)"))
+    spd = _all_runs_field(results, m, "p_spd_finite")
+    legs.append(_leg("P_SPD", None if spd is None else bool(np.all(spd >= 1.0)),
+                     None if spd is None else float(np.mean(spd)),
+                     "runner does not emit p_spd_finite yet (P3)" if spd is None
+                     else f"P SPD+finite in {np.mean(spd):.3f} of runs (==1)"))
+    far = _method_series(results, m, "far_per_hour")
+    legs.append(_leg("far", None if far.size == 0 else bool(np.nanmean(far) <= 1.0),
+                     None if far.size == 0 else float(np.nanmean(far)),
+                     "no runs" if far.size == 0 else f"FAR={np.nanmean(far):.3f}/h (<=1)"))
+    rss = _all_runs_field(results, m, "rss_growth_frac")
+    legs.append(_leg("rss_growth", None if rss is None else bool(np.all(rss < 0.10)),
+                     None if rss is None else float(np.max(rss)),
+                     "runner does not emit rss_growth_frac yet (P3)" if rss is None
+                     else f"max RSS growth hour1->hour4={np.max(rss):.3f} (<0.10)"))
+    return _combine(legs)
 
 
 S14 = Scenario(
     id="S14", title="Multi-hour stability (Schuler world)", fleet_size=1, duration_s=14400.0,
     world="schuler_tangent", cai_grade="field", attack=None, methods=("fedqpnt_local",),
-    criteria=(Criterion("no_slow_drift", "No slow numerical or statistical drift", _s14_stability,
+    criteria=(Criterion("no_slow_drift", "No slow numerical or statistical drift", _s14_check,
                          blocked_by_D047=True),),
     blocked_by_D047=True,
 )
+
+S15_ATTACK = dict(kind="drift_spoof", onset_s=60.0, duration_s=300.0, severity=0.6)
+
+
+def _s15_attacked_leg(results):
+    """ARCH S15: 'attacked nodes meet S2' -- P_D >= 0.9 over attacked nodes (first round(0.3 N) node ids).
+    The S2 damage legs need an undefended fleet arm (none registered): not evaluable, narrow in paper."""
+    runs = _fleet_runs(results, "fedqpnt")
+    if not runs:
+        return dict(passed=None, value=None, detail="no 'fedqpnt' fleet runs")
+    window = S15_ATTACK.get("duration_s")
+    hits = []
+    for r in runs:
+        nodes = r.get("nodes") or {}
+        ids = sorted(nodes)
+        n_att = max(1, round(0.3 * len(ids)))
+        for i in ids[:n_att]:
+            nd = dict(nodes[i])
+            if nd.get("latency_on") is None:
+                continue
+            hits.append(_M.detected_from_record(nd, window))
+    if not hits:
+        return dict(passed=None, value=None, detail="no per-node latency_on for attacked nodes")
+    p_d = float(np.mean(hits))
+    return dict(passed=bool(p_d >= 0.9), value=p_d,
+                detail=f"P_D over attacked nodes={p_d:.3f} (>=0.9); S2 damage legs need an undefended "
+                       f"fleet arm: not evaluable (narrow in paper)")
+
 
 def _s15_quarantine_and_far(results):
     runs = _fleet_runs(results, "fedqpnt")
@@ -542,17 +830,33 @@ def _s15_quarantine_and_far(results):
 
 S15 = Scenario(
     id="S15", title="Simultaneous attacks on fleet subset", fleet_size=10, duration_s=600.0, world="flat",
-    cai_grade="field", attack=dict(kind="drift_spoof", onset_s=60.0, duration_s=300.0, severity=0.6),
+    cai_grade="field", attack=S15_ATTACK,
     methods=("fedqpnt",),
-    criteria=(Criterion("attacked_meet_s2_unattacked_far_bound", "Robust aggregator must not punish honest "
-                         "heterogeneity", _s15_quarantine_and_far),),
+    criteria=(Criterion("attacked_meet_s2_pd", "Attacked nodes meet S2 (P_D leg)", _s15_attacked_leg),
+              Criterion("unattacked_far_no_quarantine", "Robust aggregator must not punish honest "
+                         "heterogeneity", _s15_quarantine_and_far)),
     requires_fl=True,
 )
 
 
+# D-066/D-068: displaced-meaconer variant (attack kind "meaconing_displaced", MEACON 0183f6e). No pass/fail
+# halving claim is pre-registered for it (P_D reported; never-worse leg only).
+S2_DM = _make_spoof_scenario(
+    "S2-DM", "Displaced meaconer (variant)",
+    dict(kind="meaconing_displaced", onset_s=60.0, duration_s=300.0, severity=0.6,
+         params={"d_max_m": 500, "direction_enu": [0.6, 0.8, 0.0]}),
+    final_offset_ge_50m=False, base_id="S2",
+    notes="Displaced-meaconer variant (D-066). P_D and never-worse-than-undefended only.")
+
+
 REGISTRY: dict[str, Scenario] = {s.id: s for s in
-                                 (S1, S2_LOW, S2_MED, S2_HIGH, S3, S4, S5, S6, S7, S8, S9, S10, S11, S12,
-                                  S13, S14, S15)}
+                                 (S1, S2_LOW, S2_MED, S2_HIGH, S2_DM, S3, S4, S5, S6, *S7_VARIANTS, S8, S9,
+                                  *S10_VARIANTS, S11, *S12_VARIANTS, S13, S14, S15)}
+
+
+def variants_of(family: str) -> tuple[Scenario, ...]:
+    """All registered variants of an ARCH row (e.g. 'S7' -> 5 toggle periods)."""
+    return tuple(s for s in REGISTRY.values() if s.family == family)
 
 
 def get(scenario_id: str) -> Scenario:

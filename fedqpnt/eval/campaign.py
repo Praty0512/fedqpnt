@@ -67,16 +67,29 @@ def gate_cleared(path: Path | str = GATE_D047_PATH) -> bool:
 def build_spec_dict(scenario: SC.Scenario, method: str, seed: int, *, duration_s: float | None = None,
                      kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                      detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS,
-                     record: bool = False, record_root: str = "runs_raw") -> dict[str, Any]:
-    return dict(
-        name=f"{scenario.id}_{method}_{seed}", master_seed=seed, method=method,
+                     record: bool = False, record_root: str = "runs_raw",
+                     imu_grade: str = "industrial_mems") -> dict[str, Any]:
+    # D-068: method aliases (e.g. abl_minus_quantum = fedqpnt_local with the CAI off)
+    alias = SC.METHOD_ALIASES.get(method, {})
+    node_method = alias.get("method", method)
+    quantum_grade = alias["quantum_grade"] if "quantum_grade" in alias else scenario.cai_grade
+    gnss_rate = float(scenario.gnss_rate_hz)
+    spec = dict(
+        name=f"{scenario.id}_{method}_{seed}", master_seed=seed, method=node_method,
         duration_s=float(duration_s if duration_s is not None else scenario.duration_s),
-        dt=0.01, platform="ground", world=scenario.world, imu_grade="industrial_mems",
-        quantum_grade=scenario.cai_grade, gnss_rate_hz=1.0, hold_s=30.0, heading_noise_deg=2.0,
+        dt=0.01, platform="ground", world=scenario.world, imu_grade=imu_grade,
+        quantum_grade=quantum_grade, gnss_rate_hz=gnss_rate, hold_s=30.0, heading_noise_deg=2.0,
         attack=scenario.attack, kappa_R=kappa_R, kappa_Q=kappa_Q,
         detector_weights_path=detector_weights_path, record=record, record_root=record_root,
         node_id="node0",
     )
+    # D-068 optional RunSpec fields; emitted ONLY when the scenario uses them so legacy spec hashes are
+    # unchanged. These need the runner-side support listed in the SCENARIO-FIX checkpoint (P3).
+    if scenario.attacks:
+        spec["attacks"] = [dict(a) for a in scenario.attacks]
+    if scenario.noise_scale:
+        spec["noise_scale"] = dict(scenario.noise_scale)
+    return spec
 
 
 def config_hash(spec_dict: dict[str, Any]) -> str:
@@ -103,8 +116,14 @@ class RunTask:
 def generate_tasks(scenario_ids: list[str], methods: list[str] | None, seeds: list[int], *,
                     duration_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                     detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS,
-                    n_rounds: int = 10, n_nodes: int | None = None) -> list[RunTask]:
-    """Cross product scenario x method x seed, methods defaulting to each
+                    n_rounds: int = 10, n_nodes: int | None = None,
+                    imu_grades: list[str] | None = None) -> list[RunTask]:
+    """D-063/D-068: ``imu_grades`` adds the IMU-grade dimension for single-node
+    scenarios: each (scenario, grade) gets result id ``"<sid>@<grade>"``
+    (``None`` keeps the legacy id and the industrial_mems default). Fleet
+    scenarios have no grade axis and are generated once.
+
+    Cross product scenario x method x seed, methods defaulting to each
     scenario's own declared method list (paired by seed per D-005: the same
     seed list is used for every method within a scenario). Scenarios with
     ``requires_fl=True`` (S5/S8/S9/S12/S15, D-050) get ``is_fleet=True``
@@ -116,18 +135,22 @@ def generate_tasks(scenario_ids: list[str], methods: list[str] | None, seeds: li
     for sid in scenario_ids:
         scenario = SC.get(sid)
         method_list = methods if methods is not None else list(scenario.methods)
-        for method in method_list:
-            for seed in seeds:
-                if scenario.requires_fl:
-                    spec = dict(scenario_id=sid, method=method, seed=seed,
-                                duration_s=(duration_s if duration_s is not None else scenario.duration_s),
-                                kappa_R=kappa_R, kappa_Q=kappa_Q, n_rounds=n_rounds,
-                                fleet_size=(n_nodes if n_nodes is not None else scenario.fleet_size))
-                    tasks.append(RunTask(scenario_id=sid, method=method, seed=seed, spec=spec, is_fleet=True))
-                else:
-                    spec = build_spec_dict(scenario, method, seed, duration_s=duration_s, kappa_R=kappa_R,
-                                            kappa_Q=kappa_Q, detector_weights_path=detector_weights_path)
-                    tasks.append(RunTask(scenario_id=sid, method=method, seed=seed, spec=spec))
+        grades: list[str | None] = [None] if (imu_grades is None or scenario.requires_fl) else list(imu_grades)
+        for grade in grades:
+            rid = sid if grade is None else f"{sid}@{grade}"
+            for method in method_list:
+                for seed in seeds:
+                    if scenario.requires_fl:
+                        spec = dict(scenario_id=sid, method=method, seed=seed,
+                                    duration_s=(duration_s if duration_s is not None else scenario.duration_s),
+                                    kappa_R=kappa_R, kappa_Q=kappa_Q, n_rounds=n_rounds,
+                                    fleet_size=(n_nodes if n_nodes is not None else scenario.fleet_size))
+                        tasks.append(RunTask(scenario_id=rid, method=method, seed=seed, spec=spec, is_fleet=True))
+                    else:
+                        spec = build_spec_dict(scenario, method, seed, duration_s=duration_s, kappa_R=kappa_R,
+                                                kappa_Q=kappa_Q, detector_weights_path=detector_weights_path,
+                                                imu_grade=grade or "industrial_mems")
+                        tasks.append(RunTask(scenario_id=rid, method=method, seed=seed, spec=spec))
     return tasks
 
 
@@ -160,7 +183,7 @@ def _execute_one_fleet(task: "RunTask", run_root: str, final: bool = False) -> d
     inside the single-node ``ProcessPoolExecutor``."""
     from fedqpnt.eval import fleet_adapter as FA
     _enforce_task_seed(task.seed, final)
-    scenario = SC.get(task.scenario_id)
+    scenario = SC.get(task.scenario_id.split("@")[0])
     return FA.run_fleet_task(scenario, task.method, task.seed, run_root=run_root, final=final,
                               duration_s=task.spec.get("duration_s"), kappa_R=task.spec.get("kappa_R", DEFAULT_KAPPA_R),
                               kappa_Q=task.spec.get("kappa_Q", 1.0), n_rounds=task.spec.get("n_rounds", 10),
@@ -283,7 +306,8 @@ def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str
                   run_root: str = "runs", duration_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R,
                   kappa_Q: float = 1.0, n_workers: int | None = None, final: bool = False,
                   gate_cleared_flag: bool = False, python_exe: str | None = None,
-                  n_rounds: int = 10, n_nodes: int | None = None) -> list[dict[str, Any]]:
+                  n_rounds: int = 10, n_nodes: int | None = None,
+                  imu_grades: list[str] | None = None) -> list[dict[str, Any]]:
     """Runs (or resumes) a campaign. Refuses the TEST seed range (>= 10000,
     section 7.1) unless ``final and gate_cleared_flag``; ``gate_cleared_flag``
     is itself refused unless ``results/GATE_D047.json`` says
@@ -305,7 +329,7 @@ def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str
 
     prov_start = git_provenance()
     tasks = generate_tasks(scenario_ids, methods, seeds, duration_s=duration_s, kappa_R=kappa_R,
-                            kappa_Q=kappa_Q, n_rounds=n_rounds, n_nodes=n_nodes)
+                            kappa_Q=kappa_Q, n_rounds=n_rounds, n_nodes=n_nodes, imu_grades=imu_grades)
     fleet_tasks = [t for t in tasks if t.is_fleet]
     node_tasks = [t for t in tasks if not t.is_fleet]
     task_dicts = [asdict(t) for t in node_tasks]
@@ -354,6 +378,7 @@ def load_results(run_root: str, scenario_id: str, methods: list[str]) -> dict[st
                 m = dict(rec.get("metrics") or {})
                 m["_seed"] = rec.get("seed")
                 m["_kappa_R_status"] = rec.get("kappa_R_status")
+                m["_imu_grade"] = scenario_id.split("@", 1)[1] if "@" in scenario_id else "industrial_mems"
                 recs.append(m)
         if recs:
             out[method] = recs

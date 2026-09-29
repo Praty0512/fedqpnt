@@ -175,15 +175,16 @@ def build_fleet_scenario_config(scenario, method: str, seed: int, *, n_nodes: in
     rounds = n_rounds
 
     kwargs: dict[str, Any] = {}
-    if scenario.id == "S5":
+    fam = getattr(scenario, "family", scenario.id)      # D-068: variants (S12-f40) dispatch on the ARCH row
+    if fam == "S5":
         kwargs.update(_s5_kwargs(node_ids, rounds))
-    elif scenario.id == "S8":
+    elif fam == "S8":
         kwargs.update(_s8_kwargs(node_ids, rounds))
-    elif scenario.id == "S9":
+    elif fam == "S9":
         kwargs.update(_s9_kwargs(node_ids))
-    elif scenario.id == "S12":
-        kwargs.update(_s12_kwargs(node_ids))
-    elif scenario.id == "S15":
+    elif fam == "S12":
+        kwargs.update(_s12_kwargs(node_ids, poison_frac=(getattr(scenario, "poison_frac", None) or 0.2)))
+    elif fam == "S15":
         kwargs.update(_s15_kwargs(node_ids, scenario.attack or dict(kind="drift_spoof", onset_s=60.0,
                                                                       duration_s=dur - 60.0, severity=0.6)))
 

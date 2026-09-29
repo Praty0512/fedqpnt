@@ -267,6 +267,51 @@ def latency_eff(t: np.ndarray, injected_offset_m: np.ndarray, t_det: float, phas
     return dict(excluded=False, t_eff=t_eff, latency_eff=float(t_det - t_eff), detected=True)
 
 
+def sigma_h_from_cov(cov_pos: np.ndarray) -> np.ndarray:
+    """sigma_h(P_pos) per epoch: sqrt of the largest eigenvalue of the 2x2 horizontal (E,N) covariance
+    block, i.e. the 1-sigma radius along the worst horizontal direction (conservative; D-068 S3 definition).
+    ``cov_pos``: (N,3,3)."""
+    c = np.asarray(cov_pos, dtype=float)[:, :2, :2]
+    c = 0.5 * (c + np.swapaxes(c, 1, 2))
+    return np.sqrt(np.clip(np.linalg.eigvalsh(c)[:, -1], 0.0, None))
+
+
+def consistency_fraction(e_h: np.ndarray, cov_pos: np.ndarray, mask: np.ndarray | None = None,
+                         k_sigma: float = 3.0) -> float:
+    """S3 (ARCH 6.1): fraction of samples with ``e_h <= k_sigma * sigma_h(P_pos)`` in the phase ``mask``."""
+    e = np.asarray(e_h, dtype=float)
+    sig = sigma_h_from_cov(cov_pos)
+    if mask is not None:
+        e, sig = e[mask], sig[mask]
+    ok = np.isfinite(e) & np.isfinite(sig)
+    if not np.any(ok):
+        return float("nan")
+    return float(np.mean(e[ok] <= k_sigma * sig[ok]))
+
+
+def window_rmse(t: np.ndarray, e_h: np.ndarray, t_lo: float, t_hi: float) -> float:
+    """RMSE_h over [t_lo, t_hi) (S14 first/last hour)."""
+    t = np.asarray(t, dtype=float)
+    return rmse(np.asarray(e_h, dtype=float), (t >= t_lo) & (t < t_hi))
+
+
+def latency_eff_from_record(rec: dict, sigma_nom_m: float, k_sigma: float = 3.0) -> dict:
+    """``latency_eff`` for one run record. Required record fields (emitted by
+    the runner, see SCENARIO-FIX checkpoint P2): ``offset_t_s`` and
+    ``offset_m`` (truth-side ``meta["injected_offset_m"]`` per GNSS epoch),
+    ``t_on_s``, ``t_off_s`` and ``t_det`` (NaN/None if never detected).
+    Raises KeyError if the offset channel is missing (never guessed)."""
+    for k in ("offset_t_s", "offset_m", "t_on_s", "t_off_s"):
+        if rec.get(k) is None:
+            raise KeyError(f"record lacks '{k}': no truth-side injected-offset channel, latency_eff not computable")
+    ph = Phases(t_on=float(rec["t_on_s"]), t_off=float(rec["t_off_s"]),
+                pre=np.zeros(0, bool), att=np.zeros(0, bool), post=np.zeros(0, bool))
+    t_det = rec.get("t_det")
+    t_det = float("nan") if t_det is None else float(t_det)
+    return latency_eff(np.asarray(rec["offset_t_s"], float), np.asarray(rec["offset_m"], float), t_det, ph,
+                       sigma_nom_m, k_sigma)
+
+
 def false_alarm_rate(t: np.ndarray, attack_detected: np.ndarray, attack_active: np.ndarray,
                       t_sus: float = T_SUS_S) -> dict[str, float]:
     """FA events = rising edges of ``attack_detected`` with no label active
