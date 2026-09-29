@@ -275,11 +275,15 @@ def _run_local_only_fleet(cfg: FleetScenarioConfig, theta0: dict[str, np.ndarray
 def run_fleet_task(scenario, method: str, seed: int, *, run_root: str = "runs",
                     duration_s: float | None = None, n_nodes: int | None = None, n_rounds: int = 10,
                     kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
-                    join_timeout_s: float = 1800.0) -> dict[str, Any]:
+                    join_timeout_s: float = 1800.0, final: bool = False,
+                    gate_path: str | None = None) -> dict[str, Any]:
     """Runs one fleet (scenario, method, seed) via ``run_fleet`` and writes
     a campaign-schema result file. Mirrors
     ``fedqpnt.eval.campaign._execute_one``'s return shape
-    ``{scenario_id, method, seed, status}`` for the campaign dispatcher."""
+    ``{scenario_id, method, seed, status}`` for the campaign dispatcher.
+    D-068: enforces the seed gate first (raises ``SeedGateError``)."""
+    from fedqpnt.eval import seed_gate as _SG
+    _SG.enforce_seed(seed, final=final, gate_path=gate_path)
     out_path = Path(run_root) / scenario.id / method / f"seed_{seed}.json"
     if out_path.exists():
         try:

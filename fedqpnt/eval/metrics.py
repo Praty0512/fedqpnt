@@ -99,12 +99,31 @@ def p95_err(e: np.ndarray, mask: np.ndarray | None = None) -> float:
     return float(np.percentile(e, 95))
 
 
-def anees_pos(pos_est: np.ndarray, pos_true: np.ndarray, cov_pos_diag: np.ndarray,
+def anees_pos(pos_est: np.ndarray, pos_true: np.ndarray, cov_pos: np.ndarray,
               mask: np.ndarray | None = None) -> float:
     """section 6: ANEES(P) = mean_{t in P} delta_p^T P_pos^-1 delta_p / 3.
-    ``cov_pos_diag`` is (N,3) diagonal of the position covariance (the
-    off-diagonal terms are not logged at 10 Hz by design; using the diagonal
-    is the standard NEES approximation when only variances are recorded)."""
+    D-068: ``cov_pos`` is the FULL (N,3,3) position covariance block; the
+    quadratic form uses the full inverse (off-diagonals included). A legacy
+    (N,3) diagonal-only input is still accepted for old result files but is
+    an approximation (see ``anees_pos_diag``); new runs must log (N,3,3)."""
+    cov = np.asarray(cov_pos, dtype=float)
+    if cov.ndim == 2:
+        return anees_pos_diag(pos_est, pos_true, cov, mask)
+    err = np.asarray(pos_est, dtype=float) - np.asarray(pos_true, dtype=float)
+    if mask is not None:
+        err, cov = err[mask], cov[mask]
+    if err.shape[0] == 0:
+        return float("nan")
+    cov = 0.5 * (cov + np.swapaxes(cov, 1, 2))
+    cov = cov + 1e-9 * np.eye(3)[None]
+    sol = np.linalg.solve(cov, err[:, :, None])[:, :, 0]
+    nees = np.sum(err * sol, axis=1) / 3.0
+    return float(np.mean(nees))
+
+
+def anees_pos_diag(pos_est: np.ndarray, pos_true: np.ndarray, cov_pos_diag: np.ndarray,
+                   mask: np.ndarray | None = None) -> float:
+    """Legacy diagonal-only ANEES (pre-D-068). Kept only to read old files."""
     err = pos_est - pos_true
     nees = np.sum(err ** 2 / np.clip(cov_pos_diag, 1e-9, None), axis=1) / 3.0
     nees = nees if mask is None else nees[mask]
@@ -155,6 +174,97 @@ def detection_probability(latencies: list[float], phases_list: list[Phases]) -> 
                if ph.t_on is not None and ph.t_off is not None and lat < (ph.t_off - ph.t_on))
     n = sum(1 for ph in phases_list if ph.t_on is not None)
     return float(hits / n) if n > 0 else float("nan")
+
+
+EVENT_CENSOR_S = 60.0   # D-064/D-068: event-level metrics (P_D@10 s, onset latency) censored at 60 s
+
+
+def detection_outcome(t: np.ndarray, attack_detected: np.ndarray, phases: Phases,
+                      t_sus: float = T_SUS_S) -> dict:
+    """Explicit detection outcome (D-068: S2 P_D bug -- a censored latency is
+    finite, so ``isfinite(latency)`` is always True). Returns
+    ``detected`` (bool), ``t_det`` (absolute time of the first sustained
+    detection inside the attack window, NaN if none), ``window_s`` (t_off - t_on,
+    NaN if no attack) and ``latency_on`` (t_det - t_on, or ``window_s`` if missed)."""
+    if phases.t_on is None or phases.t_off is None:
+        return dict(detected=False, t_det=float("nan"), window_s=float("nan"), latency_on=float("nan"))
+    start_idx = int(np.searchsorted(t, phases.t_on, side="left"))
+    off_idx = int(np.searchsorted(t, phases.t_off, side="left"))
+    k = _sustained_true(t, np.asarray(attack_detected, dtype=bool), start_idx, t_sus)
+    window = float(phases.t_off - phases.t_on)
+    if k is None or k >= off_idx:
+        return dict(detected=False, t_det=float("nan"), window_s=window, latency_on=window)
+    return dict(detected=True, t_det=float(t[k]), window_s=window, latency_on=float(t[k] - phases.t_on))
+
+
+def censor_event(latency_s: float, detected: bool, censor_s: float = EVENT_CENSOR_S) -> float:
+    """Event-level latency (D-064): misses -> ``censor_s`` (60 s); hits are
+    capped at ``censor_s``. Never data-dependent."""
+    if not detected or not np.isfinite(latency_s):
+        return float(censor_s)
+    return float(min(latency_s, censor_s))
+
+
+def censor_window(latency_s: float, detected: bool, window_s: float) -> float:
+    """Non-event latency: misses -> ``window_s`` = t_off - t_on."""
+    if not detected or not np.isfinite(latency_s):
+        return float(window_s)
+    return float(latency_s)
+
+
+def detected_from_record(rec: dict, attack_duration_s: float | None = None, tol_s: float = 0.05) -> bool:
+    """Reads the explicit ``detected_on`` flag from a run record. Old records
+    (before the runner emits it) fall back to ``latency_on < window - tol``
+    where window is ``window_s`` if recorded, else the scenario's
+    ``attack.duration_s``; with neither available raises (never guesses)."""
+    if rec.get("detected_on") is not None:
+        return bool(rec["detected_on"])
+    lat = rec.get("latency_on", float("nan"))
+    if not np.isfinite(lat):
+        return False
+    window = rec.get("window_s", attack_duration_s)
+    if window is None:
+        raise ValueError("record has no detected_on flag and no attack window to infer it from")
+    return bool(lat < float(window) - tol_s)
+
+
+def load_sigma_nom(path: str = "results/sigma_nom.json") -> dict:
+    """D-068: sigma_nom is read from a FROZEN file (per IMU grade, metres),
+    never computed on the fly. Expected: ``{"industrial_mems": x, "tactical": y}``
+    (optionally nested under ``"sigma_nom_m"``). Fails loudly if absent."""
+    import json
+    from pathlib import Path
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"{p} not found: sigma_nom must be frozen (D-068) before latency_eff is computed")
+    d = json.loads(p.read_text())
+    d = d.get("sigma_nom_m", d)
+    out = {k: float(v) for k, v in d.items() if isinstance(v, (int, float))}
+    if not out or not all(np.isfinite(v) and v > 0 for v in out.values()):
+        raise ValueError(f"{p}: no valid positive sigma_nom values")
+    return out
+
+
+def latency_eff(t: np.ndarray, injected_offset_m: np.ndarray, t_det: float, phases: Phases,
+                sigma_nom_m: float, k_sigma: float = 3.0) -> dict:
+    """D-068 latency_eff. ``t_eff`` = first epoch in the attack window where
+    the truth-side injected offset exceeds ``k_sigma * sigma_nom``. If the
+    attack never becomes effective the run is EXCLUDED (``excluded=True``,
+    latency NaN). Otherwise ``latency_eff = t_det - t_eff`` (may be negative:
+    detected before it became effective); a miss (``t_det`` NaN or >= t_off)
+    is censored at ``t_off - t_eff``."""
+    if phases.t_on is None or phases.t_off is None:
+        return dict(excluded=True, t_eff=float("nan"), latency_eff=float("nan"), detected=False)
+    t = np.asarray(t, dtype=float)
+    off = np.asarray(injected_offset_m, dtype=float)
+    in_att = (t >= phases.t_on) & (t < phases.t_off) & np.isfinite(off)
+    idx = np.flatnonzero(in_att & (off > k_sigma * sigma_nom_m))
+    if idx.size == 0:
+        return dict(excluded=True, t_eff=float("nan"), latency_eff=float("nan"), detected=False)
+    t_eff = float(t[idx[0]])
+    if not np.isfinite(t_det) or t_det >= phases.t_off:
+        return dict(excluded=False, t_eff=t_eff, latency_eff=float(phases.t_off - t_eff), detected=False)
+    return dict(excluded=False, t_eff=t_eff, latency_eff=float(t_det - t_eff), detected=True)
 
 
 def false_alarm_rate(t: np.ndarray, attack_detected: np.ndarray, attack_active: np.ndarray,

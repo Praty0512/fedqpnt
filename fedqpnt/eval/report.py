@@ -54,6 +54,33 @@ def _field(results: dict[str, list[dict]], method: str, field_name: str) -> np.n
     return np.array([r.get(field_name, np.nan) for r in results[method]], dtype=float)
 
 
+# D-068 uniform censoring. Event-level metrics (H2/H4 onset latency, D-064) are
+# censored at 60 s; every other latency at t_off - t_on (the scenario's attack
+# window). NEVER data-dependent (the former nanmax over the observed values is gone).
+EVENT_LATENCY_FIELDS = ("onset_latency", "latency_onset")
+
+
+def _latency_series(results: dict[str, list[dict]], method: str, field_name: str, scenario) -> np.ndarray:
+    """Per-record censored latencies for ``method``."""
+    from fedqpnt.eval import metrics as _M
+    if method not in results:
+        return np.array([])
+    event = field_name in EVENT_LATENCY_FIELDS or scenario.id in ("S8",)
+    window = (scenario.attack or {}).get("duration_s")
+    out = []
+    for r in results[method]:
+        det = _M.detected_from_record(r, window)
+        lat = r.get(field_name, np.nan)
+        if event:
+            out.append(_M.censor_event(lat, det))
+        else:
+            w = r.get("window_s", window)
+            if w is None:
+                raise ValueError(f"{scenario.id}: no attack window to censor {field_name} at")
+            out.append(_M.censor_window(lat, det, float(w)))
+    return np.array(out, dtype=float)
+
+
 def build_scenario_report(scenario_id: str, run_root: str = "runs") -> ScenarioReport:
     scenario = SC.get(scenario_id)
     results = CP.load_results(run_root, scenario_id, list(scenario.methods))
@@ -82,13 +109,12 @@ def confirmatory_tests(run_root: str = "runs", master_seed: int = 0) -> dict[str
     def _one(label, sid, field_name, method_a, method_b):
         scenario = SC.get(sid)
         results = CP.load_results(run_root, sid, list(scenario.methods))
-        a = _field(results, method_a, field_name)
-        b = _field(results, method_b, field_name)
+        is_lat = "latency" in field_name
+        a = _latency_series(results, method_a, field_name, scenario) if is_lat             else _field(results, method_a, field_name)
+        b = _latency_series(results, method_b, field_name, scenario) if is_lat             else _field(results, method_b, field_name)
         if a.size == 0 or b.size == 0 or a.size != b.size:
             return dict(evaluable=False, detail=f"missing/mismatched {method_a} vs {method_b} in {sid}")
-        censor = np.nanmax(np.concatenate([a[np.isfinite(a)], b[np.isfinite(b)], [0.0]]))
-        a_c = ST.censor_latencies(a, censor) if "latency" in field_name else a
-        b_c = ST.censor_latencies(b, censor) if "latency" in field_name else b
+        a_c, b_c = a, b
         pt = ST.paired_test(a_c, b_c)
         diffs = a_c - b_c
         hl = ST.hodges_lehmann(diffs)
@@ -143,6 +169,12 @@ def render_markdown(scenario_ids: list[str], run_root: str = "runs", *, is_dry_r
         lines += ["**PLUMBING CHECK ONLY -- these numbers are NOT results.** Generated from a short-duration, "
                   "TUNING-seed dry run to prove resumability and end-to-end reporting; do not cite.", ""]
     lines.append(f"kappa_R_status (all rows): `{SC.KAPPA_R_STATUS}` (D-046/D-047)")
+    pv = CP.provenance_valid(run_root)
+    if pv is False:
+        lines.append("**INVALID RUN (D-062): source tree was dirty or changed during the campaign; "
+                     f"see `{run_root}/{CP.PROVENANCE_FILE}`. Do not cite these numbers.**")
+    elif pv is None:
+        lines.append(f"Provenance: no `{CP.PROVENANCE_FILE}` (unknown; not a D-062-validated run).")
     lines.append("")
 
     lines.append("## Section 6.1 acceptance criteria")

@@ -23,6 +23,8 @@ from typing import Any, Callable
 
 import numpy as np
 
+from fedqpnt.eval import metrics as _M
+
 # --------------------------------------------------------------------------
 # kappa_R_status stamp (D-046/D-047): every artefact this module's callers
 # produce (campaign run records, report tables) must carry this literal.
@@ -141,11 +143,16 @@ S1 = Scenario(
 # S2: Gradual spoof, severities {low, med, high}
 # --------------------------------------------------------------------------
 def _make_s2(severity_name: str, severity: float, final_offset_ge_50m: bool) -> Scenario:
+    attack = dict(kind="drift_spoof", onset_s=60.0, duration_s=300.0, severity=severity)
+
     def _pd(results):
         lat = _method_series(results, "fedqpnt_local", "latency_on")
         if lat.size == 0:
             return dict(passed=None, value=None, detail="no fedqpnt_local runs")
-        hit = np.isfinite(lat)
+        # D-068: latency_on is CENSORED (finite) on a miss, so isfinite() was
+        # always True (P_D == 1.0). Use the explicit detected flag.
+        window = (attack or {}).get("duration_s")
+        hit = np.array([_M.detected_from_record(r, window) for r in results["fedqpnt_local"]], dtype=bool)
         p_d = float(np.mean(hit))
         crit = bool(p_d >= 0.9) if final_offset_ge_50m else None
         return dict(passed=crit, value=p_d, detail=f"P_D={p_d:.3f} (n={lat.size})")

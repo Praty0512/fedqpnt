@@ -63,7 +63,7 @@ def test_run_campaign_allows_tuning_seeds_below_10000_without_flags(tmp_path, mo
     # test here -- the dry-run campaign below exercises real subprocesses.
     calls = []
 
-    def _stub_execute(task_dict, run_root, python_exe):
+    def _stub_execute(task_dict, run_root, python_exe, final=False):
         calls.append(task_dict)
         return dict(scenario_id=task_dict["scenario_id"], method=task_dict["method"],
                     seed=task_dict["seed"], status="ok")

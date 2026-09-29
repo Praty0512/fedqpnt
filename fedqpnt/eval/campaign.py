@@ -30,8 +30,9 @@ from pathlib import Path
 from typing import Any
 
 from fedqpnt.eval import scenarios as SC
+from fedqpnt.eval import seed_gate as SG
 
-TEST_SEED_MIN = 10000
+TEST_SEED_MIN = SG.TEST_MIN   # D-068: test range is [10000, 20000), not ">= 10000"
 GATE_D047_PATH = Path("results/GATE_D047.json")
 DEFAULT_DETECTOR_WEIGHTS = "results/m1/detector_weights.npz"
 # PROPOSED-DECISION: hard worker cap. Two other agents (FL, M1-CLOSE) share
@@ -41,7 +42,7 @@ DEFAULT_DETECTOR_WEIGHTS = "results/m1/detector_weights.npz"
 MAX_WORKERS = 4
 
 
-class CampaignGateError(RuntimeError):
+class CampaignGateError(SG.SeedGateError):
     pass
 
 
@@ -140,7 +141,16 @@ def _is_done(path: Path) -> bool:
     return rec.get("status") == "ok"
 
 
-def _execute_one_fleet(task: "RunTask", run_root: str) -> dict[str, Any]:
+def _enforce_task_seed(seed: int, final: bool) -> None:
+    """D-068 lowest-level gate at task execution (cannot be bypassed by
+    scripts that call _execute_one / run_fleet_task directly)."""
+    try:
+        SG.enforce_seed(seed, final=final, gate_path=GATE_D047_PATH)
+    except SG.SeedGateError as exc:
+        raise CampaignGateError(str(exc)) from exc
+
+
+def _execute_one_fleet(task: "RunTask", run_root: str, final: bool = False) -> dict[str, Any]:
     """CAMPAIGN-FLEET: runs ONE fleet-scenario task (S5/S8/S9/S12/S15) via
     ``fedqpnt.eval.fleet_adapter.run_fleet_task``, in-process (the fleet
     orchestrator itself spawns its own real N+1 subprocess federation --
@@ -149,25 +159,27 @@ def _execute_one_fleet(task: "RunTask", run_root: str) -> dict[str, Any]:
     are run strictly sequentially by ``run_campaign`` (see there), never
     inside the single-node ``ProcessPoolExecutor``."""
     from fedqpnt.eval import fleet_adapter as FA
+    _enforce_task_seed(task.seed, final)
     scenario = SC.get(task.scenario_id)
-    return FA.run_fleet_task(scenario, task.method, task.seed, run_root=run_root,
+    return FA.run_fleet_task(scenario, task.method, task.seed, run_root=run_root, final=final,
                               duration_s=task.spec.get("duration_s"), kappa_R=task.spec.get("kappa_R", DEFAULT_KAPPA_R),
                               kappa_Q=task.spec.get("kappa_Q", 1.0), n_rounds=task.spec.get("n_rounds", 10),
                               n_nodes=task.spec.get("fleet_size"))
 
 
-def _execute_one(task_dict: dict[str, Any], run_root: str, python_exe: str) -> dict[str, Any]:
+def _execute_one(task_dict: dict[str, Any], run_root: str, python_exe: str, final: bool = False) -> dict[str, Any]:
     """Runs ONE task via ``python -m fedqpnt.node.runner '<json spec>'`` as
     a real subprocess (section 8 policy applied to the eval campaign: "runs
     execute as real processes"), writes the result file, returns a small
     status dict. Executed inside a worker process by ``run_campaign``."""
     task = RunTask(**task_dict)
+    _enforce_task_seed(task.seed, final)
     out_path = task.result_path(Path(run_root))
     if _is_done(out_path):
         return dict(scenario_id=task.scenario_id, method=task.method, seed=task.seed, status="skipped_done")
 
     if task.is_fleet:
-        return _execute_one_fleet(task, run_root)
+        return _execute_one_fleet(task, run_root, final)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     spec_json = json.dumps(task.spec)
@@ -201,6 +213,72 @@ def _execute_one(task_dict: dict[str, Any], run_root: str, python_exe: str) -> d
     return dict(scenario_id=task.scenario_id, method=task.method, seed=task.seed, status="ok")
 
 
+# --------------------------------------------------------------------------
+# D-062 provenance: a run is valid only if the source tree under fedqpnt/ is
+# clean at launch and did not change during the run.
+# --------------------------------------------------------------------------
+PROVENANCE_FILE = "_provenance.json"
+
+
+def git_provenance(repo_root: Path | str = ".", subtree: str = "fedqpnt/") -> dict[str, Any]:
+    """``git rev-parse HEAD`` + ``git status --porcelain <subtree>``.
+    Never raises: on any git failure returns ``head=None`` (treated as INVALID)."""
+    def _git(*args: str) -> str | None:
+        try:
+            r = subprocess.run(["git", *args], cwd=str(repo_root), capture_output=True, text=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+        return r.stdout if r.returncode == 0 else None
+    head = _git("rev-parse", "HEAD")
+    status = _git("status", "--porcelain", "--", subtree)
+    return dict(head=head.strip() if head else None,
+                dirty_files=None if status is None else sorted(l for l in status.splitlines() if l.strip()))
+
+
+def provenance_verdict(start: dict[str, Any], end: dict[str, Any]) -> dict[str, Any]:
+    """INVALID if git info is unavailable, the tree was dirty at launch or at
+    the end, HEAD moved, or the set of dirty files changed during the run."""
+    reasons = []
+    if start.get("head") is None or end.get("head") is None or start.get("dirty_files") is None             or end.get("dirty_files") is None:
+        reasons.append("git provenance unavailable")
+    else:
+        if start["dirty_files"]:
+            reasons.append(f"tree dirty at launch: {start['dirty_files']}")
+        if end["dirty_files"]:
+            reasons.append(f"tree dirty at end: {end['dirty_files']}")
+        if start["head"] != end["head"]:
+            reasons.append(f"HEAD changed during run: {start['head']} -> {end['head']}")
+        if start["dirty_files"] != end["dirty_files"]:
+            reasons.append("dirty-file set changed during run")
+    return dict(valid=not reasons, reasons=reasons, start=start, end=end)
+
+
+def record_provenance(run_root: str | Path, verdict: dict[str, Any]) -> Path:
+    """Appends one launch verdict to ``<run_root>/_provenance.json``."""
+    path = Path(run_root) / PROVENANCE_FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
+    entries = []
+    if path.exists():
+        try:
+            entries = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            entries = []
+    entries.append(dict(verdict, time=time.time()))
+    path.write_text(json.dumps(entries, indent=2))
+    return path
+
+
+def provenance_valid(run_root: str | Path) -> bool | None:
+    """None if no provenance file (unknown); False if any launch was INVALID."""
+    path = Path(run_root) / PROVENANCE_FILE
+    if not path.exists():
+        return None
+    try:
+        return all(e.get("valid") for e in json.loads(path.read_text()))
+    except (json.JSONDecodeError, OSError):
+        return False
+
+
 def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str] | None = None,
                   run_root: str = "runs", duration_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R,
                   kappa_Q: float = 1.0, n_workers: int | None = None, final: bool = False,
@@ -210,17 +288,22 @@ def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str
     section 7.1) unless ``final and gate_cleared_flag``; ``gate_cleared_flag``
     is itself refused unless ``results/GATE_D047.json`` says
     ``{"cleared": true}`` (D-046/D-047 gate)."""
-    test_seeds = [s for s in seeds if s >= TEST_SEED_MIN]
+    bad = [s for s in seeds if SG.classify_seed(s) in (SG.UNREGISTERED, SG.INVALID)]
+    if bad:
+        raise CampaignGateError(f"seeds {bad} are in no registered namespace (tuning [0,10000), test "
+                                f"[{SG.TEST_MIN},{SG.TEST_MAX}), fleet-derived >= {SG.FLEET_DERIVED_MIN}); refused")
+    test_seeds = [s for s in seeds if SG.classify_seed(s) == SG.TEST]
     if test_seeds:
         if not (final and gate_cleared_flag):
             raise CampaignGateError(
-                f"seeds {test_seeds} are in the TEST range (>= {TEST_SEED_MIN}); refusing without "
+                f"seeds {test_seeds} are in the TEST range [{SG.TEST_MIN}, {SG.TEST_MAX}); refusing without "
                 "--final --gate-cleared (section 7.1: test seeds are looked at only once, at the end)")
         if not gate_cleared(GATE_D047_PATH):
             raise CampaignGateError(
                 f"--final --gate-cleared was passed but {GATE_D047_PATH} says cleared=false; "
                 "D-046/D-047: no M4/publication campaign before the kappa_R gate clears")
 
+    prov_start = git_provenance()
     tasks = generate_tasks(scenario_ids, methods, seeds, duration_s=duration_s, kappa_R=kappa_R,
                             kappa_Q=kappa_Q, n_rounds=n_rounds, n_nodes=n_nodes)
     fleet_tasks = [t for t in tasks if t.is_fleet]
@@ -237,16 +320,21 @@ def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str
     # the MAX_WORKERS process-count intent on a machine shared with other
     # agents.
     for t in fleet_tasks:
-        results.append(_execute_one_fleet(t, run_root))
+        results.append(_execute_one_fleet(t, run_root, final))
 
     if workers == 1:
         for td in task_dicts:
-            results.append(_execute_one(td, run_root, py))
+            results.append(_execute_one(td, run_root, py, final))
     else:
         with ProcessPoolExecutor(max_workers=workers) as ex:
-            futs = [ex.submit(_execute_one, td, run_root, py) for td in task_dicts]
+            futs = [ex.submit(_execute_one, td, run_root, py, final) for td in task_dicts]
             for f in futs:
                 results.append(f.result())
+    verdict = provenance_verdict(prov_start, git_provenance())
+    record_provenance(run_root, verdict)
+    if not verdict["valid"]:
+        import warnings
+        warnings.warn(f"D-062: campaign run INVALID: {verdict['reasons']}")
     return results
 
 
