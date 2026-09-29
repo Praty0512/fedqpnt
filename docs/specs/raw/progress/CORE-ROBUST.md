@@ -107,6 +107,21 @@ baseline_b_bin's post=3.07 remains (not fully matching a hard-switch law's recov
 not chased further this session. Full report SENT to Master via SubagentHandback with the raw
 table (no PASS/FAIL framing) and the Q1-Q3 diagnosis.
 
+## D-065 ROUND 4 (resume after auto-mode outage). Master committed core at 906ae98.
+Git at start: HEAD=906ae9830b634552cfec2561d8711fdbf52155c2, fedqpnt/ clean.
+- A-fix: coasting script marks now 60/120/179 (was 180 = post-outage, INVALID column); re-run
+  would take >10 min so NOT re-run; old "@180s" column values must be treated as invalid. 60/120
+  columns and RMSE/max remain valid.
+- mean_w_gnss (runner.py:197) = mean over ALL ticks of the WHOLE mission (not attack window).
+- E (drift contradiction): trace script scripts/core_robust_drift_probe_trace.py (tactical,
+  seed 500, state/w/E_s/raw_p/err_h/spoof offset), log scratchpad/drift_tactical_trace.txt,
+  running (bg task byjlos2ew). NO fedqpnt edits. Then propose fix.
+- E DONE (diagnosis): log scratchpad/drift_tactical_trace.txt. Master hypothesis CONFIRMED (see
+  final report). D note written: docs/specs/raw/TRUST_SPLIT_DESIGN.md. C trace, B still pending.
+- B (ClockKF hold-exclusion, q_bias citation): wait for Master's go (H2-ABRUPT telemetry).
+- C trace, D design note (Write to docs/specs/raw/TRUST_SPLIT_DESIGN.md failed by outage; content
+  drafted in this session, must be re-written): pending.
+
 ## D-063 ROUND 3 (Master accepted the jam fix; commit pending; NO fedqpnt/ edits until told)
 Git state at start of round 3: HEAD=112bfcfe7708e5c1a6ddae7c3398b595acf52bfc,
 `git status --porcelain fedqpnt/` = M fedqpnt/fusion/eskf.py, M fedqpnt/trust/trust_law.py

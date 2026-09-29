@@ -69,7 +69,7 @@ def run_one(seed: int, imu_grade: str, cai_on: bool) -> dict:
 
         if in_outage:
             errs_in_outage.append(err_h)
-        for mark in (60.0, 120.0, 180.0):
+        for mark in (60.0, 120.0, 179.0):
             key = round(OUTAGE_ONSET_S + mark, 3)
             if abs(t - key) < 1e-6:
                 err_at[mark] = err_h
@@ -77,13 +77,13 @@ def run_one(seed: int, imu_grade: str, cai_on: bool) -> dict:
     errs = np.array(errs_in_outage)
     return dict(rmse=float(np.sqrt(np.mean(errs ** 2))), max=float(np.max(errs)),
                 err_at_60=err_at.get(60.0, float("nan")), err_at_120=err_at.get(120.0, float("nan")),
-                err_at_180=err_at.get(180.0, float("nan")))
+                err_at_180=err_at.get(179.0, float("nan")))
 
 
 def main() -> None:
     print(f"=== D-063 task A: coasting envelope, {DURATION_S:.0f}s missions, {OUTAGE_DUR_S:.0f}s "
           f"forced outage, tuning seeds {SEEDS} ===\n")
-    print(f"{'imu_grade':>16} {'CAI':>5} {'RMSE':>8} {'max':>8} {'@60s':>8} {'@120s':>8} {'@180s':>8}")
+    print(f"{'imu_grade':>16} {'CAI':>5} {'RMSE':>8} {'max':>8} {'@60s':>8} {'@120s':>8} {'@179s':>8}")
     for grade in IMU_GRADES:
         for cai_on in CAI_OPTIONS:
             rows = [run_one(s, grade, cai_on) for s in SEEDS]
@@ -94,7 +94,7 @@ def main() -> None:
             a180 = float(np.mean([r["err_at_180"] for r in rows]))
             print(f"{grade:>16} {'ON' if cai_on else 'OFF':>5} {rmse:8.2f} {mx:8.2f} "
                   f"{a60:8.2f} {a120:8.2f} {a180:8.2f}")
-            print(f"{'':>16} {'':>5}   per-seed @180s: {[round(r['err_at_180'], 2) for r in rows]}")
+            print(f"{'':>16} {'':>5}   per-seed @179s: {[round(r['err_at_180'], 2) for r in rows]}")
 
 
 if __name__ == "__main__":

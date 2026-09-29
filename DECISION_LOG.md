@@ -33,6 +33,23 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-066 · 2026-09-29 · Probe-during-spoof confirmed → shadow probe; consistency-based reacquisition; position/clock trust split approved; displaced meaconer added
+- **Trace (tactical, seed 500, drift):**
+  - Defence works until the first PROBE (t = 180: err 6 m vs spoof offset 25 m).
+  - PROBE at w = 0.3 drags the state onto the spoof (err 6 → 42 m in 10 s), and the inertial coast then continues along the spoof direction (err ≈ offset thereafter).
+  - A second probe repeats it. After the attack, E_s-position fires on the legitimate fix return, delaying TRUST to t = 401 (t_rec 190 s).
+  - The smoke `mean_w_gnss` was a whole-mission mean, not the attack window.
+- **Approved:**
+  - (1) ClockKF w_excl holdover (D-065), with q_bias verified against a cited oscillator model;
+  - (2) **shadow probe**: during PROBE, GNSS NIS is evaluated against the coast without applying the update; accept iff mean NIS < χ²_6(0.99) and no clk/xsat/cn0 E_s. Within PROBE, E_s-position is superseded by the shadow-NIS test. Known limit: a consistency-matched adversary; the damage is bounded by the coast covariance;
+  - (3) reacquisition cap waived when the first-fix NIS is consistent with the coast and E_s is silent (no global τ_r change);
+  - (4) the trust split per docs/specs/raw/TRUST_SPLIT_DESIGN.md: alias gnss = min(w_pos, w_clk); w metrics are reported per attack window and whole mission;
+  - (5) a displaced-meaconer scenario variant (separate agent).
+- **Integrity note:** these design changes are motivated by tuning-seed failures. They are legitimate design iteration on tuning data; final claims come only from held-out test seeds after the freeze.
+- **Implementation order:** holdover → shadow probe/reacq → split. Each with tests and a green suite; then one combined re-verification at both IMU grades.
+- **Patent:** revision deferred until after implementation (the shadow probe and the split trust are claim candidates).
+- **Owner:** Master
+
 ### D-065 · 2026-09-29 · Coasting envelope accepted (CAI 2.1–3.4× lower max coasting error); ClockKF holdover; drift contradiction (suspected probing into an ongoing spoof); paper resumed for results-independent sections
 - **Coasting (180 s forced outage, seeds 500–504; max err_h):** MEMS 1339 → 645 m (CAI on); tactical 400 → 119 m. This is the quantum-sensor contribution under GNSS denial. The "@180 s" column sampled after GNSS returned and is invalid; it is being fixed.
 - **Tactical smoke:** the drift_spoof defended RMSE 115 m (max 220 m, mean w 0.59) is worse than both undefended (108 m) and pure tactical + CAI coasting (max 119 m). Hypothesis: PROBE re-admits GNSS while the spoof persists, and each probe drags the state. Diagnosis is commissioned; candidate fixes are consistency-gated probe acceptance and a shadow-update probe.
