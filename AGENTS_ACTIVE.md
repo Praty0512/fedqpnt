@@ -7,7 +7,7 @@ _Last updated: 2026-09-29_
 | Agent | Model | Task | Owns (files) | Checkpoint | Last known state | Resume instruction |
 |---|---|---|---|---|---|---|
 | H2-ABRUPT | Sonnet | Core FL claim H2/H4 with abrupt as the novel family (θ0 without abrupt), ≥ 5 seeds; ≤ 6 processes | scripts/h2_abrupt_*.py, results/fleet/h2_abrupt.json | progress/H2-ABRUPT.md | Telemetry committed 77d4ff7 (golden verified by Master). PARKED until core freeze → τ calibration (580–599), n = 10 re-run (500–509), D-064 metrics | "Resume from your checkpoint; don't redo; background runs + end turn" |
-| CORE-ROBUST | Sonnet | D-043/D-057/D-058 shared-core fixes; overconfidence diag; κ_R re-tune; M1 + safety-principle re-verification; the b_a truth-definition test | fedqpnt/fusion/eskf.py, fedqpnt/trust/*, fedqpnt/node/* | progress/CORE-ROBUST.md | GO given 77d4ff7: (0) κ_R = 60 default → (i) ClockKF holdover + TCXO → (ii) shadow probe + reacq → (iii) trust split; Master commits between; then combined re-verification | "Resume from your checkpoint; don't redo; background runs + end turn" |
+| CORE-ROBUST | Sonnet | D-043/D-057/D-058 shared-core fixes; overconfidence diag; κ_R re-tune; M1 + safety-principle re-verification; the b_a truth-definition test | fedqpnt/fusion/eskf.py, fedqpnt/trust/*, fedqpnt/node/* | progress/CORE-ROBUST.md | (0) committed 09a2b30 → (i) ClockKF holdover + TCXO in progress → (ii) → (iii) → combined re-verification | "Resume from your checkpoint; don't redo; background runs + end turn" |
 | PERF | Sonnet | Bit-identical speedups (sensors/gnss/sim/attacks; NOT eskf) | fedqpnt/sensors/*, fedqpnt/sim/rotations.py, trajectory.py, fedqpnt/gnss/*, fedqpnt/attacks/* (perf-only), scripts/perf_* | progress/PERF.md | **DONE; change REJECTED** (1-ulp mismatches for large rotations; patch kept in patches/; D-060) | — |
 | CAMPAIGN-FLEET | Sonnet | Wire S5/S8/S9/S12/S15 into the campaign via the fleet runner | fedqpnt/eval/campaign.py, scenarios.py, report.py, fleet_adapter.py, scripts/run_campaign.py, tests/test_eval_campaign.py | progress/CAMPAIGN-FLEET.md | **DONE, accepted** (D-059 + lossless-comms addendum) | — |
 | PATENT | Sonnet | Patent claim skeleton | patent/ | progress/PATENT.md | **DONE 2026-09-29, accepted** (3 independent + 17 dependent claims) | — |
@@ -19,7 +19,7 @@ _Last updated: 2026-09-29_
 | REFS | Haiku | Clock-model citations | docs/REFERENCES.md, paper/refs.bib | — | DONE (Master stripped the bib note fields), committed 8955a4a | — |
 | EVAL-CONSIST | Sonnet | D-067 eval spec/code audit + doc drift | docs/, docs/specs/raw/EVAL_CONSIST_PROPOSALS.md | progress/EVAL-CONSIST.md | DONE, committed a55d873; D-068 rulings | — |
 | MEACON | Sonnet | Displaced-meaconer attack kind (D-066) | fedqpnt/attacks/*, environment.py dispatch, tests/test_attack_meaconing_displaced.py | progress/MEACON.md | Started 2026-09-29 | same |
-| SCENARIO-FIX | Sonnet | D-068 code fixes (scenarios/metrics/report/campaign/seed gate) | fedqpnt/eval/* | progress/SCENARIO-FIX.md | QUEUED: after CORE-ROBUST change (0) | — |
+| SCENARIO-FIX | Sonnet | D-068 code fixes (scenarios/metrics/report/campaign/seed gate) | fedqpnt/eval/* | progress/SCENARIO-FIX.md | Started 2026-09-29 after change (0) (09a2b30): tasks 1–5 (seed gate, S2 P_D, provenance, ANEES, censoring) → Master commit → 6–8 | same
 
 ## Queued (not started)
 - H2/H4 re-run with abrupt as the novel family (θ0 without abrupt) plus drift/meaconing with the new E_s: **after CORE-ROBUST**.
