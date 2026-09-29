@@ -33,6 +33,29 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-064 · 2026-09-29 · H2/H4 abrupt: pre-registered EVENT-LEVEL metrics; re-run parked until core freeze
+- **Diagnostic accepted:**
+  - The arms' n0 weights differ (L2 between arms 0.007–0.012 ≈ each arm's own movement from θ0), so the run is not invalid by construction.
+  - H4 install counts 5 vs 10 are by design (cold start at round 5).
+  - The live AUC inversion is physical, not a bug: a held abrupt offset has no persistent per-epoch signature once the receiver re-locks (steady-state raw_p 0.02 < pre-onset 0.027); the spoof removal is itself a jump (post-attack raw_p 0.25).
+  - The isolated check (0.805) covered only the first 60 s after onset, open-loop, at 1 Hz. The live run covered the full 300 s + 180 s post-attack, closed-loop, at 100 Hz ticks. The two were not comparable.
+- **Pre-registered (before any valid run):**
+  - **Primary:** P_D@10 s per attack event at a per-arm threshold τ calibrated to a clean FAR of 1/h on disjoint clean tuning seeds 580–599 (≥ 5 h per arm, with the final installed model), plus onset latency (censored at 60 s).
+  - **Secondary:** onset-window AUC with N = 10 s (and N = 5 s), pre-onset negatives only. It is disclosed that N was chosen after seeing one seed.
+  - **Tertiary:** full-window AUC (descriptive); post-attack "recovery alarm rate" reported separately.
+  - All metrics are computed on 1 Hz detector-update epochs. Paired Wilcoxon, n = 10 seeds (500–509), severity 0.15, θ0_noabrupt.
+- **Parked** until CORE-ROBUST's post-jam fix and position/clock trust split land and the core is frozen (D-062 rule).
+- **Owner:** Master
+
+### D-063 · 2026-09-29 · Jam-recovery fix accepted; the defended-vs-undefended gap diagnosed as three distinct causes; position/clock trust split approved in principle; IMU grade becomes an explicit evaluation dimension
+- **Accepted:** the E_s gap reset (gap > 1.5 × epoch) plus a 2-epoch quarantine (the stale-baseline epoch and the corrective-pull epoch), with a regression test. jam_cw post-attack RMSE 314 → 35.5 m (max 1163 → 157 m).
+- **Diagnoses (v3 smoke, tuning seeds, industrial_mems):**
+  - (1) **Meaconing** (fedqpnt 22.3 vs undefended 2.5 m): the clk_event is correctly detected, but the single scalar GNSS trust also excludes the (undisturbed) position. Timing is **not** protected either (1284 vs 1358 ns). This is a design flaw, not a bug. The position/clock trust split (w_pos / w_clk) is **approved in principle**; a design note is needed before implementation. The meaconing model is effectively co-located; a displaced-meaconer variant is under consideration.
+  - (2) **Drift** (121.7 vs 107.7 m): correct detection and exclusion. On industrial MEMS, 180 s of inertial coasting (~167 m) is as bad as following the spoof. The value of the defence depends on the inertial/CAI coasting quality, so **IMU grade becomes an explicit, pre-registered evaluation dimension** (MEMS and tactical, CAI on/off). The default grade is NOT switched to whichever wins (D-002). A coasting-envelope measurement is commissioned.
+  - (3) **Post-jam residual** (35.5 vs 3.1 m): the cautious re-admission ramp is suspected; D-051 requires jamming not to slow recovery. Diagnosis commissioned.
+- **Gate:** stays closed.
+- **Owner:** Master
+
 ### D-062 · 2026-09-29 · H2/H4 abrupt fleet run INVALID (mixed code + below-chance live AUC); code-freeze rule for fleet/campaign runs
 - **Finding:** H2-ABRUPT reported a null (fedqpnt_local vs baseline_b_cont detector-only AUC 0.253 vs 0.254; H4 0.263 vs 0.268; Wilcoxon p = 1.0; n = 5).
   - Live AUC ~0.25 is **below chance** (the scores are inverted), yet the isolated θ0 check at the same severity gives 0.805. The control drift live AUC is 0.74–0.78 vs ~0.99 isolated.

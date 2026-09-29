@@ -225,7 +225,246 @@ content otherwise left intact per Master's "not deletion" instruction.
   manually; wait for the bg6yh1t5m completion notification (or an
   intermediate one if the wait-loop itself needs attention).
 
-## TASK COMPLETE (task bdoo5lti3 / driver DONE, 08:38-10:24 IST)
+## D-062 Master ruling: H2/H4 null marked INVALID pending diagnostic (received
+after the "TASK COMPLETE" note below was written -- that verdict is WITHDRAWN,
+see this section)
+
+### Item 3 (code consistency) -- CONFIRMED PROBLEM
+`ls -la --time-style=full-iso fedqpnt/trust/trust_law.py` -> mtime
+**2026-09-29 09:40:55**, which is INSIDE the fleet driver's run window
+(08:38-10:24 IST). `git status`/`git diff --stat` confirm it is still
+uncommitted-modified (171 insertions/5 deletions vs HEAD) -- this is
+CORE-ROBUST's E_s gap-reset fix landing WHILE my fleet driver was running.
+**CONFIRMED: the H2/H4/control run used mixed code (part of it under one
+version of trust_law.py, part under another) and must be repeated after the
+core is frozen.** This alone invalidates the run regardless of items 1/2's
+findings.
+
+### Item 1 (weight provenance) -- IN PROGRESS, cheap offline replay (no new
+fleet missions, single process, reuses real fedqpnt.fl.client/aggregator
+code directly instead of fedqpnt.fleet.orchestrator.run_fleet's 6-process
+spawn)
+Wrote `scripts/h2_abrupt_diag_weight_provenance.py`: builds n0 + 4 peers'
+REAL local datasets (same seeds as h2_abrupt_h2h4_driver.py's run_h2,
+seed=500), runs one real `FLClient.local_round()` per node, then applies
+BOTH the B-cont path (`fedavg([n0_update])`, N=1 identity per D-059) and
+the FedQPNT path (`trim_nb_r_aggregate([n0, n1..n4])`, real TRIM-NB-R) to
+theta0, comparing n0's resulting installed-params hash/L2-diff under each
+arm, for 2 rounds. **Important limitation stated plainly: I did NOT persist
+per-round provenance (hash_pre/hash_post_train/hash_post_install,
+round_installs) from the ALREADY-COMPLETED h2_abrupt.json fleet run** --
+`fedqpnt/fleet/node_runner.py` computes and returns this exact data per
+node (the `provenance` list + `round_installs` + `final_theta_hash` keys
+already exist in `result.node_results["n0"]`, D-054's own provenance
+diagnostic!), but my driver's `_record()` only captured the 5 scalar
+METRIC_KEYS and discarded the rest before the process exited -- a real gap
+in my own driver script, now impossible to recover for that specific run.
+H4's log DID print install counts (5 vs 10, fedqpnt_local vs baseline_b_cont)
+-- a real, already-available, structural difference (see "H4 install
+counts" note in the earlier section of this file) -- but H2's log did not.
+This diagnostic script is the substitute: it answers the MECHANISM question
+(does TRIM-NB-R-aggregating-peers actually move n0's weights away from its
+own solo update) directly via the real aggregator code, cheaply, without
+needing the original run's lost telemetry or a new fleet spawn.
+
+### Item 2 (AUC inversion cause) -- hypothesis + a diagnostic script to test it
+Read `fedqpnt/fleet/node_runner.py` (lines ~256-290) and confirmed:
+- (a) label alignment: `active = bool(tick.label.spoofing or tick.label.jamming)`
+  read at the SAME tick as `raw_p = agent.trust.last_raw_p`, right after
+  `agent.step(...)` -- no epoch/onset shift in the code.
+- (b) score polarity: `auc_detector_only = M.roc_auc(raw_p_arr, active)` --
+  the SAME `fedqpnt.eval.metrics.roc_auc` function (standard convention,
+  higher score = more positive) I already used in my own offline held-out
+  checks (h2_abrupt_theta0_auc_check.py/_by_severity.py) -- SAME polarity,
+  no inversion in the scoring code itself.
+- (c)/(d): **working hypothesis, not yet empirically confirmed**: abrupt_spoof
+  is a ONE-TIME step-jump (held constant after onset, no further dragging --
+  see `fedqpnt/attacks/spoofing.py` AbruptSpoof docstring), so its actual
+  feature SIGNATURE (lock-loss/reacq, C/N0 anomaly) is transient (near
+  onset), while its ORACLE LABEL (`is_active(t, onset_s, duration_s)`) marks
+  the ENTIRE 300s live-mission duration as positive. My OWN isolated
+  held-out check (0.805 AUC) used a 120s mission that only captured ~60s of
+  the 180s label window immediately AFTER onset (the transient), while the
+  live H2 run captures the FULL 300s (mostly a quiet, steady, small-offset
+  state after the transient fades) -- if raw_p is low during that long
+  steady-state remainder (arguably indistinguishable from nominal to a
+  detector that never trained on abrupt) while some nominal CLEAN epochs
+  score comparably or higher (miscalibration), AUC over the full window can
+  go sub-chance even with NO code bug -- a property of this specific
+  attack's oracle-label-vs-signature mismatch at LOW severity, amplified by
+  using the full duration.
+  Wrote `scripts/h2_abrupt_diag_score_trace.py`: single-node fedqpnt_local
+  closed-loop replay (matches the live H2 pipeline, not the isolated
+  open-loop check), SAME attack config as H2 (onset=120/dur=300/sev=0.15),
+  full 600s mission, seed=500, theta0_noabrupt. Logs the full per-tick
+  trace and reports mean raw_p / w_gnss / es_frac in FOUR windows
+  (pre-onset clean, attack EARLY 5s transient, attack LATE steady-state,
+  post-attack clean), plus AUC recomputed with only the EARLY window's
+  epochs as positives vs only the LATE window's epochs as positives, to
+  directly test the transient-vs-full-duration hypothesis.
+
+### Master's follow-up (3 additions + H4 install-count question)
+1. State the exact label/window definition of BOTH measurements side by
+   side (isolated vs live) in the report -- isolated check: 1157 positives
+   / 1534 epochs over 13 seeds (~89 pos / ~118 total per seed), from a
+   120s mission, onset_s=60/duration_s=180 (so only t in [60,120) -- the
+   FIRST ~60s of the 180s label window -- is ever reachable before the
+   mission ends; the isolated check therefore ONLY EVER SEES the early
+   part of the attack, never the full duration_s). Live H2/H4: onset_s=120/
+   duration_s=300 inside a 600s mission -- the FULL 300s window [120,420)
+   is reachable and labelled positive. **This is the side-by-side
+   definition Master asked for; will restate cleanly in the final report.**
+2. Will NOT choose a metric window myself. Once `h2_abrupt_diag_score_trace.py`
+   finishes, will present the raw per-window numbers (full 300s window /
+   an onset-only window of N s / both) to Master for pre-registration
+   before any re-run -- no window chosen unilaterally.
+3. Updated `scripts/h2_abrupt_h2h4_driver.py` (my own script, not a core
+   module) to (a) persist FULL node_runner provenance (round_installs,
+   the per-round `provenance` list with hash_pre/hash_post_train/
+   hash_post_install, final_theta_hash) per (part, seed, method) to a new
+   `results/fleet/h2_abrupt_provenance.json` via `_flush_provenance()`
+   after each part, and (b) log `git rev-parse HEAD` +
+   `git status --porcelain fedqpnt/` at launch AND at end into the report
+   JSON, with an explicit `WARNING_code_changed_during_run` flag if they
+   differ. This is ready for the NEXT re-run (not run yet -- no new fleet
+   missions per Master's instruction).
+
+### H4 install-count question (5 vs 10, fedqpnt_local vs baseline_b_cont)
+   ANSWERED from code inspection (`scripts/h2_abrupt_h2h4_driver.py`'s
+   `run_h4`, identical to `h2_h4_subrule_d056.py`'s original design): the
+   two arms are given DIFFERENT `join_round` configs on purpose --
+   `("fedqpnt_local", node_ids, {"n0": 5})` vs `("baseline_b_cont", ["n0"], {})`.
+   H4's entire premise is cold-start: n0 is deliberately excluded from the
+   FL arm until round 5 (`fedqpnt/fleet/node_runner.py::_do_fl_round`: `if r
+   < spec.join_round: ... return` -- no send, no install, for rounds 0-4),
+   so it can only install in rounds 5-9 = 5 installs, matching the observed
+   5 exactly. `baseline_b_cont` has NO cold-start concept (it is n0's own
+   1-node "no-FL" baseline, D-059) -- `join_round` defaults to 0, so it
+   trains/installs every one of the 10 rounds, matching the observed 10
+   exactly. **This is the H4 experimental design working as intended, not
+   an anomaly or a bug** -- the FL arm installs LESS often specifically
+   because H4 is testing whether a LATE-joining node benefits from
+   federation despite fewer total updates.
+
+### Both diagnostic scripts launched (task bsh1mo6mj, sequential, single
+process at a time -- weight_provenance THEN score_trace, well within the
+Master's <=2-process instruction). **NO new fleet missions run.** Logs:
+`<scratchpad>/h2_abrupt_diag_weight_provenance.log`,
+`<scratchpad>/h2_abrupt_diag_score_trace.log`. **BOTH COMPLETE (confirmed
+across a usage-limit reset).**
+
+## RESULTS (all diagnostics complete)
+
+### Item 1 ANSWER: n0's weights DO differ between arms (H2 is NOT invalid
+by construction)
+`results/fleet/h2_abrupt_weight_provenance_diag.json` (seed=500, real
+FLClient.local_round + real fedavg/trim_nb_r_aggregate, 2 rounds):
+
+| round | n_samples (n0..n4) | bcont_hash | fq_hash | bcont L2 from theta0 | fq L2 from theta0 | bcont vs fq L2 |
+|---|---|---|---|---|---|---|
+| 0 | 67,49,57,54,63 | 877679d9d5c9 | 23588723b340 | 0.0148 | 0.0038 | 0.0119 |
+| 1 | 133,98,115,108,126 | 6caa672ae635 | a0bb124a9de2 | 0.0122 | 0.0067 | 0.0071 |
+
+Different hashes both rounds; bcont-vs-fq L2 (0.007-0.012) is the same order
+of magnitude as each arm's own movement from theta0 -- **n0's installed
+weights are genuinely different between arms, not a D-054-pattern
+duplicate. H2 is valid-by-construction on this axis.** (min_samples=8 was
+never binding here -- n0 always had 49+ samples by round 0.)
+
+### H4 install-count ANSWER (5 vs 10): BY DESIGN, not a bug
+`run_h4`'s own arm definitions: `("fedqpnt_local", node_ids, {"n0": 5})` vs
+`("baseline_b_cont", ["n0"], {})`. H4 cold-starts n0 in the FL arm only
+(`join_round=5`; `node_runner.py::_do_fl_round`: `if r < join_round: return`
+-- no send, no install, rounds 0-4) so it can install only in rounds 5-9 (=5).
+`baseline_b_cont` has no cold-start concept (D-059's 1-node "no-FL"
+baseline) -- `join_round` defaults to 0, trains/installs every round (=10).
+This is H4's cold-start design working correctly.
+
+### Item 2 ANSWER: inversion cause found -- late-attack-window scores LOWER
+than nominal, AND post-attack recovery scores HIGHER than nominal; BOTH
+contribute, neither is a labeling/polarity bug
+Confirmed (a) label alignment and (b) score polarity are correct in
+`node_runner.py` (same tick, standard `roc_auc` convention, matches my own
+offline checks). Root cause is in (c)/(d), from
+`scripts/h2_abrupt_diag_score_trace.py` (single-node, fedqpnt_local
+closed-loop, seed=500, SAME live attack config, theta0_noabrupt):
+
+**Side-by-side window definitions (Master's ask, item 1):**
+| | isolated check (0.5/0.15/0.1/0.2-severity AUCs) | live H2/H4 |
+|---|---|---|
+| method | `fixed_trust` (open-loop, trust never gates) | `fedqpnt_local`/`baseline_b_cont` (closed-loop, trust actively gates GNSS) |
+| mission length | 120 s | 600 s |
+| attack onset/duration | onset_s=60, duration_s=180 | onset_s=120, duration_s=300 |
+| window actually REACHABLE before mission ends | only t in [60,120) = the FIRST 60s of the 180s label window (mission ends before duration_s elapses) | the FULL t in [120,420) = all 300s, PLUS 180s of post-attack recovery (t in [420,600)) is also scored (as a negative) |
+| n_epochs / n_pos (13-seed aggregate, isolated) | 1534 / 1157 (~89 pos of ~118 total per seed) | n/a (this diagnostic used ticks, see below) |
+| sampling | one row per detector-scored GNSS epoch (~1 Hz) | one row per 100 Hz IMU tick (`rows_t.append(t)` unconditional in `node_runner.py`'s tick loop) -- raw_p is piecewise-constant between the 1 Hz detector updates, replicated ~100x per second |
+
+**Live trace numbers (seed=500, single node, this diagnostic):**
+`compute_phases`: t_on=120.0, t_off=420.0 -- EXACTLY matches the attack
+config (onset_s=120, duration_s=300); **no epoch/onset shift, ruling out (a)
+as a cause.**
+
+| window | n (ticks) | mean raw_p | mean w_gnss | es_frac |
+|---|---|---|---|---|
+| pre-onset (clean) | 6000 | 0.0270 | 0.9952 | 0.0000 |
+| attack, onset..+2s (=reacq_epochs) | 200 | 0.0147 | 0.9999 | 0.0000 |
+| attack, onset..+5s | 500 | 0.0724 | 0.9999 | 0.0000 |
+| attack, onset..+10s | 1000 | 0.0892 | 1.0000 | 0.0000 |
+| attack, +2s..offset (steady-state) | 29800 | 0.0213 | 0.7393 | 0.0470 |
+| attack, +5s..offset | 29500 | 0.0204 | 0.7366 | 0.0475 |
+| attack, +10s..offset | 29000 | 0.0189 | 0.7321 | 0.0483 |
+| post-attack (clean) | 21001 | **0.2482** | 0.6052 | 0.0714 |
+
+**Two compounding effects, both real, neither a code bug:**
+1. The attack's STEADY-STATE window (>99% of the labelled-positive ticks,
+   since `duration_s=300` but the detector's own response ramps up over
+   only the first ~2-10s) scores LOWER (mean 0.019-0.021) than pre-onset
+   CLEAN baseline (0.027) -- a held-constant small (12 m) GNSS offset, once
+   the receiver re-locks, looks quieter/more nominal than genuine sensor
+   noise to a detector that never trained on abrupt.
+2. POST-ATTACK recovery (labelled NEGATIVE, `t>=420`) scores dramatically
+   HIGHER (mean 0.248, ~9x pre-onset) than any other window, and stays
+   elevated over the FULL 180s post window (not a brief blip) -- plausibly
+   because the spoofed-to-truth REVERSION at t=420 is itself an abrupt
+   jump-like discontinuity (physically similar to the onset the detector
+   DOES respond to), compounded by w_gnss still recovering (mean 0.605,
+   below 1.0) through this whole window.
+   Even discounting effect 2 entirely (excluding post-attack negatives, using
+   ONLY pre-onset as the negative class): AUC = 0.2555 -- STILL far below
+   chance, confirming effect 1 (the steady-state window scoring lower than
+   nominal) is the dominant driver on its own, not merely a post-attack
+   artifact.
+3. Onset-window width is HIGHLY sensitive and non-monotonic in a way that
+   itself needs pre-registering, not picking post-hoc: N=2s (=reacq_epochs,
+   the attack's own principled parameter) -> AUC 0.102 (WORSE than the full
+   window!); N=5s -> 0.458; N=10s -> 0.567. The detector's response visibly
+   RAMPS UP over the first ~2-10s (mean raw_p rises 0.015->0.072->0.089 as N
+   grows) -- the very first reacq_epochs=2 ticks catch the detector BEFORE
+   it ramps up, so the "obvious" principled choice (2s) is actually the
+   worst option here.
+
+**Window options for Master to pre-register (proposal only, not chosen
+here), all from this one seed's trace -- full numbers above:**
+- **A. Full attack window** (current `node_runner.py` definition, t in
+  [onset, onset+duration_s)): auc=0.2404 (this seed).
+- **B. Onset window of N s** (positives = t in [onset, onset+N); negatives
+  unchanged, pre+post): N=2s -> 0.1018; N=5s -> 0.4578; N=10s -> 0.5674.
+- **C. Both / a hybrid** (e.g. full window as positives but drop post-attack
+  from the negative class): 0.2555.
+No option recovers a clearly "good" AUC at this severity/seed from what
+I've tested -- flagging that pre-registering ANY of these will likely still
+show FedQPNT/B-cont both performing weakly here; the comparison between
+arms (not the absolute number) is what H2/H4 actually tests, so this may be
+acceptable, but reporting honestly per D-002.
+
+## STATUS: diagnostics complete, awaiting Master's window pre-registration
+and confirmation to re-run H2/H4/control (on frozen code, with the updated
+driver that persists full provenance + git state, per D-062 item 3).
+
+## TASK COMPLETE (task bdoo5lti3 / driver DONE, 08:38-10:24 IST) -- WITHDRAWN
+by D-062, kept for history; see the D-062 section above for the current
+status (H2/H4/control numbers below are NOT valid evidence until the run is
+repeated on frozen code with the AUC-inversion cause fixed/understood)
 Fleet driver ran h2,h4,control sequentially (gate opened once CORE-ROBUST's
 defended_vs_undefended job finished, per the fixed wait-loop). Full results
 in `results/fleet/h2_abrupt.json`; compiled tables + discussion written to

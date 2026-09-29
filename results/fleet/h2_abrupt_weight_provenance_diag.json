@@ -1,0 +1,97 @@
+{
+  "theta0": "results\\fleet\\theta0_noabrupt.npz",
+  "seed": 500,
+  "local_seeds": {
+    "n0": [
+      350000,
+      350001,
+      350002,
+      350003,
+      350004,
+      350005
+    ],
+    "n1": [
+      351000,
+      351001,
+      351002,
+      351003,
+      351004,
+      351005
+    ],
+    "n2": [
+      352000,
+      352001,
+      352002,
+      352003,
+      352004,
+      352005
+    ],
+    "n3": [
+      353000,
+      353001,
+      353002,
+      353003,
+      353004,
+      353006
+    ],
+    "n4": [
+      354000,
+      354001,
+      354002,
+      354003,
+      354004,
+      354005
+    ]
+  },
+  "theta0_hash": "faa5a43c92b4",
+  "rounds": [
+    {
+      "round": 0,
+      "n_samples": {
+        "n0": 67,
+        "n1": 49,
+        "n2": 57,
+        "n3": 54,
+        "n4": 63
+      },
+      "n_fresh": 5,
+      "bcont_installed": true,
+      "fq_installed": true,
+      "bcont_hash": "877679d9d5c9",
+      "fq_hash": "23588723b340",
+      "bcont_l2_from_theta0": 0.014786031374090233,
+      "fq_l2_from_theta0": 0.003846560842450547,
+      "bcont_vs_fq_l2": 0.011873843208114056,
+      "trim_info": {
+        "quarantined_excluded": [],
+        "quarantine_events": [],
+        "n_live": 5,
+        "median_norm": 0.00462747418363207
+      }
+    },
+    {
+      "round": 1,
+      "n_samples": {
+        "n0": 133,
+        "n1": 98,
+        "n2": 115,
+        "n3": 108,
+        "n4": 126
+      },
+      "n_fresh": 5,
+      "bcont_installed": true,
+      "fq_installed": true,
+      "bcont_hash": "6caa672ae635",
+      "fq_hash": "a0bb124a9de2",
+      "bcont_l2_from_theta0": 0.012210600905623101,
+      "fq_l2_from_theta0": 0.006688787700863202,
+      "bcont_vs_fq_l2": 0.00710591966926615,
+      "trim_info": {
+        "quarantined_excluded": [],
+        "quarantine_events": [],
+        "n_live": 5,
+        "median_norm": 0.007860736399853149
+      }
+    }
+  ]
+}

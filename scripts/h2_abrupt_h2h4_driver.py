@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -108,15 +109,40 @@ def _ci95(vals: list[float]) -> dict:
 
 METRIC_KEYS = ("auc_detector_only", "auc", "latency_on", "t_dist", "es_fire_frac_attack")
 
+# D-062 item 3 (Master ruling): the FIRST driver run (08:38-10:24) did not
+# persist fedqpnt/fleet/node_runner.py's own per-round provenance
+# (hash_pre/hash_post_train/hash_post_install, round_installs,
+# final_theta_hash -- all already computed and returned in
+# result.node_results["n0"], D-054's own provenance diagnostic) before the
+# process exited; that data is now unrecoverable for that run. THIS driver
+# now persists it in full, per (part, seed, method), to
+# results/fleet/h2_abrupt_provenance.json, so a re-run can answer D-062 item
+# 1 directly from real telemetry instead of an offline replay.
+PROVENANCE_KEYS = ("round_installs", "provenance", "final_theta_hash")
+
+
+def _git_state() -> dict:
+    def _run(args):
+        try:
+            return subprocess.run(args, cwd=str(Path(__file__).resolve().parent.parent),
+                                   capture_output=True, text=True, timeout=15).stdout.strip()
+        except Exception as exc:  # noqa: BLE001
+            return f"<git call failed: {exc!r}>"
+    return dict(head=_run(["git", "rev-parse", "HEAD"]),
+                status_porcelain_fedqpnt=_run(["git", "status", "--porcelain", "fedqpnt/"]))
+
 
 def _empty_per_arm():
     return {"fedqpnt_local": {k: [] for k in METRIC_KEYS},
             "baseline_b_cont": {k: [] for k in METRIC_KEYS}}
 
 
-def _record(per_arm, method, n0):
+def _record(per_arm, method, n0, provenance_log=None, part=None, seed=None):
     for k in METRIC_KEYS:
         per_arm[method][k].append(n0.get(k))
+    if provenance_log is not None:
+        provenance_log.append(dict(part=part, seed=seed, method=method,
+                                    **{k: n0.get(k) for k in PROVENANCE_KEYS}))
 
 
 def _summarize(per_arm) -> dict:
@@ -134,7 +160,7 @@ def _summarize(per_arm) -> dict:
     return out
 
 
-def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str) -> dict:
+def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str, provenance_log: list) -> dict:
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
     for seed in LIVE_SEEDS:
@@ -155,12 +181,13 @@ def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str) -> dic
             n0 = result.node_results.get("n0", {})
             print(f"[H2-{tag} {method} seed{seed}] aborted={result.aborted} "
                   f"auc_det={n0.get('auc_detector_only')} auc_pbar={n0.get('auc')} "
-                  f"latency_on={n0.get('latency_on')} es_frac={n0.get('es_fire_frac_attack')}")
-            _record(per_arm, method, n0)
+                  f"latency_on={n0.get('latency_on')} es_frac={n0.get('es_fire_frac_attack')} "
+                  f"installs={n0.get('round_installs')}")
+            _record(per_arm, method, n0, provenance_log, part="h2_abrupt", seed=seed)
     return _summarize(per_arm)
 
 
-def run_h4(theta0, param_names, attack: dict, family_name: str, tag: str) -> dict:
+def run_h4(theta0, param_names, attack: dict, family_name: str, tag: str, provenance_log: list) -> dict:
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
     for seed in LIVE_SEEDS:
@@ -182,11 +209,11 @@ def run_h4(theta0, param_names, attack: dict, family_name: str, tag: str) -> dic
             print(f"[H4-{tag} {method} seed{seed}] aborted={result.aborted} "
                   f"auc_det={n0.get('auc_detector_only')} auc_pbar={n0.get('auc')} "
                   f"installs={n0.get('round_installs')} es_frac={n0.get('es_fire_frac_attack')}")
-            _record(per_arm, method, n0)
+            _record(per_arm, method, n0, provenance_log, part="h4_abrupt", seed=seed)
     return _summarize(per_arm)
 
 
-def run_control(theta0, param_names, attack: dict) -> dict:
+def run_control(theta0, param_names, attack: dict, provenance_log: list) -> dict:
     """CONTROL: family n0 DID see (drift, s=1) -- naturally present in every
     node's local mixed pool, no forced exclusion/inclusion. Expect
     FedQPNT ~= B-cont (no generalisation gap)."""
@@ -208,8 +235,8 @@ def run_control(theta0, param_names, attack: dict) -> dict:
             n0 = result.node_results.get("n0", {})
             print(f"[control-drift {method} seed{seed}] aborted={result.aborted} "
                   f"auc_det={n0.get('auc_detector_only')} auc_pbar={n0.get('auc')} "
-                  f"es_frac={n0.get('es_fire_frac_attack')}")
-            _record(per_arm, method, n0)
+                  f"es_frac={n0.get('es_fire_frac_attack')} installs={n0.get('round_installs')}")
+            _record(per_arm, method, n0, provenance_log, part="control_drift", seed=seed)
     return _summarize(per_arm)
 
 
@@ -218,32 +245,55 @@ def main():
     ap.add_argument("--parts", default="h2,h4,control",
                     help="comma list from {h2,h4,control}")
     ap.add_argument("--out", default="results/fleet/h2_abrupt.json")
+    ap.add_argument("--provenance-out", default="results/fleet/h2_abrupt_provenance.json")
     args = ap.parse_args()
     parts = set(args.parts.split(","))
 
     theta0, param_names = _theta0()
+    git_start = _git_state()
+    print(f"git state at launch: {git_start}")
     report: dict = dict(note="H2-ABRUPT: novel family=abrupt (theta0_noabrupt), "
                               "severity=0.15 (E_s-quiet, chosen by h2_abrupt_es_firing_check.py)",
                          chosen_hyperparams=CHOSEN, n_rounds=N_ROUNDS, live_seeds=LIVE_SEEDS,
                          live_duration_s=LIVE_DURATION_S, local_train_duration_s=LOCAL_TRAIN_DURATION_S,
-                         novel_abrupt=NOVEL_ABRUPT, control_attack=CONTROL_ATTACK)
+                         novel_abrupt=NOVEL_ABRUPT, control_attack=CONTROL_ATTACK,
+                         git_state_at_launch=git_start)
 
     out_path = Path(args.out)
     if out_path.exists():
         report.update(json.loads(out_path.read_text()))
 
+    prov_path = Path(args.provenance_out)
+    provenance_log: list = json.loads(prov_path.read_text()) if prov_path.exists() else []
+
+    def _flush_provenance():
+        prov_path.parent.mkdir(parents=True, exist_ok=True)
+        prov_path.write_text(json.dumps(provenance_log, indent=2, default=str))
+
     if "h2" in parts:
         print("=== H2 (novel family = abrupt) ===")
-        report["h2_abrupt"] = run_h2(theta0, param_names, NOVEL_ABRUPT, FAMILY_NAME, "abrupt")
+        report["h2_abrupt"] = run_h2(theta0, param_names, NOVEL_ABRUPT, FAMILY_NAME, "abrupt", provenance_log)
         out_path.write_text(json.dumps(report, indent=2, default=str))
+        _flush_provenance()
     if "h4" in parts:
         print("=== H4 (cold-start, novel family = abrupt) ===")
-        report["h4_abrupt"] = run_h4(theta0, param_names, NOVEL_ABRUPT, FAMILY_NAME, "abrupt")
+        report["h4_abrupt"] = run_h4(theta0, param_names, NOVEL_ABRUPT, FAMILY_NAME, "abrupt", provenance_log)
         out_path.write_text(json.dumps(report, indent=2, default=str))
+        _flush_provenance()
     if "control" in parts:
         print("=== CONTROL (family = drift, s=1, n0 DID see it locally) ===")
-        report["control_drift"] = run_control(theta0, param_names, CONTROL_ATTACK)
+        report["control_drift"] = run_control(theta0, param_names, CONTROL_ATTACK, provenance_log)
         out_path.write_text(json.dumps(report, indent=2, default=str))
+        _flush_provenance()
+
+    git_end = _git_state()
+    print(f"git state at end: {git_end}")
+    report["git_state_at_end"] = git_end
+    if git_start != git_end:
+        report["WARNING_code_changed_during_run"] = True
+        print("WARNING: git state changed during this run -- results used mixed code, per D-062 item 3 -- "
+              "DO NOT treat this run as valid; re-run after the core is frozen.")
+    out_path.write_text(json.dumps(report, indent=2, default=str))
 
     print(json.dumps(report, indent=2, default=str))
 
