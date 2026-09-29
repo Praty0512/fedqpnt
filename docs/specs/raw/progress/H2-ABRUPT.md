@@ -225,7 +225,27 @@ content otherwise left intact per Master's "not deletion" instruction.
   manually; wait for the bg6yh1t5m completion notification (or an
   intermediate one if the wait-loop itself needs attention).
 
-## Next (on wake, after bg6yh1t5m / the driver notification)
+## TASK COMPLETE (task bdoo5lti3 / driver DONE, 08:38-10:24 IST)
+Fleet driver ran h2,h4,control sequentially (gate opened once CORE-ROBUST's
+defended_vs_undefended job finished, per the fixed wait-loop). Full results
+in `results/fleet/h2_abrupt.json`; compiled tables + discussion written to
+`docs/specs/raw/H2_ABRUPT_NOTES.md`. Summary:
+- H2 (novel=abrupt): NULL result, FedQPNT ~= B-cont (Wilcoxon auc_detector_only
+  p=1.0, latency_on p=1.0, identical per-seed).
+- H4 (cold-start, novel=abrupt): same NULL result (p=1.0 both metrics).
+- Control (drift, s=1, n0 DID see it): no significant gap (p=0.0625, n=5,
+  direction opposite of "FL helps" anyway) -- as expected design check.
+- OPEN FINDING flagged (not resolved): live-mission auc_detector_only
+  (~0.25-0.27, both arms) is far below the isolated theta0 held-out check
+  at the same severity (0.805) -- both arms track identically per-seed, so
+  not per-arm noise; likely a live/closed-loop vs isolated/open-loop
+  protocol difference (trust-gating dynamics around the weak-by-design
+  attack). Reported as measured, not chased further (compute budget, D-002).
+
+All steps done. Final report delivered via SendMessage (SubagentHandback
+was already used once this task and cannot be called again).
+
+## Next (on wake, after bg6yh1t5m / the driver notification) -- SUPERSEDED, task complete, kept for history
 1. Read `<scratchpad>/h2_abrupt_driver.log` and `results/fleet/h2_abrupt.json`.
    If any fleet invocation errored/aborted, re-run just that missing
    `--parts` value (h2, h4, or control individually) -- each is

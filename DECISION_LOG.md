@@ -33,6 +33,20 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-062 · 2026-09-29 · H2/H4 abrupt fleet run INVALID (mixed code + below-chance live AUC); code-freeze rule for fleet/campaign runs
+- **Finding:** H2-ABRUPT reported a null (fedqpnt_local vs baseline_b_cont detector-only AUC 0.253 vs 0.254; H4 0.263 vs 0.268; Wilcoxon p = 1.0; n = 5).
+  - Live AUC ~0.25 is **below chance** (the scores are inverted), yet the isolated θ0 check at the same severity gives 0.805. The control drift live AUC is 0.74–0.78 vs ~0.99 isolated.
+  - The arms track each other per seed, with identical latency (the D-054 pattern).
+  - **fedqpnt/trust/trust_law.py was modified at 09:40:55 IST, inside the fleet run window (08:38–10:24)**, by CORE-ROBUST's E_s gap-reset fix, so the run used mixed code.
+- **Decision:** The H2/H4 numbers are INVALID; not a null result. Diagnostic assigned to H2-ABRUPT (offline, no new fleet runs):
+  - (1) per-round n0 weight hash/delta between the arms;
+  - (2) the cause of the live AUC inversion: label alignment, score polarity, epoch set, closed-loop feature shift;
+  - (3) the code-mtime evidence.
+  - The re-run happens only after the core fix is accepted and the inversion is explained.
+- **New rule (process):** Every campaign/fleet run records `git rev-parse HEAD` plus `git status --porcelain` for fedqpnt/ at launch and at completion; a run is valid only if the fedqpnt/ tree is clean and unchanged throughout. Core edits happen only when no evaluation run is live.
+- **Noted:** the "abrupt may not be a good novel family" argument (θ0 zero-shot 0.78–0.82) is deferred until a valid run exists.
+- **Owner:** Master
+
 ### D-061 · 2026-09-29 · CORE-ROBUST items 1–4 accepted (κ_R = 60; effective-bias b_a truth); item 6 REJECTED: defended is worse than undefended on the new core; the test-seed gate stays closed
 - **Accepted:**
   - eigenvalue-clip hygiene (D-043);
