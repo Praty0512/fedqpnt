@@ -51,7 +51,7 @@ the skew matrix, `Exp/Log` are the SO(3) exponential/logarithm, `C ≡ R_nb` (bo
 |---|---|---|---|
 | Global tick / IMU | 100 Hz (`dt = 0.01`) | `sim.dt`, `imu.rate_hz` | D-003 |
 | GNSS epoch → `GnssFix` | 1 Hz default; {1, 2, 5, 10} Hz | `gnss.rate_hz` | [ASSUMPTION] typical receiver PVT rates |
-| Quantum (CAI) | 1/T_c, T_c ∈ [0.5, 2] s; default T_c = 1 s | `quantum.cycle_time` | [LIT] Cheiney 2018, Templier 2022 (sub-Hz to few-Hz cycle rates) |
+| Quantum (CAI) | 1/T_c; T_c = 1 s (lab, Wright 2022); T_c = 1.548 s (field, Jarlaud 2024); T_c = 0.1 s (near_future, Wu 2022) | `quantum.cycle_time` per grade | [LIT] Wright 2022 (lab, Frontiers Phys. 10:994459); Jarlaud 2024 (field, measured PER-SHOT combined kD/kU cycle period, D-020); Wu 2022 (near_future, Nat. Commun. 13:1442) [updated 2026-09-29, doc drift fix] |
 | Nav output logged | 10 Hz (every 10th tick) | `rec.nav_decimation = 10` | [DESIGN] metrics are evaluated at 10 Hz |
 | FL round | every `T_round = 60 s` sim time | `fl.round_period_s` | [ASSUMPTION] |
 
@@ -649,10 +649,10 @@ Throughput is irrelevant.
 
 ## 9. Default parameter summary (for `RunConfig` defaults)
 
-`sim.dt=0.01; gnss.rate_hz=1; quantum.cycle_time=1.0; fl.round_period_s=60; fl.local_epochs=2;
+`sim.dt=0.01; gnss.rate_hz=1; quantum.cycle_time=1.0 (lab grade; field: 1.548 s; near_future: 0.1 s); fl.round_period_s=60; fl.local_epochs=2;
 fl.lr=0.05; fl.batch=64; fl.prox_mu=0.01; fl.aggregator="trim_nb_r"; fl.trim_beta=0.2; fl.clip_c=2;
 fl.rep_rho=0.8; fl.rep_q=0.2; comms.* per §4.6; trust.* per §3.3; fusion.kappa_R (tuned), kappa_Q=1,
-w_min=0.02, w_excl=0.05, alpha_gate=1e-4; pseudolabel.L=30, h1=20; eval.T_sus=1, T_hold=10, t_align=60`.
+w_min=0.02, w_excl=0.05, alpha_gate=1e-4; pseudolabel.L=30, h1=20; eval.T_sus=1, T_hold=10, t_align=60` [updated 2026-09-29, doc drift fix]
 
 ---------------------------------------------------------------------------------------------------
 
@@ -833,6 +833,8 @@ class RunConfig:
 Tests: round trip `from_dict(to_dict(c)) == c`; JSON file round trip; hash stable across processes
 (check a hard-coded expected hash for a fixed config, then compute it in a `subprocess` too); hash changes when any
 leaf changes; unknown key → ValueError.
+
+**Note on `quantum.cycle_time` defaults (2026-09-29):** The default `cycle_time = 1.0` above is the **lab grade** default. Override per grade via the `quantum` config dict: `1.0 s` (lab), `1.548 s` (field, calibrated to Jarlaud/d'Armagnac 2024 data), or `0.1 s` (near_future). See §1.2 and fedqpnt/sensors/quantum.py for details.
 
 ### 11.5 `fedqpnt/sim/recorder.py`
 

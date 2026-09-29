@@ -31,10 +31,7 @@ TRUST_DESIGN_V2.md numeric defaults change (e.g. κ_R, T_ex, T_probe, rates) —
 is the only source of these PDFs/PNGs, so edits should go there, not to the images.
 
 ## Open spec ambiguities noted while building (not resolved here)
-- §11 mentions T_c ∈ [0.5, 2] s / default 1 s (ARCHITECTURE §1.2), but the "closed loop"
-  fig was asked to show CAI ≈ 0.65 Hz per the task brief — used as given; it does not match
-  the 1/T_c = 1 Hz default in the spec exactly (0.65 Hz ⇒ T_c ≈ 1.54 s). Left the number as
-  instructed by the task brief rather than reconciling against §1.2's default.
+- RESOLVED (2026-09-29 doc drift fix): §1.2 table updated to show default cycle times per grade: T_c = 1 s (lab), 1.548 s (field, Jarlaud 2024), 0.1 s (near_future). The "closed loop" fig showing CAI ≈ 0.65 Hz (T_c ≈ 1.548 s) is now recognized as the correct FIELD-grade default, calibrated to real Jarlaud/d'Armagnac 2024 data. This matches the task-brief requirement and the code (fedqpnt/sensors/quantum.py line 103).
 - Trust law v2 (TRUST_DESIGN_V2.md §C) does not restate w_min, w_excl, the reacquisition cap
   or the asymmetric ramp rates (τ_d, τ_r) — it says they're "unchanged" from ARCHITECTURE
   §3.3. fig_trust_state_machine therefore only labels the v2-specific quantities
