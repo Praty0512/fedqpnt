@@ -522,6 +522,93 @@ BEFORE any re-run (verbatim ruling + all fixed parameters in
    D-062 sub-chance finding); recovery_alarm_rate=0.716. **Proves the code
    runs; these are explicitly NOT reported as results.**
 
+## Step (a) attempted: 1Hz per-epoch dump CANNOT be done purely in the
+driver script -- PROPOSED DIFF for fedqpnt/fleet/node_runner.py, NOT applied
+Checked: the driver (`scripts/h2_abrupt_h2h4_driver.py`) only ever sees
+`result.node_results[nid]`, a dict built and returned by
+`fedqpnt/fleet/node_runner.py::_run_fleet_node` (put on `node_result_q`
+inside the spawned node PROCESS). The raw per-tick arrays
+(`rows_t`/`rows_active`/`rows_raw_p`, plus whether that tick had a GNSS
+epoch) are LOCAL variables inside `_run_fleet_node` -- consumed only to
+compute the existing aggregate scalars (`auc`, `auc_detector_only`, etc.)
+and then discarded; they never leave the node process. There is no
+driver-side hook to recover them without a node process spawned. This
+**requires a small change inside `fedqpnt/fleet/node_runner.py`**, which is
+under the core freeze -- NOT edited. Proposed diff (purely additive: two
+new local trackers + two new result keys, nothing existing removed or
+changed; same style as the existing D-056 `rows_raw_p`/`rows_es`
+instrumentation already in this file):
+
+```diff
+--- a/fedqpnt/fleet/node_runner.py
++++ b/fedqpnt/fleet/node_runner.py
+@@ line ~146 (local tracker declarations)
+     rows_score: list[float] = []   # H2/H4 preview: max detector anomaly score per tick (AUC)
+     rows_raw_p: list[float] = []   # D-056 metric (a): raw calibrated detector p, E_s excluded
+     rows_es: list[bool] = []       # D-056 metric (d): whether E_s (physical spoof evidence) fired
++    rows_has_gnss: list[bool] = []  # D-064: whether this tick had a real GNSS epoch (1 Hz
++                                     # detector-update boundary) -- lets downstream metric code
++                                     # (scripts/h2_abrupt_metrics.py) down-select the 100 Hz tick
++                                     # trace to the same 1 Hz sampling the isolated held-out
++                                     # check uses, instead of the 100x-oversampled raw_p currently
++                                     # only usable for the existing aggregate scalars.
+
+@@ line ~222 (inside the per-tick loop, right after the existing rows_es.append)
+             rows_es.append(bool(agent.trust.last_es_evidence))
++            rows_has_gnss.append(tick.gnss_epoch is not None)
+
+@@ line ~254 (result dict construction, inside `if len(t_arr) > 0:`)
+         es_fire_frac_attack = float(np.mean(es_arr[active])) if active.any() else float("nan")
++        # D-064: additive-only per-epoch dump for scripts/h2_abrupt_metrics.py's pre-registered
++        # metrics. Filters to 1 Hz GNSS-epoch ticks only; does not change any existing key.
++        has_gnss = np.array(rows_has_gnss, dtype=bool)
++        result.update(dict(
++            epoch_t=t_arr[has_gnss].tolist(),
++            epoch_active=active[has_gnss].tolist(),
++            epoch_raw_p=raw_p_arr[has_gnss].tolist(),
++        ))
+```
+
+Size impact: ~600 floats/bools per node per mission (600 s at ~1 Hz) --
+negligible over the existing `multiprocessing.Queue` IPC (the queue already
+carries the full `provenance` list and other per-round data).
+
+**Diff APPROVED in content by Master.** Timing per the D-062 rule: no
+fedqpnt/ edits while any evaluation run is live -- CORE-ROBUST currently has
+measurement runs going. **DO NOT APPLY until Master sends the literal
+message "freeze window open".** Steps (b)-(d) (tau calibration on 580-599,
+the real re-run, computing the D-064 metrics) additionally wait on the
+core-freeze confirmation. No fedqpnt/ files touched. STAYING PARKED.
+
+### When the freeze window opens, apply in ONE pass (diff above + this test
++ full suite), so there's no window where a half-applied change sits in the
+tree:
+1. Apply the node_runner.py diff exactly as proposed above (3 additive
+   hunks: `rows_has_gnss` tracker, its per-tick append, the 3 new result
+   keys).
+2. **CORRECTED procedure (Master's fix: running the new code twice only
+   proves determinism, not that the diff preserved the old outputs)**:
+   a. BEFORE applying the diff (on the CURRENT, unmodified code): run one
+      small seeded fleet mission (N=2 nodes, 120s, 2 rounds -- cheap) via
+      `run_fleet`/`run_fleet_node_process`, and save ITS aggregate keys
+      (`auc`, `auc_detector_only`, `latency_on`, `t_dist`,
+      `es_fire_frac_attack`, `round_installs`, `final_theta_hash`, etc.) to
+      a golden file `tests/data/node_runner_golden.json`.
+      **This golden run ALSO counts as an evaluation run under the D-062
+      rule -- it MUST wait for "freeze window open" too, same as the diff
+      itself. Do NOT run it early.**
+   b. Apply the node_runner.py diff (3 additive hunks, as proposed above).
+   c. Add `tests/test_node_runner_epoch_dump.py` (new file) asserting: (i)
+      the SAME seeded mission's existing aggregate keys are BIT-IDENTICAL
+      to the golden file's values; (ii) the new keys (`epoch_t`,
+      `epoch_active`, `epoch_raw_p`) are present, correct length (== count
+      of GNSS-epoch ticks), `epoch_t` strictly increasing, and
+      `epoch_active` matches the oracle label at those timestamps.
+3. Run `python -m pytest tests/ -q` (full suite) and confirm green before
+   reporting back.
+4. Only then proceed to steps (b)-(d) once Master ALSO confirms the
+   trust_law.py core freeze (a separate, already-stated precondition).
+
 ## NEXT (blocked on Master)
 Wait for Master to confirm the core (`fedqpnt/trust/trust_law.py`) is
 frozen (post-jam fix + position/clock trust split landed). Once frozen:
@@ -584,3 +671,22 @@ was already used once this task and cannot be called again).
 ## Resume command pattern
 `python -u <script> > "<scratchpad>/<name>.log" 2>&1` via the Bash tool with
 run_in_background; do not poll manually, wait for the completion notification.
+
+## FREEZE WINDOW OPEN (node_runner.py telemetry diff only; core HEAD 906ae98) -- executed
+- Golden run on UNMODIFIED code (fedqpnt/ clean): `scripts/h2_abrupt_golden_run.py`
+  (N=1 node + server = 2 processes per the <=2-process budget, not N=2; 120 s,
+  2 rounds, abrupt sev 0.5 onset 60/dur 60, theta0_noabrupt) -> `tests/data/node_runner_golden.json`.
+- Applied the 3-hunk additive diff to `fedqpnt/fleet/node_runner.py` (+7 lines; only fedqpnt/ file touched). NOT committed.
+- Added `tests/test_node_runner_epoch_dump.py` (bit-identity of all pre-existing keys vs golden + new epoch_* keys
+  present/consistent). First run failed on a TEST bug (NaN != NaN in rmse_h_pre); fixed by comparing serialised form.
+- Full suite running in background: task bob8jlu37 (`python -m pytest tests/ -q -x`); result pending.
+- (b)-(d) tau calibration + re-run remain BLOCKED (CORE-ROBUST trust/clock changes still coming).
+
+## Telemetry diff DONE (not committed)
+- Full suite (bob8jlu37) passed 100% with the diff applied.
+- tests/test_node_runner_epoch_dump.py split: permanent test (epoch_* keys, equal lengths, strictly increasing 1 Hz t,
+  epoch_active == attack schedule) + golden bit-identity test. Golden test run UNskipped at HEAD 85e0e8e: PASSED
+  (golden captured at 906ae98; existing keys bit-identical). It is now @pytest.mark.skip (one-shot; later core changes invalidate golden).
+- Files: fedqpnt/fleet/node_runner.py (+7), tests/test_node_runner_epoch_dump.py, tests/data/node_runner_golden.json,
+  scripts/h2_abrupt_golden_run.py. Note: golden/earlier runs used DEFAULT_KAPPA_R=40; re-run must use the default in force at freeze (do not hard-code).
+- (b)-(d) still BLOCKED until Master confirms the core freeze.

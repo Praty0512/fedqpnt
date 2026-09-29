@@ -147,6 +147,8 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
     rows_score: list[float] = []   # H2/H4 preview: max detector anomaly score per tick (AUC)
     rows_raw_p: list[float] = []   # D-056 metric (a): raw calibrated detector p, E_s excluded
     rows_es: list[bool] = []       # D-056 metric (d): whether E_s (physical spoof evidence) fired
+    rows_has_gnss: list[bool] = []  # D-064: tick had a real GNSS epoch (1 Hz detector-update boundary);
+                                     # lets metric code down-select the 100 Hz trace to 1 Hz epochs
     round_installs = 0
     current_round = 0
     provenance: list[dict] = []   # D-054 provenance diagnostic: per-round param hashes
@@ -235,6 +237,7 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             raw_p = agent.trust.last_raw_p
             rows_raw_p.append(float(raw_p) if raw_p is not None else 0.0)
             rows_es.append(bool(agent.trust.last_es_evidence))
+            rows_has_gnss.append(tick.gnss_epoch is not None)
 
             target_round = min(int(t // spec.round_period_s), spec.n_rounds)
             while current_round < target_round:
@@ -270,6 +273,10 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
         # evidence) fired -- logging only, computed from the read-only
         # last_es_evidence side channel added to TrustEngineImpl.update.
         es_fire_frac_attack = float(np.mean(es_arr[active])) if active.any() else float("nan")
+        # D-064: additive per-epoch dump (1 Hz GNSS-epoch ticks only) for scripts/h2_abrupt_metrics.py.
+        has_gnss = np.array(rows_has_gnss, dtype=bool)
+        result.update(dict(epoch_t=t_arr[has_gnss].tolist(), epoch_active=active[has_gnss].tolist(),
+                           epoch_raw_p=raw_p_arr[has_gnss].tolist()))
         e_h = M.horizontal_error(pos_est, pos_true)
         e_3 = M.full3d_error(pos_est, pos_true)
         e_v = M.velocity_error(vel_est, vel_true)

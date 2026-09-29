@@ -1,0 +1,43 @@
+{
+ "node_id": "n0",
+ "seed": 500,
+ "n_ticks": 12000,
+ "round_installs": 2,
+ "failed": false,
+ "provenance": [
+  {
+   "round": 0,
+   "hash_pre": "faa5a43c92b4",
+   "n_local_samples": 30,
+   "hash_post_train": "02c8ff4e241f",
+   "installed": true,
+   "hash_post_install": "5800764a4aac"
+  },
+  {
+   "round": 1,
+   "hash_pre": "5800764a4aac",
+   "n_local_samples": 60,
+   "hash_post_train": "153940a617bb",
+   "installed": true,
+   "hash_post_install": "95ed84374140"
+  }
+ ],
+ "final_theta_hash": "95ed84374140",
+ "rmse_h_pre": NaN,
+ "max_h_pre": NaN,
+ "rmse_h_att": 65.11628079867934,
+ "max_h_att": 157.09368531179592,
+ "rmse_h_post": 53.28912887398452,
+ "rmse_3_att": 65.12437999048458,
+ "rmse_v_att": 3.204279810796541,
+ "anees_pos_pre": NaN,
+ "latency_on": 2.0,
+ "t_dist": 2.0,
+ "mean_w_gnss": 0.2630906021579184,
+ "auc": 0.49748611111111113,
+ "auc_detector_only": 0.7174833333333334,
+ "es_fire_frac_attack": 0.0,
+ "fa_events": 0.0,
+ "far_per_hour": 0.0,
+ "fpr": 0.5001666666666666
+}
