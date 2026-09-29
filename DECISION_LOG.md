@@ -33,6 +33,19 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-071 · 2026-09-29 · Shadow-probe calibration result; clock-jump features normalised by the predicted TCXO innovation over the gap
+- **D-069 rule outcome:** the clean false-veto rate was MEMS 3.3% (> 1%) and tactical 0%, so the rule triggered. Frozen bounds from disjoint clean seeds 510–529: MEMS 25.07, tactical 6.74.
+- **Detection power at the frozen bounds** (fraction of offset windows vetoed):
+  - MEMS 10/26/50 m → 0.00/0.07/0.70;
+  - tactical → 0.37/1.00/1.00.
+  - **Stated limitation:** on MEMS, sub-50 m consistency-matched spoofs pass the probe; the damage is bounded by the coast covariance.
+- **Post-jam regression found and fixed:** with the TCXO truth clock, the first fix after a 180 s outage showed clk jumps of 141σ/29σ (oscillator drift over the gap), which fired E_s clk_event and caused DISTRUST.
+  - Interim fix (726bc35): x8/x9 are unavailable after a > 3 s gap. Post-jam RMSE_h: tactical 5.1 m, MEMS 25.6 m; TRUST within 20 s.
+  - **Rejected as the final form:** it blinds the clock evidence in jam_then_spoof.
+  - **Ruling:** normalise the clock jumps by the predicted innovation std from the TCXO model over the gap (σ_b² = r + q_b·Δt + q_d·Δt³/3; σ_d² = r + q_d·Δt). Tests: no post-jam false fire; a 750 m replay delay after a 180 s gap still detectable (reported, not tuned).
+- **Detector v3 + θ0 retrain after the freeze** is confirmed (the x8/x9 distributions changed with the TCXO truth).
+- **Owner:** Master
+
 ### D-070 · 2026-09-29 · S6 re-registered as the H3 scenario; no CAI fault injector; fleet control arms mapped
 - **S6 (H3, confirmatory, 2 of 8):** Schuler world, 1500 s; drift_spoof onset 300 s, duration 900 s, severity 0.3 (gradual-spoofing regime per ARCHITECTURE §6.2; parameters fixed before any test data); arms fedqpnt_local, abl_minus_quantum, undefended; grades industrial_mems and tactical. Primary: paired latency_eff per grade. Plus the never-worse safety leg.
 - **S6-coast (exploratory, outside the Holm family):** a 180 s forced outage; max coasting error with vs without CAI (D-065 envelope).
