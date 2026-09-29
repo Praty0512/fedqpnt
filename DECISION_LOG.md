@@ -33,6 +33,16 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-069 · 2026-09-29 · Shadow-probe consistency threshold: pre-registered clean-data calibration rule
+- **Context:** change (ii) (18e3207). The κ_R-inflated NIS is ~100× too insensitive for a consistency test (0.28 with a 26 m spoof), so the shadow probe uses a 6-D innovation against the coasting P with the receiver's UN-inflated covariance.
+- **Risk:** κ_R = 60 exists because that covariance under-states the real time-correlated LC-fix error. Clean fixes could then fail the χ²₆(0.99) = 16.81 test, creating a new permanent lockout.
+- **Pre-registered rule (fixed before measurement):**
+  - measure the clean false-veto rate (the mean shadow NIS over the first 10 s after a forced 60 s outage; tuning seeds 500–509; both IMU grades);
+  - if ≤ 1% at both grades, keep χ²₆(0.99);
+  - otherwise set the threshold to the 99th percentile of the clean distribution on disjoint tuning seeds 510–529, per grade, frozen.
+  - This is clean-data (FAR-type) calibration only, never on attack data. Detection power at 10/26/50 m offsets is reported at the resulting threshold.
+- **Owner:** Master
+
 ### D-068 · 2026-09-29 · Rulings on the EVAL-CONSIST audit: σ_nom, the confirmatory family, the S7 bound, latency_eff, the seed gate, the S2 P_D bug, scenario registry vs intent
 - **Correction to the record:** D-055's text contains no "3σ_nom" bound. The bound comes from ARCHITECTURE §6.1, with σ_nom undefined; D-061 mis-attributed it. It is therefore defined now, before any test-seed data, and disclosed as defined after the tuning data.
 - **σ_nom (frozen for M4):** the across-seed std of the undefended nominal-scenario RMSE_h, measured on ≥ 20 disjoint tuning seeds (560–579) **per IMU grade**, frozen with the core.
