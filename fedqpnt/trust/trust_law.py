@@ -119,6 +119,10 @@ class TrustLawConfig:
     # the project's standard nominal GNSS rate used throughout the eval
     # scripts/tests; 1.5x per Master's directive.]
     es_nominal_epoch_s: float = 1.0
+    # D-066/D-067: acceptance bound on the mean joint shadow NIS (PROBE exit; reacquisition-cap waiver).
+    # None -> chi2_6(0.99). Per-IMU-grade values (99th percentile of the CLEAN mean-shadow-NIS
+    # distribution, frozen) are applied by fedqpnt/node/methods.py; see PROBE_NIS_BOUND_BY_GRADE.
+    probe_nis_bound: float | None = None
     es_gap_reset_factor: float = 1.5
 
     @property
@@ -354,7 +358,8 @@ class _LawCoreV2:
             self._probe_es_any = self._probe_es_any or es_evidence
             if self._probe_timer >= c.T_probe:
                 mean_nis = self._probe_nis_sum / max(self._probe_nis_n, 1)
-                if mean_nis <= CHI2_6_99 and not self._probe_es_any:
+                bound = CHI2_6_99 if c.probe_nis_bound is None else c.probe_nis_bound
+                if mean_nis <= bound and not self._probe_es_any:
                     # sec C item 4, success: TRUST, detector suppressed for
                     # T_sup, recovery continues via the normal ramp (next
                     # call, from w=w_probe) in the TRUST branch above.
@@ -879,7 +884,9 @@ class TrustEngineImpl:
                     # an outage is untrusted; waive it only when this first fix is CONSISTENT with the
                     # coasting state (shadow NIS <= chi2_6(0.99)) AND E_s is silent. Otherwise keep the
                     # cap. tau_r is NOT changed. (Same consistency-matched-adversary limit as the probe.)
-                    consistent = (self.gnss_law._uses_v2 and shadow_inv is not None and shadow_nis <= CHI2_6_99
+                    bound = (CHI2_6_99 if self.gnss_law.cfg.probe_nis_bound is None
+                             else self.gnss_law.cfg.probe_nis_bound)
+                    consistent = (self.gnss_law._uses_v2 and shadow_inv is not None and shadow_nis <= bound
                                   and not (es_other or es_pos))
                     if not consistent:
                         self.gnss_law.apply_reacquisition_cap()

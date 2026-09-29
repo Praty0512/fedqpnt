@@ -84,3 +84,24 @@ def test_cusum_grows_under_sustained_spoofing_and_resets_under_clean():
     # a sustained large-severity drift spoof should eventually push nis_pos up
     # and the CUSUM (Page test, k_c=1.5) should exceed the pre-attack level.
     assert np.max(late_attack) >= np.max(pre_attack)
+
+
+def test_clock_jump_features_unavailable_after_long_gap():
+    """D-067: x8/x9 must not fire on the first fix after a long outage (TCXO holdover drift is not spoofing)."""
+    import numpy as np
+    from fedqpnt.core.types import GnssFix
+    from fedqpnt.trust.features import GnssFeatureExtractor
+
+    def fx(t, bias, drift):
+        return GnssFix(t=t, pos=np.zeros(3), vel=np.zeros(3), clk_bias=bias, clk_drift=drift, cov_pos=np.eye(3),
+                       cov_vel=np.eye(3), residual_rms=0.5, num_sats=8, mean_cn0=45.0, std_cn0=1.0, agc_db=0.0,
+                       valid=True, raim_stat=1.0)
+    ex = GnssFeatureExtractor()
+    ex.step(fx(1.0, 0.0, 0.0), [])
+    ex.step(fx(2.0, 0.0, 0.0), [])
+    near = ex.step(fx(3.0, 40.0, 0.0), [])        # 1 s later: 40 m jump is real evidence
+    assert near[7] > 5.0
+    ex2 = GnssFeatureExtractor()
+    ex2.step(fx(1.0, 0.0, 0.0), [])
+    far = ex2.step(fx(181.0, 400.0, 5.0), [])      # 180 s gap: holdover drift, unavailable
+    assert far[7] == 0.0 and far[8] == 0.0

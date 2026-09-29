@@ -40,6 +40,14 @@ from fedqpnt.core.defaults import DEFAULT_KAPPA_R  # noqa: E402  (D-061/D-067: k
 # so DEFAULT_KAPPA_R stays PROVISIONAL and MUST be re-chosen with the same
 # procedure once D-028 lands -- see results/m1/kappa_r_frozen.json.
 
+# D-066/D-067 pre-registered calibration of the shadow-probe / reacquisition acceptance bound. The
+# chi2_6(0.99)=16.81 bound gave a clean false-veto of 3.3% (1/30 windows, seeds 500-509) at
+# industrial_mems, above the pre-registered 1% limit, so the bound is replaced, per IMU grade, by the
+# 99th percentile of the CLEAN mean shadow NIS over the first 10 s after a 60 s outage with no update
+# applied, measured on disjoint tuning seeds 510-529 (n=60 windows/grade; results/m1/
+# shadow_nis_calib_510_529.json, scripts/core_robust_shadow_nis_check.py) and FROZEN. Clean data only.
+PROBE_NIS_BOUND_BY_GRADE = {"industrial_mems": 25.07, "tactical": 6.74}
+
 # trust_law._METHOD_TABLE key + whether it needs a (locally-)trained detector.
 _METHOD_TRUST_KEY = {
     "fedqpnt_local": "fedqpnt",
@@ -77,12 +85,17 @@ def save_detector_weights(path: str | Path, params: dict[str, np.ndarray]) -> No
 def make_agent_config(method: str, *, kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                        world: str = "flat", quantum_enabled: bool = True,
                        quantum_cycle_time_s: float = 1.0,
-                       detector_weights_path: str | Path | None = None) -> AgentConfig:
+                       detector_weights_path: str | Path | None = None,
+                       imu_grade: str | None = None) -> AgentConfig:
     if method not in _METHOD_TRUST_KEY:
         raise ValueError(f"unknown method '{method}'; choose from {METHOD_NAMES}")
     trust_key = _METHOD_TRUST_KEY[method]
     trust_cfg: TrustEngineConfig = make_method_config(
         trust_key, quantum_enabled=quantum_enabled, quantum_cycle_time_s=quantum_cycle_time_s)
+
+    # D-066/D-067: frozen per-IMU-grade shadow-NIS acceptance bound (unknown grade -> chi2_6(0.99)).
+    if imu_grade in PROBE_NIS_BOUND_BY_GRADE:
+        trust_cfg.gnss_law_cfg.probe_nis_bound = PROBE_NIS_BOUND_BY_GRADE[imu_grade]
 
     alpha_gate = 0.0 if method == "undefended" else 1e-4
 

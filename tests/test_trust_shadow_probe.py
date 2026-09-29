@@ -137,3 +137,23 @@ def test_eskf_applies_no_gnss_update_during_probe_and_reports_shadow_nis():
                       attack_detected=False)
     kf.correct(0.0, innov2, live)
     assert kf.p[0] > 0.0
+
+
+# ---- per-IMU-grade frozen acceptance bound (D-067 pre-registered calibration) ---------------
+def test_per_grade_probe_nis_bound_applied_by_methods_layer():
+    from fedqpnt.node.methods import PROBE_NIS_BOUND_BY_GRADE, make_agent_config
+    assert PROBE_NIS_BOUND_BY_GRADE == {"industrial_mems": 25.07, "tactical": 6.74}
+    for grade, bound in PROBE_NIS_BOUND_BY_GRADE.items():
+        cfg = make_agent_config("fedqpnt_local", imu_grade=grade)
+        assert cfg.trust.gnss_law_cfg.probe_nis_bound == bound
+    assert make_agent_config("fedqpnt_local").trust.gnss_law_cfg.probe_nis_bound is None  # -> chi2_6(0.99)
+
+
+def test_probe_uses_configured_bound():
+    cfg = TrustLawConfig(probe_nis_bound=6.74)
+    law = SensorTrustLaw(cfg=cfg, law_mode="continuous", trust_law_version="v2")
+    t = _to_probe(law)
+    for _ in range(int(cfg.T_probe)):
+        law.step(t, 0.0, nis_ok=True, features_nominal=True, nis_value=10.0, es_evidence=False, es_position=False)
+        t += 1.0
+    assert law._core_v2.state == "DISTRUST"   # 10 > 6.74 although < chi2_6(0.99)=16.81

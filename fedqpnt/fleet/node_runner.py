@@ -124,7 +124,8 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
     env = NodeEnvironment(env_cfg, seed=spec.master_seed, node_id=spec.node_id, dt=spec.dt,
                            duration_s=spec.duration_s)
     agent_cfg = make_agent_config(spec.method, kappa_R=spec.kappa_R, kappa_Q=spec.kappa_Q,
-                                   world=spec.world, quantum_enabled=spec.quantum_grade is not None)
+                                   world=spec.world, quantum_enabled=spec.quantum_grade is not None,
+                                   imu_grade=spec.imu_grade)
     agent = Agent(agent_cfg, env.imu.config(), node_id=spec.node_id)
     agent.trust.detector.set_params({k: np.asarray(v) for k, v in theta0.items()})
 

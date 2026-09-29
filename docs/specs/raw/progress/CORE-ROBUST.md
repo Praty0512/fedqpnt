@@ -510,3 +510,33 @@ consistency-matched-adversary limit documented in the PROBE branch comment; tau_
 Design note: kappa_R-inflated NIS was ~100x too small for consistency (x1~0.28 with a 26 m spoof), hence the
 un-inflated shadow statistic. Tests: tests/test_trust_shadow_probe.py xfail removed (9 pass: law-level probe
 accept/veto/supersede, engine reacq waived/kept/no-shadow, ESKF no-update + shadow NIS). Pause for commit.
+
+## D-068-era check before (iii): shadow-NIS false-veto/power check (Master request; change (ii) committed)
+Script scripts/core_robust_shadow_nis_check.py (3 outage windows/mission x seeds 500-509 x grades x offsets 0/10/26/50 m,
+NO update applied in the first 10 s after each 60 s outage, per-epoch clean shadow NIS via --with-clean-epochs, <=4 workers).
+Pre-registered rule: clean false-veto <=1% at both grades -> keep chi2_6(0.99)=16.81; else replace with p99 of clean
+mean-shadow-NIS on seeds 510-529 per grade (frozen; clean data only). (c) jam_cw tactical seed 500 recovery trace also due.
+Then (iii); message Master before touching eval/metrics.py.
+SHADOW-NIS CHECK seeds 500-509 (log scratchpad/shadow_nis_500_509.log, results/m1/shadow_nis_check_500_509.json; start HEAD=1cc9d4e, end 1f43a36, fedqpnt/ dirty only from other agents):
+mean shadow NIS over first 10 s after a 60 s outage, no update applied (n=30 windows/cell); frac>16.81:
+MEMS  off0: median 3.58 p95 13.40 p99 17.06 frac 0.033 | off10: 4.69/17.26/21.95 0.067 | off26: 9.77/29.19/35.16 0.233 | off50: 28.24/58.15/66.87 1.000
+TACT  off0: median 3.12 p95 6.35 p99 9.85 frac 0.000 | off10: 6.15/10.28/12.67 0.000 | off26: 21.43/31.81/32.92 0.733 | off50: 74.63/97.91/100.79 1.000
+Clean per-epoch (no outage, n=4900): MEMS median 1.84 p95 8.02 p99 19.37 frac>16.81 0.0159; TACT 1.88/5.84/8.16 0.0002.
+Rule triggered (MEMS clean false-veto 3.3% > 1%): calibrate per grade on seeds 510-529 (running, log shadow_nis_510_529.log).
+CALIBRATION seeds 510-529 (n=60 clean windows/grade, log shadow_nis_510_529.log): MEMS p99=25.07 (frac>16.81=0.050), TACT p99=6.74 (0.000).
+FROZEN per pre-registered rule: PROBE_NIS_BOUND_BY_GRADE = {industrial_mems: 25.07, tactical: 6.74} (node/methods.py; TrustLawConfig.probe_nis_bound;
+make_agent_config(imu_grade=...); runner + fleet/node_runner pass grade). Detection power at frozen bounds (seeds 500-509, n=30, frac vetoed):
+MEMS@25.07: off0 0.00, off10 0.00, off26 0.067, off50 0.70. TACT@6.74: off0 0.033, off10 0.367, off26 1.00, off50 1.00.
+(b at chi2_6(0.99)=16.81: MEMS 0.033/0.067/0.233/1.00, TACT 0/0/0.733/1.00.)
+Full suite + (c) recovery summary running (scratchpad/suite_shadow_bound.log, jam_recovery_summary.log).
+(c) RESULT with shadow probe + per-grade bounds (scripts/core_robust_jam_recovery_summary.py, seed 500, jam_cw): REGRESSION.
+At t=302 (first valid fix after the 180 s outage) state goes TRUST->DISTRUST, w=0.02 and STAYS; err_h keeps growing (tactical 51.6->56 m over
+t300-313, MEMS 325->378 m); post RMSE tactical 31.82 / MEMS 243.23, time_to_TRUST(w>0.9) 163 s both. Suite green (log suite_shadow_bound.log, 0 F/E).
+Hypothesis (verifying via scratchpad/jam_trace_v5.txt): the TCXO truth (change i, drift RW 0.19 m/s/sqrt(s)) makes the clk_jump features x8/x9
+(dt-scaled prediction over the 180 s gap, sigma 3 m) huge on the first post-gap fix -> E_s clk_event and detector p fire -> D=1 -> DISTRUST 60 s
+at w<w_excl (no correction) -> PROBE. Position gap-reset never covered the clock features. Candidate fix (needs Master ok, trust/features.py):
+treat x8/x9 as unavailable (0) when dt since last fix > 3 s (gap-aware), like the outage handling.
+FIX for the (c) regression: trust/features.py CLK_JUMP_MAX_DT_S=3.0: x8/x9 unavailable (0) when gap since last fix > 3 s (root cause: x8=141 sigma, x9=28.8 sigma on
+the first post-outage fix with TCXO truth -> E_s clk_event + detector -> DISTRUST at w=0.02). Test test_clock_jump_features_unavailable_after_long_gap.
+Re-run (jam_recovery_summary2.log): tactical post RMSE 5.10 (max 51.9 at the 2 invalid epochs), err<5 m in 3 s, TRUST&w>0.9 in 20 s; MEMS post RMSE 25.61
+(max 328.6, same), 3 s, 20 s; first fix w=0.774 (cap waived, consistent). Full suite green (suite_features_fix.log). Change (ii) follow-up READY; then (iii).
