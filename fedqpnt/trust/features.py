@@ -31,6 +31,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from fedqpnt.core.defaults import CLOCK_Q_BIAS, CLOCK_Q_DRIFT
 from fedqpnt.core.types import GnssFix, Innovation, QuantumSample, NavSolution
 
 FEATURE_NAMES = (
@@ -52,13 +53,15 @@ MU_CN0_REF_DBHZ = 45.0
 SIGMA_CLK_BIAS_M = 3.0
 SIGMA_CLK_DRIFT_MPS = 0.2
 K_CUSUM = 1.5
-# D-067 (jam recovery): x8/x9 predict the receiver clock forward by dt from the last fix. With a TCXO-class
-# oscillator (D-066 addendum: q_drift 3.55e-2 m^2/s^3) the prediction error after a long GNSS outage (jamming,
-# tunnel) is ~100+ sigma from ordinary holdover drift, which is NOT spoofing evidence; it false-fired E_s
-# clk_event and the detector on the first fix after every outage and locked GNSS out. x8/x9 are therefore
-# treated as unavailable (0, like the outage handling) when the gap since the last fix exceeds this bound
-# [ASSUMPTION: 3 s = 3 nominal 1 Hz epochs].
-CLK_JUMP_MAX_DT_S = 3.0
+# D-071 (replaces the D-067 blanket "unavailable after a >3 s gap"): x8/x9 are the clock-bias / drift jumps
+# relative to the forward prediction from the last fix, normalised by the PREDICTED clock innovation std over
+# the gap from the TCXO two-state model (closed form; q values in fedqpnt/core/defaults.py, Brown & Hwang /
+# Krawinkel & Schon 2021 / Qin et al. 2021):
+#     sigma_b(dt)^2 = r_bias + q_bias*dt + q_drift*dt^3/3,      sigma_d(dt)^2 = r_drift + q_drift*dt
+# with r_bias = sigma_clk_bias^2, r_drift = sigma_clk_drift^2. At dt = 1 s sigma_b is unchanged to 0.1% but
+# sigma_d grows from 0.200 to 0.275 (x9 scaled by 0.73); after a long outage ordinary TCXO holdover drift is
+# no longer a spurious 100+ sigma "jump" (it made the first post-outage fix false-fire E_s clk_event and the
+# detector), yet a large replay-delay step still shows up in proportion to its size vs the holdover std.
 
 
 def _innovation_nis_over_dof(innovations: list[Innovation], sensor: str) -> float:
@@ -180,14 +183,15 @@ class GnssFeatureExtractor:
             x1 = _innovation_nis_over_dof(innovations, "gnss_pos")
             x2 = _innovation_nis_over_dof(innovations, "gnss_vel")
             x3 = (fix.raim_stat / max(fix.num_sats - 4, 1)) if np.isfinite(fix.raim_stat) else 0.0
-            if (self._last_clk_bias is None or self._last_clk_drift is None or not np.isfinite(fix.clk_bias)
-                    or dt > CLK_JUMP_MAX_DT_S):
+            sig_b = float(np.sqrt(self.sigma_clk_bias ** 2 + CLOCK_Q_BIAS * dt + CLOCK_Q_DRIFT * dt ** 3 / 3.0))
+            sig_d = float(np.sqrt(self.sigma_clk_drift ** 2 + CLOCK_Q_DRIFT * dt))
+            if self._last_clk_bias is None or self._last_clk_drift is None or not np.isfinite(fix.clk_bias):
                 x8 = 0.0
             else:
                 pred_b = self._last_clk_bias + self._last_clk_drift * dt
-                x8 = abs(fix.clk_bias - pred_b) / self.sigma_clk_bias
-            x9 = (0.0 if (self._last_clk_drift is None or not np.isfinite(fix.clk_drift) or dt > CLK_JUMP_MAX_DT_S)
-                  else abs(fix.clk_drift - self._last_clk_drift) / self.sigma_clk_drift)
+                x8 = abs(fix.clk_bias - pred_b) / sig_b
+            x9 = (0.0 if self._last_clk_drift is None or not np.isfinite(fix.clk_drift)
+                  else abs(fix.clk_drift - self._last_clk_drift) / sig_d)
             x10 = fix.residual_rms if np.isfinite(fix.residual_rms) else 0.0
 
         x4 = fix.mean_cn0 - self.mu_cn0_ref

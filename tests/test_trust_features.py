@@ -3,6 +3,7 @@ streams (no synthetic GnssFix stand-ins) to build the causal input."""
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from fedqpnt.core.seeding import stream
 from fedqpnt.core.types import Innovation
@@ -86,22 +87,63 @@ def test_cusum_grows_under_sustained_spoofing_and_resets_under_clean():
     assert np.max(late_attack) >= np.max(pre_attack)
 
 
-def test_clock_jump_features_unavailable_after_long_gap():
-    """D-067: x8/x9 must not fire on the first fix after a long outage (TCXO holdover drift is not spoofing)."""
+def _clk_fix(t, bias, drift):
     import numpy as np
     from fedqpnt.core.types import GnssFix
-    from fedqpnt.trust.features import GnssFeatureExtractor
+    return GnssFix(t=t, pos=np.zeros(3), vel=np.zeros(3), clk_bias=bias, clk_drift=drift, cov_pos=np.eye(3),
+                   cov_vel=np.eye(3), residual_rms=0.5, num_sats=8, mean_cn0=45.0, std_cn0=1.0, agc_db=0.0,
+                   valid=True, raim_stat=1.0)
 
-    def fx(t, bias, drift):
-        return GnssFix(t=t, pos=np.zeros(3), vel=np.zeros(3), clk_bias=bias, clk_drift=drift, cov_pos=np.eye(3),
-                       cov_vel=np.eye(3), residual_rms=0.5, num_sats=8, mean_cn0=45.0, std_cn0=1.0, agc_db=0.0,
-                       valid=True, raim_stat=1.0)
+
+def test_clock_jump_normalised_by_tcxo_holdover_std_after_long_gap():
+    """D-071 (a): ordinary TCXO holdover over a 180 s outage (truth ClockState) must NOT look like a clock
+    jump on the first fix after the outage (x8/x9 stay below the E_s clk_event threshold es_clk_sigma=5)."""
+    import numpy as np
+    from fedqpnt.gnss.signal import ClockState
+    from fedqpnt.trust.features import GnssFeatureExtractor
+    from fedqpnt.trust.trust_law import TrustLawConfig
+    thr = TrustLawConfig().es_clk_sigma
+    hits = []
+    for seed in range(200):
+        rng = np.random.default_rng(seed)
+        clk = ClockState()
+        ex = GnssFeatureExtractor()
+        for k in range(1, 4):                       # a few normal epochs, then the outage
+            clk.step(1.0, rng)
+            ex.step(_clk_fix(float(k), clk.bias_m + rng.normal(0, 3.0), clk.drift_mps + rng.normal(0, 0.2)), [])
+        for _ in range(180):
+            clk.step(1.0, rng)
+        f = ex.step(_clk_fix(183.0, clk.bias_m + rng.normal(0, 3.0), clk.drift_mps + rng.normal(0, 0.2)), [])
+        hits.append(max(f[7], f[8]) > thr)
+    assert np.mean(hits) <= 0.02, f"post-outage clk_event false-fire fraction {np.mean(hits):.3f}"
+
+
+def test_meaconing_step_on_first_fix_after_gap_reports_its_x8():
+    """D-071 (b): a 750 m replay-delay step (meaconing severity 0.5) on the first fix after a 180 s gap.
+    sigma_b(180 s)^2 = 9 + q_b*180 + q_d*180^3/3 -> ~263 m, so x8 ~ 2.85 < es_clk_sigma=5: the closed-form
+    normalisation does NOT make a 750 m step an E_s clk_event after a 3-minute holdover (reported, threshold
+    NOT tuned). At a normal 1 s gap the same step is ~250 sigma."""
+    import numpy as np
+    from fedqpnt.core.defaults import CLOCK_Q_BIAS, CLOCK_Q_DRIFT
+    from fedqpnt.trust.features import GnssFeatureExtractor
     ex = GnssFeatureExtractor()
-    ex.step(fx(1.0, 0.0, 0.0), [])
-    ex.step(fx(2.0, 0.0, 0.0), [])
-    near = ex.step(fx(3.0, 40.0, 0.0), [])        # 1 s later: 40 m jump is real evidence
-    assert near[7] > 5.0
+    ex.step(_clk_fix(1.0, 0.0, 0.0), [])
+    far = ex.step(_clk_fix(181.0, 750.0, 0.0), [])          # dt = 180 s
+    sig = np.sqrt(9.0 + CLOCK_Q_BIAS * 180 + CLOCK_Q_DRIFT * 180 ** 3 / 3.0)
+    assert far[7] == pytest.approx(750.0 / sig, rel=1e-6)
+    print("x8 after 180 s gap for a 750 m step:", far[7])
     ex2 = GnssFeatureExtractor()
-    ex2.step(fx(1.0, 0.0, 0.0), [])
-    far = ex2.step(fx(181.0, 400.0, 5.0), [])      # 180 s gap: holdover drift, unavailable
-    assert far[7] == 0.0 and far[8] == 0.0
+    ex2.step(_clk_fix(1.0, 0.0, 0.0), [])
+    near = ex2.step(_clk_fix(2.0, 750.0, 0.0), [])           # dt = 1 s
+    assert near[7] > 200.0
+
+
+def test_nominal_dt1_clock_features_scaling_vs_previous():
+    """D-071: at dt=1 s sigma_b is unchanged to 0.1% (3.0 -> 3.003); sigma_d 0.200 -> 0.275 (x9 x0.73)."""
+    import numpy as np
+    from fedqpnt.trust.features import GnssFeatureExtractor
+    ex = GnssFeatureExtractor()
+    ex.step(_clk_fix(1.0, 0.0, 0.0), [])
+    f = ex.step(_clk_fix(2.0, 3.0, 0.2), [])
+    assert f[7] == pytest.approx(3.0 / 3.003, rel=2e-3)
+    assert f[8] == pytest.approx(0.2 / 0.2748, rel=2e-3)

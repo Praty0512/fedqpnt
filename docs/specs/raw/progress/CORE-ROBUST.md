@@ -540,3 +540,11 @@ FIX for the (c) regression: trust/features.py CLK_JUMP_MAX_DT_S=3.0: x8/x9 unava
 the first post-outage fix with TCXO truth -> E_s clk_event + detector -> DISTRUST at w=0.02). Test test_clock_jump_features_unavailable_after_long_gap.
 Re-run (jam_recovery_summary2.log): tactical post RMSE 5.10 (max 51.9 at the 2 invalid epochs), err<5 m in 3 s, TRUST&w>0.9 in 20 s; MEMS post RMSE 25.61
 (max 328.6, same), 3 s, 20 s; first fix w=0.774 (cap waived, consistent). Full suite green (suite_features_fix.log). Change (ii) follow-up READY; then (iii).
+
+## D-071 (before (iii)): principled clock-jump normalisation replaces the blanket >3 s gap blind
+features.py x8/x9 normalised by predicted TCXO innovation std over dt (closed form; q values now single-sourced in core/defaults.py CLOCK_Q_BIAS/CLOCK_Q_DRIFT,
+used by ClockKFConfig, signal.py ClockState, features.py): sigma_b^2=r_bias+q_b dt+q_d dt^3/3, sigma_d^2=r_drift+q_d dt. At dt=1 s sigma_b 3.000->3.003
+(0.1%), sigma_d 0.200->0.275 (x9 x0.73: stated change). Tests (tests/test_trust_features.py): (a) post-180 s-outage x8/x9 under TCXO truth: false clk_event <=2%
+(numbers in scratchpad/x89_after_gap.log); (b) 750 m replay step on first fix after 180 s gap gives x8=2.855 (sigma_b(180)=262.7 m), BELOW es_clk_sigma=5
+-> does NOT fire (reported, threshold not tuned); same step at dt=1 s is ~250 sigma. Recovery re-run: scratchpad/jam_recovery_summary3.log; suite: suite_d071.log.
+Detector retrain deferred (v3 + theta0_noabrupt after freeze, D-067).

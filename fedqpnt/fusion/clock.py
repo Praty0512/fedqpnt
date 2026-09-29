@@ -22,6 +22,7 @@ from typing import Any
 
 import numpy as np
 
+from fedqpnt.core.defaults import CLOCK_Q_BIAS, CLOCK_Q_DRIFT
 from fedqpnt.core.types import GnssFix
 
 
@@ -36,8 +37,8 @@ class ClockKFConfig:
     # The simulated TRUTH clock (fedqpnt/gnss/signal.py ClockState) uses the same values, so the
     # filter is model-consistent (was q_bias=1.0, q_drift=1e-3 [ASSUMPTION] vs a truth 4000x quieter
     # in drift than a TCXO). Q is oscillator physics and is NOT scaled by trust.
-    q_bias: float = 0.5 * (299_792_458.0 ** 2) * 2e-19                  # [m^2/s]
-    q_drift: float = (299_792_458.0 ** 2) * 2.0 * np.pi ** 2 * 2e-20    # [(m/s)^2/s]
+    q_bias: float = CLOCK_Q_BIAS      # [m^2/s]      (fedqpnt/core/defaults.py, provenance above)
+    q_drift: float = CLOCK_Q_DRIFT    # [(m/s)^2/s]
     # Baseline (w=1) measurement noise -- reuses the same [ASSUMPTION] sigmas
     # trust/features.py uses for x8/x9 (sigma_clk_bias_m=3.0, sigma_clk_drift_mps=0.2),
     # single source of truth for "how noisy is one epoch of clk_bias/clk_drift".
