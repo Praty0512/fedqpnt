@@ -33,6 +33,15 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-065 · 2026-09-29 · Coasting envelope accepted (CAI 2.1–3.4× lower max coasting error); ClockKF holdover; drift contradiction (suspected probing into an ongoing spoof); paper resumed for results-independent sections
+- **Coasting (180 s forced outage, seeds 500–504; max err_h):** MEMS 1339 → 645 m (CAI on); tactical 400 → 119 m. This is the quantum-sensor contribution under GNSS denial. The "@180 s" column sampled after GNSS returned and is invalid; it is being fixed.
+- **Tactical smoke:** the drift_spoof defended RMSE 115 m (max 220 m, mean w 0.59) is worse than both undefended (108 m) and pure tactical + CAI coasting (max 119 m). Hypothesis: PROBE re-admits GNSS while the spoof persists, and each probe drags the state. Diagnosis is commissioned; candidate fixes are consistency-gated probe acceptance and a shadow-update probe.
+- **Clock:** ClockKF gets a w_excl hard-exclusion holdover (free-running oscillator). Q is NOT scaled by trust (it is physics). q_bias = 1.0 m²/s is to be verified against a cited oscillator model.
+- **Meaconing, tactical:** defended 6.6 vs undefended 2.5 m. The trust split (D-063) is still needed.
+- **Paper:** the user directed "keep working until the project is finished". The PAPER agent (Sonnet) drafts the results-independent Sections IV–V; the trust-law subsection is held until the freeze.
+- **Process:** H2-ABRUPT's node_runner telemetry change is applied in a freeze window at HEAD 906ae98, with a pre-diff golden bit-identity test.
+- **Owner:** Master
+
 ### D-064 · 2026-09-29 · H2/H4 abrupt: pre-registered EVENT-LEVEL metrics; re-run parked until core freeze
 - **Diagnostic accepted:**
   - The arms' n0 weights differ (L2 between arms 0.007–0.012 ≈ each arm's own movement from θ0), so the run is not invalid by construction.
