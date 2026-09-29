@@ -497,3 +497,16 @@ tests/test_fusion_clock_holdover.py::test_above_w_excl_still_updates = regressio
 w=1 update behaviour, intentionally passes before the change (kept, not a defect). Not touched: eval/*, attacks/*, environment.py.
 Timing baselines (rmse_t_ns 13.7 nominal, 1284/1358 meaconing) are PRE-change; re-measure in combined run.
 PAUSE for Master commit after suite green, then (ii).
+
+## CHANGE (ii) IMPLEMENTED (awaiting full suite: scratchpad/suite_change_ii.log, bg task b672d1o5z)
+Files: core/types.py (TrustState.probe_shadow=False default), fusion/eskf.py (innovations() also emits
+"gnss_shadow" 6-D innovation = same nu vs coasting P with the receiver's own UN-inflated covariance, chi2_6
+under nominal; correct() skips the GNSS update when trust.probe_shadow), node/agent.py (ClockKF weight 0
+during shadow), trust/trust_law.py (CHI2_6_99; _LawCoreV2.advance(es_position): position jump term
+superseded in PROBE, clk/xsat/cn0 veto stays; PROBE accept iff mean shadow NIS<=chi2_6(0.99) and no
+non-position E_s; SensorTrustLaw.probe_shadow; engine passes shadow NIS, splits E_s parts, waives
+apply_reacquisition_cap ONLY for v2 laws when a shadow innovation exists, NIS<=chi2_6(.99), E_s silent;
+consistency-matched-adversary limit documented in the PROBE branch comment; tau_r untouched).
+Design note: kappa_R-inflated NIS was ~100x too small for consistency (x1~0.28 with a 26 m spoof), hence the
+un-inflated shadow statistic. Tests: tests/test_trust_shadow_probe.py xfail removed (9 pass: law-level probe
+accept/veto/supersede, engine reacq waived/kept/no-shadow, ESKF no-update + shadow NIS). Pause for commit.

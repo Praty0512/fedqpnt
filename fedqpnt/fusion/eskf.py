@@ -346,6 +346,17 @@ class ESKF:
             accepted = nis <= chi2.ppf(1.0 - self.cfg.alpha_gate, 6)
             self._pending["gnss"] = (nu, H, R, 6)
             out.append(Innovation(t=t, sensor="gnss", nu=nu, S=S, nis=nis, dof=6, accepted=bool(accepted)))
+            # D-066 shadow consistency statistic: the SAME innovation against the coasting state, but
+            # with the receiver's own (honest, D-043) covariance -- no kappa_R inflation, no trust
+            # scaling -- so that under nominal conditions it is ~chi2_6 and a chi2_6(0.99) bound is
+            # meaningful (the kappa_R-inflated NIS above is calibrated for filtering correlated GNSS
+            # errors, not for single-epoch consistency, and is ~100x too small for this purpose).
+            R_raw = np.zeros((6, 6))
+            R_raw[0:3, 0:3] = _spd_or_fallback(fix.cov_pos, self.cfg.fallback_cov_pos)
+            R_raw[3:6, 3:6] = _spd_or_fallback(fix.cov_vel, self.cfg.fallback_cov_vel)
+            S_raw = H @ self.P @ H.T + R_raw
+            out.append(Innovation(t=t, sensor="gnss_shadow", nu=nu, S=S_raw,
+                                   nis=float(nu @ np.linalg.solve(S_raw, nu)), dof=6, accepted=True))
             self._last_clk_bias = fix.clk_bias
 
         if quantum is not None and quantum.valid:
@@ -397,6 +408,8 @@ class ESKF:
             if sensor not in self._pending:
                 continue
             nu, H, R_nom, dof = self._pending[sensor]
+            if sensor == "gnss" and getattr(trust, "probe_shadow", False):
+                continue  # D-066 shadow probe: innovation/NIS evaluated by the trust engine, NO update
             w = trust.weights.get(sensor, 1.0)
             if w < self.cfg.w_excl:
                 continue  # exclusion (Sec 2.7)

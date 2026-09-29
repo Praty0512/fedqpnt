@@ -215,6 +215,9 @@ class TrustState:
     weights: dict[str, float]          # keys from SENSORS
     anomaly_scores: dict[str, float]   # raw detector outputs feeding the trust update
     attack_detected: bool
+    # D-066 shadow probe: True while the GNSS trust law is in PROBE. The filter must then compute the
+    # GNSS innovation/NIS but apply NO GNSS update (no state or covariance change).
+    probe_shadow: bool = False
 
 
 @dataclass(frozen=True)

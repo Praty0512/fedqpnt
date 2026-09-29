@@ -39,6 +39,9 @@ from scipy.stats import chi2
 
 from fedqpnt.core.types import ImuSample, Innovation, QuantumSample
 
+# D-066: shadow-probe / shadow-consistent-reacquisition acceptance bound on the (joint 6-D) NIS.
+CHI2_6_99 = float(chi2.ppf(0.99, 6))
+
 LawMode = Literal[
     "continuous", "no_recovery_gate", "binary_hysteresis",
     "detect_switch", "fixed_exclude", "w_equals_1",
@@ -292,17 +295,23 @@ class _LawCoreV2:
         self.w = float(np.clip(self.w, c.w_min, 1.0))
 
     def advance(self, t: float, p: float, nis_ok: bool, features_nominal: bool,
-                nis_value: float, es_evidence: bool) -> float:
+                nis_value: float, es_evidence: bool, es_position: bool = False) -> float:
         c = self.cfg
+        # D-066: es_evidence = clk/xsat/cn0 physical evidence (always vetoes, also in PROBE);
+        # es_position = short-baseline jump test, SUPERSEDED during PROBE by the shadow-NIS test
+        # (consistency with the coasting INS/CAI state is the stronger evidence, and it resolves
+        # the false fire on a legitimate fix return after a spoof ends).
+        es_pos_active = es_position and self.state != "PROBE"
+        es_any = es_evidence or es_pos_active
         # T_sup (sec C item 4): while suppressed, the learned detector's p is
         # ignored (treated as clean) unless E_s itself fires -- E_s always
         # gets through, so a genuine physical spoof signature can still
         # re-trigger exclusion during the suppression window.
-        effective_p = 0.0 if (self._suppress_timer > 0 and not es_evidence) else p
+        effective_p = 0.0 if (self._suppress_timer > 0 and not es_any) else p
         # es_evidence is a PHYSICAL signature, not the learned detector: if
         # it fires, force the hysteresis core to see p=1 regardless of
         # suppression, so an evidenced spoof is never masked.
-        if es_evidence:
+        if es_any:
             effective_p = 1.0
 
         info = self.core.advance(t, effective_p, nis_ok, features_nominal)
@@ -331,8 +340,13 @@ class _LawCoreV2:
                 self._probe_es_any = False
 
         elif self.state == "PROBE":
-            # sec C item 3: w fixed at w_probe regardless of p, for the
-            # whole probe; collect NIS + E_s evidence.
+            # sec C item 3: w fixed at w_probe regardless of p, for the whole probe; collect NIS +
+            # E_s evidence. D-066 SHADOW PROBE: while in PROBE the filter applies NO GNSS update
+            # (TrustState.probe_shadow); nis_value is the joint 6-D GNSS innovation NIS against
+            # the coasting state (receiver's own covariance, chi2_6 under nominal conditions).
+            # Known limit (paper limitation): a consistency-matched adversary that keeps the
+            # spoof inside the coast uncertainty can pass the probe; the damage is bounded by the
+            # coast covariance P (once admitted, the pull per epoch stays inside ~sqrt(S)).
             self.w = c.w_probe
             self._probe_timer += dt
             self._probe_nis_sum += nis_value
@@ -340,7 +354,7 @@ class _LawCoreV2:
             self._probe_es_any = self._probe_es_any or es_evidence
             if self._probe_timer >= c.T_probe:
                 mean_nis = self._probe_nis_sum / max(self._probe_nis_n, 1)
-                if mean_nis <= c.nis_clean_threshold and not self._probe_es_any:
+                if mean_nis <= CHI2_6_99 and not self._probe_es_any:
                     # sec C item 4, success: TRUST, detector suppressed for
                     # T_sup, recovery continues via the normal ramp (next
                     # call, from w=w_probe) in the TRUST branch above.
@@ -397,8 +411,14 @@ class SensorTrustLaw:
     def attack_detected(self) -> bool:
         return bool(self._core_v2.D) if self._uses_v2 else bool(self._core.D)
 
+    @property
+    def probe_shadow(self) -> bool:
+        """D-066: True while the v2 law is in PROBE (GNSS evaluated, not applied)."""
+        return bool(self._uses_v2 and self._core_v2.state == "PROBE")
+
     def step(self, t: float, p: float, nis_ok: bool = True, features_nominal: bool = True,
-             nis_value: float | None = None, es_evidence: bool = False) -> float:
+             nis_value: float | None = None, es_evidence: bool = False,
+             es_position: bool = False) -> float:
         c = self.cfg
 
         if self.law_mode == "fixed_exclude":
@@ -421,8 +441,8 @@ class SensorTrustLaw:
             # (e.g. existing v1-style call sites / tests).
             nv = nis_value
             if nv is None:
-                nv = 0.0 if nis_ok else (c.nis_clean_threshold + 1.0)
-            return self._core_v2.advance(t, p, nis_ok, features_nominal, nv, es_evidence)
+                nv = 0.0 if nis_ok else 2.0 * CHI2_6_99
+            return self._core_v2.advance(t, p, nis_ok, features_nominal, nv, es_evidence, es_position)
 
         info = self._core.advance(t, p, nis_ok, features_nominal)
         dt, tau_star, D, G, G_capped = info["dt"], info["tau_star"], info["D"], info["G"], info["G_capped"]
@@ -732,7 +752,7 @@ class TrustEngineImpl:
     def _physical_spoof_evidence(self, raw: np.ndarray, fix: GnssFix,
                                   nav_prior: NavSolution | None,
                                   innovations: list[Innovation],
-                                  skip_position: bool = False) -> bool:
+                                  skip_position: bool = False, split: bool = False):
         """D-051 sec C: E_s, the physical spoof-evidence set. Uses the
         detector's own running normalizer (updated only on pseudo-label-
         negative samples) as the "clean reference" mu/sd -- the same idea
@@ -796,7 +816,10 @@ class TrustEngineImpl:
             stat = float(d @ np.linalg.solve(S_d, d))
             position_event = stat > chi2.ppf(c.es_position_gate_quantile, 3)
 
-        return bool(clk_event or xsat_event or cn0_event or position_event)
+        other_event = bool(clk_event or xsat_event or cn0_event)
+        if split:
+            return bool(position_event), other_event
+        return bool(other_event or position_event)
 
     def update(self, t: float, fix: GnssFix | None, imu: ImuSample | None,
                quantum: QuantumSample | None, nav_prior: NavSolution | None,
@@ -836,17 +859,31 @@ class TrustEngineImpl:
                 nis_ok = raw[0] <= self.gnss_law.cfg.nis_clean_threshold
                 xtilde = self.detector.normalizer.normalize(raw)
                 features_nominal = bool(np.all(np.abs(xtilde[2:11]) <= _FEATURES_NOMINAL_Z))
-                es_evidence = (self._physical_spoof_evidence(raw, fix, nav_prior, innovations,
-                                                              skip_position=skip_position)
-                               if self.gnss_law._uses_v2 else False)
+                if self.gnss_law._uses_v2:
+                    es_pos, es_other = self._physical_spoof_evidence(
+                        raw, fix, nav_prior, innovations, skip_position=skip_position, split=True)
+                else:
+                    es_pos = es_other = False
+                # D-066: joint 6-D shadow NIS of this fix against the coasting state.
+                shadow_inv = next((iv for iv in innovations if iv.sensor == "gnss_shadow"), None)
+                shadow_nis = float(shadow_inv.nis) if shadow_inv is not None else 3.0 * float(raw[_IDX_NIS_POS])
+                was_probe = self.gnss_law.probe_shadow
                 self.last_raw_p = p              # D-056 metric (a): logging only, not consumed downstream
-                self.last_es_evidence = es_evidence  # D-056 metric (d): logging only
+                # D-056 metric (d): logging only (position term is superseded while in PROBE)
+                self.last_es_evidence = bool(es_other or (es_pos and not was_probe))
                 gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal,
-                                             nis_value=float(raw[_IDX_NIS_POS]), es_evidence=es_evidence)
+                                             nis_value=shadow_nis, es_evidence=es_other, es_position=es_pos)
 
                 if gap > self.gnss_law.cfg.T_gap:
-                    self.gnss_law.apply_reacquisition_cap()
-                    gnss_w = self.gnss_law.w
+                    # D-066 shadow-consistent reacquisition: the cap exists because the first fix after
+                    # an outage is untrusted; waive it only when this first fix is CONSISTENT with the
+                    # coasting state (shadow NIS <= chi2_6(0.99)) AND E_s is silent. Otherwise keep the
+                    # cap. tau_r is NOT changed. (Same consistency-matched-adversary limit as the probe.)
+                    consistent = (self.gnss_law._uses_v2 and shadow_inv is not None and shadow_nis <= CHI2_6_99
+                                  and not (es_other or es_pos))
+                    if not consistent:
+                        self.gnss_law.apply_reacquisition_cap()
+                        gnss_w = self.gnss_law.w
                 self._last_valid_gnss_t = t
                 # D-058: keep this epoch's raw fix pos/cov for NEXT epoch's
                 # short-baseline test (stored after use above, so the test
@@ -871,4 +908,5 @@ class TrustEngineImpl:
                                  # report its binary anomaly indicator here for TrustState schema symmetry.
         }
         return TrustState(t=t, weights=weights, anomaly_scores=anomaly_scores,
-                           attack_detected=self.gnss_law.attack_detected)
+                           attack_detected=self.gnss_law.attack_detected,
+                           probe_shadow=self.gnss_law.probe_shadow)
