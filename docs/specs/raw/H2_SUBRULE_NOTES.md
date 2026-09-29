@@ -1,3 +1,13 @@
+> **SUPERSEDED (abrupt-control numbers only) by H2-ABRUPT (D-061a), measured
+> on pre-D-058 core.** The abrupt es_fire_frac_attack (~1.7-1.9%) and the
+> H2-control table below were measured BEFORE CORE-ROBUST's fix to the
+> D-058 short-baseline jump test's `nav_prior` bug (fedqpnt/trust/trust_law.py);
+> under the fixed core, abrupt fires E_s at 15.6% at the same severity used
+> here. See `docs/specs/raw/H2_ABRUPT_NOTES.md` and
+> `results/fleet/h2_abrupt.json` for the current numbers (severity=0.15,
+> chosen to keep E_s quiet under the fixed core). The drift/meaconing
+> sub-rule-unreachable finding below is UNCHANGED and still current.
+
 ## H2-SUBRULE (D-056 protocol implementation) -- kappa_R PROVISIONAL; TUNING SEEDS
 
 Agent: H2-SUBRULE. Implements DECISION_LOG D-056's amended H2/H4 evaluation

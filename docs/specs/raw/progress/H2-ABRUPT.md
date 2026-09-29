@@ -132,6 +132,45 @@ count (140/900) -- suspect the reacq_epochs=2 lock-loss window right after
 onset dominates the fire count at these severities more than raw jump size;
 0.2 (16m) still fails; 0.15 (12m) and 0.1 (8m) both pass cleanly (0/900).
 
+## Master ruling D-061a (received mid-task, addressed before fleet runs)
+1. Compute theta0_noabrupt's held-out abrupt AUC at EXPLICIT severities
+   0.15/0.1/0.2 (same 13 seeds as the 0.898 result), since that 0.898 was
+   measured at the training-pool DEFAULT abrupt severity (0.5, from
+   `build_supervised_dataset._family_attacks`), NOT the 0.15 the fleet runs
+   actually use. Master confirmed no leakage (`jam_then_spoof` uses
+   `drift_spoof`, not `abrupt_spoof` -- checked, correct, see
+   `_family_attacks` line ~105-107: jam_wideband + drift_spoof, no abrupt).
+   Wrote `scripts/h2_abrupt_theta0_auc_by_severity.py` (reimplements
+   `collect_run`'s body locally with an explicit severity override --
+   `build_supervised_dataset.py` not edited) and launched it in the
+   background (task **b1mcfth4f**, log `h2_abrupt_theta0_auc_by_severity.log`,
+   writes into `results/fleet/h2_abrupt_theta0_auc_check.json` alongside the
+   existing severity=0.5 result under a new `auc_by_severity` key).
+   **Severity=0.15 result (same 13 seeds, n=1534 epochs, 1157 positive):
+   AUC=0.805** -- BELOW Master's 0.85 low-headroom threshold, so per the
+   pre-registered decision rule, H2/H4 run "as planned" (not flagged
+   low-headroom). Still waiting on 0.1 and 0.2 (reported for context per
+   Master's request) before the job finishes.
+2. Pre-registered decision rule (DO NOT change after seeing fleet results):
+   if zero-shot AUC at sev 0.15 >= 0.85 -> still run H2/H4 as planned but
+   label it 'low-headroom' and ALSO report per-severity AUC deltas (FL
+   minus zero-shot); if < 0.85 -> run as planned either way. Recorded here
+   BEFORE the fleet driver runs, per Master's pre-registration requirement.
+3. Severity 0.15 (E_s-quiet, 0% firing) ACCEPTED by Master for H2/H4/control.
+4. Old H2_SUBRULE_NOTES.md abrupt-control numbers: add a one-line header
+   note "SUPERSEDED by H2-ABRUPT (D-061a), measured on pre-D-058 core" --
+   NOT deleted (done below, see "H2_SUBRULE_NOTES.md header" section).
+5. CPU budget: `tasklist` still shows 13-14 python.exe processes (CORE-
+   ROBUST's chain still running) as of this ruling; the wait-loop
+   (bg6yh1t5m) has NOT yet started the fleet driver -- confirmed correct,
+   still respecting the <=6-process shared budget. The new severity-check
+   script (b1mcfth4f) is single-process/lightweight, same footprint class
+   as steps 1/2, launched without waiting.
+
+## H2_SUBRULE_NOTES.md header note (done)
+Added a one-line SUPERSEDED marker at the top of the file (see that file);
+content otherwise left intact per Master's "not deletion" instruction.
+
 ## Steps 1+2 COMPLETE. Step 3-5 driver written, waiting on CPU headroom.
 - Wrote `scripts/h2_abrupt_h2h4_driver.py`: runs H2 (novel family=abrupt),
   H4 (cold-start, same), and the control (family=drift, s=1, n0 DID see it)
