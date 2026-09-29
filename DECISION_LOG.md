@@ -33,6 +33,33 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-068 · 2026-09-29 · Rulings on the EVAL-CONSIST audit: σ_nom, the confirmatory family, the S7 bound, latency_eff, the seed gate, the S2 P_D bug, scenario registry vs intent
+- **Correction to the record:** D-055's text contains no "3σ_nom" bound. The bound comes from ARCHITECTURE §6.1, with σ_nom undefined; D-061 mis-attributed it. It is therefore defined now, before any test-seed data, and disclosed as defined after the tuning data.
+- **σ_nom (frozen for M4):** the across-seed std of the undefended nominal-scenario RMSE_h, measured on ≥ 20 disjoint tuning seeds (560–579) **per IMU grade**, frozen with the core.
+  - Primary safety criterion: mean_defended ≤ mean_undefended + 3σ_nom, per scenario × grade.
+  - Secondary (pre-registered now): the paired Hodges–Lehmann difference defended − undefended with a 95% CI.
+- **Confirmatory family:** 8 tests, fixed m = 8, Holm; an unevaluable test counts as NOT rejected (m never shrinks):
+  - H1 × {RMSE_h(att), latency_on} on S2-med vs Baseline A;
+  - H2 × {P_D@10 s, onset latency} per D-064 (the H2 RMSE test is dropped; the D-064 event-level primaries replace it; disclosed);
+  - H3 × latency_eff vs abl_minus_quantum at the {MEMS, tactical} grades;
+  - H4 × {P_D@10 s, latency} for the cold-start node (D-064 protocol).
+  - Wiring fixes: S8 method list; an abl_minus_quantum arm where H3 is tested. Uniform censoring: 60 s for the event-level metrics, t_off − t_on elsewhere, and never data-dependent (nanmax removed).
+- **S7 chattering bound:** re-derived from the frozen post-D-066 config, plus adversarial property tests; the integer count is pre-registered at the freeze.
+- **latency_eff:** the proposal spec is approved (t_eff = first epoch the injected offset exceeds 3σ_nom via a truth-side offset channel; misses censored at t_off − t_eff; never-effective runs excluded).
+- **Seed gate:** the classify_seed [10000, 20000) proposal is approved and enforced at the lowest level (run_single / run_fleet, not only run_campaign), with tests.
+- **Bugs to fix:**
+  - S2 P_D is always 1.0 (isfinite on censored latency): use an explicit detected flag;
+  - D-062 clean-tree provenance check in the campaign runner;
+  - ANEES_pos uses the full 3×3 position block, not the diagonal.
+- **Scenario registry vs intent** (S4 jam leg only; S6 is a GNSS drift with no −quantum arm; S10 no rate grid; S11 no noise scaling; S7 one period vs five; S12 sign-flip at 20% only; S15 missing leg; S3/S14 criteria are stubs):
+  - bring the code to the ARCHITECTURE intent before M4;
+  - S6 is re-registered so it can answer H3 (a CAI-relevant condition plus an abl_minus_quantum arm);
+  - where the intent is infeasible, narrow the paper's description instead;
+  - all of this is labelled as registered after the tuning data but before the test data.
+- **S5:** the N = 5 rounding gives 40% (2/5). It is documented as-is; the spec N = 10 gives 30%.
+- **Execution:** the SCENARIO-FIX agent starts after CORE-ROBUST's change (0) lands (both touch eval/scenarios.py and campaign.py).
+- **Owner:** Master
+
 ### D-067 · 2026-09-29 · Rulings on the PAPER agent's spec/code mismatch audit (15 items)
 - **κ_R default (critical):** D-061's κ_R = 60 was never made the default. node/methods.py DEFAULT_KAPPA_R = 40, so the campaign, fleet and H2 runs used 40. Fix: a single source of truth, DEFAULT_KAPPA_R = 60, imported everywhere, with a test. This is CORE-ROBUST change (0), before (i).
 - **Detector and θ0 retrain after the freeze:** the supervised data was collected at κ_R = 40 on the old core, and the filter-derived features (NIS etc.) change. Detector v3 and θ0_noabrupt are retrained at the freeze, before the H2 re-run and M4.

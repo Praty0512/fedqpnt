@@ -64,6 +64,8 @@ Aggregation = FedAvg (alias). Prox term `(μ/2)||θ - θ_g||²` is entirely clie
 
 **Parameter:** `FedProxConfig.mu` (default 0 = FedAvg).
 
+**Evaluation status [updated 2026-09-29, D-067]:** with the frozen μ = 0 (D-056; the chosen FL hyperparameters) FedProx is *identical* to FedAvg (`aggregator.fedprox_aggregate = fedavg`, and the prox term vanishes client-side), and there is no FedProx arm in the fleet runner (`eval/fleet_adapter._METHOD_MAP` has fedqpnt, fedavg_ablation, baseline_a, baseline_b_cont, baseline_b_bin). Per D-067 FedProx is therefore **not an evaluated method** and no result or claim may be attributed to it; it is mentioned only as implemented-but-not-evaluated. Any FedProx result would be a relabelled FedAvg result.
+
 ### TRIM-NB-R (Byzantine-Robust Aggregator)
 1. Clip each δ by `c × median_norm` (c=2; probation c=1 for first 2 rounds, SS4.7)
 2. Exclude quarantined nodes
@@ -101,12 +103,12 @@ LogNormal(ln 0.2, 0.5) + `bytes * 8 / 1 Mbit`, capped/lost beyond `d_max = 5 s`.
 All attacks supplied via `PoisoningAttackConfig` in `ScenarioConfig`.
 
 ### Node-Local Attacks
-**sign_flip:** x → x - 5; applied node-side before `train_local`.
+**sign_flip:** x → (−5)·x, i.e. the outgoing model-parameter update is multiplied by −5 (`poisoning.sign_flip(factor=-5.0)`; `fl/orchestrator.py::_apply_local_poison`, `factor=-5.0`). It is applied node-side to the *outgoing update after local training* (the normaliser statistics `norm_mu/norm_sd/norm_count` are left untouched), not before `train_local`. [updated 2026-09-29, D-067] The earlier text ("x → x − 5", "before `train_local`") was wrong on both counts.
 **label_flip:** y → 1 - y; applied before `train_local`.
 
 ### Server-Side Attacks (require cross-node information)
 **gaussian_noise:** magnitude 10× median update norm; applied to fresh updates at aggregation.
-**ALIE (Automated Lie Injection):** closed-form z per Baruch et al. 2019 (PROPOSED-DECISION: uses standard simplification, not exact per-coordinate order-statistics).
+**ALIE ("A Little Is Enough", Baruch, Baruch & Goldberg, NeurIPS 2019):** the attacker crafts an update near the honest per-coordinate mean, shifted by z per-coordinate standard deviations (`poisoning.alie`, uses the omniscient, simulation-only view of the honest updates of the round). [updated 2026-09-29, D-067] (The earlier expansion "Automated Lie Injection" was wrong.) z is closed-form per Baruch et al. 2019 (PROPOSED-DECISION: uses standard simplification, not exact per-coordinate order-statistics).
 
 Both server-side attacks are simulation-only bookkeeping (never on wire `ModelUpdate` contract); leakage guard unaffected.
 

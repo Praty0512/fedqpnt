@@ -57,7 +57,7 @@ Full system architecture specification (WP-1.1). Covers:
 - 15-state loosely-coupled error-state EKF with quantum-sensor and GNSS observations
 - Continuous trust law (continuous soft-weighting, not binary detect-and-exclude)
 - Trust-coupled closed-loop detector (MLP trained by FL on hindsight pseudo-labels)
-- TRIM-NB-R robust aggregator, FedAvg/FedProx baselines
+- TRIM-NB-R robust aggregator, FedAvg baseline (FedProx implemented but with μ = 0 it equals FedAvg and is not evaluated, D-067) [updated 2026-09-29, D-067]
 - 30 paired seeds, Wilcoxon + Holm rank tests
 
 **Contract v0.2 changes:** `Innovation` type, `QuantumSample.t_interrogation`, `GnssEpoch.for_agent()` (strips `meta`), `GnssFix.pdop`.
@@ -69,7 +69,7 @@ Full system architecture specification (WP-1.1). Covers:
 ### [FEDERATION.md](FEDERATION.md)
 Federated learning transport layer, aggregators, and poisoning resilience. Covers:
 - FL transport (bulk-synchronous, multiprocessing spawn, deterministic RNG)
-- Aggregators: FedAvg, FedProx, TRIM-NB-R (with byzantine robustness)
+- Aggregators: FedAvg, TRIM-NB-R (with byzantine robustness); FedProx implemented but not evaluated (μ = 0 ≡ FedAvg, D-067) [updated 2026-09-29, D-067]
 - Communications model (Gilbert-Elliott fading, LogNormal delay)
 - Poisoning attacks: sign-flip, label-flip, gaussian-noise, ALIE
 - Cold-start and staleness handling

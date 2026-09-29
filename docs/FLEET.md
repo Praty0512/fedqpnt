@@ -47,7 +47,7 @@ Earlier previews (H2/H4 at reduced scale) ran θ0 = M1 detector (trained on ALL 
 - N=5 or N=10 IID nodes, all see all attack families (clean + drift + meaconing + jamming)
 - FedAvg and TRIM-NB-R aggregators
 - Tune only FL hyper-parameters on tuning seeds (500–599, identically for all FL methods)
-- Chosen parameters: `local_epochs=2`, `lr=0.05`, `μ=0` (FedProx), `R=10` (rounds)
+- Chosen parameters: `local_epochs=2`, `lr=0.05`, `μ=0` (FedProx term off; with μ = 0 FedProx equals FedAvg and is not an evaluated method, D-067) [updated 2026-09-29, D-067], `R=10` (rounds)
 - Centralised baseline: supervised M1 detector trained on union of node data
 
 ### D-056 Results (N=5, reduced scale 30 seeds × 60 s)

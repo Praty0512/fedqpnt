@@ -76,7 +76,7 @@ Implemented `fedqpnt/trust/pseudolabel.py::SIGMA_FLOOR_15`, applied to both posi
 **Unit test:** `test_class_weight_cap_bounds_update_norm_with_single_negative` (PASS).
 
 ### Platt Scaling (Runtime Calibration, D-051 Section B, D-052)
-Per-head (spoof/jam) logistic calibration: `p_calibrated = σ(a*p_raw + b)` where (a, b) are fit on heldout data (seeds 550–574, natural class ratio).
+Per-head (spoof/jam) logistic calibration applied in **logit space**: `p_calibrated = σ(a·logit(p_raw) + b)`, with `logit(p) = ln(p/(1−p))` and `p_raw` clipped to [1e-6, 1−1e-6] first (`TrustDetector._platt_apply`, `fedqpnt/trust/detector.py`). (a, b) are fit on heldout data (seeds 550–574, natural class ratio); identity is (a, b) = (1, 0). [updated 2026-09-29, D-067] The earlier form `σ(a·p_raw + b)` was wrong: it applied the affine map to the probability itself, not to its logit (standard Platt scaling).
 
 **Wiring:** `TrustDetector.score()` returns calibrated `p_bar` if Platt params are installed; identity by default.
 
