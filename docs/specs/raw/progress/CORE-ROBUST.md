@@ -107,6 +107,26 @@ baseline_b_bin's post=3.07 remains (not fully matching a hard-switch law's recov
 not chased further this session. Full report SENT to Master via SubagentHandback with the raw
 table (no PASS/FAIL framing) and the Q1-Q3 diagnosis.
 
+## D-066 ROUND 5 (approvals: ClockKF holdover, shadow probe, shadow-consistent reacq, trust split)
+STATE: WAITING for Master's "H2 telemetry landed" before the FIRST fedqpnt/ edit.
+Git at last check: HEAD=d56b49051ea8d3b30f910f43bb9bbb9a4de1b2e9; fedqpnt/ dirty ONLY in
+fedqpnt/fleet/node_runner.py (H2-ABRUPT's telemetry work, not mine).
+Done while waiting: xfail-marked intended-behaviour tests written (remove pytestmark xfail when
+implemented): tests/test_fusion_clock_holdover.py (needs ClockKFConfig.w_excl=0.05, skip update when
+w<w_excl, P equals no-fix coast P), tests/test_trust_shadow_probe.py (needs SensorTrustLaw.step
+kwarg es_position, .probe_shadow, probe success iff mean NIS<=chi2_6 99% (16.81) and no
+clk/xsat/cn0 event; es_position superseded in PROBE).
+q_bias check (Brown&Hwang two-state, range units): q_bias=c^2*h0/2, q_drift=c^2*2*pi^2*h_-2. TCXO
+typical h0=2e-19 s, h_-2=2e-20 /s (Brown&Hwang Table) -> q_bias=9e-3 m^2/s, q_drift=3.6e-2
+(m/s)^2/s. Current ClockKFConfig q_bias=1.0 (~110x above), q_drift=1e-3 (~36x below). Simulated
+truth (gnss/signal.py ClockState): sigma_bias_rw=3e-2 m/sqrt(s) -> 9e-4 m^2/s, sigma_drift_rw=3e-3
+-> 9e-6. Citation source (Brown&Hwang) is NOT in refs.bib/REFERENCES as far as grepped -> flag TODO.
+Decision on changing q_bias deferred until holdover implemented and its effect measured.
+ORDER after go: (i) ClockKF holdover, (ii) shadow probe + reacq consistency, (iii) trust split
+(weights["gnss"]=min alias; mean_w_pos/mean_w_clk over attack window AND whole mission), each with
+tests + full suite green + git state per D-062; then ONE combined re-verification at MEMS+tactical
+(smoke 7 methods, coasting A-script @179, S1 FAR, safety sweep, drift trace tactical seed 500).
+
 ## D-065 ROUND 4 (resume after auto-mode outage). Master committed core at 906ae98.
 Git at start: HEAD=906ae9830b634552cfec2561d8711fdbf52155c2, fedqpnt/ clean.
 - A-fix: coasting script marks now 60/120/179 (was 180 = post-outage, INVALID column); re-run

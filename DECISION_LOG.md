@@ -48,6 +48,7 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Integrity note:** these design changes are motivated by tuning-seed failures. They are legitimate design iteration on tuning data; final claims come only from held-out test seeds after the freeze.
 - **Implementation order:** holdover → shadow probe/reacq → split. Each with tests and a green suite; then one combined re-verification at both IMU grades.
 - **Patent:** revision deferred until after implementation (the shadow probe and the split trust are claim candidates).
+- **Addendum (clock model):** the filter q_bias = 1.0 m²/s was ~110× above a TCXO. Worse, the simulated TRUTH clock drift noise (9e-6) was ~4000× below a TCXO, which flatters holdover. Oscillator class = **TCXO** (Brown & Hwang two-state model; h0 = 2e-19, h_-2 = 2e-20 → q_bias ≈ 9e-3 m²/s, q_drift ≈ 3.6e-2 (m/s)²/s) for BOTH the truth and ClockKF (model-matched), with a clock NEES test. The citation is marked TO VERIFY by the user.
 - **Owner:** Master
 
 ### D-065 · 2026-09-29 · Coasting envelope accepted (CAI 2.1–3.4× lower max coasting error); ClockKF holdover; drift contradiction (suspected probing into an ongoing spoof); paper resumed for results-independent sections
