@@ -21,10 +21,15 @@ def test_s7_five_toggle_periods_and_attack_schedule():
     assert "undefended" in v10.methods
 
 
-def test_s10_rate_grid():
-    assert sorted(v.gnss_rate_hz for v in SC.variants_of("S10")) == [1.0, 2.0, 5.0, 10.0]
+def test_s10_rate_by_tc_grid():
+    vs = SC.variants_of("S10")
+    assert len(vs) == 16
+    assert sorted({v.gnss_rate_hz for v in vs}) == [1.0, 2.0, 5.0, 10.0]
+    assert sorted({v.quantum_cycle_time_s for v in vs if v.quantum_cycle_time_s}) == [0.5, 0.73, 2.0]
     spec = CP.build_spec_dict(SC.get("S10-r5"), "fedqpnt_local", 500)
-    assert spec["gnss_rate_hz"] == 5.0
+    assert spec["gnss_rate_hz"] == 5.0 and "quantum_cycle_time_s" not in spec
+    spec = CP.build_spec_dict(SC.get("S10-r2-c0.73"), "fedqpnt_local", 500)
+    assert spec["gnss_rate_hz"] == 2.0 and spec["quantum_cycle_time_s"] == 0.73
 
 
 def test_s10_monotone_check():

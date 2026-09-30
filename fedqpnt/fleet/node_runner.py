@@ -304,4 +304,8 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             es_fire_frac_attack=es_fire_frac_attack,
             **M.false_alarm_rate(t_arr, detected, active),
         ))
+        # D-068 (P2) additive: explicit detection flag / window / absolute times (existing keys unchanged).
+        _o = M.detection_outcome(t_arr, detected, phases)
+        result.update(dict(detected_on=bool(_o["detected"]), window_s=_o["window_s"], t_det=_o["t_det"],
+                           t_on_s=phases.t_on, t_off_s=phases.t_off))
     node_result_q.put(result)

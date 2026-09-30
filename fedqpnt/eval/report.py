@@ -285,7 +285,7 @@ def render_markdown(scenario_ids: list[str], run_root: str = "runs", *, is_dry_r
             lines.append(f"| {row['criterion']} | {passed} | {val} | {row['blocked_by_D047']} | "
                           f"{row['detail']} |")
 
-    s10 = [sid for sid in scenario_ids if sid.startswith("S10-r")]
+    s10 = [sid for sid in scenario_ids if sid.startswith("S10-r") and "-c" not in sid]   # default-T_c cells only
     if len(s10) >= 2:
         by_rate = {SC.get(sid).gnss_rate_hz: CP.load_results(run_root, sid, ["fedqpnt_local"]) for sid in s10}
         mono = SC.s10_rmse_monotone(by_rate)

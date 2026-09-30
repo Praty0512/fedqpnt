@@ -80,6 +80,7 @@ class Scenario:
     # --- D-068 registry-vs-intent fields (all optional; defaults keep legacy behaviour) ---
     base_id: str = ""                # family id for variants (e.g. "S10-r5" -> "S10"); "" = same as id
     gnss_rate_hz: float = 1.0        # S10 rate grid
+    quantum_cycle_time_s: float | None = None   # S10: the AGENT's assumed CAI cycle time (mismatch axis); None = default
     attacks: tuple = ()              # multi-attack schedule (S4 jam->spoof, S7 toggling); needs RunSpec.attacks
     noise_scale: dict | None = None  # S11: {"imu": 10, "gnss": 5, "cai_contrast_div": 3}; needs RunSpec.noise_scale
     poison_frac: float | None = None # S12 fleet variants (f in {0.2, 0.4}, sign_flip)
@@ -197,8 +198,16 @@ def _s1_far(results):
     return dict(passed=bool(val <= 1.0), value=val, detail=f"FAR={val:.3f}/h/node (bound 1.0)")
 
 
+def _anees_series(results, method, base):
+    """D-068: prefer the full-3x3-block ANEES ('<base>_full') when every run has it, else the legacy diagonal key."""
+    full = _method_series(results, method, base + "_full")
+    if full.size and np.all(np.isfinite(full)):
+        return full
+    return _method_series(results, method, base)
+
+
 def _s1_anees(results):
-    v = _method_series(results, "fedqpnt_local", "anees_pos_pre")
+    v = _anees_series(results, "fedqpnt_local", "anees_pos_pre")
     if v.size == 0:
         return dict(passed=None, value=None, detail="no fedqpnt_local runs")
     val = float(np.mean(v[np.isfinite(v)])) if np.any(np.isfinite(v)) else float("nan")
@@ -652,7 +661,7 @@ S9 = Scenario(
 
 
 def _s10_anees_band(results):
-    v = _method_series(results, "fedqpnt_local", "anees_pos_all")
+    v = _anees_series(results, "fedqpnt_local", "anees_pos_all")
     if v.size == 0:
         return dict(passed=None, value=None, detail="no fedqpnt_local runs")
     val = float(np.nanmean(v))
@@ -660,19 +669,24 @@ def _s10_anees_band(results):
 
 
 S10_RATES_HZ = (1.0, 2.0, 5.0, 10.0)
+S10_TC_S = (0.5, 0.73, 1.0, 2.0)
+S10_TC_DEFAULT = 1.0        # the agent's default assumed cycle time (make_agent_config); T_c=1.0 is the un-mismatched cell
 
 
-def _make_s10(rate_hz: float) -> Scenario:
+def _make_s10(rate_hz: float, tc_s: float = S10_TC_DEFAULT) -> Scenario:
+    default_tc = tc_s == S10_TC_DEFAULT
+    sid = f"S10-r{rate_hz:g}" + ("" if default_tc else f"-c{tc_s:g}")
     return Scenario(
-        id=f"S10-r{rate_hz:g}", title=f"Sample-rate mismatch (GNSS {rate_hz:g} Hz)", fleet_size=1,
+        id=sid, title=f"Sample-rate mismatch (GNSS {rate_hz:g} Hz, assumed T_c {tc_s:g} s)", fleet_size=1,
         duration_s=300.0, world="flat", cai_grade="field", attack=None, methods=("fedqpnt_local",),
-        gnss_rate_hz=rate_hz, base_id="S10", group="S10",
+        gnss_rate_hz=rate_hz, quantum_cycle_time_s=(None if default_tc else tc_s), base_id="S10", group="S10",
         criteria=(Criterion("no_crash_anees_band", "Rate handling correctness", _s10_anees_band),),
-        notes="GNSS-rate axis of the ARCH grid only. NOT registered (narrow in paper unless RunSpec gains "
-              "quantum_cycle_time_s / tick jitter, proposal P3): T_c in {0.5,0.73,1,2} s and +-1 tick jitter.")
+        notes="GNSS-rate x T_c grid of the ARCH row; T_c is the AGENT's assumed CAI cycle time (the sensor's true "
+              "cycle is unchanged: that is the mismatch). The '+-1 tick jitter' axis is NOT implemented "
+              "(narrow in paper).")
 
 
-S10_VARIANTS = tuple(_make_s10(r) for r in S10_RATES_HZ)
+S10_VARIANTS = tuple(_make_s10(r, tc) for r in S10_RATES_HZ for tc in S10_TC_S)
 
 
 def s10_rmse_monotone(results_by_rate: dict[float, dict[str, list[dict]]]) -> dict[str, Any]:

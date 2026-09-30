@@ -68,7 +68,7 @@ def build_spec_dict(scenario: SC.Scenario, method: str, seed: int, *, duration_s
                      kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                      detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS,
                      record: bool = False, record_root: str = "runs_raw",
-                     imu_grade: str = "industrial_mems") -> dict[str, Any]:
+                     imu_grade: str = "industrial_mems", final: bool = False) -> dict[str, Any]:
     # D-068: method aliases (e.g. abl_minus_quantum = fedqpnt_local with the CAI off)
     alias = SC.METHOD_ALIASES.get(method, {})
     node_method = alias.get("method", method)
@@ -89,6 +89,10 @@ def build_spec_dict(scenario: SC.Scenario, method: str, seed: int, *, duration_s
         spec["attacks"] = [dict(a) for a in scenario.attacks]
     if scenario.noise_scale:
         spec["noise_scale"] = dict(scenario.noise_scale)
+    if scenario.quantum_cycle_time_s is not None:
+        spec["quantum_cycle_time_s"] = float(scenario.quantum_cycle_time_s)
+    if final:
+        spec["final"] = True      # runner-level seed gate (D-068); test seeds still need the open gate file
     return spec
 
 
@@ -117,7 +121,7 @@ def generate_tasks(scenario_ids: list[str], methods: list[str] | None, seeds: li
                     duration_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                     detector_weights_path: str | None = DEFAULT_DETECTOR_WEIGHTS,
                     n_rounds: int = 10, n_nodes: int | None = None,
-                    imu_grades: list[str] | None = None) -> list[RunTask]:
+                    imu_grades: list[str] | None = None, final: bool = False) -> list[RunTask]:
     """D-063/D-068: ``imu_grades`` adds the IMU-grade dimension for single-node
     scenarios: each (scenario, grade) gets result id ``"<sid>@<grade>"``
     (``None`` keeps the legacy id and the industrial_mems default). Fleet
@@ -149,7 +153,7 @@ def generate_tasks(scenario_ids: list[str], methods: list[str] | None, seeds: li
                     else:
                         spec = build_spec_dict(scenario, method, seed, duration_s=duration_s, kappa_R=kappa_R,
                                                 kappa_Q=kappa_Q, detector_weights_path=detector_weights_path,
-                                                imu_grade=grade or "industrial_mems")
+                                                imu_grade=grade or "industrial_mems", final=final)
                         tasks.append(RunTask(scenario_id=rid, method=method, seed=seed, spec=spec))
     return tasks
 
@@ -329,7 +333,8 @@ def run_campaign(scenario_ids: list[str], seeds: list[int], *, methods: list[str
 
     prov_start = git_provenance()
     tasks = generate_tasks(scenario_ids, methods, seeds, duration_s=duration_s, kappa_R=kappa_R,
-                            kappa_Q=kappa_Q, n_rounds=n_rounds, n_nodes=n_nodes, imu_grades=imu_grades)
+                            kappa_Q=kappa_Q, n_rounds=n_rounds, n_nodes=n_nodes, imu_grades=imu_grades,
+                            final=bool(final and gate_cleared_flag))
     fleet_tasks = [t for t in tasks if t.is_fleet]
     node_tasks = [t for t in tasks if not t.is_fleet]
     task_dicts = [asdict(t) for t in node_tasks]

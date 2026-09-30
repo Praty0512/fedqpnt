@@ -21,6 +21,7 @@ from typing import Any
 import numpy as np
 
 from fedqpnt.core.defaults import DEFAULT_KAPPA_R
+from fedqpnt.core.seed_gate import enforce_seed
 from fedqpnt.core.seeding import stream
 from fedqpnt.eval import metrics as M
 from fedqpnt.node.agent import Agent
@@ -54,6 +55,11 @@ class RunSpec:
     record: bool = False
     record_root: str = "runs"
     node_id: str = "node0"
+    # --- D-068 additions (all default to the pre-D-068 behaviour) ---
+    final: bool = False                  # seed gate: True only for an authorised final (test-seed) campaign
+    attacks: list | None = None          # multi-attack schedule (S4/S7); overrides ``attack`` for the environment
+    noise_scale: dict | None = None      # S11 environment-side noise scaling, filter not told (see EnvConfig)
+    quantum_cycle_time_s: float | None = None   # agent's ASSUMED CAI cycle time (S10 mismatch axis)
 
 
 def _level_att(f_b_mean: np.ndarray) -> tuple[float, float]:
@@ -81,18 +87,22 @@ def _to_run_config(spec: RunSpec) -> RunConfig:
 
 
 def run_single(spec: RunSpec) -> dict[str, Any]:
+    enforce_seed(spec.master_seed, final=spec.final)      # D-068: lowest-level seed gate
     t_wall0 = time.time()
     env_cfg = EnvConfig(platform=spec.platform, world=spec.world, imu_grade=spec.imu_grade,
                          quantum_grade=spec.quantum_grade, gnss_rate_hz=spec.gnss_rate_hz,
                          hold_s=spec.hold_s, heading_noise_deg=spec.heading_noise_deg,
-                         attacks=[spec.attack] if spec.attack else [])
+                         attacks=(list(spec.attacks) if spec.attacks else ([spec.attack] if spec.attack else [])),
+                         noise_scale=spec.noise_scale)
     env = NodeEnvironment(env_cfg, seed=spec.master_seed, node_id=spec.node_id, dt=spec.dt,
                            duration_s=spec.duration_s)
 
     agent_cfg = make_agent_config(spec.method, kappa_R=spec.kappa_R, kappa_Q=spec.kappa_Q,
                                    world=spec.world, quantum_enabled=spec.quantum_grade is not None,
                                    detector_weights_path=spec.detector_weights_path,
-                                   imu_grade=spec.imu_grade)
+                                   imu_grade=spec.imu_grade,
+                                   **({} if spec.quantum_cycle_time_s is None
+                                      else dict(quantum_cycle_time_s=spec.quantum_cycle_time_s)))
     agent = Agent(agent_cfg, env.imu.config(), node_id=spec.node_id)
 
     rec = None
@@ -109,6 +119,8 @@ def run_single(spec: RunSpec) -> dict[str, Any]:
     rows_w_pos, rows_w_clk = [], []
     rows_true_pos, rows_true_vel, rows_active = [], [], []
     rows_clk_est, rows_clk_true = [], []
+    rows_cov3, rows_off_t, rows_off_m, rows_jam = [], [], [], []      # D-068 additions
+    rows_fix_idx, rows_fix_eh = [], []
 
     for k in range(len(env)):
         tick = env.tick(k)
@@ -133,6 +145,14 @@ def run_single(spec: RunSpec) -> dict[str, Any]:
         rows_pos.append(atick.nav.pos.copy())
         rows_vel.append(atick.nav.vel.copy())
         rows_cov.append(np.diag(atick.nav.cov_pos).copy())
+        rows_cov3.append(np.array(atick.nav.cov_pos, dtype=float))
+        rows_jam.append(bool(tick.label.jamming))
+        if tick.gnss_epoch is not None:                       # truth-side offset channel, GNSS-epoch ticks (1 Hz)
+            rows_off_t.append(t)
+            rows_off_m.append(float(tick.injected_offset_m))
+        if atick.fix is not None and atick.fix.valid:         # raw GNSS fix error (S11 reference)
+            rows_fix_idx.append(len(rows_t) - 1)
+            rows_fix_eh.append(float(np.linalg.norm(np.asarray(atick.fix.pos)[:2] - tick.truth.pos[:2])))
         rows_w_gnss.append(atick.trust.weights.get("gnss", 1.0))
         rows_w_pos.append(atick.trust.weights.get("gnss_pos", atick.trust.weights.get("gnss", 1.0)))
         rows_w_clk.append(atick.trust.weights.get("gnss_clk", atick.trust.weights.get("gnss", 1.0)))
@@ -203,6 +223,35 @@ def run_single(spec: RunSpec) -> dict[str, Any]:
         rmse_t_ns=M.rmse_t_ns(e_t_ns), max_t_ns=M.max_t_ns(e_t_ns),
         **M.false_alarm_rate(t_arr, detected, active),
     ))
+
+    # ---- D-068 additive outputs (existing keys above are unchanged) ----
+    cov3 = np.array(rows_cov3)
+    outcome = M.detection_outcome(t_arr, detected, phases)
+    result.update(dict(
+        anees_pos_pre_full=M.anees_pos(pos_est, pos_true, cov3, phases.pre),     # full 3x3 block (D-068)
+        anees_pos_all_full=M.anees_pos(pos_est, pos_true, cov3),
+        detected_on=bool(outcome["detected"]), window_s=outcome["window_s"], t_det=outcome["t_det"],
+        t_on_s=phases.t_on, t_off_s=phases.t_off,
+        offset_t_s=rows_off_t, offset_m=rows_off_m,
+        frac_e_le_3sigma_att=M.consistency_fraction(e_h, cov3, phases.att),
+        p_spd_finite=float(bool(np.all(np.isfinite(cov3)) and np.all(np.linalg.eigvalsh(0.5 * (cov3 + np.swapaxes(cov3, 1, 2))) > 0.0))),
+    ))
+    if rows_fix_idx:
+        idx = np.array(rows_fix_idx)
+        sel = phases.pre[idx]
+        if np.any(sel):
+            result["rmse_h_gnss_raw_pre"] = float(np.sqrt(np.mean(np.array(rows_fix_eh)[sel] ** 2)))
+    jam = np.array(rows_jam, dtype=bool)
+    if jam.any():                                             # S4: max w_gnss in the 10 s after the jam ends
+        last = int(np.flatnonzero(jam)[-1])
+        t_jam_end = float(t_arr[min(last + 1, len(t_arr) - 1)])
+        win = (t_arr >= t_jam_end) & (t_arr < t_jam_end + 10.0)
+        if win.any():
+            result["w_gnss_reacq_max"] = float(np.max(w_gnss[win]))
+    span = float(t_arr[-1] - t_arr[0])
+    if span >= 7200.0:                                        # S14: first / last hour RMSE_h
+        result["rmse_h_hour_first"] = M.window_rmse(t_arr, e_h, t_arr[0], t_arr[0] + 3600.0)
+        result["rmse_h_hour_last"] = M.window_rmse(t_arr, e_h, t_arr[-1] - 3600.0, t_arr[-1] + 1.0)
     return result
 
 

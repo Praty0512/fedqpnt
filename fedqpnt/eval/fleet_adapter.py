@@ -160,7 +160,7 @@ def _s15_kwargs(node_ids: list[str], attack: dict, attack_frac: float = 0.3) -> 
 def build_fleet_scenario_config(scenario, method: str, seed: int, *, n_nodes: int | None = None,
                                  duration_s: float | None = None, n_rounds: int = 10,
                                  round_period_s: float | None = None, kappa_R: float = DEFAULT_KAPPA_R,
-                                 kappa_Q: float = 1.0) -> FleetScenarioConfig:
+                                 kappa_Q: float = 1.0, final: bool = False) -> FleetScenarioConfig:
     """Scenario -> FleetScenarioConfig, per ARCHITECTURE.md section 6.1's
     S5/S8/S9/S12/S15 rows (fault injection: failures, cold start, comms
     loss, poisoning, attacked-subset)."""
@@ -208,7 +208,7 @@ def build_fleet_scenario_config(scenario, method: str, seed: int, *, n_nodes: in
 
     return FleetScenarioConfig(scenario_id=scenario.id, method=agent_method, seed=seed, node_ids=node_ids,
                                 n_rounds=rounds, round_period_s=rp, duration_s=dur, aggregator=aggregator,
-                                kappa_R=kappa_R, kappa_Q=kappa_Q, **kwargs)
+                                kappa_R=kappa_R, kappa_Q=kappa_Q, final=final, **kwargs)
 
 
 def _run_local_only_fleet(cfg: FleetScenarioConfig, theta0: dict[str, np.ndarray], param_names: list[str],
@@ -246,7 +246,8 @@ def _run_local_only_fleet(cfg: FleetScenarioConfig, theta0: dict[str, np.ndarray
                                 else {}),
             local_train_pool=({node_id: cfg.local_train_pool[node_id]} if node_id in cfg.local_train_pool
                                else {}),
-            local_train_duration_s=cfg.local_train_duration_s, local_train_workers=cfg.local_train_workers)
+            local_train_duration_s=cfg.local_train_duration_s, local_train_workers=cfg.local_train_workers,
+            final=cfg.final)
         return node_id, run_fleet(sub, theta0, param_names, join_timeout_s=join_timeout_s)
 
     sub_results: dict[str, FleetResult] = {}
@@ -322,7 +323,8 @@ def run_fleet_task(scenario, method: str, seed: int, *, run_root: str = "runs",
         return dict(scenario_id=scenario.id, method=method, seed=seed, status="error")
 
     cfg = build_fleet_scenario_config(scenario, method, seed, n_nodes=n_nodes, duration_s=duration_s,
-                                       n_rounds=n_rounds, kappa_R=kappa_R, kappa_Q=kappa_Q)
+                                       n_rounds=n_rounds, kappa_R=kappa_R, kappa_Q=kappa_Q,
+                                       final=final)
     if is_local_only(method):
         result = _run_local_only_fleet(cfg, theta0, param_names, join_timeout_s=join_timeout_s)
     else:

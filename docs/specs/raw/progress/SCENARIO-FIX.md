@@ -98,3 +98,19 @@ P3 (new) fields for scenario legs (metrics.py functions already exist: consisten
 - fleet_adapter._METHOD_MAP += fedqpnt_clean (no poison/attacks), fedqpnt_nofault (no failure_round/delay_window),
   fedqpnt_noloss (lossless comms on both legs, D-059); S5/S9/S12 method lists include them so the AUC-drop legs are evaluable.
 - P1-P3 still queued for the "runner window open" message.
+
+## Runner window (P1-P3) APPLIED (not committed)
+Files: core/seed_gate.py (git mv from eval; eval/seed_gate.py re-exports), node/runner.py, node/environment.py, fleet/orchestrator.py,
+fleet/node_runner.py, eval/{campaign,fleet_adapter,scenarios,report}.py; tests/test_runner_d068.py (+ S10 test updated).
+- P1: enforce_seed at top of run_single (RunSpec.final) and run_fleet (FleetScenarioConfig.final); campaign/fleet_adapter thread `final`.
+- P2: run_single adds detected_on, window_s, t_det, t_on_s, t_off_s, offset_t_s/offset_m (EnvTick.injected_offset_m from
+  epoch.meta before for_agent()), anees_pos_{pre,all}_full (full 3x3), fleet node_runner adds the detection keys.
+  ANEES: old keys anees_pos_pre/all (diag) kept bit-identical; eval criteria (S1, S10) prefer the *_full keys.
+- P3: RunSpec.attacks (S4/S7), noise_scale {imu,gnss,cai_contrast_div} (environment-side; imu.config() untouched = filter not told;
+  GNSS/CAI as extra white noise sqrt(k^2-1)*sigma from a dedicated RNG stream), quantum_cycle_time_s (agent's ASSUMED cycle -> S10 T_c axis;
+  S10 is now rate x T_c = 16 variants, default-T_c cells S10-r{r}); result fields frac_e_le_3sigma_att, p_spd_finite (position 3x3 block only),
+  rmse_h_gnss_raw_pre, w_gnss_reacq_max (only if jamming), rmse_h_hour_first/last (only if span >= 2 h).
+- NOT implemented (narrow in paper / unevaluable): S10 +-1 tick jitter; n_gnss_accepted_jammed (no filter-side counter without fusion/ edit);
+  rss_growth_frac (psutil not installed); p_spd_finite covers only the position covariance block exposed in NavSolution.
+- Golden check: 3 seeded run_single specs (drift_spoof/MEMS/120 s, abrupt/tactical/no-CAI/90 s, nominal 80 s) captured before edits;
+  after edits all 31 pre-existing result keys have identical repr in all three (wall_s excluded).

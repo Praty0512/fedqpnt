@@ -68,6 +68,7 @@ class FleetScenarioConfig:
     local_train_pool: dict[str, str] = field(default_factory=dict)     # "mixed" | "clean" (see plan_for)
     local_train_duration_s: float = 60.0
     local_train_workers: int = 1
+    final: bool = False        # D-068 seed gate: True only for an authorised final (test-seed) campaign
 
     def to_fl_scenario(self, theta0_param_names: list[str]) -> FLScenarioConfig:
         return FLScenarioConfig(node_ids=self.node_ids, n_rounds=self.n_rounds, seed=self.seed,
@@ -132,6 +133,8 @@ def run_fleet(scenario: FleetScenarioConfig, theta0: dict[str, np.ndarray], para
     full fleet mission with FL rounds interleaved, joins, and returns a
     ``FleetResult``. Federations/fleets must be run one at a time by the
     caller (this function itself only ever runs ONE)."""
+    from fedqpnt.core.seed_gate import enforce_seed
+    enforce_seed(scenario.seed, final=scenario.final)     # D-068: lowest-level seed gate
     t0 = time.time()
     ctx = mp.get_context("spawn")
     server_q = ctx.Queue()
