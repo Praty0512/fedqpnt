@@ -27,7 +27,7 @@ absolute, low-bias output is not subject to the same spoofing surface as GNSS. \
 summary of the headline RMSE\_h(P\_att) comparison, once measured} We present FedQPNT, a system that
 fuses a classical inertial measurement unit (IMU), GNSS, and a cold-atom accelerometer inside a
 loosely-coupled error-state Kalman filter, in which a learnable, federated detector drives a continuous,
-asymmetric trust law with formally bounded chattering, and in which detector parameters (never raw
+asymmetric trust law with evidence-bounded exclusion \todo{chattering bound re-derived for the frozen law (S7-BOUND agent)}, and in which detector parameters (never raw
 sensor data) are aggregated fleet-wide by a trust-aware robust aggregator (TRIM-NB-R). The quantum
 sensor's noise and fault statistics are calibrated against real cold-atom interferometer laboratory data
 (d'Armagnac de Castanet et al., 2024) rather than assumed; the platform dynamics, GNSS observables, and
@@ -39,8 +39,9 @@ respectively, and the experimental protocol. \todo{result: RMSE\_h(P\_att) FedQP
 \todo{result: H3, latency\_eff with vs without quantum aiding, gradual spoofing}
 We disclose two scoped limitations up front: the rigid-mode cold-atom sensor loses contrast above
 $\Omega_c \approx 17\,\mathrm{mrad/s}$, making quantum aiding intermittent during ordinary vehicle
-manoeuvres, and the loosely-coupled filter requires a GNSS covariance inflation factor $\kappa_R$ whose
-root cause is still under investigation. No experimental outcome is claimed in this draft; all
+manoeuvres, and the loosely-coupled filter requires a GNSS covariance inflation factor ($\kappa_R = 60$, tuned once on
+tuning seeds identically for every method) as a surrogate for the time-correlated error of a loosely coupled
+fix, while its attitude and accelerometer-bias states remain over-confident. No experimental outcome is claimed in this draft; all
 quantitative statements are placeholders pending the completed evaluation matrix.
 \end{abstract}
 
@@ -83,7 +84,7 @@ fusion within one platform) rather than federated learning across distributed cl
 \cite{negru2024resilient} -- a distinction we make precise in Section~\ref{sec:related} because the
 term is a recurring source of confusion in this literature. The specific, scoped gap this paper
 addresses is therefore: \emph{a closed loop in which an FL-trained, fleet-shared spoofing/jamming
-detector drives a continuous, formally bounded, per-sensor trust weight that gates a quantum-aided
+detector drives a continuous, evidence-bounded, per-sensor trust weight that gates a quantum-aided
 navigation filter, with the quantum sensor's own noise and fault behaviour calibrated to real
 laboratory data rather than assumed.}
 
@@ -93,14 +94,15 @@ laboratory data rather than assumed.}
   shared, unmodified, across every baseline and ablation, so that comparisons isolate the contribution
   of each mechanism (FL, continuous trust, quantum aiding) rather than confounding it with
   implementation differences (Section~\ref{sec:method}).
-\item A continuous, asymmetric trust law with a proven chattering bound
-  ($T_{\mathrm{cyc}} \geq 26.1\,\mathrm{s}$ between trust cycles for any input sequence, adversarial
-  included) that couples a learned, federated detector to the GNSS and quantum measurement
-  covariances via a bounded inflation $R_{\mathrm{eff}} = R / \max(w, w_{\min})$
+\item A continuous, asymmetric trust law with evidence-bounded exclusion (a bounded distrust time, a
+  shadow probe that tests returning GNSS against the coasting state without applying it, and separate
+  position and clock trust weights) that couples a learned, federated detector to the GNSS, clock and
+  quantum measurement covariances via a bounded inflation $R_{\mathrm{eff}} = R / \max(w, w_{\min})$
+  \todo{chattering bound re-derived for the frozen law (S7-BOUND agent)}
   (Section~\ref{sec:method}).
 \item TRIM-NB-R, a trust-aware robust federated aggregator that combines norm clipping, coordinate-wise
   trimmed-mean/median aggregation, and a cosine-similarity reputation score with quarantine, evaluated
-  against FedAvg and FedProx references under sign-flip, Gaussian, label-flip and "A Little Is Enough"
+  against a FedAvg reference (FedProx is implemented but not evaluated, as with the frozen $\mu=0$ it coincides with FedAvg) under sign-flip, Gaussian, label-flip and "A Little Is Enough"
   poisoning (Section~\ref{sec:method}).
 \item A quantum inertial sensor model whose noise density, per-interrogation-time noise scaling, and
   bursty fault process are calibrated from real cold-atom interferometer shot data
@@ -257,7 +259,7 @@ Pardhasaradhi \& Cenkeramaddi 2022 \cite{pardhasaradhi2022gps} & No & No & No (d
 Hazarika et al. 2025 \cite{hazarika2025quantum} & Yes & No (quantum-enhanced compute) & No & No \\
 Chehimi et al. 2023 \cite{chehimi2023foundations} & Yes (quantum FL) & No & No & No \\
 Tariq \& Ahanger 2026 \cite{tariq2026multimodel} & No (multi-model fusion) & No & Partial (model ensembling) & Yes (BeiDou spoofing) \\
-\textbf{FedQPNT (this paper)} & \textbf{Yes} & \textbf{Yes (cold-atom, real-data-calibrated)} & \textbf{Yes (continuous, bounded-chatter)} & \textbf{Yes (15-scenario matrix)} \\
+\textbf{FedQPNT (this paper)} & \textbf{Yes} & \textbf{Yes (cold-atom, real-data-calibrated)} & \textbf{Yes (continuous, evidence-bounded exclusion)} & \textbf{Yes (15-scenario matrix)} \\
 \bottomrule
 \end{tabular}
 \end{table*}
@@ -508,7 +510,9 @@ where $\Sigma^{\mathrm{fix}}$ are the covariances reported by the receiver (a fi
 used when they are not symmetric positive definite). The inflation $\kappa_R$ compensates the
 time-correlated error of a loosely coupled fix (ionosphere, troposphere, multipath), which the update
 treats as white. It is set once, on tuning seeds, identically for every method, so that the nominal
-horizontal ANEES is close to one, and is $\kappa_R = 60$ in the current configuration, to be frozen before the test sweep. We do not add a
+horizontal ANEES is close to one. It is $\kappa_R = 60$, a single constant that every layer of the code
+resolves to and that is frozen with the core; it was re-tuned from an earlier $40$ after the covariance-hygiene
+and soft-gating fixes described below changed the propagated covariance. We do not add a
 correlated-error state, because a slow drift spoof would be absorbed into it as ``correlated noise''.
 The attitude and bias states remain over-confident at this $\kappa_R$ (against the effective-bias truth,
 which includes turn-on bias, GM1, random-walk and scale-factor/misalignment aliasing, the residual
@@ -536,7 +540,10 @@ covariance and an exclusion rule,
 R_{\mathrm{eff},s} = \frac{R_s}{\max(w_s,\,w_{\min})},\qquad \text{skip the update if } w_s < w_{\mathrm{excl}},
 \label{eq:reff}
 \end{equation}
-with $w_{\min} = 0.02$ and $w_{\mathrm{excl}} = 0.05$ (assumed). A $\chi^2$ gate at level
+with $w_{\min} = 0.02$ and $w_{\mathrm{excl}} = 0.05$ (assumed). For the GNSS position/velocity update the
+weight is the position weight $w_{\mathrm{pos}}$ of Section~\ref{sec:trustlaw}, and the update is additionally
+suspended, not merely down-weighted, while the trust engine is probing GNSS in shadow mode (the innovation is
+evaluated but not applied). A $\chi^2$ gate at level
 $\alpha_{\mathrm{gate}} = 10^{-4}$ is part of the shared core, so every method except the deliberately
 gate-free ``undefended'' reference has it. With $S_{\mathrm{eff}} = H P H^{\top} + R_{\mathrm{eff}}$ and
 $\mathrm{NIS}_{\mathrm{eff}} = \nu^{\top} S_{\mathrm{eff}}^{-1}\nu$, an update whose NIS exceeds
@@ -556,12 +563,29 @@ real per-step gyro-bias process noise, and replacing it by the eigenvalue clip r
 \paragraph{Clock filter.}
 Timing is estimated by a standalone two-state Kalman filter (\texttt{ClockKF}) on the clock bias $b$ and
 drift $d$ (metres and metres per second, i.e.\ $c$ times the physical quantities) with
-$b_{k+1} = b_k + d_k\Delta t$ and a random-walk drift. It is aided by the fix's clock estimates with
-$R_{\mathrm{clk}} = \mathrm{diag}(3^2\,\mathrm{m}^2,\ 0.2^2\,(\mathrm{m/s})^2)/\max(w_{\mathrm{gnss}}, w_{\min})$,
-the same trust convention as Eq.~\eqref{eq:reff}, and coasts on its drift model when there is no valid fix.
-Its process-noise densities ($1\,\mathrm{m^2/s}$ on the bias and $10^{-3}\,(\mathrm{m/s})^2/\mathrm{s}$ on the drift)
-are assumed. \todo{ClockKF hold-over on exclusion (D-065) is decided but not yet in the code; update
-this paragraph after the freeze, and verify $q_{\mathrm{bias}}$ against a cited oscillator model.}
+$b_{k+1} = b_k + d_k\Delta t$ and a random-walk drift, and process noise
+$Q(\Delta t) = \mathrm{diag}(q_b\Delta t,\ q_d\Delta t)$. The receiver oscillator is modelled as a
+temperature-compensated crystal oscillator (TCXO): with the two-state clock model of
+\cite{brown2012introduction}, whose TCXO $h$-parameters $h_0 = 2\times10^{-19}\,\mathrm{s}$ and
+$h_{-2} = 2\times10^{-20}\,\mathrm{s^{-1}}$ are those used in \cite{krawinkel2021improved} (flicker-frequency noise
+$h_{-1}$ is not modelled), the spectral densities are $q_b = h_0/2$ and $q_d = 2\pi^2 h_{-2}$
+\cite{qin2021benefits}, which in range units (scaled by $c^2$) are
+\begin{equation}
+q_b = \tfrac{1}{2}c^2 h_0 \approx 9.0\times10^{-3}\ \mathrm{m^2/s},\qquad
+q_d = 2\pi^2 c^2 h_{-2} \approx 3.6\times10^{-2}\ \mathrm{(m/s)^2/s}.
+\label{eq:tcxo}
+\end{equation}
+The simulated truth clock uses the same values, so the filter is model-consistent by construction. This
+replaced an earlier assumed $q_b = 1\,\mathrm{m^2/s}$, about two orders of magnitude above a TCXO, and a truth
+clock far quieter than a TCXO in drift, which had flattered holdover. The process noise is oscillator physics and
+is not scaled by trust. The filter is aided by the fix's clock estimates with
+$R_{\mathrm{clk}} = \mathrm{diag}(3^2\,\mathrm{m}^2,\ 0.2^2\,(\mathrm{m/s})^2)/\max(w_{\mathrm{clk}}, w_{\min})$,
+the same trust convention as Eq.~\eqref{eq:reff} but driven by the clock weight $w_{\mathrm{clk}}$ of
+Section~\ref{sec:trustlaw}. When $w_{\mathrm{clk}} < w_{\mathrm{excl}}$ (and at zero weight while the clock law
+is probing) or when there is no valid fix, the update is skipped and the filter holds over on the oscillator
+model. The hard holdover is required because, with $R$-inflation alone, the unconditional process noise re-opens
+the gain during a sustained low-trust period. The measurement sigmas $3\,\mathrm{m}$ and $0.2\,\mathrm{m/s}$
+are assumed. The same $q_b, q_d$ normalise the clock-jump evidence of Eq.~\eqref{eq:clkjump}.
 
 %---------------------------------------------------------------------
 \subsection{Learned detector}
@@ -574,7 +598,9 @@ feature cannot depend on its own trust output. The features are: (1--2) the posi
 normalised innovation squares divided by their degrees of freedom; (3) the RAIM statistic divided by
 $\max(n_{\mathrm{sat}}-4, 1)$; (4--5) the mean C/N0 relative to $45\,\mathrm{dB\,Hz}$ and its
 cross-satellite standard deviation; (6) the C/N0 rate; (7) the AGC reading; (8--9) the clock-bias and
-clock-drift jumps against a constant-drift prediction, in units of $3\,\mathrm{m}$ and $0.2\,\mathrm{m/s}$;
+clock-drift jumps against a constant-drift prediction, in units of the predicted innovation standard deviation
+over the time since the last fix with a valid clock estimate, Eq.~\eqref{eq:clkjump} ($3\,\mathrm{m}$ and $0.2\,\mathrm{m/s}$ at
+one-second spacing);
 (10) the WLS residual rms; (11) the change in the number of satellites; (12) a Page CUSUM of feature~1,
 $S_j = \max(0, S_{j-1} + x_{1,j} - 1.5)$; (13) an indicator that the previous epoch was an outage;
 (14) the mean pairwise correlation of per-satellite C/N0 over a 20-epoch window; and (15) the slope of C/N0 on
@@ -622,14 +648,196 @@ of H1--H4.
 \subsection{Trust engine}
 \label{sec:trustlaw}
 %---------------------------------------------------------------------
-The trust engine turns the calibrated detector probability into continuous per-sensor weights
-$w_{\mathrm{gnss}}$ and $w_{\mathrm{quantum}}$ that enter the filter through Eq.~\eqref{eq:reff}, using an
-asymmetric (fast-distrust, slow-recovery) recursion with a bounded exclusion time and a recovery gate, and a
-small set of rule-based physical evidence used as a safety floor. \todo{Trust law: equations, states,
-parameters, the chattering bound $T_{\mathrm{cyc}}$, the position/clock split and the quantum-trust rule are
-to be written after the D-065 revision is frozen; the current abstract, introduction and scenario S7
-statements about a $26.1\,\mathrm{s}$ cycle bound must be re-derived for the final law.}
-%% PENDING D-065: trust law is being revised (probe-during-spoof fix, position/clock trust split); fill after freeze
+The trust engine turns the calibrated detector probability $p$ and a small set of physical evidence into
+continuous per-sensor weights. It produces a \emph{position} weight $w_{\mathrm{pos}}$, which governs the
+GNSS position/velocity update of the filter, a \emph{clock} weight $w_{\mathrm{clk}}$, which governs the
+\texttt{ClockKF}, a quantum weight $w_{\mathrm{q}}$ and an IMU weight, and reports the alias
+$w_{\mathrm{gnss}} = \min(w_{\mathrm{pos}}, w_{\mathrm{clk}})$ for metrics. Trust enters the filter only
+through Eq.~\eqref{eq:reff}, with two additions described below (a suspended update while probing, and a
+clock holdover). This subsection describes the law as frozen in the code. \todo{Cite the final freeze tag: \texttt{core-freeze-1} was superseded by a re-freeze after the clock-gap correction of D-073.}
+The law was revised several times on tuning seeds before the freeze, in response to failures found there
+(unbounded time spent excluded, a probe that dragged the state onto a persisting spoof, and
+position-domain exclusion driven by a clock-domain signature); each revision is a design iteration on
+tuning data, made before any test-seed run, and is disclosed as such.
+
+\paragraph{Smoothing, detection flag and recovery gate.}
+Each weight is driven by one instance of the same core recursion, evaluated at every valid GNSS epoch $j$.
+The detector probability is smoothed, mapped to a target weight, and turned into a hysteretic detection
+flag $D$:
+\begin{align}
+\bar p_j &= \bar p_{j-1} + \beta_j\,(p_j - \bar p_{j-1}), && \beta_j = 1 - e^{-\Delta t_j/\tau_p},\ \ \tau_p = 0.5\,\mathrm{s}, \label{eq:pbar}\\
+w^{\star}_j &= w_{\min} + (1-w_{\min})\,\mathrm{clip}\!\Big(\frac{\theta_{\mathrm{hi}} - \bar p_j}{\theta_{\mathrm{hi}}-\theta_{\mathrm{lo}}},\,0,\,1\Big), && \theta_{\mathrm{lo}} = 0.2,\ \theta_{\mathrm{hi}} = 0.8. \label{eq:target}
+\end{align}
+$D$ is set when $\bar p \ge \theta_{\mathrm{on}} = 0.6$ has held for $T_{\mathrm{on}} = 0.5\,\mathrm{s}$ and is
+cleared when $\bar p \le \theta_{\mathrm{off}} = 0.3$ has held for $T_{\mathrm{off}} = 5\,\mathrm{s}$. The
+weight $w$ falls fast and rises slowly,
+\begin{equation}
+w \leftarrow w + \big(1-e^{-\Delta t/\tau}\big)\,(w^{\star}-w),\qquad
+\tau = \begin{cases}\tau_d = 0.5\,\mathrm{s} & w^{\star} < w,\\ \tau_r = 10\,\mathrm{s},\ \text{only if } G & w^{\star} > w,\end{cases}
+\qquad w \in [w_{\min}, 1],
+\label{eq:ramp}
+\end{equation}
+where a rise is permitted only when the recovery gate $G$ is open. The gate requires $D = 0$, a clean dwell of
+$T_{\mathrm{clean}} = 10\,\mathrm{s}$ since $\bar p$ last exceeded $\theta_{\mathrm{off}}$, and at least $90\%$ of
+the epochs in that window with a position innovation $x_1 \le \chi^2_{3,0.95}/3$ (the dof-normalised
+nominal-$R$ NIS of Section~\ref{sec:detector}). An anti-lockout rule opens the gate, with the target capped at
+$w_{\mathrm{cap}} = 0.5$, if only the NIS-fraction condition has been failing for $T_{\mathrm{lock}} = 120\,\mathrm{s}$
+while all normalised features $3$--$11$ stay within $\pm 1.96$. For the GNSS weights, the first fix that follows an
+outage of more than $T_{\mathrm{gap}} = 5\,\mathrm{s}$ has its weight capped at $w_{\mathrm{reacq}} = 0.5$ unless
+the consistency test below waives the cap; $w_{\min} = 0.02$ and $w_{\mathrm{excl}} = 0.05$ are as in
+Eq.~\eqref{eq:reff}.
+
+\paragraph{Bounded exclusion: TRUST, DISTRUST and PROBE.}
+The recursion above alone has no bound on the time spent excluded: a chronically mis-firing detector kept
+$D=1$ indefinitely, pinned the weight at $w_{\min}$ and let free-inertial error grow without limit on
+nominal missions. Each law instance is therefore a three-state machine. It starts in TRUST. When $D$ is
+set it enters DISTRUST, where the weight follows Eq.~\eqref{eq:ramp}. After $T_{\mathrm{ex}} = 60\,\mathrm{s}$
+in DISTRUST it enters PROBE, the \emph{only} exit from DISTRUST, which lasts $T_{\mathrm{probe}} = 10\,\mathrm{s}$
+and whose weight is reported as $w_{\mathrm{probe}} = 0.3$ irrespective of $p$. At the end of the probe the
+law returns to TRUST if the probe statistic is within its bound and no physical spoof evidence
+routed to that law (Table~\ref{tab:trustsplit}) was observed during the probe, and otherwise returns to DISTRUST for another
+$T_{\mathrm{ex}}$. On a successful exit the learned detector is \emph{suppressed} for
+$T_{\mathrm{sup}} = 120\,\mathrm{s}$: $p$ is treated as $0$ unless physical evidence fires, which prevents a
+mis-firing detector from re-locking the filter into exclusion, while the weight then recovers through
+Eq.~\eqref{eq:ramp}. Physical evidence is never masked by the suppression: whenever it fires, the recursion
+is fed $p = 1$. Jamming evidence (AGC drop, C/N0 loss, lost lock) does not block a probe exit, because
+jamming degrades rather than deceives and the receiver's own covariance already down-weights a degraded fix;
+invalid fixes are simply absent. Because DISTRUST can only be left through PROBE, successive entries into
+DISTRUST are separated by at least $T_{\mathrm{ex}} + T_{\mathrm{probe}} = 70\,\mathrm{s}$ by construction.
+\todo{Chattering bound: the abstract and Contribution~2 no longer state $T_{\mathrm{cyc}} \ge 26.1\,\mathrm{s}$;
+the bound for the frozen law, its property-based verification and the S7 count are being re-derived (S7-BOUND
+agent, D-068) and must be inserted here.}
+
+\paragraph{Physical spoof evidence $E_s$.}
+$E_s$ is a set of rule-based signatures that do not depend on the learned detector. It has four members.
+(i)~\emph{Position jump.} A short-baseline GNSS-versus-INS test compares the change of the GNSS fix over one
+epoch with the change of the filter's own pre-correction estimate over the same epoch,
+$d_k = (p_{\mathrm{g},k} - p_{\mathrm{g},k-1}) - (\hat p^{-}_k - \hat p^{-}_{k-1})$, with
+$\hat p^{-}_k = p_{\mathrm{g},k} + \nu_{p,k}$ recovered from the nominal-$R$ innovation, and fires when
+\begin{equation}
+d_k^{\top}\big(\Sigma_{p,k} + \Sigma_{p,k-1} + \sigma_{\mathrm{ins}}^2 I_3\big)^{-1} d_k > \chi^2_{3,\,0.999} \approx 16.27,
+\qquad \sigma_{\mathrm{ins}} = 0.05\,\mathrm{m},
+\label{eq:jump}
+\end{equation}
+where $\Sigma_p$ are the fix covariances and $\sigma_{\mathrm{ins}}$ is an assumed one-epoch inertial drift
+bound that is independent of the filter covariance. The filter's own NIS is deliberately not used: it
+contains the filter's $P$ and therefore cannot separate a spoof from filter self-divergence, and it was
+observed to couple the evidence to the trust law's own exclusion dynamics. A slow drift changes little from one
+epoch to the next and does not fire the test, an abrupt jump appears entirely in one epoch and does. After a
+gap of more than $1.5$ nominal epochs (for example a jamming outage) the baseline is stale by the whole gap, so
+it is reset and the position term is suppressed for two epochs, the first fix and the epoch after its
+corrective pull. (ii)~\emph{Clock jump} (\texttt{clk\_event}). With $\Delta t$ the time since the last fix with a valid clock estimate (invalid fixes emitted during an outage do not reset it),
+\begin{align}
+x_8 &= \frac{\lvert b_k - (b_{k-1} + d_{k-1}\Delta t)\rvert}{\sigma_b(\Delta t)}, &
+x_9 &= \frac{\lvert d_k - d_{k-1}\rvert}{\sigma_d(\Delta t)}, \nonumber\\
+\sigma_b^2(\Delta t) &= \sigma_{b0}^2 + q_b\Delta t + q_d\Delta t^3/3, &
+\sigma_d^2(\Delta t) &= \sigma_{d0}^2 + q_d\Delta t, \label{eq:clkjump}
+\end{align}
+with $\sigma_{b0} = 3\,\mathrm{m}$, $\sigma_{d0} = 0.2\,\mathrm{m/s}$ and the TCXO densities
+$q_b, q_d$ of Section~\ref{sec:fusion}. The event fires when $x_8 \ge 5$ or $x_9 \ge 5$. The normalisation by
+the \emph{predicted} innovation standard deviation over the gap matters after long outages: with the
+oscillator model, the clock innovation standard deviation after a $180\,\mathrm{s}$ outage is about
+$263\,\mathrm{m}$, so ordinary oscillator holdover drift is not a spurious jump, but a replay-delay step is
+detected only in proportion to its size against this standard deviation (a $750\,\mathrm{m}$ step is about
+$2.9\sigma$; see the limitation in Section~\ref{sec:limitations}). (iii)~\emph{Cross-satellite C/N0
+correlation} (\texttt{xsat\_event}): feature $x_{14}$ exceeds $\mu_{14} + 1.96\,\sigma_{14}$. (iv)~\emph{C/N0
+bump} (\texttt{cn0\_event}): feature $x_4$ exceeds $\mu_4 + 1.96\,\sigma_4 + 3\,\mathrm{dB}$, the signature of
+a meaconing power advantage. The reference values $\mu, \sigma$ in (iii)--(iv) are the running clean-only
+statistics of the detector's normaliser, with $\sigma$ floored at a physical resolution so that a degenerate
+clean variance cannot make the evidence trivially easy to trigger.
+
+\paragraph{Shadow probe.}
+The probe must decide whether the GNSS fixes that have returned are consistent with what the platform has
+been doing, without letting a persisting spoof pull the state while the decision is taken. A probe that
+applied the fixes at partial trust was found on tuning data to drag the state onto a persisting spoof (and the
+subsequent inertial coast then continued along the spoof direction), so during PROBE of the position law the
+filter evaluates the fix but applies \emph{no} GNSS update and coasts on the inertial and CAI states. For
+each fix it forms the joint 6-D innovation $\nu_s = [\hat p^- - p_{\mathrm{g}};\ \hat v^- - v_{\mathrm{g}}]$
+and
+\begin{equation}
+\mathrm{NIS}_{s} = \nu_s^{\top}\big(H P^{-} H^{\top} + \mathrm{blkdiag}(\Sigma_p^{\mathrm{fix}}, \Sigma_v^{\mathrm{fix}})\big)^{-1}\nu_s ,
+\label{eq:shadownis}
+\end{equation}
+i.e.\ against the coasting covariance $P^{-}$ with the receiver's reported covariance, without the
+$\kappa_R$ inflation of Eq.~\eqref{eq:rgnss} and without trust scaling. The $\kappa_R$-inflated NIS is
+calibrated for filtering correlated fix error, not for a single-epoch consistency test, and is far too
+insensitive for this purpose; Eq.~\eqref{eq:shadownis} is approximately $\chi^2_6$ under nominal conditions.
+The probe is accepted when the mean of $\mathrm{NIS}_s$ over the probe does not exceed a bound
+$\bar\nu_{\mathrm{grade}}$ and $E_s$ members (iii)--(iv) were silent throughout (the clock jump (ii) vetoes
+only the clock law, below); member~(i) is superseded by the shadow statistic during the probe, because consistency with the coasting state is the stronger evidence and it
+removes a false fire on the legitimate return of the fix after an attack ends. The default bound is
+$\chi^2_{6,\,0.99} = 16.81$. Under a pre-registered rule (fixed before the measurement), the default is replaced
+by the $99$th percentile of the \emph{clean} distribution of the mean shadow NIS over the first $10\,\mathrm{s}$
+after a forced $60\,\mathrm{s}$ outage, measured on tuning seeds disjoint from those used to tune the rest of the
+law ($510$--$529$, $60$ windows per grade), whenever the default gives a clean false-veto rate above $1\%$; this
+occurred at the MEMS grade, and the frozen bounds are $\bar\nu_{\mathrm{MEMS}} = 25.07$ and
+$\bar\nu_{\mathrm{tactical}} = 6.74$. The calibration uses clean data only and never attack data; an unknown IMU
+grade uses the default. A consistency-matched adversary that keeps the offset inside the coasting uncertainty
+can pass this test; this is a stated limitation (Section~\ref{sec:limitations}).
+
+\paragraph{Consistency-based reacquisition.}
+A first valid fix after an outage longer than $T_{\mathrm{gap}}$ would normally have its position weight capped
+at $w_{\mathrm{reacq}}$. The cap is waived when this fix is consistent with the coasting state, i.e.\
+$\mathrm{NIS}_s \le \bar\nu_{\mathrm{grade}}$, and $E_s$ members (iii)--(iv) are silent (member~(i) is
+quarantined at this epoch by the gap reset, and the clock member is not a position signature); otherwise the cap
+stays. The recovery time constant $\tau_r$ is unchanged. The same consistency-matched-adversary limit as for the
+probe applies.
+
+\paragraph{Position/clock trust split.}
+A single GNSS weight forced a co-located meaconer, which appears as a common-mode delay and therefore as a
+clock-bias jump with an undisturbed position innovation, to cost the position solution its updates as well,
+although the position fix carried no evidence of manipulation. The frozen engine therefore runs two independent
+instances of the three-state law with independent timers and states: the position law drives $w_{\mathrm{pos}}$,
+which enters the ESKF GNSS update through Eq.~\eqref{eq:reff} (with the update suspended in the shadow probe), and the
+clock law drives $w_{\mathrm{clk}}$, which enters the \texttt{ClockKF}, which free-runs on the oscillator model
+whenever $w_{\mathrm{clk}} < w_{\mathrm{excl}}$ and, at zero weight, throughout the clock law's probe.
+Evidence is routed by domain (Table~\ref{tab:trustsplit}). The single-antenna signatures and the learned
+detector, whose feature vector mixes both domains, drive both laws, because a consistent forged solution
+forges the clock too; the position jump drives only the position law, and the clock jump only the clock law.
+
+\begin{table}[t]
+\centering
+\caption{Routing of evidence to the position law ($w_{\mathrm{pos}}$) and the clock law ($w_{\mathrm{clk}}$).
+$x_8, x_9$ are the normalised clock jumps of Eq.~\eqref{eq:clkjump}.}
+\label{tab:trustsplit}
+\footnotesize
+\begin{tabular}{p{2.6cm}p{2.5cm}p{2.5cm}}
+\toprule
+Item & Position law & Clock law \\
+\midrule
+Position jump, Eq.~\eqref{eq:jump} & drives & --- \\
+Clock jump, $x_8, x_9 \ge 5$ & --- & drives \\
+\texttt{xsat}, \texttt{cn0} events & drives & drives \\
+Detector output $p$ & drives & drives \\
+Clean-dwell statistic & $x_1$ (position NIS/dof) & $x_8^2 + x_9^2 \le \chi^2_{2,0.95}$ \\
+Probe statistic and bound & mean $\mathrm{NIS}_s \le \bar\nu_{\mathrm{grade}}$ & mean $x_8^2 + x_9^2 \le \chi^2_{2,0.99}$ \\
+Reacquisition cap & waived if consistent & always kept \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent Position-domain exclusion is thus no longer triggered by a clock jump. Whether the split recovers
+position accuracy under meaconing is measured rather than assumed, because the learned detector, which drives
+both laws, may still depress $w_{\mathrm{pos}}$ (Section~\ref{sec:discussion}). When the continuous v2 law is not
+in use (all other methods), $w_{\mathrm{clk}} = w_{\mathrm{pos}}$ and there is no split.
+
+\paragraph{Quantum and inertial trust.}
+The quantum weight is rule-based and uses the same recursion with quantum time constants
+($\tau_d = T_c$, $\tau_r = 60\,\mathrm{s}$, $T_{\mathrm{clean}} = 5T_c$ for CAI cycle time $T_c$) but without the
+bounded-exclusion state machine. Its evidence is
+$p_{\mathrm{q}} = 1 - \mathbb{1}[\text{valid}]\cdot\mathrm{clip}\big((c - 0.1)/0.9,\,0,\,1\big)\cdot\mathbb{1}[\mathrm{NIS}_{\mathrm{q}} \le \chi^2_{\mathrm{dof},0.999}]$,
+with $c$ the fringe contrast, together with a two-sided Page CUSUM ($k = 0.5$, $h = 8$) on the
+standardised, running-mean-removed CAI innovation. The CUSUM runs only while $w_{\mathrm{pos}} > 0.9$, so that it
+anchors on an accelerometer bias that GNSS itself constrains, and sets $p_{\mathrm{q}} = 1$ when it crosses $h$.
+During CAI dead time the weight is held. The IMU weight is $w_{\min}$ when a sample is missing or an axis
+exceeds the saturation limit ($156.9\,\mathrm{m/s^2}$, assumed) and $1$ otherwise.
+
+\paragraph{Scope of the law.}
+The three-state law with the shadow probe, consistency-based reacquisition and the position/clock split is
+used by FedQPNT and by B-cont (which differ only in how the detector is trained). Baseline~A, B-bin and B$'$
+keep their earlier, simpler laws, and the CAI-off arm of H3 is FedQPNT with the CAI switched off.
+\todo{result: trust trajectories $w_{\mathrm{pos}}(t)$, $w_{\mathrm{clk}}(t)$ and the fraction of time spent in
+TRUST/DISTRUST/PROBE per scenario, from the test-seed sweep.}
 
 %---------------------------------------------------------------------
 \subsection{Federated learning}
@@ -753,8 +961,8 @@ S15 & Simultaneous attacks on a fleet subset (30\%) & 10 & 600 & drift spoof; 0.
 
 The code still marks the attitude- and bias-dependent scenarios (S3, S4, S6, S14) as gated behind the
 filter-consistency gate and the test-seed gate (Section~\ref{sec:seeds}); their claims are reported only if
-the gate clears. \todo{Confirm after the core freeze which of S3/S4/S6/S14 are unblocked (the code still stamps
-$\kappa_R = 40$ provisional), and register a true jam-then-spoof attack for S4: the registered S4 attack is
+the gate clears. \todo{Confirm after the core freeze which of S3/S4/S6/S14 are unblocked (the code now stamps
+$\kappa_R = 60$), and register a true jam-then-spoof attack for S4: the registered S4 attack is
 currently the jam leg only.}
 
 %---------------------------------------------------------------------
@@ -782,7 +990,7 @@ A \cite{khan2025enhancing,chai2025navigation} & FL & $w{=}1$ if $p{<}0.5$ else $
 A0 & FL & $w{\equiv}1$ (alarm only) & TRIM-NB-R \\
 B-bin \cite{pardhasaradhi2022gps} & Local & detect, exclude, coast until the recovery gate passes & --- \\
 B-cont \cite{ren2020adaptive} & Local & the FedQPNT law & --- \\
-B$'$ \cite{mehra1970identification} & --- & the FedQPNT law with $p = F_{\chi^2_3}(3x_1)$ & --- \\
+B$'$ \cite{mehra1970identification} & --- & the earlier continuous law (no probe) with $p = F_{\chi^2_3}(3x_1)$ & --- \\
 $-$quantum & FL & continuous law, CAI off & TRIM-NB-R \\
 Fixed trust & FL & $w{\equiv}1$, gate on & TRIM-NB-R \\
 Undefended & FL & $w{\equiv}1$, \emph{gate off} & TRIM-NB-R \\
@@ -885,8 +1093,8 @@ result. The protocol requires every campaign or fleet run to record the reposito
 launch and at completion, and a run is valid only if the tree is clean and unchanged throughout; core
 changes are made only when no evaluation run is live. Trust-law and filter hyperparameters are frozen with
 their configuration hash logged before the test sweep, and all random streams derive hierarchically from
-the master seed, node identifier and component name. \todo{State the frozen $\kappa_R$ (the campaign, runner and fleet defaults are still $40$ although $60$ was accepted) and the configuration hash
-after the freeze.}
+the master seed, node identifier and component name. The frozen $\kappa_R$ is $60$ (single source \texttt{DEFAULT\_KAPPA\_R}, core freeze tag to be cited).
+\todo{State the configuration hash after the freeze.}
 
 %---------------------------------------------------------------------
 \subsection{H2/H4 event-level protocol (pre-registered)}
@@ -967,7 +1175,7 @@ requirement (jamming must not slow recovery) with its result.}
 \todo{result: Table -- RMSE\_h(P\_att), MAX\_h(P\_att), P95\_h(P\_att) for FedQPNT, A, A0, B-bin, B-cont, B$'$, per attack scenario (S2--S4, S15), 30 seeds, median [IQR]}
 \todo{result: Table -- detection probability P\_D and latency\_on/latency\_eff, same methods and scenarios}
 \todo{result: Figure -- trust trajectory $w_{\mathrm{gnss}}(t)$, $w_{\mathrm{quantum}}(t)$ and detector output $\bar p(t)$ across a representative gradual-spoof run}
-\todo{result: Table -- S12 poisoning: global-model AUC drop at $f=20\%$ and $f=40\%$, TRIM-NB-R vs FedAvg vs FedProx}
+\todo{result: Table -- S12 poisoning: global-model AUC drop at $f=20\%$ and $f=40\%$, TRIM-NB-R vs FedAvg}
 \todo{result: S1 nominal-operation cost check (RMSE\_h ratio to fixed-trust, FAR/h, ANEES, mean $w_{\mathrm{gnss}}$) for every method}
 \todo{result: H1--H4 hypothesis test table with Hodges--Lehmann median differences, 95\% BCa CIs, Holm-adjusted p-values}
 \todo{result: MEMS vs tactical IMU grade comparison of the CAI's contribution (H3), reported for both grades per D-002/D-009 risk R-6}
@@ -975,20 +1183,80 @@ requirement (jamming must not slow recovery) with its result.}
 %=====================================================================
 \section{Discussion and Limitations}
 \label{sec:discussion}
-\label{sec:limitations}
 %=====================================================================
 
-The following limitations are already established by the project's own validation work and are stated
-here rather than deferred, in keeping with the scientific-integrity requirement that known weaknesses be
-disclosed regardless of how they affect the headline comparison.
+\subsection{Discussion}
+\todo[inline]{Results-dependent discussion, to be written after Section~\ref{sec:results} is populated: which
+of H1--H4 were supported; whether the position/clock split recovered position accuracy under co-located
+meaconing; the measured signature-strength failure boundary and harm analysis (Section~\ref{sec:safety}); the
+measured coasting benefit of the CAI per IMU grade; and which scenario legs failed their criteria as
+reported.}
+
+\subsection{Limitations}
+\label{sec:limitations}
+The following limitations are already established by the project's own validation work and the decision log
+and are stated here rather than deferred, in keeping with the scientific-integrity requirement that known
+weaknesses be disclosed regardless of how they affect the headline comparison. Where a limitation has a
+measured extent on the test seeds, the number is left to Section~\ref{sec:results}.
 
 \begin{itemize}
-\item \textbf{The quantum sensor's calibration is real, the platform dynamics are not.} The CAI noise
-  density, per-interrogation-time scaling and bursty-outlier fault process are fitted to real cold-atom
-  interferometer laboratory shot data \cite{darmagnac2024atom}, but the vehicle/UAV trajectories, the
-  GNSS constellation and signal propagation, and the resulting sensor time series along those
-  trajectories are all simulated; no public dataset places a moving quantum inertial sensor under GNSS
-  attack, so a fully real-data closed-loop evaluation is not currently possible.
+\item \textbf{Detection has a signature-strength envelope.} Detection of a drifting single-antenna spoofer
+  relies on the strength $s$ of its C/N0 signature (Section~\ref{sec:safety}). The detector is trained at
+  full strength and detects reliably at $s \gtrsim 0.5$; for $s < 0.5$ it fails, its ranking of spoofed
+  against clean epochs falling to chance and, at $s = 0$, inverting. The minimum strength $s \gtrsim 0.5$ is
+  therefore an explicit operating assumption, not a guarantee, and a fully signature-free spoofer
+  (multi-antenna, per-satellite-power-matched) is outside the threat model. Against such a spoofer the
+  probe-based recovery has no physical signature to rely on. \todo{result: failure boundary and harm analysis
+  over $s$ on test seeds.}
+\item \textbf{A consistency-matched adversary can pass the shadow probe.} The probe accepts GNSS whose
+  innovation against the coasting state is within a calibrated bound (Section~\ref{sec:trustlaw}). An adversary
+  that keeps its offset inside the coasting uncertainty is by construction consistent with the coasting state
+  and can pass. The bound is calibrated on clean data per IMU grade and, at the MEMS grade, is loose (a long
+  coast has a large covariance), so spoofs below roughly the coast uncertainty can be admitted at that grade,
+  whereas the tighter tactical-grade bound rejects far smaller offsets. Once admitted, the damage per epoch is
+  bounded by the coasting covariance, not unbounded. The detection-power figures that motivated the calibration
+  were obtained on tuning seeds and are diagnostics, not findings. The same limit applies to the
+  consistency-based waiver of the reacquisition cap. \todo{result: detection power of the shadow probe against
+  offset spoofs, both IMU grades, test seeds.}
+\item \textbf{Clock-only evidence is weak just after a long outage.} After a long GNSS outage the receiver
+  oscillator's own uncertainty is large (a TCXO drifts by about $263\,\mathrm{m}$, one standard deviation, over
+  $180\,\mathrm{s}$), so the clock-jump evidence of Eq.~\eqref{eq:clkjump}, which is normalised by that
+  uncertainty to avoid false alarms on ordinary holdover drift, detects a replay-delay step only in proportion
+  to its size: a $750\,\mathrm{m}$ step is only about $2.9\sigma$ against the $5\sigma$ threshold. Immediately
+  after a long outage, meaconing therefore has to be caught by the other evidence (position, C/N0, detector).
+\item \textbf{The filter is over-confident in attitude and accelerometer bias.} $\kappa_R$ is a surrogate
+  for the time-correlated error of a loosely coupled fix. The receiver's reported velocity covariance was
+  checked and found honest, and $\kappa_R = 60$ brings the position/velocity consistency to nominal, but the
+  attitude and bias states stay over-confident: against the effective-bias truth, which includes turn-on bias,
+  GM1, random walk and scale-factor/misalignment aliasing, the accelerometer-bias NEES remains about six times
+  its nominal value on tuning seeds. The residual is a stated limitation. Results that depend on attitude or
+  bias estimates (coasting envelope, the CAI contribution, multi-hour stability) carry this caveat, and the
+  test-seed gate that guards them is described in Section~\ref{sec:seeds}. \todo{status of the test-seed gate
+  at submission.}
+\item \textbf{The evaluation is simulation-only.} The CAI noise density, per-interrogation-time scaling and
+  bursty-outlier fault process are fitted to real cold-atom interferometer laboratory shot data
+  \cite{darmagnac2024atom}, but the vehicle/UAV trajectories, the GNSS constellation and signal propagation
+  (modelled at the raw-observable level, not the signal or IF-sample level), the receiver oscillator, and the
+  resulting sensor time series are all simulated. The simulated truth clock uses the same TCXO model as the
+  filter, so the timing results are model-consistent by construction. No public dataset places a moving quantum
+  inertial sensor under GNSS attack, so a fully real-data closed-loop evaluation is not currently possible, and
+  receiver-internal (tracking-loop, correlator) effects are not captured.
+\item \textbf{The modelled meaconer is co-located.} The meaconing attack applies a common-mode delay to all
+  satellites, which is nearly degenerate with a receiver clock bias and barely disturbs the position solution.
+  The position/clock trust split can therefore be evaluated only on this co-located threat. A displaced meaconer
+  pins the position toward the meaconer's antenna and is a distinct threat; a displaced variant has been added
+  as a separate scenario entry and is held out of detector training, so that it tests generalisation.
+  \todo{result: displaced-meaconer outcome.} Even for the co-located case, the learned detector drives both laws
+  and may still depress the position weight, so the split's benefit is measured, not assumed.
+\item \textbf{Several scenario legs are narrowed relative to the pre-registered intent.} A cold-atom
+  \emph{fault injector} was not built, so the leg in which a CAI bias drift drives $w_{\mathrm{q}}$ below $0.5$
+  within ten cycles is not exercised (S6 is instead the H3 scenario, with the CAI on and off); S7 does not vary the
+  detector noise near its decision threshold and toggles abrupt-spoof segments at $50\%$ duty; S10 does not
+  vary CAI cycle-time jitter; S12 in the campaign matrix covers only a subset of the poisoning types, the others
+  being covered by a separate script; and S15 does not include the attacked-node damage legs. These narrowings
+  were decided before any test-seed data.
+\item \textbf{FedProx is not evaluated.} It is implemented on the client side, but with the frozen $\mu = 0$ it
+  equals FedAvg and no fleet arm exists for it, so it is dropped from the evaluated methods and from the claims.
 \item \textbf{Rigid-mode quantum aiding is intermittent during ordinary manoeuvres.} The measured
   rigid-mode contrast roll-off rate implies a rotation-rate tolerance of only
   $\Omega_c \approx 17\,\mathrm{mrad/s}$ (field grade), well below the rotation rates of an ordinary
@@ -996,24 +1264,10 @@ disclosed regardless of how they affect the headline comparison.
   intermittent, during manoeuvring rather than only during straight-and-level segments. This is reported
   as a real effect, not corrected for, and it is expected to weaken the measured quantum benefit relative
   to an idealized always-on quantum sensor.
-\item \textbf{The GNSS is simulated at the raw-observable level, not the signal (IF-sample) level.}
-  Pseudorange, Doppler, carrier-to-noise-density ratio, lock state and AGC are modelled directly, with
-  attacks constructed as literature-grounded deltas on the clean observables; this keeps published
-  attack signatures faithful and keeps multi-hour, multi-node simulation computationally tractable, but
-  it cannot capture receiver-internal (tracking-loop, correlator) effects that an IF-sample-level or
-  hardware-in-the-loop evaluation would.
-\item \textbf{The loosely-coupled filter requires a GNSS covariance inflation factor $\kappa_R$.} Under
-  fixed trust, the nominal-operation filter is over-confident unless the GNSS fix covariance is inflated
-  by a currently non-unit factor; this is being investigated as an effect of the loosely-coupled fix's
-  time-correlated (ionospheric/tropospheric/multipath) error being processed as if it were white, and,
-  separately, of the receiver's reported velocity-fix covariance not yet being independently checked for
-  honesty. $\kappa_R$ is tuned once, identically for every method, on tuning seeds disjoint from the test
-  seeds, so it cannot bias a between-method comparison; its root cause is documented as an open,
-  in-progress investigation rather than resolved.
 \item \textbf{The novelty claimed here is scoped, not absolute.} G\textsuperscript{2}FL
   \cite{liu2026g2fl} already provides robust federated learning for GNSS spoofing detection under
   Byzantine clients. FedQPNT's contribution is the closed loop that couples an FL-trained detector to a
-  continuous, formally bounded trust law and to physical quantum-sensor aiding, not the robust-aggregation
+  continuous, evidence-bounded trust law and to physical quantum-sensor aiding, not the robust-aggregation
   idea in isolation.
 \item \textbf{Hypotheses are pre-registered; no result yet exists.} H1--H4 above are stated as hypotheses,
   to be reported whatever their outcome, including a null or reversed result, per the project's own
@@ -1028,15 +1282,16 @@ disclosed regardless of how they affect the headline comparison.
 below.}
 
 We have presented FedQPNT, a system architecture that closes the loop between federated, fleet-shared
-attack detection, a continuous and formally bounded per-sensor trust law, and physical quantum inertial
+attack detection, a continuous and evidence-bounded per-sensor trust law, and physical quantum inertial
 aiding whose noise and fault behaviour is calibrated against real laboratory data rather than assumed.
 We have specified the node and threat model, the fusion and trust equations, the federated aggregation
 mechanism, and a pre-registered, mechanism-class baseline and hypothesis structure designed so that the
 eventual results can be attributed to a specific mechanism rather than to incidental implementation
 choices. \todo{result: one-sentence outcome summary once the evaluation matrix completes} We have also
 disclosed, in advance of any result, the two most consequential limitations of the current design: the
-intermittency of rigid-mode quantum aiding above ordinary vehicle turn rates, and the as-yet-unresolved
-need for a GNSS covariance inflation factor in the loosely-coupled filter.
+intermittency of rigid-mode quantum aiding above ordinary vehicle turn rates, and the need for a GNSS covariance
+inflation factor in the loosely-coupled filter, together with the residual over-confidence of its attitude and
+bias states.
 
 \section*{Reproducibility Statement}
 Every numeric default in the system specification is tagged as literature-derived, design-derived, or an
