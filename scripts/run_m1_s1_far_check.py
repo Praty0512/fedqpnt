@@ -20,6 +20,7 @@ if str(ROOT) not in sys.path:
 
 import numpy as np
 from fedqpnt.node.runner import RunSpec, run_many  # noqa: E402
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R  # noqa: E402
 from fedqpnt.node.methods import METHOD_NAMES  # noqa: E402
 
 DETECTOR_WEIGHTS_REAL = ROOT / "results" / "m1" / "detector_weights_real.npz"
@@ -29,7 +30,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--duration", type=float, default=1800.0)
     ap.add_argument("--seeds", type=int, nargs="+", default=[500, 501, 502, 503, 504])
-    ap.add_argument("--kappa-r", type=float, default=40.0)
+    ap.add_argument("--kappa-r", type=float, default=DEFAULT_KAPPA_R)
     ap.add_argument("--imu-grade", type=str, default="industrial_mems")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--weights", type=str, default=str(DETECTOR_WEIGHTS_REAL))

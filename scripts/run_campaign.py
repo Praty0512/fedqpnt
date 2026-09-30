@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from fedqpnt.eval.campaign import CampaignGateError, run_campaign
+from fedqpnt.core.defaults import DEFAULT_KAPPA_R  # noqa: E402
 
 
 def main() -> None:
@@ -33,7 +34,7 @@ def main() -> None:
                      help="Method names; default is each scenario's own declared method list")
     ap.add_argument("--seeds", nargs="+", type=int, required=True)
     ap.add_argument("--duration", type=float, default=None, help="Override duration_s (e.g. short dry-runs)")
-    ap.add_argument("--kappa-R", type=float, default=40.0)
+    ap.add_argument("--kappa-R", type=float, default=DEFAULT_KAPPA_R)
     ap.add_argument("--kappa-Q", type=float, default=1.0)
     ap.add_argument("--workers", type=int, default=2, help="Hard-capped at 4 (fedqpnt.eval.campaign.MAX_WORKERS)")
     ap.add_argument("--run-root", default="runs")
