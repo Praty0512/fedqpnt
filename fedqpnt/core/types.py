@@ -218,6 +218,9 @@ class TrustState:
     # D-066 shadow probe: True while the GNSS trust law is in PROBE. The filter must then compute the
     # GNSS innovation/NIS but apply NO GNSS update (no state or covariance change).
     probe_shadow: bool = False
+    # D-072 trust split: True while the CLOCK trust law (w_clk, weights["gnss_clk"]) is in PROBE; the
+    # ClockKF then holds over (weight 0) instead of applying the fix's clock bias/drift.
+    clk_probe_shadow: bool = False
 
 
 @dataclass(frozen=True)

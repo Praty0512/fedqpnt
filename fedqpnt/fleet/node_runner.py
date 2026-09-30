@@ -146,6 +146,7 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
     initialized = False
     rows_t, rows_pos, rows_vel, rows_cov = [], [], [], []
     rows_w_gnss, rows_detected, rows_true_pos, rows_true_vel, rows_active = [], [], [], [], []
+    rows_w_pos, rows_w_clk = [], []
     rows_score: list[float] = []   # H2/H4 preview: max detector anomaly score per tick (AUC)
     rows_raw_p: list[float] = []   # D-056 metric (a): raw calibrated detector p, E_s excluded
     rows_es: list[bool] = []       # D-056 metric (d): whether E_s (physical spoof evidence) fired
@@ -230,6 +231,8 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             rows_vel.append(atick.nav.vel.copy())
             rows_cov.append(np.diag(atick.nav.cov_pos).copy())
             rows_w_gnss.append(atick.trust.weights.get("gnss", 1.0))
+            rows_w_pos.append(atick.trust.weights.get("gnss_pos", atick.trust.weights.get("gnss", 1.0)))
+            rows_w_clk.append(atick.trust.weights.get("gnss_clk", atick.trust.weights.get("gnss", 1.0)))
             rows_detected.append(bool(atick.trust.attack_detected))
             rows_true_pos.append(tick.truth.pos.copy())
             rows_true_vel.append(tick.truth.vel.copy())
@@ -292,7 +295,7 @@ def _run_fleet_node(spec: FleetNodeSpec, theta0: dict[str, np.ndarray], server_q
             anees_pos_pre=M.anees_pos(pos_est, pos_true, cov_diag, phases.pre),
             latency_on=M.detection_latency(t_arr, detected, phases),
             t_dist=M.time_to_distrust(t_arr, w_gnss, phases),
-            mean_w_gnss=float(np.mean(w_gnss)),
+            **M.mean_w_report(w_gnss, np.array(rows_w_pos), np.array(rows_w_clk), phases),
             auc=M.roc_auc(scores, active),
             # D-056 metrics (a)/(d): learned-detector-only AUC (E_s excluded,
             # raw calibrated p vs the operational p_bar-derived `auc` above)

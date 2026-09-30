@@ -379,6 +379,26 @@ def recovery_time(t: np.ndarray, e_h: np.ndarray, phases: Phases, rmse_pre: floa
 # --------------------------------------------------------------------------
 # Trust chattering (section 3.3 / section 6)
 # --------------------------------------------------------------------------
+def mean_w(w: np.ndarray, mask: np.ndarray | None = None) -> float:
+    """Mean trust weight over a mask (NaN if the mask is empty)."""
+    w = np.asarray(w, dtype=float)
+    if mask is not None:
+        w = w[np.asarray(mask, dtype=bool)]
+    return float(np.mean(w)) if len(w) else float("nan")
+
+
+def mean_w_report(w_gnss: np.ndarray, w_pos: np.ndarray, w_clk: np.ndarray, phases: Phases) -> dict:
+    """D-072 trust split: mean weights over the WHOLE mission and over the ATTACK window, for the
+    min(w_pos, w_clk) alias (``mean_w_gnss``), the position weight and the clock weight. The whole-mission
+    mean alone confused the D-065 drift diagnosis (it includes long post-attack re-admission), so the
+    attack-window means are always reported next to it."""
+    out = {}
+    for name, w in (("mean_w_gnss", w_gnss), ("mean_w_pos", w_pos), ("mean_w_clk", w_clk)):
+        out[name] = mean_w(w)
+        out[name + "_att"] = mean_w(w, phases.att)
+    return out
+
+
 def trust_cycles(t: np.ndarray, w: np.ndarray) -> int:
     """A trust cycle = a downward crossing of w=0.5 followed by an upward
     crossing of w=0.9."""

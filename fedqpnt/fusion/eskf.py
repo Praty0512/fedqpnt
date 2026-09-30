@@ -410,7 +410,10 @@ class ESKF:
             nu, H, R_nom, dof = self._pending[sensor]
             if sensor == "gnss" and getattr(trust, "probe_shadow", False):
                 continue  # D-066 shadow probe: innovation/NIS evaluated by the trust engine, NO update
-            w = trust.weights.get(sensor, 1.0)
+            # D-072 trust split: the GNSS position/velocity update is governed by w_pos; fall back to the
+            # aggregate "gnss" alias for callers/tests that only provide it.
+            w = (trust.weights.get("gnss_pos", trust.weights.get("gnss", 1.0)) if sensor == "gnss"
+                 else trust.weights.get(sensor, 1.0))
             if w < self.cfg.w_excl:
                 continue  # exclusion (Sec 2.7)
             R_eff = R_nom / max(w, self.cfg.w_min)

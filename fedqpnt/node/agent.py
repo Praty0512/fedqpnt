@@ -128,6 +128,9 @@ class Agent:
         trust_state = self.trust.update(t, fix, imu, quantum, self._last_nav,
                                          _split_gnss_innovation(innovations))
         nav = self.eskf.correct(t, innovations, trust_state)
-        clk = self.clock.step(t, fix, 0.0 if trust_state.probe_shadow else trust_state.weights.get("gnss", 1.0))
+        # D-072: the ClockKF is governed by w_clk (alias "gnss" as fallback); weight 0 -> hard holdover while
+        # the clock law is probing (shadow).
+        w_clk = trust_state.weights.get("gnss_clk", trust_state.weights.get("gnss", 1.0))
+        clk = self.clock.step(t, fix, 0.0 if trust_state.clk_probe_shadow else w_clk)
         self._last_nav = nav
         return AgentTick(t=t, nav=nav, trust=trust_state, clock=clk, fix=fix)

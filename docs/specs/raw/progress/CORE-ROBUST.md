@@ -548,3 +548,17 @@ used by ClockKFConfig, signal.py ClockState, features.py): sigma_b^2=r_bias+q_b 
 (numbers in scratchpad/x89_after_gap.log); (b) 750 m replay step on first fix after 180 s gap gives x8=2.855 (sigma_b(180)=262.7 m), BELOW es_clk_sigma=5
 -> does NOT fire (reported, threshold not tuned); same step at dt=1 s is ~250 sigma. Recovery re-run: scratchpad/jam_recovery_summary3.log; suite: suite_d071.log.
 Detector retrain deferred (v3 + theta0_noabrupt after freeze, D-067).
+
+## CHANGE (iii) IN PROGRESS (trust split, D-072): applied core edits (types clk_probe_shadow, eskf reads gnss_pos, agent w_clk, trust_law clk_law + evidence routing + alias),
+test subset running (task bwn5wcyfc). Prepared but NOT yet applied: scratchpad/apply_metrics.py (metrics.mean_w/mean_w_report, runner + fleet node_runner use it).
+Remaining: apply metrics edit, update tests (weights["gnss"] alias min -> read gnss_pos in tests/test_trust_shadow_probe.py reacq tests), new split tests
+(clk_event only -> w_clk down, w_pos stays; meaconing-like), ClockKF clk_probe_shadow, full suite, git state, pause for Master commit. Master OK'd metrics.py edits.
+
+## CHANGE (iii) IMPLEMENTED (D-072 trust split) - READY TO COMMIT; full suite green (scratchpad/suite_change_iii_b.log, 0 F/E). HEAD=12b6d92a03783c0ca5a284bce585e4555cad29e6
+Files: core/types.py (TrustState.clk_probe_shadow), fusion/eskf.py (GNSS update reads weights["gnss_pos"], falls back to "gnss"), node/agent.py (ClockKF reads
+"gnss_clk"; weight 0 during clk probe), trust/trust_law.py (TrustEngineImpl.clk_law = second v2 law; position law <- position_event + xsat/cn0; clock law <- clk_event + xsat/cn0
+with statistic x8^2+x9^2 vs chi2_2 (bound 9.21, ok<=5.99); detector p drives both; shadow probe + reacq consistency stay on w_pos; clock keeps the unconditional reacq cap; weights
+"gnss"=min alias, "gnss_pos", "gnss_clk"; anomaly_scores gnss_clk; attack_detected = pos OR clk), eval/metrics.py (mean_w, mean_w_report: whole-mission and attack-window
+mean_w_gnss/pos/clk), node/runner.py + fleet/node_runner.py (report them), tests/test_trust_split.py (4 tests), tests/test_trust_shadow_probe.py (reacq tests read gnss_pos).
+Caveat for combined re-verification: detector p (trained) fired 0.98-0.999 on meaconing in the earlier trace and drives BOTH weights by design, so w_pos may still drop under meaconing;
+effectiveness is empirical. Next: combined re-verification (both grades, <=4 procs) after Master's commit.

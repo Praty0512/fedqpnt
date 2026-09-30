@@ -106,6 +106,7 @@ def run_single(spec: RunSpec) -> dict[str, Any]:
 
     rows_t, rows_pos, rows_vel, rows_cov = [], [], [], []
     rows_w_gnss, rows_w_quantum, rows_detected, rows_pbar = [], [], [], []
+    rows_w_pos, rows_w_clk = [], []
     rows_true_pos, rows_true_vel, rows_active = [], [], []
     rows_clk_est, rows_clk_true = [], []
 
@@ -133,6 +134,8 @@ def run_single(spec: RunSpec) -> dict[str, Any]:
         rows_vel.append(atick.nav.vel.copy())
         rows_cov.append(np.diag(atick.nav.cov_pos).copy())
         rows_w_gnss.append(atick.trust.weights.get("gnss", 1.0))
+        rows_w_pos.append(atick.trust.weights.get("gnss_pos", atick.trust.weights.get("gnss", 1.0)))
+        rows_w_clk.append(atick.trust.weights.get("gnss_clk", atick.trust.weights.get("gnss", 1.0)))
         rows_w_quantum.append(atick.trust.weights.get("quantum", 1.0))
         rows_detected.append(bool(atick.trust.attack_detected))
         rows_pbar.append(atick.trust.anomaly_scores.get("gnss", 0.0))
@@ -196,7 +199,7 @@ def run_single(spec: RunSpec) -> dict[str, Any]:
         t_rec=M.recovery_time(t_arr, e_h, phases, rmse_h_pre),
         n_cyc_per_hour=M.trust_cycles_per_hour(t_arr, w_gnss),
         tv_w_per_hour=M.total_variation_per_hour(t_arr, w_gnss),
-        mean_w_gnss=float(np.mean(w_gnss)),
+        **M.mean_w_report(w_gnss, np.array(rows_w_pos), np.array(rows_w_clk), phases),
         rmse_t_ns=M.rmse_t_ns(e_t_ns), max_t_ns=M.max_t_ns(e_t_ns),
         **M.false_alarm_rate(t_arr, detected, active),
     ))

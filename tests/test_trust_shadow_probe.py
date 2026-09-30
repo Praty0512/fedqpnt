@@ -89,7 +89,7 @@ def _post_outage_weight(shadow_nis):
     for t in [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0]:
         eng.update(t, None, None, None, None, [])
     inn = [] if shadow_nis is None else [_shadow(shadow_nis)]
-    return eng.update(10.0, _gfix(10.0), None, None, None, inn).weights["gnss"], eng.gnss_law.cfg.w_reacq
+    return eng.update(10.0, _gfix(10.0), None, None, None, inn).weights["gnss_pos"], eng.gnss_law.cfg.w_reacq
 
 
 def test_reacquisition_cap_waived_when_first_fix_consistent_with_coast():

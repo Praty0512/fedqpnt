@@ -41,6 +41,8 @@ from fedqpnt.core.types import ImuSample, Innovation, QuantumSample
 
 # D-066: shadow-probe / shadow-consistent-reacquisition acceptance bound on the (joint 6-D) NIS.
 CHI2_6_99 = float(chi2.ppf(0.99, 6))
+CHI2_2_99 = float(chi2.ppf(0.99, 2))   # D-072: clock-domain (x8^2 + x9^2) probe bound
+CHI2_2_95 = float(chi2.ppf(0.95, 2))
 
 LawMode = Literal[
     "continuous", "no_recovery_gate", "binary_hysteresis",
@@ -693,6 +695,12 @@ class TrustEngineImpl:
         self.detector = TrustDetector(arch=self.cfg.detector_arch, seed=self.cfg.detector_seed)
         self.gnss_law = SensorTrustLaw(cfg=self.cfg.gnss_law_cfg, law_mode=self.cfg.law_mode,
                                        trust_law_version=self.cfg.trust_law_version)
+        # D-072 TRUST SPLIT: ``gnss_law`` is the POSITION law (w_pos: ESKF GNSS update, shadow probe,
+        # reacquisition consistency); ``clk_law`` is an independent law for the clock (w_clk: ClockKF).
+        # Only used for the v2 continuous law; otherwise w_clk == w_pos (no split).
+        import dataclasses as _dc
+        self.clk_law = SensorTrustLaw(cfg=_dc.replace(self.cfg.gnss_law_cfg, probe_nis_bound=CHI2_2_99),
+                                      law_mode=self.cfg.law_mode, trust_law_version=self.cfg.trust_law_version)
         self.imu_trust = ImuTrust(w_min=self.cfg.gnss_law_cfg.w_min)
         self.quantum_trust = QuantumTrust(cycle_time_s=self.cfg.quantum_cycle_time_s,
                                            law_mode=self.cfg.law_mode) if self.cfg.quantum_enabled else None
@@ -736,6 +744,7 @@ class TrustEngineImpl:
     def reset(self) -> None:
         self.extractor.reset()
         self.gnss_law.reset(1.0)
+        self.clk_law.reset(1.0)
         self.imu_trust.reset()
         if self.quantum_trust is not None:
             self.quantum_trust.reset()
@@ -823,7 +832,7 @@ class TrustEngineImpl:
 
         other_event = bool(clk_event or xsat_event or cn0_event)
         if split:
-            return bool(position_event), other_event
+            return bool(position_event), bool(clk_event), bool(xsat_event or cn0_event)
         return bool(other_event or position_event)
 
     def update(self, t: float, fix: GnssFix | None, imu: ImuSample | None,
@@ -832,6 +841,7 @@ class TrustEngineImpl:
         imu_w = self.imu_trust.step(imu)
 
         gnss_w = self.gnss_law.w
+        clk_w = self.clk_law.w if self.gnss_law._uses_v2 else gnss_w
         if fix is not None:
             raw = self.extractor.step(fix, innovations)
             if raw is not None and fix.valid:
@@ -865,10 +875,11 @@ class TrustEngineImpl:
                 xtilde = self.detector.normalizer.normalize(raw)
                 features_nominal = bool(np.all(np.abs(xtilde[2:11]) <= _FEATURES_NOMINAL_Z))
                 if self.gnss_law._uses_v2:
-                    es_pos, es_other = self._physical_spoof_evidence(
+                    es_pos, es_clk, es_xc = self._physical_spoof_evidence(
                         raw, fix, nav_prior, innovations, skip_position=skip_position, split=True)
                 else:
-                    es_pos = es_other = False
+                    es_pos = es_clk = es_xc = False
+                es_other = es_clk or es_xc
                 # D-066: joint 6-D shadow NIS of this fix against the coasting state.
                 shadow_inv = next((iv for iv in innovations if iv.sensor == "gnss_shadow"), None)
                 shadow_nis = float(shadow_inv.nis) if shadow_inv is not None else 3.0 * float(raw[_IDX_NIS_POS])
@@ -876,8 +887,17 @@ class TrustEngineImpl:
                 self.last_raw_p = p              # D-056 metric (a): logging only, not consumed downstream
                 # D-056 metric (d): logging only (position term is superseded while in PROBE)
                 self.last_es_evidence = bool(es_other or (es_pos and not was_probe))
+                # D-072: position law <- position_event + xsat/cn0 (clk_event does NOT cost position).
                 gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal,
-                                             nis_value=shadow_nis, es_evidence=es_other, es_position=es_pos)
+                                             nis_value=shadow_nis, es_evidence=es_xc, es_position=es_pos)
+                # clock law <- clk_event + xsat/cn0; its own consistency statistic x8^2 + x9^2 (chi2_2).
+                if self.gnss_law._uses_v2:
+                    clk_stat = float(raw[7] ** 2 + raw[8] ** 2)
+                    clk_w = self.clk_law.step(t, p, nis_ok=clk_stat <= CHI2_2_95,
+                                              features_nominal=features_nominal, nis_value=clk_stat,
+                                              es_evidence=es_clk or es_xc, es_position=False)
+                else:
+                    clk_w = gnss_w
 
                 if gap > self.gnss_law.cfg.T_gap:
                     # D-066 shadow-consistent reacquisition: the cap exists because the first fix after
@@ -887,10 +907,13 @@ class TrustEngineImpl:
                     bound = (CHI2_6_99 if self.gnss_law.cfg.probe_nis_bound is None
                              else self.gnss_law.cfg.probe_nis_bound)
                     consistent = (self.gnss_law._uses_v2 and shadow_inv is not None and shadow_nis <= bound
-                                  and not (es_other or es_pos))
+                                  and not (es_xc or es_pos))
                     if not consistent:
                         self.gnss_law.apply_reacquisition_cap()
                         gnss_w = self.gnss_law.w
+                    if self.gnss_law._uses_v2:      # clock: cap kept (no clock-domain coast statistic)
+                        self.clk_law.apply_reacquisition_cap()
+                        clk_w = self.clk_law.w
                 self._last_valid_gnss_t = t
                 # D-058: keep this epoch's raw fix pos/cov for NEXT epoch's
                 # short-baseline test (stored after use above, so the test
@@ -906,14 +929,19 @@ class TrustEngineImpl:
             gnss_innov = next((iv for iv in innovations if iv.sensor == "quantum"), None)
             quantum_w = self.quantum_trust.step(t, quantum, gnss_w=gnss_w, quantum_innovation=gnss_innov)
 
-        weights = {"gnss": gnss_w, "imu": imu_w, "quantum": quantum_w}
+        # D-072: "gnss" is the back-compat alias min(w_pos, w_clk).
+        weights = {"gnss": min(gnss_w, clk_w), "gnss_pos": gnss_w, "gnss_clk": clk_w,
+                   "imu": imu_w, "quantum": quantum_w}
         anomaly_scores = {
             "gnss": self.gnss_law.p_bar,
+            "gnss_clk": self.clk_law.p_bar if self.gnss_law._uses_v2 else self.gnss_law.p_bar,
             "quantum": self.quantum_trust.p_bar if self.quantum_trust is not None else 0.0,
             "imu": 1.0 - imu_w,  # PROPOSED-DECISION: §3.3 defines p_bar only for the learned/rule-scored
                                  # gnss/quantum channels; the IMU rule (§3.4) has no probability, so we
                                  # report its binary anomaly indicator here for TrustState schema symmetry.
         }
         return TrustState(t=t, weights=weights, anomaly_scores=anomaly_scores,
-                           attack_detected=self.gnss_law.attack_detected,
-                           probe_shadow=self.gnss_law.probe_shadow)
+                           attack_detected=bool(self.gnss_law.attack_detected
+                                                or (self.gnss_law._uses_v2 and self.clk_law.attack_detected)),
+                           probe_shadow=self.gnss_law.probe_shadow,
+                           clk_probe_shadow=bool(self.gnss_law._uses_v2 and self.clk_law.probe_shadow))
