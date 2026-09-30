@@ -19,8 +19,8 @@ _Last updated: 2026-09-29_
 | REFS | Haiku | Clock-model citations | docs/REFERENCES.md, paper/refs.bib | — | DONE (Master stripped the bib note fields), committed 8955a4a | — |
 | EVAL-CONSIST | Sonnet | D-067 eval spec/code audit + doc drift | docs/, docs/specs/raw/EVAL_CONSIST_PROPOSALS.md | progress/EVAL-CONSIST.md | DONE, committed a55d873; D-068 rulings | — |
 | MEACON | Sonnet | Displaced-meaconer attack kind (D-066) | fedqpnt/attacks/*, environment.py dispatch, tests/test_attack_meaconing_displaced.py | progress/MEACON.md | DONE (0183f6e, ee7498c) | —
-| SCENARIO-FIX | Sonnet | D-068 code fixes (scenarios/metrics/report/campaign/seed gate) | fedqpnt/eval/* | progress/SCENARIO-FIX.md | Runner window OPEN: applying P1–P3 (seed gate → core, runner outputs, RunSpec fields), bit-identity required | same
-| DETECTOR-V3 | Sonnet | Detector v3 retrain on the frozen core (D-052/D-053 protocol) | scripts/train_supervised_v3.py, results/m1/*_v3* | progress/DETECTOR-V3.md | Phase A (prep); launch on "core frozen — launch v3" | same |
+| SCENARIO-FIX | Sonnet | D-068 code fixes (scenarios/metrics/report/campaign/seed gate) | fedqpnt/eval/* | progress/SCENARIO-FIX.md | P1–P3 DONE, committed a7c8bf0 (core-freeze-1). Idle | same
+| DETECTOR-V3 | Sonnet | Detector v3 retrain on the frozen core (D-052/D-053 protocol) | scripts/train_supervised_v3.py, results/m1/*_v3* | progress/DETECTOR-V3.md | Phase B RUNNING on core-freeze-1 (v3 train → S1 FAR → displaced-meaconer generalisation) | same |
 
 ## Queued (not started)
 - H2/H4 re-run with abrupt as the novel family (θ0 without abrupt) plus drift/meaconing with the new E_s: **after CORE-ROBUST**.
