@@ -562,3 +562,21 @@ with statistic x8^2+x9^2 vs chi2_2 (bound 9.21, ok<=5.99); detector p drives bot
 mean_w_gnss/pos/clk), node/runner.py + fleet/node_runner.py (report them), tests/test_trust_split.py (4 tests), tests/test_trust_shadow_probe.py (reacq tests read gnss_pos).
 Caveat for combined re-verification: detector p (trained) fired 0.98-0.999 on meaconing in the earlier trace and drives BOTH weights by design, so w_pos may still drop under meaconing;
 effectiveness is empirical. Next: combined re-verification (both grades, <=4 procs) after Master's commit.
+
+## D-072: HOLD combined re-verification until detector v3 (order: SCENARIO-FIX additions -> core FREEZE -> v3 retrain (D-052/D-053, other agent) -> mine). (iii) committed c288e69.
+RE-VERIFICATION RUN PLAN (launch immediately when told "v3 ready"; W = results/m1/<v3 weights .npz, path from the retrain agent>; kappa_R now defaults to 60 so NO --kappa-r;
+seeds 500-504 (tuning only; safety sweep 9600-9602); <=4 worker processes; ONE chain at a time, python -u, output to scratchpad; record `git rev-parse HEAD` +
+`git status --porcelain fedqpnt/` at launch and end of each step (D-062) and do NOT edit fedqpnt/ while a step runs):
+ 0. TODO before launch (scripts only, allowed): add --imu-grade to scripts/run_m1_s1_far_check.py and scripts/core_robust_safety_principle_sweep.py (both hard-code industrial_mems;
+    run_m1_smoke.py already has --imu-grade/--methods); drift trace + jam summary scripts already grade-aware (drift_probe_trace hard-codes tactical; jam_recovery_summary loops both grades).
+ 1. Smoke, all 7 methods, both grades:  python -u scripts/run_m1_smoke.py --weights W --workers 4 --imu-grade industrial_mems --out results/m1/smoke_v3_mems.json ; same with tactical -> smoke_v3_tactical.json
+    (expect: per scenario/method rmse_h_pre/att/post, max_h_*, mean_w_gnss/_pos/_clk and *_att, rmse_t_ns, far; ~20-30 min each).
+ 2. Coasting envelope (fixed @60/120/@179): python -u scripts/core_robust_coasting_envelope.py  (grid grade x CAI, seeds 500-504, single process, ~20 min) -> scratchpad log.
+ 3. S1 FAR (5 seeds x 30 min, all 7 methods, per grade): python -u scripts/run_m1_s1_far_check.py --weights W --workers 4 --imu-grade <g> --out results/m1/s1_v3_<g>.json (~17-25 min each).
+ 4. Safety sweep (s in {0,0.25,0.5,1.0}, drift, seeds 9600-9602, 10 min, 7 methods + nominal for sigma_nom): python -u scripts/core_robust_safety_principle_sweep.py --weights W --workers 4 --imu-grade <g> --out results/m1/safety_v3_<g>.json (~20 min each).
+ 5. Seed-500 tactical drift trace: python -u scripts/core_robust_drift_probe_trace.py drift_spoof > scratchpad/drift_tactical_v3.txt (expect PROBE shadow: err_h no longer dragged onto spoof; state/w/es/raw_p/spoof offset per epoch).
+ 6. Jam recovery summary (both grades): python -u scripts/core_robust_jam_recovery_summary.py -> jam_recovery_v3.log (compare post RMSE 5.10/25.62, w>0.9 in 48 s).
+ 7. Meaconing split effectiveness: report mean_w_pos_att vs mean_w_clk_att, rmse_h_att, rmse_t_ns (attack window AND whole mission) for fedqpnt_local vs undefended at both grades.
+ 8. Full suite once at the end. Report raw numbers only (no PASS framing): post-attack column, both grades, git state per step.
+Plan step 0 DONE (scripts only): --imu-grade added to run_m1_s1_far_check.py and core_robust_safety_principle_sweep.py; jam_recovery_summary.py takes weights path as argv[1];
+drift_probe_trace.py takes `<kind> <weights>` (argv[1], argv[2]). STANDING BY for "v3 ready".

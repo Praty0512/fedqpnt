@@ -10,7 +10,7 @@ from fedqpnt.node.agent import Agent
 from fedqpnt.node.environment import EnvConfig, NodeEnvironment
 from fedqpnt.node.methods import make_agent_config
 
-W = ROOT / "results" / "m1" / "detector_weights_sup_v2.npz"
+W = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "results" / "m1" / "detector_weights_sup_v2.npz"
 END = 300.0
 
 def run(grade, seed=500):

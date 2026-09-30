@@ -38,6 +38,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--kappa-r", type=float, default=60.0)
     ap.add_argument("--weights", type=str, default=str(DETECTOR_WEIGHTS_V2))
+    ap.add_argument("--imu-grade", type=str, default="industrial_mems")
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--out", type=str, default=str(ROOT / "results" / "m1" / "core_robust_safety_sweep.json"))
     args = ap.parse_args()
@@ -50,7 +51,7 @@ def main() -> None:
             specs.append(RunSpec(
                 name=f"safety_nominal_{method}_{seed}", master_seed=seed, method=method,
                 duration_s=DURATION_S, hold_s=30.0, platform="ground", world="flat",
-                imu_grade="industrial_mems", quantum_grade="field", gnss_rate_hz=1.0,
+                imu_grade=args.imu_grade, quantum_grade="field", gnss_rate_hz=1.0,
                 heading_noise_deg=2.0, attack=None, kappa_R=args.kappa_r, kappa_Q=1.0,
                 detector_weights_path=str(weights_path) if weights_path.exists() else None,
                 record=False,
@@ -62,7 +63,7 @@ def main() -> None:
                 specs.append(RunSpec(
                     name=f"safety_s{s}_{method}_{seed}", master_seed=seed, method=method,
                     duration_s=DURATION_S, hold_s=30.0, platform="ground", world="flat",
-                    imu_grade="industrial_mems", quantum_grade="field", gnss_rate_hz=1.0,
+                    imu_grade=args.imu_grade, quantum_grade="field", gnss_rate_hz=1.0,
                     heading_noise_deg=2.0,
                     attack=dict(kind="drift_spoof", onset_s=120.0, duration_s=180.0, severity=0.5,
                                 params=dict(cn0_sig_scale=s)),

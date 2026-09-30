@@ -26,7 +26,7 @@ from fedqpnt.node.environment import EnvConfig, NodeEnvironment
 from fedqpnt.node.methods import make_agent_config
 from fedqpnt.trust import trust_law as tl
 
-DETECTOR_WEIGHTS_V2 = ROOT / "results" / "m1" / "detector_weights_sup_v2.npz"
+DETECTOR_WEIGHTS_V2 = (Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "results" / "m1" / "detector_weights_sup_v2.npz")
 KAPPA_R = 60.0
 SEED = 500
 DURATION_S = 600.0

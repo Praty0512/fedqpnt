@@ -30,6 +30,7 @@ def main() -> None:
     ap.add_argument("--duration", type=float, default=1800.0)
     ap.add_argument("--seeds", type=int, nargs="+", default=[500, 501, 502, 503, 504])
     ap.add_argument("--kappa-r", type=float, default=40.0)
+    ap.add_argument("--imu-grade", type=str, default="industrial_mems")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--weights", type=str, default=str(DETECTOR_WEIGHTS_REAL))
     ap.add_argument("--out", type=str, default=str(ROOT / "results" / "m1" / "s1_far_check.json"))
@@ -42,7 +43,7 @@ def main() -> None:
             specs.append(RunSpec(
                 name=f"s1_{method}_{seed}", master_seed=seed, method=method,
                 duration_s=args.duration, hold_s=30.0, platform="ground", world="flat",
-                imu_grade="industrial_mems", quantum_grade="field", gnss_rate_hz=1.0,
+                imu_grade=args.imu_grade, quantum_grade="field", gnss_rate_hz=1.0,
                 heading_noise_deg=2.0, attack=None, kappa_R=args.kappa_r, kappa_Q=1.0,
                 detector_weights_path=str(weights_path) if weights_path.exists() else None,
                 record=False,
