@@ -690,3 +690,32 @@ run_in_background; do not poll manually, wait for the completion notification.
 - Files: fedqpnt/fleet/node_runner.py (+7), tests/test_node_runner_epoch_dump.py, tests/data/node_runner_golden.json,
   scripts/h2_abrupt_golden_run.py. Note: golden/earlier runs used DEFAULT_KAPPA_R=40; re-run must use the default in force at freeze (do not hard-code).
 - (b)-(d) still BLOCKED until Master confirms the core freeze.
+
+## UNPARKED for step 1 only (core frozen: tag core-freeze-1 a7c8bf0; HEAD at launch 6dd7cc9)
+- New scripts (fedqpnt/ untouched): scripts/h2_abrupt_pretrain_theta0_v2.py -> results/fleet/theta0_noabrupt_v2.npz +
+  theta0_noabrupt_v2_provenance.json (git head/describe/porcelain + kappa_R default recorded; old files NOT overwritten);
+  scripts/h2_abrupt_theta0_auc_by_severity_v2.py -> results/fleet/h2_abrupt_theta0_auc_check_v2.json (kappa_R=DEFAULT_KAPPA_R,
+  not hard-coded; the old script had hard-coded 40).
+- Running in background chain (task box2wwci5, 1 process): logs C:/Users/DELL/AppData/Local/Temp/h2v2_pre.log and h2v2_auc.log (/tmp in git-bash).
+- Old numbers to compare: 0.819 / 0.805 / 0.783 (sev 0.1/0.15/0.2). Rule: AUC(0.15)>=0.85 -> D-061a low-headroom.
+- After reporting: STOP. tau calibration + n=10 re-run wait for Master.
+- Resume: rerun the two scripts in order if the chain died.
+
+## STOPPED by Master (core bug: clock-jump features after jamming; pretrain families include jam_*)
+- theta0_noabrupt_v2 pretrain + v2 AUC check STOPPED; partial/any v2 outputs discarded (deleted my own theta0_noabrupt_v2.npz /
+  _provenance.json / h2_abrupt_theta0_auc_check_v2.json if present). Old theta0_noabrupt.npz untouched.
+- WAIT for Master's "core-freeze-2", then relaunch the SAME step 1, no other changes:
+  python -u scripts/h2_abrupt_pretrain_theta0_v2.py ; python -u scripts/h2_abrupt_theta0_auc_by_severity_v2.py  (run directly with
+  run_in_background; the earlier `( ... ) &` subshell chain died silently). Record git state + kappa_R (already done by the scripts).
+- Then report new AUC(0.1/0.15/0.2) vs old 0.819/0.805/0.783; AUC(0.15)>=0.85 -> D-061a low-headroom. Then STOP for tau/n=10.
+
+## core-freeze-2 (tag 845636e; HEAD b002fdc = tag + docs-only commit; fedqpnt/ clean) -- step 1 relaunched unchanged
+- Job 1 (task b4gh120tn): full-path python -u scripts/h2_abrupt_pretrain_theta0_v2.py > /tmp/h2v2_pre.log (1 process).
+- Job 2 (NOT yet launched; starts after job 1 writes theta0_noabrupt_v2.npz): scripts/h2_abrupt_theta0_auc_by_severity_v2.py > /tmp/h2v2_auc.log.
+- Then report vs old 0.819/0.805/0.783 (sev 0.1/0.15/0.2); AUC(0.15)>=0.85 -> D-061a low-headroom; then STOP.
+- Job 1 DONE (theta0_noabrupt_v2.npz written, exit 0). Job 2 launched: task bbhtu5dch, log /tmp/h2v2_auc.log. Resume: rerun scripts/h2_abrupt_theta0_auc_by_severity_v2.py if it died.
+
+## STEP 1 RESULT (core-freeze-2; HEAD b002fdc = tag 845636e + docs-only; fedqpnt/ clean; kappa_R default 60.0)
+theta0_noabrupt_v2 zero-shot abrupt AUC (same 13 held-out seeds, n=1534 epochs, 1157 pos): sev 0.1 -> 0.826, 0.15 -> 0.834, 0.2 -> 0.834
+(old, core-freeze-1-era/kappa_R 40: 0.819 / 0.805 / 0.783). D-061a: AUC(0.15)=0.834 < 0.85 -> NOT low-headroom (0.016 below the line); run as planned.
+Files: results/fleet/theta0_noabrupt_v2.npz, _provenance.json, h2_abrupt_theta0_auc_check_v2.json (git state + kappa_R recorded). STOPPED; tau calibration + n=10 re-run wait for Master.
