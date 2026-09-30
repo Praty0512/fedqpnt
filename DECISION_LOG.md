@@ -33,6 +33,18 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-072 · 2026-09-30 · Trust split committed; the re-verification waits for detector v3 on a frozen core; freeze sequence defined
+- **Change (iii)** (c288e69): separate w_pos/w_clk laws; alias gnss = min; the detector p drives both (D-066); the shadow probe and the reacquisition waiver are on w_pos; the ClockKF follows w_clk with holdover; mean_w is reported per attack window and whole mission.
+- **Caveat:** under meaconing, the trained detector (raw_p ≈ 0.99) still depresses w_pos. Whether the split recovers position accuracy is measured, not assumed.
+- **Ruling:** the combined M1 re-verification is NOT run with detector v2, which was trained on the pre-change core (κ_R 40, old clock, old x9 scaling, no split). Sequence:
+  1. SCENARIO-FIX applies the approved runner/core/environment additions (P1–P3), bit-identical for existing keys;
+  2. **core FREEZE**, tagged in git;
+  3. **detector v3** retrained under the unchanged D-052/D-053 protocol (same 6 families; meaconing_displaced is excluded as a held-out generalisation test);
+  4. the combined re-verification at both IMU grades with v3;
+  5. θ0_noabrupt retrain + the H2/H4 re-run (D-064);
+  6. σ_nom measurement (D-068) → gate decision → M4.
+- **Owner:** Master
+
 ### D-071 · 2026-09-29 · Shadow-probe calibration result; clock-jump features normalised by the predicted TCXO innovation over the gap
 - **D-069 rule outcome:** the clean false-veto rate was MEMS 3.3% (> 1%) and tactical 0%, so the rule triggered. Frozen bounds from disjoint clean seeds 510–529: MEMS 25.07, tactical 6.74.
 - **Detection power at the frozen bounds** (fraction of offset windows vetoed):
