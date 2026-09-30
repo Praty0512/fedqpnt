@@ -33,6 +33,21 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-074 · 2026-09-30 · PAPER-2 audit items folded into core-freeze-2
+- **Code fixes (with D-073, before core-freeze-2):**
+  - (1) the trust-side quantum_cycle_time_s default follows the configured CAI grade (FIELD 1.548 s, not 1.0 s), single-sourced; the S10 override is kept;
+  - (2) the clock-law probe bound (fixed χ²₂(0.99) = 9.21) gets the D-069 pre-registered clean-data rule: measure the false-veto rate on seeds 500–509 with realistic invalid-fix outages; if > 1%, use the per-grade 99th percentile on seeds 510–529.
+- **Documented, not changed:**
+  - the reacquisition waiver applies the 10 s-mean probe bound to a single first-fix NIS (conservative: slower re-admission, never faster);
+  - B′ runs the v1 law (classical innovation-adaptive fusion; the paper describes it so);
+  - ClockKF Q omits q_d·Δt³/3 at a 100 Hz tick (negligible);
+  - TRUST_DESIGN_V2 §C is superseded by D-066/D-069/D-071.
+- **Also noted:**
+  - in the live agent path, invalid fixes never reached the feature extractor (fix = None), so the D-073 bug affected the training dataset builder, i.e. a train/serve feature skew, and not the online recovery;
+  - this confirms the decision to stop v3.
+- **Paper:** IV.D trust engine, IV.B clock/TCXO, and Discussion + Limitations are drafted (PAPER-2, 7e84d97).
+- **Owner:** Master
+
 ### D-073 · 2026-09-30 · Clock-gap bug in core-freeze-1 → runs stopped, fix, re-freeze; patent rev. 2 accepted
 - **Bug (found by PATENT-2 F10, confirmed by the Master in the code):**
   - GnssFeatureExtractor.step computes dt from _last_t, which updates on EVERY call, including the invalid fixes the receiver emits every epoch while jammed (receiver.solve, n < min_sats);
