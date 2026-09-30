@@ -33,6 +33,17 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-075 · 2026-09-30 · S7 bound re-derived and pre-registered (223/h); DISTRUST must pin trust (probe-bypass hole)
+- **S7 bound (S7-BOUND):**
+  - The trust-cycle metric (a down-cross of 0.5 then an up-cross of 0.9 on the alias) is bounded by ⌊3600/(τ_r·ln 5)⌋ = **223/h** for any evidence and any fix timing, per law and for alias = min(w_pos, w_clk); 133/h holds under a regular 1 Hz cadence.
+  - 132 adversarial property tests pass; the tightest adversaries reach 132/h (1 Hz) and 208/h (sparse), so the bound is tight.
+  - The registered S7 toggles reach ≤ 17/h.
+  - **Pre-registered S7 pass: count ≤ 223 (integer), derived from config**; 133 is reported as an annotation. The stale 138 and 52 are retired.
+- **Hole found:** the recovery ramp runs inside DISTRUST whenever D = 0, so w can reach 0.9 while in DISTRUST. A spoof that goes quiet to the detector is then re-admitted WITHOUT passing the shadow probe, which bypasses D-066.
+  - **Fix (in core-freeze-2):** in DISTRUST, w is pinned at w_min for both laws; the only exit is PROBE success.
+  - The S7 bound can only tighten; the tests are re-run on freeze-2.
+- **Owner:** Master
+
 ### D-074 · 2026-09-30 · PAPER-2 audit items folded into core-freeze-2
 - **Code fixes (with D-073, before core-freeze-2):**
   - (1) the trust-side quantum_cycle_time_s default follows the configured CAI grade (FIELD 1.548 s, not 1.0 s), single-sourced; the S10 override is kept;
