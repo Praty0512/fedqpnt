@@ -4,13 +4,15 @@ Federated, quantum-sensor-augmented PNT (positioning, navigation, and timing) wi
 
 ## Status
 
+**Code frozen at tag `core-freeze-1` (commit a7c8bf0); results from this tag are reproducible.**
+
 **Results are PRELIMINARY on tuning seeds (500–599).** M1 Milestone (single-node closed loop) is signed off with stated limitations; federation, full campaign evaluation, and test-seed results are in progress. See [PROJECT_STATE.md](PROJECT_STATE.md) for milestone status and open issues.
 
 - **M0 — Foundations:** ✅ Signed off 2026-09-26
 - **M1 — Single-node closed loop:** ✅ Signed off 2026-09-28 (with limitations)
-- **M2 — Federation:** 🔶 In progress
-- **M3 — Baselines/eval/stats:** 🔶 Pipeline done, not yet at scale
-- **M4 — Full 15-scenario campaign:** ⛔ Gated on issue #1 (κ_R/filter overconfidence)
+- **M2 — Federation:** 🔶 In progress (H2-ABRUPT diagnostic phase)
+- **M3 — Baselines/eval/stats:** 🔶 Core-robustness session in progress
+- **M4 — Full 15-scenario campaign:** ⛔ Gated on issue #1 (κ_R/filter overconfidence; test-seed gate closed in results/GATE_D047.json)
 - **M5 — Paper/patent/figures/repro:** ⏸ On hold
 
 ## Repository Layout
@@ -92,6 +94,10 @@ Results are written to `runs/dryrun/`.
 Real cold-atom interferometer data from [Jarlaud et al. 2024](https://doi.org/10.1038/s41467-024-50804-0) (*Nat. Commun.* 15:6406) is used to calibrate quantum-sensor noise. See [docs/DATA.md](docs/DATA.md) for dataset access and reproduction scripts.
 
 ## Reproducibility
+
+**Seed namespaces:** tuning [0, 10000), test [10000, 20000), fleet-derived ≥ 100000 (gated by results/GATE_D047.json, enforced in fedqpnt/core/seed_gate.py). Every run records git provenance; runs on a dirty tree are flagged INVALID (D-062).
+
+**κ_R = 60** is the single source of truth in fedqpnt/core/defaults.py (D-061); all methods, runners, and scenarios resolve to this value.
 
 Deterministic seeding (SHA-256 stream per seed) ensures bit-identical reruns. See [docs/REPRODUCE.md](docs/REPRODUCE.md) for seeds policy, gate conditions, and mapping of results files to scripts.
 

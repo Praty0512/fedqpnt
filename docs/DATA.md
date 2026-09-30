@@ -83,6 +83,21 @@ Dataset: https://zenodo.org/records/11543715 (CC-BY-4.0)
 
 All values are from EXECUTION_LOG.md entries 18–29 (D-014 to D-019). For detailed methodology, see [REAL_DATA_JARLAUD2024.md](REAL_DATA_JARLAUD2024.md).
 
+## Clock Model (TCXO)
+
+The simulated clock model is a two-state TCXO (temperature-compensated crystal oscillator) per **D-066 addendum / D-071**:
+
+- **Model:** Two-state first-order Gauss-Markov process (bias + drift)
+- **Bias noise spectral density:** q_bias = 0.5 × c² × 2e-19 s ≈ 9.0e-3 m²/s
+- **Drift noise spectral density:** q_drift = c² × 2π² × 2e-20 (1/s) ≈ 3.55e-2 (m/s²)
+
+**Parameter provenance:** 
+- h₀ = 2e-19 s, h₋₂ = 2e-20 (1/s) from Brown & Hwang, *Introduction to Random Signals and Applied Kalman Filtering*, 4th ed., Wiley 2012
+- Cited in Krawinkel & Schön, "GNSS Outlier and Error Detection using Machine Learning," *NAVIGATION*, **68**(2):444, 2021. doi:[10.1002/navi.444](https://doi.org/10.1002/navi.444)
+- q_b = h₀/2 and q_d = 2π² h₋₂ from Qin et al., "An Intelligent Detection Method for Fading Multipath and Non-Line-of-Sight Signals," *Sensors*, **21**(2):466, 2021. doi:[10.3390/s21020466](https://doi.org/10.3390/s21020466)
+
+This clock model is used for both the truth simulator and the ClockKF filter (model-matched).
+
 ## Specification
 
 Full technical specification of dataset structure, file formats, calibration procedures, and caveats is in [REAL_DATA_JARLAUD2024.md](REAL_DATA_JARLAUD2024.md).

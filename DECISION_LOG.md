@@ -33,6 +33,23 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-073 · 2026-09-30 · Clock-gap bug in core-freeze-1 → runs stopped, fix, re-freeze; patent rev. 2 accepted
+- **Bug (found by PATENT-2 F10, confirmed by the Master in the code):**
+  - GnssFeatureExtractor.step computes dt from _last_t, which updates on EVERY call, including the invalid fixes the receiver emits every epoch while jammed (receiver.solve, n < min_sats);
+  - the clock reference (_last_clk_*) updates only on valid fixes;
+  - so the D-071 gap normalisation used dt ≈ 1 s at the first post-jam fix;
+  - the D-071 unit test did not interleave invalid fixes.
+- **Action:**
+  - all runs started on core-freeze-1 were stopped: detector v3, θ0_noabrupt_v2, the σ_nom/coasting chain, and possibly one S7-BOUND pytest run. 12 python processes were killed by the Master;
+  - their outputs are discarded;
+  - fix: a separate _last_valid_t for the clock dt, a realistic jam-sequence test, and a recovery trace;
+  - then **core-freeze-2** and a relaunch of all three.
+- **Patent rev. 2 (PATENT-2):** accepted as the attorney-review skeleton.
+  - Claim 1(vi) kept; split trust, shadow probe, consistency reacquisition, normalised clock evidence and gap-reset jump test added as dependents 21–26.
+  - Flags recorded: F3 (reputation is used only for quarantine, not weighting) is resolved by rewording the claim; the FL code is not changed. F7 (claim 20 unsupported) is left to the attorney.
+  - No prior-art search has been done (attorney to-do).
+- **Owner:** Master
+
 ### D-072 · 2026-09-30 · Trust split committed; the re-verification waits for detector v3 on a frozen core; freeze sequence defined
 - **Change (iii)** (c288e69): separate w_pos/w_clk laws; alias gnss = min; the detector p drives both (D-066); the shadow probe and the reacquisition waiver are on w_pos; the ClockKF follows w_clk with holdover; mean_w is reported per attack window and whole mission.
 - **Caveat:** under meaconing, the trained detector (raw_p ≈ 0.99) still depresses w_pos. Whether the split recovers position accuracy is measured, not assumed.
