@@ -335,9 +335,13 @@ class _LawCoreV2:
 
         elif self.state == "DISTRUST":
             self._distrust_timer += dt
-            G_effective = info["G"] or info["G_capped"]
-            target = min(info["tau_star"], c.w_cap) if info["G_capped"] else info["tau_star"]
-            self._ramp(target, dt, G_effective)
+            # D-075: DISTRUST PINS w at w_min and the recovery ramp is SUSPENDED. Previously the ramp kept
+            # running whenever the core flag D was 0, so w could climb to 0.9 inside DISTRUST: a spoof that
+            # goes quiet to the detector (p low) was re-admitted without ever passing the shadow probe (D-066).
+            # The ONLY way out is DISTRUST -> PROBE (after T_ex) -> probe success -> TRUST (ramp from the probe
+            # set-point). This can only shorten the time w spends above w_min, so the S7 chattering bound
+            # (docs/specs/raw/S7_BOUND.md) can only get tighter.
+            self.w = c.w_min
             if self._distrust_timer >= c.T_ex:
                 self.state = "PROBE"
                 self._probe_timer = 0.0

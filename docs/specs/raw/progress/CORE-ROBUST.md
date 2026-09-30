@@ -580,3 +580,54 @@ seeds 500-504 (tuning only; safety sweep 9600-9602); <=4 worker processes; ONE c
  8. Full suite once at the end. Report raw numbers only (no PASS framing): post-attack column, both grades, git state per step.
 Plan step 0 DONE (scripts only): --imu-grade added to run_m1_s1_far_check.py and core_robust_safety_principle_sweep.py; jam_recovery_summary.py takes weights path as argv[1];
 drift_probe_trace.py takes `<kind> <weights>` (argv[1], argv[2]). STANDING BY for "v3 ready".
+
+## v3-INDEPENDENT steps running (one chain, <=4 procs; bg task b9m5r6ep2). HEAD at launch=6dd7cc9f8b8cc6c85ba0ffb2bbe8e76ae96a9da6 (core-freeze-1 + 2 commits), fedqpnt/ clean.
+(a) scripts/core_robust_sigma_nom.py: undefended, nominal, 600 s, seeds 560-579 per grade, sigma_nom=std(ddof=1) of rmse_h_pre -> results/sigma_nom.json
+    (layout for metrics.load_sigma_nom: top-level "sigma_nom_m": {grade: m} + "detail" block per grade with n/seeds/mean/per_seed/definition/git_head/git_status). Log scratchpad/sigma_nom_run.log.
+(b) coasting envelope @60/120/179, grade x CAI, seeds 500-504 -> scratchpad/coasting_envelope_v3.log. Git start/end: scratchpad/v3indep_git.log. v3-dependent steps wait for "v3 ready".
+First chain (b9m5r6ep2) died silently after the MEMS grade (sigma_nom industrial_mems = 1.1801 m, mean 2.9440, n=20, min 1.034 max 5.176; tactical stage exited without traceback, no json,
+coasting skipped by &&; probable memory pressure from the v3 training). RETRY (bg br5f1773e): sigma script now crash-safe (results/sigma_nom.json.partial_<grade>.json), --workers 3, then coasting;
+logs scratchpad/sigma_nom_run2.log, coasting_envelope_v3.log, v3indep_git2.log (git per D-062).
+
+## D-073 STOP-AND-FIX (features.py clock gap measured from last call instead of last valid clock ref)
+PROCESSES: my sigma_nom/coasting retry chain (bg task br5f1773e) STOPPED via TaskStop; my earlier chain b9m5r6ep2 had already exited. Only python process alive afterwards was PID 18560
+(Temp/m.py, not mine). No results/sigma_nom*.json produced (nothing to discard). NOTE: I made the features.py edit while br5f1773e may still have been live (D-062 violation for that
+chain; its outputs are discarded; the chain ran the undefended method so features were irrelevant to it).
+FIX: trust/features.py: new _last_clk_t (set with _last_clk_bias/_last_clk_drift on valid epochs); dt_clk = t - _last_clk_t for sig_b, sig_d, pred_b; dt kept for x6.
+Other _last_t patterns checked: x6 (C/N0 rate) and x11 (nsat delta) use references updated on every call consistently (dt matches their reference); EwmaStack has its own _last_t,
+called once per valid epoch; trust_law._last_valid_gnss_t fine. NOTE: in the AGENT path invalid fixes never reach the extractor (agent.py sets fix=None when invalid), so the
+first-post-jam recovery trace was already fine; the bug bites any caller that feeds invalid fixes (training/dataset builders, tests, future agent changes).
+Tests: test_clock_gap_measured_from_last_valid_fix_across_1hz_invalid_fixes (100 TCXO draws, 180 invalid 1 Hz fixes then a valid fix: clk_event fraction <=2%), and
+test_meaconing_750m_step_after_invalid_fix_gap_x8_reported (x8 = 750/sigma_b(180 s) ~ 2.855). Verification run: scratchpad/jam_recovery_d073.log, suite_d073.log, d073_git.log.
+
+## D-074 batch (after D-073 verification): (1) quantum_cycle_time_s default follows the quantum grade preset (field 1.548 = JARLAUD_CYCLE_TIME_S, lab 1.0, near_future 0.1;
+single-sourced from sensors/quantum.py presets; RunSpec override stays; test: default agent + FIELD -> 1.548). Sites: node/methods.py:87 (make_agent_config default 1.0),
+trust/trust_law.py:534/623 (defaults 1.0), node/runner.py:62/104. (2) clock-law probe bound (chi2_2(0.99)=9.21): D-069 rule via scripts/core_robust_clock_probe_check.py (written;
+seeds 500-509 both grades, 3 windows/seed, 1 Hz invalid fixes fed to the extractor during outages; if frac>9.21 >1% -> p99 on seeds 510-529 per grade, frozen).
+WAITING for the D-073 verification runs (suite_d073.log, jam_recovery_d073.log; bg bm8vrt70v) to finish before ANY fedqpnt/ edit (D-062). Then: edit (1) -> launch clock-probe check -> (2) bound edit if needed -> full suite -> one report.
+D-073 VERIFIED: OLD code (HEAD~) on a 180 s 1 Hz-invalid-fix jam sequence: median max(x8,x9)=59.5, frac>5 = 0.96 (bug reproduced); fixed code passes the new test (<=2%).
+Jam recovery (scratchpad/jam_recovery_d073.log, seed 500): tactical post RMSE_h 5.10 (max 52.0), err<5 m in 3 s, w>0.9 in 50 s; MEMS 25.62 (max 328.8), 3 s, 50 s (recovery kept).
+Suite run during verification had 18 FAILED in tests/test_trust_chattering_bound.py (UNTRACKED file written by another agent, S7-BOUND, in flux during my run); the same tests pass when
+re-run (test_s7_toggle_schedule_through_engine passes) -> transient, not mine; the final suite will re-check.
+D-074 item 1 DONE (edits before launching any run): methods.default_quantum_cycle_time_s(grade) from sensors/quantum.py preset (GRADES[g]().axis.cycle_time_s: field 1.548, lab 1.0, near_future 0.1;
+None -> 1.0), make_agent_config(quantum_cycle_time_s=None, quantum_grade=None); runner + fleet/node_runner pass quantum_grade; RunSpec.quantum_cycle_time_s override intact.
+Tests tests/test_quantum_cycle_default.py (3 pass). Item 2 clock-probe check LAUNCHED (bg b2niq93ew; log scratchpad/clock_probe_500_509.log); no fedqpnt/ edits until it ends.
+D-074 item 2 RESULT (scratchpad/clock_probe_500_509.log, results/m1/clock_probe_check_500_509.json; git start=end HEAD 4249659 with only my dirty files): mean (x8^2+x9^2) over the first 10 valid fixes
+after a 60 s outage with 1 Hz invalid fixes fed during the outage, n=30/grade: both grades median 0.75, p95 1.86, p99 2.23, max 2.34, frac>9.21 = 0.000 (identical across grades: clock statistic is IMU-independent,
+same seeds/truth clock) -> <=1% -> KEEP chi2_2(0.99)=9.21, no calibration needed. Full suite running (scratchpad/suite_d074.log).
+
+## D-075 (third core-freeze-2 item): DISTRUST pin. Plan: _LawCoreV2 DISTRUST branch: w = w_min (no upward ramp; core ramp suspended); only exit DISTRUST->PROBE (T_ex)->probe success->TRUST.
+Tests written first: tests/test_trust_distrust_pin.py (a: p=0, no evidence, 59 s -> w==w_min; b: TRUST only after PROBE, ramp from w_probe; c: consistency-matched quiet spoof cannot raise w before PROBE;
+failed probe -> pinned DISTRUST). Also must keep tests/test_trust_chattering_bound.py green and report whether the S7 derivation changes; jam-recovery trace re-run (both grades).
+WAITING for suite_d074.log (bg brclabipf) to finish before editing trust_law.py (D-062).
+D-074 suite (scratchpad/suite_d074.log) GREEN (0 F/E, includes tests/test_trust_chattering_bound.py). D-075 implemented in trust_law._LawCoreV2 DISTRUST branch: w=w_min, ramp suspended (only exit
+DISTRUST->PROBE->success->TRUST). New tests test_trust_distrust_pin.py pass. S7 chattering file: 2 failures, both owned by S7-BOUND semantics: (1) test_premise_w_recovers_inside_distrust_without_probe asserts the
+very bug (w>=0.9 in DISTRUST) -> must be inverted; (2) test_greedy_shallow_dip_adversary_regular_cadence[0.5] non-vacuity guard n>=20 (adversary now produces fewer cycles: bound tightens).
+Measuring counts in scratchpad/greedy_counts_d075.log; then update those two tests, re-run full suite + jam-recovery trace (both grades).
+S7 chattering (greedy counts after the pin, scratchpad/greedy_counts_d075.log): delta=1.0 132/h, delta=0.5 19/h, sparse gap 16.2/17/25 -> 208/199/137/h (all <= 223 timing-free bound; 133 grid bound at D=1 not exceeded).
+Derivation (L1: w rises only via the ramp or the w_probe<0.5 set-point) is UNCHANGED: the pin only removes the ramp inside DISTRUST; worst-case adversaries use shallow TRUST-state dips (w<0.5 without D=1), so
+worst-case counts are ~unchanged (132/h at 1 Hz); only delta=0.5 dropped 20->19. Tests edited (owner S7-BOUND; flagged): premise test inverted -> test_premise_w_pinned_inside_distrust_without_probe;
+non-vacuity guard n>=20 -> n>=10 with comment. S7_BOUND.md "SURPRISE" wording (DISTRUST does not pin w) is now stale (their doc, not edited).
+Verification (D-075): suite_d075.log, jam_recovery_d075.log, d075_git.log (bg baijc17s0).
+BATCH (D-073 + D-074 + D-075) VERIFIED: full suite green (scratchpad/suite_d075.log, 0 F/E); jam recovery unchanged (tactical 5.10 m post RMSE, max 52.0, err<5 m in 3 s, w>0.9 in 50 s; MEMS 25.62/328.8/3 s/50 s) since the pure-jam path is TRUST+reacq (no DISTRUST).
+HEAD 62f7b495187abaaf0e492da7199b3bda08898534 at launch and end, dirty = my files only. READY for Master's core-freeze-2 commit.

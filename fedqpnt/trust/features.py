@@ -91,6 +91,9 @@ class GnssFeatureExtractor:
     _last_mean_cn0: float | None = field(default=None, repr=False)
     _last_clk_bias: float | None = field(default=None, repr=False)
     _last_clk_drift: float | None = field(default=None, repr=False)
+    # D-073: time of the fix that set _last_clk_bias/_last_clk_drift. The clock prediction gap is measured from
+    # THIS (valid-clock) epoch, not from _last_t (which advances on every call, incl. invalid/outage fixes).
+    _last_clk_t: float | None = field(default=None, repr=False)
     _last_num_sats: int | None = field(default=None, repr=False)
     _cusum: float = field(default=0.0, repr=False)
     _prev_was_outage: bool = field(default=False, repr=False)
@@ -101,6 +104,7 @@ class GnssFeatureExtractor:
         self._last_mean_cn0 = None
         self._last_clk_bias = None
         self._last_clk_drift = None
+        self._last_clk_t = None
         self._last_num_sats = None
         self._cusum = 0.0
         self._prev_was_outage = False
@@ -183,12 +187,14 @@ class GnssFeatureExtractor:
             x1 = _innovation_nis_over_dof(innovations, "gnss_pos")
             x2 = _innovation_nis_over_dof(innovations, "gnss_vel")
             x3 = (fix.raim_stat / max(fix.num_sats - 4, 1)) if np.isfinite(fix.raim_stat) else 0.0
-            sig_b = float(np.sqrt(self.sigma_clk_bias ** 2 + CLOCK_Q_BIAS * dt + CLOCK_Q_DRIFT * dt ** 3 / 3.0))
-            sig_d = float(np.sqrt(self.sigma_clk_drift ** 2 + CLOCK_Q_DRIFT * dt))
+            # D-073: gap since the last VALID clock reference (not since the last call of any kind).
+            dt_clk = 1.0 if self._last_clk_t is None else max(fix.t - self._last_clk_t, 1e-6)
+            sig_b = float(np.sqrt(self.sigma_clk_bias ** 2 + CLOCK_Q_BIAS * dt_clk + CLOCK_Q_DRIFT * dt_clk ** 3 / 3.0))
+            sig_d = float(np.sqrt(self.sigma_clk_drift ** 2 + CLOCK_Q_DRIFT * dt_clk))
             if self._last_clk_bias is None or self._last_clk_drift is None or not np.isfinite(fix.clk_bias):
                 x8 = 0.0
             else:
-                pred_b = self._last_clk_bias + self._last_clk_drift * dt
+                pred_b = self._last_clk_bias + self._last_clk_drift * dt_clk
                 x8 = abs(fix.clk_bias - pred_b) / sig_b
             x9 = (0.0 if self._last_clk_drift is None or not np.isfinite(fix.clk_drift)
                   else abs(fix.clk_drift - self._last_clk_drift) / sig_d)
@@ -217,6 +223,7 @@ class GnssFeatureExtractor:
         if not outage_now:
             self._last_clk_bias = fix.clk_bias
             self._last_clk_drift = fix.clk_drift
+            self._last_clk_t = fix.t
         self._prev_was_outage = outage_now
         return vec
 

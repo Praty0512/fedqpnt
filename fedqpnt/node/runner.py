@@ -100,7 +100,7 @@ def run_single(spec: RunSpec) -> dict[str, Any]:
     agent_cfg = make_agent_config(spec.method, kappa_R=spec.kappa_R, kappa_Q=spec.kappa_Q,
                                    world=spec.world, quantum_enabled=spec.quantum_grade is not None,
                                    detector_weights_path=spec.detector_weights_path,
-                                   imu_grade=spec.imu_grade,
+                                   imu_grade=spec.imu_grade, quantum_grade=spec.quantum_grade,
                                    **({} if spec.quantum_cycle_time_s is None
                                       else dict(quantum_cycle_time_s=spec.quantum_cycle_time_s)))
     agent = Agent(agent_cfg, env.imu.config(), node_id=spec.node_id)

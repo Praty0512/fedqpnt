@@ -147,3 +147,49 @@ def test_nominal_dt1_clock_features_scaling_vs_previous():
     f = ex.step(_clk_fix(2.0, 3.0, 0.2), [])
     assert f[7] == pytest.approx(3.0 / 3.003, rel=2e-3)
     assert f[8] == pytest.approx(0.2 / 0.2748, rel=2e-3)
+
+
+def test_clock_gap_measured_from_last_valid_fix_across_1hz_invalid_fixes():
+    """D-073: a realistic jam sequence (1 Hz INVALID fixes for 180 s, then a valid fix carrying ordinary TCXO
+    holdover drift) must not fire clk_event: the clock prediction gap is 180 s (last valid clock reference), not the
+    ~1 s since the last call. Would blow up x8/x9 with dt taken from the last call of any kind."""
+    import numpy as np
+    from fedqpnt.core.types import GnssFix
+    from fedqpnt.gnss.signal import ClockState
+    from fedqpnt.trust.features import GnssFeatureExtractor
+    from fedqpnt.trust.trust_law import TrustLawConfig
+    thr = TrustLawConfig().es_clk_sigma
+    fired = []
+    for seed in range(100):
+        rng = np.random.default_rng(seed)
+        clk = ClockState()
+        ex = GnssFeatureExtractor()
+        for k in range(1, 4):
+            clk.step(1.0, rng)
+            ex.step(_clk_fix(float(k), clk.bias_m + rng.normal(0, 3.0), clk.drift_mps + rng.normal(0, 0.2)), [])
+        for k in range(4, 184):                      # jamming: invalid fix every epoch
+            clk.step(1.0, rng)
+            bad = GnssFix(t=float(k), pos=np.full(3, np.nan), vel=np.full(3, np.nan), clk_bias=np.nan,
+                          clk_drift=np.nan, cov_pos=np.eye(3), cov_vel=np.eye(3), residual_rms=np.nan,
+                          num_sats=2, mean_cn0=25.0, std_cn0=3.0, agc_db=-10.0, valid=False, raim_stat=np.nan)
+            ex.step(bad, [])
+        clk.step(1.0, rng)
+        f = ex.step(_clk_fix(184.0, clk.bias_m + rng.normal(0, 3.0), clk.drift_mps + rng.normal(0, 0.2)), [])
+        fired.append(max(f[7], f[8]) > thr)
+    assert np.mean(fired) <= 0.02, f"post-jam clk_event fraction {np.mean(fired):.3f}"
+
+
+def test_meaconing_750m_step_after_invalid_fix_gap_x8_reported():
+    import numpy as np
+    from fedqpnt.core.defaults import CLOCK_Q_BIAS, CLOCK_Q_DRIFT
+    from fedqpnt.core.types import GnssFix
+    from fedqpnt.trust.features import GnssFeatureExtractor
+    ex = GnssFeatureExtractor()
+    ex.step(_clk_fix(1.0, 0.0, 0.0), [])
+    for k in range(2, 181):
+        ex.step(GnssFix(t=float(k), pos=np.full(3, np.nan), vel=np.full(3, np.nan), clk_bias=np.nan,
+                        clk_drift=np.nan, cov_pos=np.eye(3), cov_vel=np.eye(3), residual_rms=np.nan, num_sats=2,
+                        mean_cn0=25.0, std_cn0=3.0, agc_db=-10.0, valid=False, raim_stat=np.nan), [])
+    f = ex.step(_clk_fix(181.0, 750.0, 0.0), [])
+    sig = np.sqrt(9.0 + CLOCK_Q_BIAS * 180 + CLOCK_Q_DRIFT * 180 ** 3 / 3.0)
+    assert f[7] == pytest.approx(750.0 / sig, rel=1e-6)      # ~2.855, below es_clk_sigma=5 (reported, not tuned)

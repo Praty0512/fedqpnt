@@ -179,7 +179,8 @@ def _greedy(delta, dur=W_HOUR, sparse_gap=None, w_target=0.4999):
 def test_greedy_shallow_dip_adversary_regular_cadence(delta):
     ts, ws = _greedy(delta)
     n = check_series(ts, ws, n_bound=n_bound_grid(1.0) if delta == 1.0 else N_BOUND_ANY_TIMING)
-    assert n >= 20, "adversary failed to produce cycles (test would be vacuous)"
+    # D-075: with DISTRUST pinned the greedy adversary at delta=0.5 gets 19 cycles/h (was >= 20); non-vacuity floor 10
+    assert n >= 10, "adversary failed to produce cycles (test would be vacuous)"
 
 
 @pytest.mark.parametrize("gap", [16.2, 17.0, 25.0])
@@ -284,21 +285,19 @@ def test_premise_distrust_exits_only_through_probe():
         assert ("TRUST", "DISTRUST") in seen
 
 
-def test_premise_w_recovers_inside_distrust_without_probe():
-    """SURPRISE (documented): the DISTRUST *label* does not pin w; the ramp runs in DISTRUST too, so a
-    w-cycle needs no PROBE.  A strong burst then clean evidence must lift w >= 0.9 while still DISTRUST."""
+def test_premise_w_pinned_inside_distrust_without_probe():
+    """D-075 (inverts the earlier documented SURPRISE): DISTRUST PINS w at w_min and suspends the ramp, so w can
+    no longer reach 0.9 inside DISTRUST; the only way up is DISTRUST -> PROBE -> success -> TRUST.  A strong burst
+    then clean evidence leaves w == w_min for the whole DISTRUST dwell (< T_ex)."""
     law = v2_law()
     t = 0.0
     for _ in range(3):
         step_law(law, Ev(t, 1.0, nis_ok=False, fn=False, nv=40.0)); t += 1.0
     assert law._core_v2.state == "DISTRUST"
-    hit = False
     for _ in range(50):
         step_law(law, Ev(t, 0.0)); t += 1.0
-        if law._core_v2.state == "DISTRUST" and law.w >= W_UP:
-            hit = True
-    assert hit
-    # ... hence the v2 "cycle >= T_ex + T_probe = 70 s => 52/h" claim is FALSE for w-cycles.
+        assert law._core_v2.state == "DISTRUST"
+        assert law.w == pytest.approx(CFG.w_min)
 
 
 def test_premise_reacquisition_cap_never_raises_w():

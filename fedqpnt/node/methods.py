@@ -82,14 +82,28 @@ def save_detector_weights(path: str | Path, params: dict[str, np.ndarray]) -> No
     np.savez(path, **{k: np.asarray(v) for k, v in params.items()})
 
 
+def default_quantum_cycle_time_s(quantum_grade: str | None) -> float:
+    """D-074: cycle time of the configured quantum sensor grade from the sensor preset (lab 1.0 s,
+    field 1.548 s, near_future 0.1 s); 1.0 s when no grade is given (legacy default)."""
+    if quantum_grade is None:
+        return 1.0
+    from fedqpnt.sensors.quantum import GRADES
+    return float(GRADES[quantum_grade]().axis.cycle_time_s)
+
+
 def make_agent_config(method: str, *, kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                        world: str = "flat", quantum_enabled: bool = True,
-                       quantum_cycle_time_s: float = 1.0,
+                       quantum_cycle_time_s: float | None = None,
                        detector_weights_path: str | Path | None = None,
-                       imu_grade: str | None = None) -> AgentConfig:
+                       imu_grade: str | None = None,
+                       quantum_grade: str | None = None) -> AgentConfig:
     if method not in _METHOD_TRUST_KEY:
         raise ValueError(f"unknown method '{method}'; choose from {METHOD_NAMES}")
     trust_key = _METHOD_TRUST_KEY[method]
+    # D-074: the trust-side assumed CAI cycle time follows the configured quantum sensor grade (single source:
+    # the sensor preset, e.g. FIELD = JARLAUD_CYCLE_TIME_S = 1.548 s); an explicit value (S10 mismatch axis) wins.
+    if quantum_cycle_time_s is None:
+        quantum_cycle_time_s = default_quantum_cycle_time_s(quantum_grade)
     trust_cfg: TrustEngineConfig = make_method_config(
         trust_key, quantum_enabled=quantum_enabled, quantum_cycle_time_s=quantum_cycle_time_s)
 
