@@ -15,3 +15,18 @@
 ## Master follow-ups (done, still no runs)
 - --kappa-r/--kappa-R argparse default -> DEFAULT_KAPPA_R (import from fedqpnt.core.defaults) in: run_m1_s1_far_check.py, run_m1_smoke.py, run_campaign.py, defended_vs_undefended_check.py. Left alone (historical/diagnostic, hard-coded 40): cai_h3_investigation, core_robust_ba_nees_artifact_check, core_robust_overconfidence_diag, diag_s0_gate_localization, filter_gnss_d038, fusion_outage, fusion_profile, gate_a_labeller_v2, h2_abrupt_theta0_auc_by_severity, perf_benchmark, perf_bitident_check, recalibrate_and_retrain_v2, retrain_detector_real. (core_robust_safety_principle_sweep already defaults 60.0 literal; untouched.)
 - train_supervised_v3.py: Step 3b added: meaconing_displaced (onset 60, dur 180, sev 0.5, default params) on seeds 575-579, scored with v3 + Platt, AUC raw/cal/spoof-head + CI, saved as report["generalisation_meaconing_displaced"]. Done via worker-side wrapper patching plan_for (no fedqpnt/ edit). Random-stream name "train_supervised_v3" noted: SGD stream differs from v2.
+
+## Phase B LAUNCHED (core-freeze-1 = a7c8bf0 per Master)
+- Chain script scratchpad/run_v3_chain.sh: train v3 (workers 4) -> S1 FAR (weights v3, --kappa-r default=60, workers 4, out results/m1/s1_far_check_v3.json). Logs in scratchpad: v3_train.log, v3_far.log, v3_chain.log. Displaced check is inside the training script (Step 3b).
+- Launch git HEAD/fedqpnt status recorded in scratchpad/v3_chain.log and report json.
+- Launched (background). Launch HEAD 08f29dd (ops commit atop a7c8bf0; fedqpnt/ diff vs a7c8bf0 empty, status clean). On completion: read scratchpad v3_train.log, results/m1/detector_train_sup_v3_report.json, results/m1/s1_far_check_v3.json; compare to results/m1/detector_train_sup_v2_report.json; report to Master.
+- Note: HEAD moved 08f29dd -> 6dd7cc9 (ops-only commits; git diff a7c8bf0..HEAD -- fedqpnt empty) between chain launch and training script launch. Not a core change. Chain still running (background); the earlier task-completion notice was just the launcher's sleep wrapper.
+
+## CHAIN STOPPED by Master (core bug: clock-jump features use wrong gap after jamming). Discard outputs.
+- Found still-running run_m1_s1_far_check.py (--weights sup_v3...) tree (pid 12320 + 4 workers); killed. Chain log had "train exit 127 / far exit 127" (bash chain itself never ran python; that FAR process had a different parent, not from my chain).
+- No results/m1/*sup_v3* or s1_far_check_v3.json present. Nothing to delete. No other detector-v3 processes running.
+- WAITING for "core frozen — launch v3 (core-freeze-2)"; then relaunch same chain (scratchpad/run_v3_chain.sh; fix: bash chain got exit 127 -> use full python path / PowerShell launch).
+
+## core-freeze-2 (845636e) relaunch
+- Launched training via full python path, run_in_background (task b79zxvcsc), log scratchpad/v3_train2.log. Launch HEAD b002fdc (fedqpnt/ diff vs 845636e empty, status clean). First log line confirmed ([git @launch]).
+- NEXT (when notified training done): read report json + log; then run S1 FAR separately: python -u scripts/run_m1_s1_far_check.py --weights results/m1/detector_weights_sup_v3.npz --workers 4 --out results/m1/s1_far_check_v3.json (kappa default now 60) -> scratchpad/v3_far2.log; compare to v2 report; report to Master.

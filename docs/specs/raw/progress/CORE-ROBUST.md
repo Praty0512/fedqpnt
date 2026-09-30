@@ -631,3 +631,7 @@ non-vacuity guard n>=20 -> n>=10 with comment. S7_BOUND.md "SURPRISE" wording (D
 Verification (D-075): suite_d075.log, jam_recovery_d075.log, d075_git.log (bg baijc17s0).
 BATCH (D-073 + D-074 + D-075) VERIFIED: full suite green (scratchpad/suite_d075.log, 0 F/E); jam recovery unchanged (tactical 5.10 m post RMSE, max 52.0, err<5 m in 3 s, w>0.9 in 50 s; MEMS 25.62/328.8/3 s/50 s) since the pure-jam path is TRUST+reacq (no DISTRUST).
 HEAD 62f7b495187abaaf0e492da7199b3bda08898534 at launch and end, dirty = my files only. READY for Master's core-freeze-2 commit.
+
+## POST core-freeze-2 (845636e): v3-independent chain relaunched (bg b26t9vuxq, <=3 workers, no fedqpnt/ edits): sigma_nom per grade (seeds 560-579) -> results/sigma_nom.json (log scratchpad/sigma_nom_freeze2.log),
+then coasting envelope @60/120/179 (scratchpad/coasting_freeze2.log); git per D-062 in scratchpad/chain_freeze2_git.log. docs/specs/raw/S7_BOUND.md: dated "RESOLVED by D-075" note added (docs only; bound
+unchanged 223/h timing-free, 133/h at 1 Hz; adversary counts 132/19 greedy, 208/199/137 sparse). v3-dependent re-verification waits for "v3 ready".

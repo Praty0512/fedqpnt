@@ -92,7 +92,16 @@ law itself permits it, so the registered bound cannot assume dense fixes unless 
 
 - Fastest down-and-up sequence: shallow dip (p_bar just above 0.506, w just under 0.5; with dt = 1 s p_bar must land in
   (0.597, 0.600) so D stays 0), then p = 0. w recovers in TRUST with no DISTRUST at all. Deep dips only lengthen the rise.
-- Can DISTRUST be exited other than through PROBE? No (label). BUT surprise: the DISTRUST label does not pin w. The
+- **RESOLVED by D-075 (core-freeze-2, 2026-09-30):** DISTRUST now PINS w at w_min and the ramp is suspended, so the
+  "surprise" below no longer holds (the only way up from DISTRUST is PROBE -> success -> TRUST). The premise test was
+  inverted (`test_premise_w_pinned_inside_distrust_without_probe`) and the greedy non-vacuity floor lowered 20 -> 10. The
+  bound is UNCHANGED at 223 cycles/h (timing-free, L = 16.094 s) and 133/h on a regular 1 Hz grid; the derivation (w rises
+  only via the ramp or the w_probe = 0.3 < 0.5 set-point) is unchanged. Adversary counts after the pin
+  (`scratchpad/greedy_counts_d075.log`): greedy delta = 1.0 s 132/h, delta = 0.5 s 19/h; sparse-timing (gap 16.2 / 17 / 25 s)
+  208 / 199 / 137 per hour. The worst adversaries use shallow TRUST-state dips (w < 0.5 without D = 1), so the worst-case
+  count is essentially unchanged; the "state cycle >= T_ex + T_probe = 70 s" argument now also holds for cycles that pass
+  through DISTRUST. Historical text follows.
+- Can DISTRUST be exited other than through PROBE? No (label). BUT surprise (STALE, see the D-075 note above): the DISTRUST label does not pin w. The
   ramp runs in DISTRUST too (`_LawCoreV2.advance` DISTRUST branch), and G only needs the core hysteresis D_core = 0
   (5 s of p_bar <= 0.3). So w can climb back to 0.9 while the state is still DISTRUST
   (`test_premise_w_recovers_inside_distrust_without_probe`). The "cycle >= T_ex + T_probe = 70 s" argument behind 52/h
