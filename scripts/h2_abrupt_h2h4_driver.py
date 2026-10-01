@@ -1,12 +1,12 @@
 """H2-ABRUPT steps 3-5: H2, H4, and the drift-control fleet runs, with
-'abrupt' as the NOVEL family (theta0_noabrupt.npz never saw it; n0's own
+'abrupt' as the NOVEL family (theta0_noabrupt_v2.npz never saw it; n0's own
 local FL data excludes it; peers' local data includes it).
 
 Adapts scripts/h2_h4_subrule_d056.py's run_h2/run_h4 (already generic over
 attack dict / family_name / tag -- no changes needed there, this is a NEW
 script per the task's "write new scripts only" rule, not an edit) pointed
 at:
-  - theta0 = results/fleet/theta0_noabrupt.npz (h2_abrupt_pretrain_theta0.py)
+  - theta0 = results/fleet/theta0_noabrupt_v2.npz (h2_abrupt_pretrain_theta0.py)
   - attack = abrupt_spoof, severity=0.15 (chosen by h2_abrupt_es_firing_check.py:
     0.6/0.4/0.2 all fire E_s above the 5% target under the CURRENT (CORE-ROBUST
     nav_prior-fixed) D-058 short-baseline jump test; 0.15 and 0.1 both pass at
@@ -44,14 +44,14 @@ from fedqpnt.fleet.orchestrator import FleetScenarioConfig, run_fleet
 from fedqpnt.node.methods import load_detector_weights
 from fedqpnt.training.build_supervised_dataset import plan_for
 
-THETA0_PATH = Path("results/fleet/theta0_noabrupt.npz")
+THETA0_PATH = Path("results/fleet/theta0_noabrupt_v2.npz")
 N_NODES = 5
 LIVE_DURATION_S = 600.0
 LOCAL_TRAIN_DURATION_S = 120.0
 ROUND_PERIOD_S = 60.0
 N_ROUNDS = 10
 CHOSEN = dict(local_epochs=2, lr=0.05, prox_mu=0.0)   # D-054.3 FL sanity check
-LIVE_SEEDS = [500, 501, 502, 503, 504]
+LIVE_SEEDS = list(range(500, 510))   # n=10 per H2_PREREG (D-064)
 
 # Step 2 result: severity 0.15 (12 m jump) is the largest tested value that
 # still keeps es_fire_frac_attack at 0% pooled over seeds 500-504 (0.2/16m
@@ -128,8 +128,33 @@ def _git_state() -> dict:
                                    capture_output=True, text=True, timeout=15).stdout.strip()
         except Exception as exc:  # noqa: BLE001
             return f"<git call failed: {exc!r}>"
-    return dict(head=_run(["git", "rev-parse", "HEAD"]),
+    return dict(head=_run(["git", "rev-parse", "HEAD"]), fedqpnt_tree=_run(["git", "rev-parse", "HEAD:fedqpnt"]),
                 status_porcelain_fedqpnt=_run(["git", "status", "--porcelain", "fedqpnt/"]))
+
+
+RUNS_DIR = Path("results/fleet/h2_abrupt_runs")
+
+
+def _run_or_load(part, method, seed, scenario, theta0, param_names):
+    """Runs ONE fleet (sequential) and persists n0's full result (incl. epoch_* 1 Hz arrays,
+    provenance) + the arm's FINAL installed model + git state; resumable (skips finished runs)."""
+    RUNS_DIR.mkdir(parents=True, exist_ok=True)
+    stem = RUNS_DIR / f"{part}_{method}_seed{seed}"
+    jpath = stem.with_suffix(".json")
+    if jpath.exists():
+        rec = json.loads(jpath.read_text())
+        print(f"[resume] {jpath.name} already done")
+        return rec["n0"], rec["aborted"]
+    git0 = _git_state()
+    result = run_fleet(scenario, theta0, param_names)
+    n0 = result.node_results.get("n0", {})
+    git1 = _git_state()
+    if result.final_theta is not None:
+        np.savez(stem.with_suffix(".npz"), **{k: np.asarray(v) for k, v in result.final_theta.items()})
+    rec = dict(part=part, method=method, seed=seed, aborted=bool(result.aborted), wall_s=result.wall_s,
+               git_start=git0, git_end=git1, fedqpnt_changed_during_run=((git0['fedqpnt_tree'], git0['status_porcelain_fedqpnt']) != (git1['fedqpnt_tree'], git1['status_porcelain_fedqpnt'])), n0=n0)
+    jpath.write_text(json.dumps(rec, default=str))
+    return n0, bool(result.aborted)
 
 
 def _empty_per_arm():
@@ -161,6 +186,7 @@ def _summarize(per_arm) -> dict:
 
 
 def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str, provenance_log: list) -> dict:
+    PART = "h2_abrupt"
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
     for seed in LIVE_SEEDS:
@@ -177,9 +203,8 @@ def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str, proven
                 local_train_seeds={nid: local_seeds[nid] for nid in ids},
                 local_train_pool={nid: "mixed" for nid in ids}, local_train_duration_s=LOCAL_TRAIN_DURATION_S,
             )
-            result = run_fleet(scenario, theta0, param_names)
-            n0 = result.node_results.get("n0", {})
-            print(f"[H2-{tag} {method} seed{seed}] aborted={result.aborted} "
+            n0, aborted = _run_or_load(PART, method, seed, scenario, theta0, param_names)
+            print(f"[H2-{tag} {method} seed{seed}] aborted={aborted} "
                   f"auc_det={n0.get('auc_detector_only')} auc_pbar={n0.get('auc')} "
                   f"latency_on={n0.get('latency_on')} es_frac={n0.get('es_fire_frac_attack')} "
                   f"installs={n0.get('round_installs')}")
@@ -188,6 +213,7 @@ def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str, proven
 
 
 def run_h4(theta0, param_names, attack: dict, family_name: str, tag: str, provenance_log: list) -> dict:
+    PART = "h4_abrupt"
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
     for seed in LIVE_SEEDS:
@@ -204,9 +230,8 @@ def run_h4(theta0, param_names, attack: dict, family_name: str, tag: str, proven
                 local_train_seeds={nid: local_seeds[nid] for nid in ids},
                 local_train_pool={nid: "mixed" for nid in ids}, local_train_duration_s=LOCAL_TRAIN_DURATION_S,
             )
-            result = run_fleet(scenario, theta0, param_names)
-            n0 = result.node_results.get("n0", {})
-            print(f"[H4-{tag} {method} seed{seed}] aborted={result.aborted} "
+            n0, aborted = _run_or_load(PART, method, seed, scenario, theta0, param_names)
+            print(f"[H4-{tag} {method} seed{seed}] aborted={aborted} "
                   f"auc_det={n0.get('auc_detector_only')} auc_pbar={n0.get('auc')} "
                   f"installs={n0.get('round_installs')} es_frac={n0.get('es_fire_frac_attack')}")
             _record(per_arm, method, n0, provenance_log, part="h4_abrupt", seed=seed)
@@ -217,6 +242,7 @@ def run_control(theta0, param_names, attack: dict, provenance_log: list) -> dict
     """CONTROL: family n0 DID see (drift, s=1) -- naturally present in every
     node's local mixed pool, no forced exclusion/inclusion. Expect
     FedQPNT ~= B-cont (no generalisation gap)."""
+    PART = "control_drift"
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
     for seed in LIVE_SEEDS:
@@ -231,9 +257,8 @@ def run_control(theta0, param_names, attack: dict, provenance_log: list) -> dict
                 local_train_seeds={nid: local_seeds[nid] for nid in ids},
                 local_train_pool={nid: "mixed" for nid in ids}, local_train_duration_s=LOCAL_TRAIN_DURATION_S,
             )
-            result = run_fleet(scenario, theta0, param_names)
-            n0 = result.node_results.get("n0", {})
-            print(f"[control-drift {method} seed{seed}] aborted={result.aborted} "
+            n0, aborted = _run_or_load(PART, method, seed, scenario, theta0, param_names)
+            print(f"[control-drift {method} seed{seed}] aborted={aborted} "
                   f"auc_det={n0.get('auc_detector_only')} auc_pbar={n0.get('auc')} "
                   f"es_frac={n0.get('es_fire_frac_attack')} installs={n0.get('round_installs')}")
             _record(per_arm, method, n0, provenance_log, part="control_drift", seed=seed)
@@ -289,7 +314,7 @@ def main():
     git_end = _git_state()
     print(f"git state at end: {git_end}")
     report["git_state_at_end"] = git_end
-    if git_start != git_end:
+    if (git_start['fedqpnt_tree'], git_start['status_porcelain_fedqpnt']) != (git_end['fedqpnt_tree'], git_end['status_porcelain_fedqpnt']):
         report["WARNING_code_changed_during_run"] = True
         print("WARNING: git state changed during this run -- results used mixed code, per D-062 item 3 -- "
               "DO NOT treat this run as valid; re-run after the core is frozen.")

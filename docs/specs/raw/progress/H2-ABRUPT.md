@@ -719,3 +719,33 @@ run_in_background; do not poll manually, wait for the completion notification.
 theta0_noabrupt_v2 zero-shot abrupt AUC (same 13 held-out seeds, n=1534 epochs, 1157 pos): sev 0.1 -> 0.826, 0.15 -> 0.834, 0.2 -> 0.834
 (old, core-freeze-1-era/kappa_R 40: 0.819 / 0.805 / 0.783). D-061a: AUC(0.15)=0.834 < 0.85 -> NOT low-headroom (0.016 below the line); run as planned.
 Files: results/fleet/theta0_noabrupt_v2.npz, _provenance.json, h2_abrupt_theta0_auc_check_v2.json (git state + kappa_R recorded). STOPPED; tau calibration + n=10 re-run wait for Master.
+
+## GO steps 2-4 (D-064 prereg, theta0 = theta0_noabrupt_v2, core-freeze-2; HEAD 7d2aa0a, fedqpnt/ identical to tag, kappa_R default 60)
+- H2_PREREG.md: dated AMENDMENT 1 (2026-09-30, before any live run) + implementation notes (tau via open-loop clean features scored per model; >=5 h/model = 20 seeds x 1000 s minus 60 s align).
+- Old invalid outputs renamed (*_INVALID_pre_freeze*). Driver updated (theta0 v2, seeds 500-509, per-run persistence results/fleet/h2_abrupt_runs/{part}_{method}_seed{seed}.json + .npz final model, git start/end per run, RESUMABLE: rerun same command skips finished runs).
+- Step 2 RUNNING: task bovo3l64i, `python -u scripts/h2_abrupt_h2h4_driver.py --parts h2,h4,control > /tmp/h2_abrupt_driver_v2.log` (6 processes/fleet, sequential; ~3.5-4 h expected). First log lines confirmed: git state at launch head 7d2aa0a, fedqpnt clean; "=== H2 (novel family = abrupt) ===".
+- Steps 3-4 script written, NOT run: scripts/h2_abrupt_prereg_analysis.py (`--collect-only --workers 4` first, only after the fleet ends, to respect <=6 processes; then no flag). Output results/fleet/h2_abrupt_prereg_results.json.
+- Run is INVALID if any run json has fedqpnt_changed_during_run or git status at end differs (script lists invalid_runs).
+- Resume: rerun the driver command (skips done runs), then analysis script.
+
+## Step 2 fleet run finished (task bovo3l64i); 59/60 runs ok
+- Driver flagged "code changed" only because HEAD moved (7d2aa0a -> 19352c9, docs/results commits). fedqpnt/ TREE hash identical at core-freeze-2, 7d2aa0a and 19352c9 (878419ac...), git status porcelain clean at start/end of every run -> run VALID on code. Driver/analysis now compare fedqpnt tree + porcelain, not HEAD.
+- 1 aborted fleet: control_drift fedqpnt_local seed501 (n0 empty). Deleted its json and RE-RUNNING only that one: task bv64phr5e (`--parts control`, resumes the rest), log /tmp/h2_abrupt_driver_v2_rerun.log.
+- NEXT after bv64phr5e: `python -u scripts/h2_abrupt_prereg_analysis.py --collect-only --workers 4` (clean 580-599 x 1000 s), then `python -u scripts/h2_abrupt_prereg_analysis.py` -> results/fleet/h2_abrupt_prereg_results.json. Then report raw.
+
+## Master ruling (this turn): all 60 runs VALID (core-freeze-2). "code changed" flags (control_drift_baseline_b_cont_seed506, control_drift_fedqpnt_local_seed504, driver warning) are FALSE POSITIVES: HEAD moved only via docs/scripts/results commits; `git diff 845636e HEAD -- fedqpnt` empty, fedqpnt/ clean at both ends (tree hash identical 878419ac). Driver/analysis now compare fedqpnt tree+porcelain (future: git diff start end -- fedqpnt).
+- NOTE: 1 of the 60 (control_drift fedqpnt_local seed501) had ABORTED (empty n0); being re-run (bv64phr5e; waiter blyjdsa1u). D-076 fix is on a branch, merged only after calibration finishes -> main tree stays core-freeze-2 code.
+- Order: wait for bv64phr5e -> analysis `--collect-only --workers 4` -> full analysis -> leak proxy (`scripts/h2_abrupt_leak_exposure_proxy.py`, 1 process).
+- Leak exposure: run JSON/npz do NOT record trust state (only epoch_t/active/raw_p + scalars + provenance). Proxy = single-node closed-loop replay (theta0_noabrupt_v2, not the arms' installed models), counting PROBE->DISTRUST per law (position, clock), seeds 500-509, abrupt + drift control.
+- 60/60 runs complete (seed501 control re-ran OK, tree hash unchanged). Launched collect-only (4 workers) THEN analysis chained: task bse01bznt, logs /tmp/h2_abrupt_collect.log, /tmp/h2_abrupt_analysis.log -> results/fleet/h2_abrupt_prereg_results.json. Then run leak proxy (scripts/h2_abrupt_leak_exposure_proxy.py).
+
+## STEPS 3-4 DONE (results/fleet/h2_abrupt_prereg_results.json; invalid_runs=[]; fedqpnt/ clean; tree 878419ac)
+Pre-registered metrics are DEGENERATE: tau (open-loop clean calibration, 5.07 h/model) = ~0.004-0.0075; live closed-loop raw_p exceeds it in 100% of pre-onset epochs
+(live pre-onset median raw_p 0.93-0.95 on seeds 503/504/505/508 even BEFORE onset) -> P_D@10s = 1.0, latency 0 s, recovery alarm rate 1.0 for BOTH arms in H2/H4/control. 
+Wilcoxon p=1.0 (ties). Secondary onset-window AUC N=10: H2 0.613 vs 0.615 (p=0.5); H4 0.652 vs 0.612 (p=0.19); control 0.721 vs 0.723. Full-window AUC: H2 0.575/0.578, H4 0.531/0.597 (p=0.11), control 0.847/0.774 (p=0.19).
+Cause: live closed-loop raw_p distribution != open-loop clean (disclosed feature-path risk). Leak proxy running: task b2cq3l24r, /tmp/h2_abrupt_leak.log -> results/fleet/h2_abrupt_leak_exposure_proxy.json.
+
+## Leak-exposure proxy DONE (results/fleet/h2_abrupt_leak_exposure_proxy.json; single-node closed loop, theta0_noabrupt_v2, seeds 500-509; NOT the arms' installed models; fleet run files do not record trust state)
+Abrupt sev0.15: position PROBE entries 65, PROBE->DISTRUST 36 (8/8 on seeds 501,502,504,509; 0 on 500,508), ok 28; clock entries 46, failed 6, ok 40.
+Drift sev1.0 control: position entries 76, failed 72, ok 3; clock entries 73, failed 47, ok 25.
+ALL ANALYSIS DONE. Report sent; awaiting Master (D-076 / core-freeze-3 decision).

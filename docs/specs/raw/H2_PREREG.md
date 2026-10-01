@@ -83,3 +83,17 @@ run until Master confirms the core is frozen.
   attack config, to prove the code runs -- its printed numbers are NOT
   results (no valid frozen-core re-run has happened yet) and are labelled
   as such in the script's own output.
+
+## AMENDMENT 1 (2026-09-30, made BEFORE any live H2/H4 run under this pre-registration)
+theta0 = `results/fleet/theta0_noabrupt_v2.npz` (retrained on frozen core `core-freeze-2` = 845636e, same protocol/seeds/families as the
+original theta0_noabrupt; zero-shot abrupt AUC at severity 0.15 = 0.834, 0.016 below the D-061a 0.85 low-headroom line, run as planned)
+replaces `theta0_noabrupt.npz`. Everything else in this document is unchanged. The earlier (invalid, mixed-code) fleet run used the old theta0
+and the pre-freeze core and is superseded.
+
+## Implementation notes for the re-run (added before running; interpretation, not a metric change)
+- Live seeds 500-509 (n=10), severity 0.15, kappa_R = DEFAULT_KAPPA_R at the freeze (60), 1 Hz epochs from node_runner epoch_* keys.
+- tau calibration: per (arm, seed) using that run's FINAL installed model (`FleetResult.final_theta`), on clean-mission 1 Hz features from seeds
+  580-599, 900 s each (= 5.0 h per model). DISCLOSED interpretation: clean features are collected once in the open-loop `fixed_trust`
+  data-collection mode (`build_supervised_dataset.collect_run`, model-independent) and scored offline with each arm's model, instead of running a
+  closed-loop clean mission per model. Live raw_p is computed under closed-loop trust; this feature-path difference is part of the disclosure.
+- FAR = rising edges of raw_p > tau per clean hour (same definition as fedqpnt.eval.metrics.false_alarm_rate).
