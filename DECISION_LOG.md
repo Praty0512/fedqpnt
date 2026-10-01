@@ -33,6 +33,18 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-077 · 2026-10-01 · H2/H4 confirmatory run moves to core-freeze-3; the core-freeze-2 run becomes PRELIMINARY; τ calibration must be closed-loop
+- **Leak exposure** (proxy, abrupt severity 0.15, seeds 500–509): position-law PROBE failures were 36 of 65 entries (8/8 on four seeds); drift control 72/76.
+  - The leak (D-076) applied failed-probe fixes, and FL local training uses post-onset epochs from earlier rounds, so the installed models of the freeze-2 run were produced by a system that no longer exists.
+- **Decision (taken BEFORE the Master inspected any freeze-2 H2 metric):**
+  - the freeze-2 H2/H4 run is **PRELIMINARY / exploratory** and is reported as such whatever its outcome;
+  - **the confirmatory H2/H4 run is re-executed on core-freeze-3** under H2_PREREG.md.
+- **Amendment 2** to H2_PREREG (before the confirmatory run):
+  - τ calibration uses **closed-loop clean missions through the same runner/agent path as the live runs** (seeds 580–599, ≥ 5 h per arm, the arm's final installed model);
+  - the freeze-2 implementation calibrated on open-loop clean features, which H2-ABRUPT itself flagged as a closed-loop vs open-loop raw_p mismatch, so FAR = 1/h would not hold live.
+- **Provenance check fix:** the fedqpnt-changed flag compares `git diff <start> <end> -- fedqpnt`, not HEAD equality.
+- **Owner:** Master
+
 ### D-076 · 2026-10-01 · Probe-exit leak: a failed probe's fix was applied → fix on a worktree branch; decisive stopped; H2 kept pending a leak-exposure check
 - **Finding (CORE-ROBUST trace, meaconing, MEMS, seed 500):**
   - w_clk correctly drops to w_min with the clock law in DISTRUST; holdover works (clock error 40 → 286 ns over 60 s, the physical TCXO drift).
