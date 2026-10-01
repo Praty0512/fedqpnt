@@ -48,7 +48,7 @@ def main(kind: str) -> None:
     dbg_by_t: dict[float, dict] = {}
     orig = agent.trust._physical_spoof_evidence
 
-    def wrapped(raw, fix, nav_prior, innovations, skip_position=False):
+    def wrapped(raw, fix, nav_prior, innovations, skip_position=False, split=False):
         c = agent.trust.gnss_law.cfg
         p_prior = tl._p_prior_from_innovations(fix, innovations)
         d = stat = gate = None
@@ -62,7 +62,7 @@ def main(kind: str) -> None:
             S_d = cov_now + agent.trust._last_gnss_cov + cov_ins_short
             stat = float(d @ np.linalg.solve(S_d, d))
             gate = float(chi2.ppf(c.es_position_gate_quantile, 3))
-        r = orig(raw, fix, nav_prior, innovations, skip_position=skip_position)
+        r = orig(raw, fix, nav_prior, innovations, skip_position=skip_position, split=split)
         dbg_by_t[round(fix.t, 3)] = dict(d_norm=float(np.linalg.norm(d)) if d is not None else float("nan"),
                                           stat=stat if stat is not None else float("nan"),
                                           gate=gate if gate is not None else float("nan"),

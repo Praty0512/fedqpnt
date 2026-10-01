@@ -25,20 +25,21 @@ from fedqpnt.node.environment import EnvConfig, NodeEnvironment
 from fedqpnt.node.methods import make_agent_config
 
 C_LIGHT = 299_792_458.0
-DETECTOR_WEIGHTS_V2 = ROOT / "results" / "m1" / "detector_weights_sup_v2.npz"
+DETECTOR_WEIGHTS_V2 = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "results" / "m1" / "detector_weights_sup_v2.npz"
+GRADE = sys.argv[2] if len(sys.argv) > 2 else "industrial_mems"
 KAPPA_R = 60.0
 SEED = 500
 DURATION_S = 600.0
 ONSET_S, ATK_DUR_S, SEVERITY = 120.0, 180.0, 0.5
 
 
-def run_one(method: str, attack: dict | None) -> dict:
-    env_cfg = EnvConfig(platform="ground", world="flat", imu_grade="industrial_mems",
+def run_one(method: str, attack: dict | None, seed: int = SEED) -> dict:
+    env_cfg = EnvConfig(platform="ground", world="flat", imu_grade=GRADE,
                          quantum_grade="field", gnss_rate_hz=1.0, hold_s=30.0,
                          heading_noise_deg=2.0, attacks=[attack] if attack else [])
-    env = NodeEnvironment(env_cfg, seed=SEED, node_id="clktrace", dt=0.01, duration_s=DURATION_S)
+    env = NodeEnvironment(env_cfg, seed=seed, node_id="clktrace", dt=0.01, duration_s=DURATION_S)
     agent_cfg = make_agent_config(method, kappa_R=KAPPA_R, kappa_Q=1.0, world="flat",
-                                   quantum_enabled=True,
+                                   quantum_enabled=True, imu_grade=GRADE,
                                    detector_weights_path=str(DETECTOR_WEIGHTS_V2)
                                    if DETECTOR_WEIGHTS_V2.exists() else None)
     agent = Agent(agent_cfg, env.imu.config(), node_id="clktrace")
@@ -79,29 +80,19 @@ def _rmse(vals):
 
 def main() -> None:
     meaconing = dict(kind="meaconing", onset_s=ONSET_S, duration_s=ATK_DUR_S, severity=SEVERITY)
-    print("=== D-063 task B: ClockKF under meaconing, seed 500, kappa_R=60 ===\n")
+    seeds = [500, 501, 502, 503, 504]
+    print(f"=== meaconing timing (clock bias RMSE, ns), grade={GRADE}, seeds {seeds}, weights={DETECTOR_WEIGHTS_V2} ===")
     for method in ("fedqpnt_local", "undefended"):
-        r_nominal = run_one(method, None)
-        r_meacon = run_one(method, meaconing)
-
-        rows_m = r_meacon["rows"]
-        whole = _rmse([x["err_ns"] for x in rows_m])
-        att = _rmse([x["err_ns"] for x in rows_m if ONSET_S <= x["t"] < ONSET_S + ATK_DUR_S])
-        post = _rmse([x["err_ns"] for x in rows_m if x["t"] >= ONSET_S + ATK_DUR_S])
-        pre = _rmse([x["err_ns"] for x in rows_m if x["t"] < ONSET_S])
-        nominal_whole = _rmse([x["err_ns"] for x in r_nominal["rows"]])
-
-        print(f"[{method}]")
-        print(f"  nominal (no attack) whole-mission RMSE_t = {nominal_whole:.1f} ns")
-        print(f"  meaconing run: pre={pre:.1f}ns  attack-window={att:.1f}ns  post={post:.1f}ns  "
-              f"whole-mission={whole:.1f}ns")
-        # print a few rows spanning onset to see the fix.clk_bias jump and w response
-        onset_rows = [x for x in rows_m if ONSET_S - 2 <= x["t"] <= ONSET_S + 8]
-        for x in onset_rows:
-            print(f"    t={x['t']:6.1f} w={x['w']:7.4f} active={int(x['active'])} "
-                  f"fix.clk_bias={x['fix_clk_bias']:10.3f} est_bias={x['est_bias']:10.3f} "
-                  f"true_bias={x['true_bias']:10.3f} err_ns={x['err_ns']:8.1f}")
-        print()
+        acc = {k: [] for k in ("nominal", "pre", "att", "post", "whole")}
+        for sd in seeds:
+            rows = run_one(method, meaconing, sd)["rows"]
+            acc["whole"].append(_rmse([x["err_ns"] for x in rows]))
+            acc["att"].append(_rmse([x["err_ns"] for x in rows if ONSET_S <= x["t"] < ONSET_S + ATK_DUR_S]))
+            acc["post"].append(_rmse([x["err_ns"] for x in rows if x["t"] >= ONSET_S + ATK_DUR_S]))
+            acc["pre"].append(_rmse([x["err_ns"] for x in rows if x["t"] < ONSET_S]))
+            acc["nominal"].append(_rmse([x["err_ns"] for x in run_one(method, None, sd)["rows"]]))
+        print(f"[{method}] " + "  ".join(f"{k}={np.mean(v):.1f}ns" for k, v in acc.items()) +
+              "   per-seed att=" + str([round(v, 1) for v in acc["att"]]), flush=True)
 
 
 if __name__ == "__main__":

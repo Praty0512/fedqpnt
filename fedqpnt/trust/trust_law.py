@@ -269,6 +269,10 @@ class _LawCoreV2:
     _probe_nis_n: int = field(default=0, repr=False)
     _probe_es_any: bool = field(default=False, repr=False)
     _suppress_timer: float = field(default=0.0, repr=False)
+    # D-076: True only for the epoch in which a PROBE just FAILED. That epoch's fix has just failed the
+    # consistency test, so it must NOT be applied (w = w_min and shadow reported); otherwise the failed fix
+    # leaked into the ESKF/ClockKF at w = w_probe (traced: +843 m clock-bias jump onto the spoofed fix).
+    _probe_failed_now: bool = field(default=False, repr=False)
 
     def __post_init__(self) -> None:
         self.core = _LawCore(cfg=self.cfg)
@@ -303,6 +307,7 @@ class _LawCoreV2:
     def advance(self, t: float, p: float, nis_ok: bool, features_nominal: bool,
                 nis_value: float, es_evidence: bool, es_position: bool = False) -> float:
         c = self.cfg
+        self._probe_failed_now = False
         # D-066: es_evidence = clk/xsat/cn0 physical evidence (always vetoes, also in PROBE);
         # es_position = short-baseline jump test, SUPERSEDED during PROBE by the shadow-NIS test
         # (consistency with the coasting INS/CAI state is the stronger evidence, and it resolves
@@ -374,8 +379,12 @@ class _LawCoreV2:
                     self._distrust_timer = 0.0
                 else:
                     # sec C item 4, failure: back to DISTRUST for another T_ex.
+                    # D-076: pin w = w_min IN THIS CALL (D-075 pins from the next call on) and report shadow for
+                    # this epoch so the fix that just failed the probe is not applied. A SUCCESS epoch is unchanged.
                     self.state = "DISTRUST"
                     self._distrust_timer = 0.0
+                    self.w = c.w_min
+                    self._probe_failed_now = True
 
         return self.w
 
@@ -425,7 +434,7 @@ class SensorTrustLaw:
     @property
     def probe_shadow(self) -> bool:
         """D-066: True while the v2 law is in PROBE (GNSS evaluated, not applied)."""
-        return bool(self._uses_v2 and self._core_v2.state == "PROBE")
+        return bool(self._uses_v2 and (self._core_v2.state == "PROBE" or self._core_v2._probe_failed_now))
 
     def step(self, t: float, p: float, nis_ok: bool = True, features_nominal: bool = True,
              nis_value: float | None = None, es_evidence: bool = False,
