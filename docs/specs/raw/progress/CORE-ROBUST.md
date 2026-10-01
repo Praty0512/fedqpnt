@@ -635,3 +635,27 @@ HEAD 62f7b495187abaaf0e492da7199b3bda08898534 at launch and end, dirty = my file
 ## POST core-freeze-2 (845636e): v3-independent chain relaunched (bg b26t9vuxq, <=3 workers, no fedqpnt/ edits): sigma_nom per grade (seeds 560-579) -> results/sigma_nom.json (log scratchpad/sigma_nom_freeze2.log),
 then coasting envelope @60/120/179 (scratchpad/coasting_freeze2.log); git per D-062 in scratchpad/chain_freeze2_git.log. docs/specs/raw/S7_BOUND.md: dated "RESOLVED by D-075" note added (docs only; bound
 unchanged 223/h timing-free, 133/h at 1 Hz; adversary counts 132/19 greedy, 208/199/137 sparse). v3-dependent re-verification waits for "v3 ready".
+
+## COMBINED RE-VERIFICATION LAUNCHED (v3 ready): ONE chain, bg task bxh7g0ups, script scripts/core_robust_chain_v3.sh (<=4 workers, weights results/m1/detector_weights_sup_v3.npz, core-freeze-2 + 7d2aa0a).
+git records: scratchpad/chain_v3_git.log (start/end per step; do NOT edit fedqpnt/ until "CHAIN V3 DONE"). Steps: (1)(4)(7 part) scripts/core_robust_decisive.py per grade -> results/m1/decisive_v3_<grade>.json + log decisive_v3_<grade>.log
+ (smoke group nominal/drift/meaconing/jam_cw seeds 500-504 + safety group nominal/drift s in {0,.25,.5,1} seeds 9600-9604, 7 methods, sigma_nom from results/sigma_nom.json (MEMS 1.180, tactical 1.122), D-068 primary + HL diff with BCa CI,
+ post column, mean_w_gnss/pos/clk whole + attack window, rmse_t_ns); (3) S1 FAR per grade (run_m1_s1_far_check.py --kappa-r 60 --imu-grade g) -> s1far_v3_<g>.log; (5) drift trace tactical seed 500 -> drift_tactical_v3.txt;
+ (6) jam_recovery_v3.log; (7) meacon_timing_v3_<grade>.log (attack-window clock RMSE, seeds 500-504). Coasting (from my earlier chain, freeze-2): MEMS CAI on RMSE 257.05 max 645.45 @60 36.71 @120 218.96 @179 635.88; CAI off 574.78/1338.52/121.27/540.04/1322.42;
+ tactical CAI on 49.83/119.44/9.78/45.50/117.85; off 169.01/399.57/35.38/156.51/394.53. Expected duration ~4-5 h.
+
+## decisive crash fixed (script only) + chain 2 queued (bg bs46g73cx; waits for chain 1's "CHAIN V3 DONE", never two chains at once)
+Chain 1 results OK: S1 (FAR 0/h, ratios 0.986/0.983), traces, jam recovery; MEMS meaconing timing so far: fedqpnt_local att 2052.5 ns (pre 13.1, post 750.2, whole 1255.1, nominal 13.9; per-seed att 2019-2107).
+Fix: core_robust_decisive.py: per-run raw JSON persisted as each run completes (results/m1/decisive_v3_raw/<grade>/<scenario>_<method>_<seed>.json), aggregation reads only those files (row.update(scenario,method,seed) so no key collision),
+restart skips existing files; testing flags --scenarios/--methods/--seeds/--duration/--raw-dir. Chain 2 order: tiny aggregation test (tactical, 150 s, 2 methods x 2 scenarios, 1 seed; aborts if no table) -> clock-law diagnosis trace
+(scripts/core_robust_clock_law_trace.py, MEMS seed 500 meaconing; log clock_law_trace_mems.txt) -> decisive MEMS -> decisive tactical. git: scratchpad/chain_v3b_git.log.
+
+## DIAGNOSIS (no fedqpnt/ edits): why fedqpnt_local's clock is unprotected under meaconing (MEMS seed 500, v3, scratchpad/clock_law_trace_mems.txt)
+Meaconing timing (seeds 500-504, both grades identical): fedqpnt_local att 2052.5 ns (pre 13.1, post 750.2, whole 1255.1, nominal 13.9) vs undefended att 2363.3 (pre 12.2, post 369.1, whole 1323.2, nominal 13.8).
+Trace: w_clk DOES drop and stay: t=120 0.98 -> t=121 0.15 (clk_event, x8=249.3) -> t=122 0.02 (w_min < w_excl 0.05) with clock-law state DISTRUST, and stays 0.02 through the attack, so ClockKF holds over.
+Holdover works until t=181: clock bias error 40 ns (t=121) -> 286 ns (t=181) (TCXO holdover drift: est drift -0.66 m/s vs true ~+2.4 m/s; physical).
+BUG FOUND: at the PROBE->DISTRUST (probe FAILED) epoch t=191 the clock estimate jumps +843 m (est -83.6 -> 759.4 = the spoofed fix clk_bias ~760) and the drift state is polluted (+4.7 m/s thereafter), error 2.8 us.
+Cause: _LawCoreV2.advance PROBE branch sets w = w_probe (0.3) and on probe failure changes state to DISTRUST in the SAME call; the D-075 pin (w=w_min) only takes effect on the NEXT call, and probe_shadow/clk_probe_shadow
+are computed from the NEW state (False). So the failure epoch reports w=0.3, shadow=0 -> ESKF and ClockKF APPLY the update with the fix that just failed the probe (same at 251-261 probe, and for w_pos: trace shows w_pos=0.3 at the exit epoch).
+After the leak the clock holds over a polluted state: est 1095 vs true 329 at t=290 (err 2556 ns); at t=301 the fix returns to truth (clk_event x8=249.7 fires legitimately) -> clock law DISTRUST (pinned 60 s) + PROBE 10 s, TRUST at t=331: est snaps 1245->427 (err 58 ns).
+=> attack-window RMSE (2052 ns) is dominated by the probe-exit leak (epochs 191-300 at 0.6-2.6 us), not by missing exclusion; post RMSE (750 ns) = 30 s of pinned DISTRUST holding the polluted estimate.
+Proposed fix (needs Master + freeze exception): on probe failure set w = w_min in the same call (and report shadow for the failure epoch, i.e. the epoch whose fix just failed must NOT be applied); success epoch keeps w_probe (fix passed). Applies to both laws.

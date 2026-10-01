@@ -33,6 +33,22 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-076 · 2026-10-01 · Probe-exit leak: a failed probe's fix was applied → fix on a worktree branch; decisive stopped; H2 kept pending a leak-exposure check
+- **Finding (CORE-ROBUST trace, meaconing, MEMS, seed 500):**
+  - w_clk correctly drops to w_min with the clock law in DISTRUST; holdover works (clock error 40 → 286 ns over 60 s, the physical TCXO drift).
+  - At the clock-law PROBE FAILURE epoch, _LawCoreV2.advance reports w = w_probe (0.3) and switches state to DISTRUST in the same call, while the shadow flags are computed from the new state. So **the fix that just failed the probe is applied** to the ClockKF (+843 m jump onto the meaconer's clock) and to the ESKF (w_pos = 0.3 at the exit epoch).
+  - This dominates the meaconing timing error (attack window 2052 vs undefended 2363 ns; post-attack 750 vs 369 ns), and it leaks into position in the drift and meaconing scenarios.
+- **Ruling:**
+  - On probe failure, w = w_min and shadow = True in the same epoch (both laws); unit tests; full suite.
+  - Implemented on git worktree branch `probe-exit-fix`, because the main tree must not change while the H2 fleet driver is live (D-062).
+  - Merge → **core-freeze-3** after H2 completes.
+  - The decisive re-verification was stopped (it ran on leaky code; partial outputs invalid) and is relaunched on core-freeze-3.
+- **H2/H4 (run on core-freeze-2):** allowed to finish.
+  - The primary metric (P_D@10 s at onset) precedes any probe (probes start ≥ T_ex = 60 s after DISTRUST), so it is not exposed to the leak.
+  - Before accepting, the number of probe-failure epochs in the H2 runs is counted. If non-negligible, H2 is re-run on core-freeze-3.
+  - Either way, the result is labelled with its freeze tag.
+- **Owner:** Master
+
 ### D-075 · 2026-09-30 · S7 bound re-derived and pre-registered (223/h); DISTRUST must pin trust (probe-bypass hole)
 - **S7 bound (S7-BOUND):**
   - The trust-cycle metric (a down-cross of 0.5 then an up-cross of 0.9 on the alias) is bounded by ⌊3600/(τ_r·ln 5)⌋ = **223/h** for any evidence and any fix timing, per law and for alias = min(w_pos, w_clk); 133/h holds under a regular 1 Hz cadence.
