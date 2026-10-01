@@ -33,6 +33,31 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-078 · 2026-10-02 · Decisive check on core-freeze-3: defended loses on MEMS and meaconing; a permanent lockout on clean data → startup E_s validity fix + κ_Q coast-consistency calibration
+- **Decisive results** (v3, 5 seeds, attack-window RMSE_h, fedqpnt_local vs undefended; report results/m1/decisive_v3_report_freeze3.txt):
+
+| Scenario | MEMS | Tactical |
+|---|---|---|
+| drift | 250 vs 108 m ✗ (HL +141 [85, 181]) | **69 vs 108 m ✓** (HL −43.5 [−60, −10]) |
+| meaconing | 248 vs 2.5 m ✗ | 68 vs 2.5 m ✗ |
+| jam | 260 vs 269 m ✓ | 71 vs 72 m ✓ |
+
+  - Baselines B-bin and B′ stay near undefended; Baseline A is far worse.
+- **Permanent lockout on CLEAN data** (seed 9604, both grades):
+  - a single-epoch xsat/cn0 E_s event right after init (correlation window not yet full) → DISTRUST pinned 60 s;
+  - the coast diverges (MEMS ~1 km);
+  - the shadow probe fails (NIS 403 vs bound 25) **on honest GNSS**, and every later probe fails: lockout for the rest of the mission.
+  - This is the D-066 "new lockout" risk realised. The D-075/D-076 fixes removed the paths (the ramp, the leak) that had been masking it.
+- **Root cause:** the coast covariance is overconfident (the attitude/bias inconsistency already noted in D-061), so the shadow-probe consistency test rejects honest GNSS after a long coast. The same mechanism makes co-located meaconing cost position (an honest fix is excluded, then cannot be re-admitted).
+- **Rulings:**
+  1. **E_s statistic validity:** xsat/cn0 (and any windowed statistic) evidence is suppressed until its window is full.
+  2. **κ_Q coast-consistency calibration** per IMU grade. Pre-registered rule: clean forced 180 s outages, tuning seeds 530–549; choose the smallest κ_Q on {1, 2, 3, 5, 8, 12, 20, 30, 50} with mean outage-window position NEES ≤ 1.5; clean data only; then re-check S1/ANEES (κ_R is not silently re-tuned).
+  3. The bounded lockout escape is deferred (a security trade-off), pending the measurement of 1 + 2.
+  4. The detector-p routing is unchanged (D-066); meaconing is re-measured after 1 + 2.
+- **Freeze-3 status:** the freeze-3 decisive results are committed as the record of that design (superseded). The H2 confirmatory run on freeze-3 was ABORTED (the design is changing; no outcome inspected). It re-runs on core-freeze-4.
+- **Integrity note:** all of this is design iteration on tuning seeds. The paper will state that the trust design was iterated on tuning data and evaluated once on held-out test seeds.
+- **Owner:** Master
+
 ### D-077 · 2026-10-01 · H2/H4 confirmatory run moves to core-freeze-3; the core-freeze-2 run becomes PRELIMINARY; τ calibration must be closed-loop
 - **Leak exposure** (proxy, abrupt severity 0.15, seeds 500–509): position-law PROBE failures were 36 of 65 entries (8/8 on four seeds); drift control 72/76.
   - The leak (D-076) applied failed-probe fixes, and FL local training uses post-onset epochs from earlier rounds, so the installed models of the freeze-2 run were produced by a system that no longer exists.
