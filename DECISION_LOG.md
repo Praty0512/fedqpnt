@@ -33,6 +33,24 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-080 · 2026-10-03 · Final M1 characterisation (freeze-4); TEST-SEED GATE CLEARED; M4 launched
+- **Decisive v4** (core-freeze-4, detector v3, tuning seeds; report results/m1/decisive_v4_report.txt):
+  - **Nominal:** never worse (MEMS 2.78 vs 2.83 m; tactical 2.72 vs 2.78), FAR 0. **The lockout is resolved** (safety_nominal passes at both grades).
+  - **Tactical:**
+    - drift 69 vs 108 m (HL −43.5) **WIN**;
+    - jam 70.6 vs 72.0 **WIN**;
+    - co-located meaconing 68 vs 2.5 LOSS (by design: the cn0/xsat evidence routing).
+  - **MEMS:**
+    - drift 250 vs 108 LOSS (coast-limited);
+    - jam 260 vs 269 **WIN**;
+    - meaconing 248 vs 2.5 LOSS.
+  - **vs Baseline A:** FedQPNT better or equal in every scenario and grade.
+  - **NEW stated limitation:** slow post-attack re-admission after weak-signature or long attacks (tactical safety_drift s ≤ 0.25: post-attack RMSE 600–895 m vs 67 m; MEMS drift post 223 vs 76 m). Mechanism: after a long coast, honest GNSS is inconsistent with the coasted state, and the detector features (innovation NIS vs nominal R) read that as anomalous, which prolongs exclusion.
+- **Decision:** per D-079, no further design changes. The above is reported as the operating envelope.
+- **Gate:** results/GATE_D047.json **CLEARED**. Conditions met: the code is frozen (core-freeze-4); M4 is pre-registered (PREREG_M4.md, written before the freeze and before any test seed); detector v3 is fixed; σ_nom and the S7 bound are frozen.
+- **M4 execution:** single-node scenarios first (≤ 4 workers, concurrent with the single H2 fleet); fleet scenarios after H2 completes (memory). Test seeds 10000–10029, run once.
+- **Owner:** Master
+
 ### D-079 · 2026-10-03 · κ_Q rule picks 1 (the coast covariance is honest); freeze-4 = the E_s window-validity fix only; the remaining deficits are the stated operating envelope
 - **κ_Q calibration** (pre-registered D-078 rule; clean 180 s outages, seeds 530–549, n = 20; CAI on): pooled outage position ANEES at κ_Q = 1 is MEMS 0.91 and tactical 0.68 (both ≤ 1.5), so **κ_Q = 1, no change**. The coast covariance is consistent (slightly conservative) once the filter has converged.
 - **Lockout cause, refined:** seed 9604's xsat event fired at t = 35 s with the C/N0 correlation window holding 5 of 20 epochs (x14 = 0.30 at threshold), before filter convergence. **Freeze-4 = the window-validity gating only.**

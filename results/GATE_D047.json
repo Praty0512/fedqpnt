@@ -1,3 +1,14 @@
 {
-  "cleared": false
+  "cleared": true,
+  "cleared_by": "Master (Opus)",
+  "date": "2026-10-03",
+  "decision": "D-080",
+  "code": "core-freeze-4 (32ebf90)",
+  "prereg": "docs/specs/raw/PREREG_M4.md (e6b11f4)",
+  "test_seeds": [
+    10000,
+    10029
+  ],
+  "detector": "results/m1/detector_weights_sup_v3.npz",
+  "note": "Design frozen; no changes after this point. Test seeds run once."
 }
