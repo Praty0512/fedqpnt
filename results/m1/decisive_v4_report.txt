@@ -1,0 +1,184 @@
+
+================ GRADE industrial_mems  sigma_nom=1.1801 m (D-068 frozen) ================
+
+[nominal] n_seeds=5  primary metric=rmse_h_pre  undefended mean=2.825  threshold=6.365
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.78       nan       nan       nan       nan   0.00  0.983  0.992  0.983     nan     nan     nan     11.7  True    -0.06  [   -0.20,    0.09]
+  baseline_a           2.76       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True    -0.09  [   -0.11,   -0.01]
+  baseline_b_bin       2.82       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True    -0.04  [   -0.12,    0.13]
+  baseline_b_cont      2.78       nan       nan       nan       nan   0.00  0.983  0.992  0.983     nan     nan     nan     11.7  True    -0.06  [   -0.20,    0.09]
+  bprime               2.78       nan       nan       nan       nan   0.00  0.991  0.991  0.991     nan     nan     nan     11.5  True    -0.07  [   -0.21,    0.02]
+  fixed_trust          2.82       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True    -0.00  [   -0.01,    0.00]
+  undefended           2.83       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True      nan                    -
+
+[drift_spoof] n_seeds=5  primary metric=rmse_h_att  undefended mean=107.656  threshold=111.196
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.18    250.04     594.2    222.97     858.5  43.06  0.192  0.200  0.648   0.054   0.054   0.054    312.4 False   141.37  [   85.30,  180.46]
+  baseline_a           1.83    455.68    1179.1     11.85      48.1   0.00  0.708  0.708  0.708   0.041   0.041   0.041    217.7 False   232.00  [   74.59,  602.72]
+  baseline_b_bin       2.18    107.72     211.7     77.13     210.9   0.00  0.551  0.551  0.551   0.064   0.064   0.064     11.8  True     0.13  [   -0.99,    1.05]
+  baseline_b_cont      2.18    250.04     594.2    222.97     858.5  43.06  0.192  0.200  0.648   0.054   0.054   0.054    312.4 False   141.37  [   85.30,  180.46]
+  bprime               2.19    107.70     211.9    935.72    2245.1   1.72  0.534  0.534  0.534   1.000   1.000   1.000    505.7  True     0.05  [   -0.04,    0.12]
+  fixed_trust          2.17    107.66     211.8     91.57     217.1   0.00  0.999  0.999  0.999   1.000   1.000   1.000     11.5  True    -0.00  [   -0.00,    0.00]
+  undefended           2.17    107.66     211.8     76.40     210.7   0.00  0.999  0.999  0.999   1.000   1.000   1.000     11.5  True      nan                    -
+
+[meaconing] n_seeds=5  primary metric=rmse_h_att  undefended mean=2.495  threshold=6.035
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.18    248.31     589.1    229.79     871.6  42.88  0.192  0.200  0.648   0.054   0.054   0.054    390.7 False   244.76  [  191.98,  282.28]
+  baseline_a           1.83    728.08    1750.4     86.73    1768.9   0.00  0.699  0.699  0.699   0.006   0.006   0.006    235.1 False   763.66  [  449.54, 1068.11]
+  baseline_b_bin       2.18      2.79       3.6      3.09       4.7   0.00  0.700  0.700  0.700   0.055   0.055   0.055   1261.1  True     0.08  [   -0.82,    1.26]
+  baseline_b_cont      2.18    248.31     589.1    229.79     871.6  42.88  0.192  0.200  0.648   0.054   0.054   0.054    390.7 False   244.76  [  191.98,  282.28]
+  bprime               2.19      2.46       3.1      2.96       4.3   0.00  0.991  0.991  0.991   1.000   1.000   1.000   1317.9  True    -0.03  [   -0.07,   -0.01]
+  fixed_trust          2.17      2.49       3.1      2.98       4.2   0.00  0.999  0.999  0.999   1.000   1.000   1.000   1317.9  True     0.00  [   -0.01,    0.00]
+  undefended           2.17      2.49       3.1      2.98       4.2   0.00  0.999  0.999  0.999   1.000   1.000   1.000   1317.9  True      nan                    -
+
+[jam_cw] n_seeds=5  primary metric=rmse_h_att  undefended mean=268.926  threshold=272.466
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.18    259.84     616.8      3.00       5.5   0.00  0.969  0.988  0.969   0.989   0.989   0.989    237.4  True    -8.32  [  -19.23,   -1.91]
+  baseline_a           1.83    745.66    1792.1      3.33      22.2   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4 False   513.66  [  215.68,  745.48]
+  baseline_b_bin       2.18    269.21     646.2      3.07       7.1   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4  True     0.22  [   -1.81,    2.06]
+  baseline_b_cont      2.18    259.84     616.8      3.00       5.5   0.00  0.969  0.988  0.969   0.989   0.989   0.989    237.4  True    -8.32  [  -19.23,   -1.91]
+  bprime               2.19    269.65     647.0      3.07       9.1   0.00  0.976  0.976  0.976   1.000   1.000   1.000    237.5  True     0.84  [   -3.50,    4.83]
+  fixed_trust          2.17    269.02     646.0      3.08       6.8   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4  True     0.01  [   -0.16,    0.37]
+  undefended           2.17    268.93     645.8      3.08       6.9   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4  True      nan                    -
+
+[safety_nominal] n_seeds=5  primary metric=rmse_h_pre  undefended mean=2.787  threshold=6.327
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.77       nan       nan       nan       nan   0.00  0.985  0.994  0.985     nan     nan     nan      9.2  True    -0.05  [   -0.08,    0.05]
+  baseline_a           2.72       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True    -0.09  [   -0.38,    0.05]
+  baseline_b_bin       2.75       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True    -0.05  [   -0.12,    0.04]
+  baseline_b_cont      2.77       nan       nan       nan       nan   0.00  0.985  0.994  0.985     nan     nan     nan      9.2  True    -0.05  [   -0.08,    0.05]
+  bprime               2.77       nan       nan       nan       nan   0.00  0.991  0.991  0.991     nan     nan     nan      9.0  True    -0.02  [   -0.08,    0.05]
+  fixed_trust          2.79       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True     0.00  [   -0.01,    0.01]
+  undefended           2.79       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True      nan                    -
+
+[safety_drift_s0.0] n_seeds=5  primary metric=rmse_h_att  undefended mean=108.054  threshold=111.594
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.17    106.74     215.3    426.25    1241.9  31.00  0.187  0.199  0.746   0.057   0.057   0.597     41.3  True    -0.79  [  -15.73,   11.04]
+  baseline_a           1.91    108.46     212.6     82.65     213.8   6.89  0.983  0.983  0.983   0.954   0.954   0.954      9.1  True     0.44  [    0.26,    0.50]
+  baseline_b_bin       2.15    108.62     212.6     82.42     213.8   0.00  0.971  0.971  0.971   0.908   0.908   0.908      9.0  True     0.57  [    0.48,    0.63]
+  baseline_b_cont      2.17    106.74     215.3    426.25    1241.9  31.00  0.187  0.199  0.746   0.057   0.057   0.597     41.3  True    -0.79  [  -15.73,   11.04]
+  bprime               2.19    108.09     212.3    960.89    2214.1   3.44  0.594  0.594  0.594   1.000   1.000   1.000    300.4  True     0.03  [   -0.14,    0.14]
+  fixed_trust          2.22    108.05     212.2     82.29     213.4   6.89  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True    -0.01  [   -0.02,    0.00]
+  undefended           2.22    108.05     212.2     67.14     209.4  10.33  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True      nan                    -
+
+[safety_drift_s0.25] n_seeds=5  primary metric=rmse_h_att  undefended mean=108.073  threshold=111.613
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.17    107.23     215.5    421.31    1227.5  31.00  0.187  0.199  0.746   0.057   0.057   0.597     42.4  True    -0.39  [  -14.70,   11.10]
+  baseline_a           1.91    108.45     212.6     84.39     214.5   0.00  0.972  0.972  0.972   0.910   0.910   0.910      9.1  True     0.43  [    0.22,    0.50]
+  baseline_b_bin       2.15    108.89     212.9     84.55     214.7   0.00  0.940  0.940  0.940   0.804   0.804   0.804      9.0  True     0.83  [    0.72,    0.94]
+  baseline_b_cont      2.17    107.23     215.5    421.31    1227.5  31.00  0.187  0.199  0.746   0.057   0.057   0.597     42.4  True    -0.39  [  -14.70,   11.10]
+  bprime               2.19    108.11     212.3    965.75    2224.8   3.44  0.592  0.592  0.592   1.000   1.000   1.000    303.2  True     0.03  [   -0.12,    0.12]
+  fixed_trust          2.22    108.07     212.2     84.50     214.1   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True    -0.01  [   -0.02,    0.00]
+  undefended           2.22    108.07     212.2     69.19     209.9   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True      nan                    -
+
+[safety_drift_s0.5] n_seeds=5  primary metric=rmse_h_att  undefended mean=107.955  threshold=111.495
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.17    231.89     577.6    401.00    1397.1  39.62  0.190  0.199  0.645   0.054   0.054   0.090    160.0 False   132.90  [  -13.16,  247.68]
+  baseline_a           1.91    108.71     212.4     83.84     214.3   0.00  0.899  0.899  0.899   0.668   0.668   0.668      9.5  True     0.80  [    0.47,    0.95]
+  baseline_b_bin       2.15    108.66     213.1     79.01     213.6   0.00  0.778  0.778  0.778   0.377   0.377   0.377      9.0  True     0.73  [   -0.89,    2.00]
+  baseline_b_cont      2.17    231.89     577.6    401.00    1397.1  39.62  0.190  0.199  0.645   0.054   0.054   0.090    160.0 False   132.90  [  -13.16,  247.68]
+  bprime               2.19    107.99     212.1    972.70    2240.5   3.44  0.589  0.589  0.589   1.000   1.000   1.000    305.6  True     0.03  [   -0.10,    0.10]
+  fixed_trust          2.22    107.95     212.0     86.61     214.9   0.00  0.999  0.999  0.999   1.000   1.000   1.000      8.9  True    -0.01  [   -0.02,    0.00]
+  undefended           2.22    107.95     212.0     71.35     210.1   0.00  0.999  0.999  0.999   1.000   1.000   1.000      8.9  True      nan                    -
+
+[safety_drift_s1.0] n_seeds=5  primary metric=rmse_h_att  undefended mean=108.034  threshold=111.574
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.17    250.08     636.5    251.30    1001.3  41.34  0.194  0.202  0.648   0.054   0.054   0.054    188.4 False   132.79  [   12.67,  247.50]
+  baseline_a           1.91    724.72    1743.7      3.34      20.5   0.00  0.706  0.706  0.706   0.032   0.032   0.032    145.4 False   563.26  [  290.81,  876.54]
+  baseline_b_bin       2.15    108.32     212.2     75.44     211.1   0.00  0.554  0.554  0.554   0.063   0.063   0.063      9.2  True     0.04  [   -1.01,    1.60]
+  baseline_b_cont      2.17    250.08     636.5    251.30    1001.3  41.34  0.194  0.202  0.648   0.054   0.054   0.054    188.4 False   132.79  [   12.67,  247.50]
+  bprime               2.19    108.06     212.1   1003.18    2312.0   3.44  0.575  0.575  0.575   1.000   1.000   1.000    312.3  True     0.02  [   -0.07,    0.07]
+  fixed_trust          2.22    108.03     212.0     90.61     217.0   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.1  True    -0.00  [   -0.01,    0.00]
+  undefended           2.22    108.03     212.1     75.23     210.8   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.1  True      nan                    -
+
+================ GRADE tactical  sigma_nom=1.1224 m (D-068 frozen) ================
+
+[nominal] n_seeds=5  primary metric=rmse_h_pre  undefended mean=2.775  threshold=6.142
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.72       nan       nan       nan       nan   0.00  0.983  0.992  0.983     nan     nan     nan     11.7  True    -0.07  [   -0.21,    0.08]
+  baseline_a           2.73       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True    -0.08  [   -0.16,    0.06]
+  baseline_b_bin       2.77       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True    -0.05  [   -0.10,    0.08]
+  baseline_b_cont      2.72       nan       nan       nan       nan   0.00  0.983  0.992  0.983     nan     nan     nan     11.7  True    -0.07  [   -0.21,    0.08]
+  bprime               2.72       nan       nan       nan       nan   0.00  0.991  0.991  0.991     nan     nan     nan     11.5  True    -0.08  [   -0.22,    0.07]
+  fixed_trust          2.77       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True    -0.00  [   -0.01,    0.00]
+  undefended           2.78       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan     11.4  True      nan                    -
+
+[drift_spoof] n_seeds=5  primary metric=rmse_h_att  undefended mean=107.612  threshold=110.980
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        1.76     68.95     164.4     60.35     230.7  25.84  0.354  0.363  0.648   0.054   0.054   0.054    312.4  True   -43.54  [  -59.94,   -9.56]
+  baseline_a           1.75     96.43     237.7     12.73      45.5   0.00  0.708  0.708  0.708   0.041   0.041   0.041    217.7  True   -13.45  [  -60.48,   36.86]
+  baseline_b_bin       1.77    105.31     208.8     80.44     208.3   0.00  0.549  0.549  0.549   0.064   0.064   0.064     11.8  True    -2.10  [   -3.58,   -1.17]
+  baseline_b_cont      1.76     68.95     164.4     60.35     230.7  25.84  0.354  0.363  0.648   0.054   0.054   0.054    312.4  True   -43.54  [  -59.94,   -9.56]
+  bprime               1.73    107.65     211.9    438.93     720.2   1.72  0.468  0.468  0.468   1.000   1.000   1.000    597.7  True     0.03  [   -0.03,    0.08]
+  fixed_trust          1.76    107.62     211.8     99.91     221.1   0.00  0.999  0.999  0.999   1.000   1.000   1.000     11.5  True     0.00  [   -0.00,    0.01]
+  undefended           1.76    107.61     211.8     77.78     210.8   0.00  0.999  0.999  0.999   1.000   1.000   1.000     11.5  True      nan                    -
+
+[meaconing] n_seeds=5  primary metric=rmse_h_att  undefended mean=2.523  threshold=5.891
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        1.76     68.04     162.3     61.92     233.0  25.73  0.354  0.363  0.648   0.054   0.054   0.054    390.7 False    58.71  [   43.04,   93.95]
+  baseline_a           1.75    168.67     394.4     19.78     398.4   0.00  0.699  0.699  0.699   0.006   0.006   0.006    235.1 False   170.57  [   96.19,  232.48]
+  baseline_b_bin       1.77      2.32       3.1      3.09       4.5   0.00  0.700  0.700  0.700   0.055   0.055   0.055   1261.1  True    -0.25  [   -0.94,    0.32]
+  baseline_b_cont      1.76     68.04     162.3     61.92     233.0  25.73  0.354  0.363  0.648   0.054   0.054   0.054    390.7 False    58.71  [   43.04,   93.95]
+  bprime               1.73      2.47       3.0      2.92       4.3   0.00  0.991  0.991  0.991   1.000   1.000   1.000   1317.9  True    -0.05  [   -0.10,   -0.01]
+  fixed_trust          1.76      2.52       3.1      2.92       4.2   0.00  0.999  0.999  0.999   1.000   1.000   1.000   1317.9  True    -0.00  [   -0.01,    0.00]
+  undefended           1.76      2.52       3.1      2.93       4.2   0.00  0.999  0.999  0.999   1.000   1.000   1.000   1317.9  True      nan                    -
+
+[jam_cw] n_seeds=5  primary metric=rmse_h_att  undefended mean=72.007  threshold=75.374
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        1.76     70.60     168.3      3.02       4.7   0.00  0.969  0.988  0.969   0.989   0.989   0.989    237.4  True    -1.34  [   -3.62,   -0.39]
+  baseline_a           1.75    172.47     403.3      3.09      10.7   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4 False   105.53  [   52.69,  141.47]
+  baseline_b_bin       1.77     70.87     170.0      3.09       5.5   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4  True    -0.93  [   -4.84,    1.37]
+  baseline_b_cont      1.76     70.60     168.3      3.02       4.7   0.00  0.969  0.988  0.969   0.989   0.989   0.989    237.4  True    -1.34  [   -3.62,   -0.39]
+  bprime               1.73     73.65     175.5      3.17      11.5   0.00  0.978  0.978  0.978   1.000   1.000   1.000    237.5  True     1.12  [   -0.55,    3.52]
+  fixed_trust          1.76     72.58     173.2      3.09       5.6   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4  True     0.21  [   -0.12,    1.32]
+  undefended           1.76     72.01     171.8      3.09       5.6   0.00  0.998  0.998  0.998   1.000   1.000   1.000    237.4  True      nan                    -
+
+[safety_nominal] n_seeds=5  primary metric=rmse_h_pre  undefended mean=2.764  threshold=6.131
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        2.77       nan       nan       nan       nan   0.00  0.985  0.994  0.985     nan     nan     nan      9.2  True     0.01  [   -0.14,    0.09]
+  baseline_a           2.79       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True     0.02  [   -0.12,    0.17]
+  baseline_b_bin       2.75       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True    -0.02  [   -0.14,    0.08]
+  baseline_b_cont      2.77       nan       nan       nan       nan   0.00  0.985  0.994  0.985     nan     nan     nan      9.2  True     0.01  [   -0.14,    0.09]
+  bprime               2.77       nan       nan       nan       nan   0.00  0.991  0.991  0.991     nan     nan     nan      9.0  True    -0.00  [   -0.11,    0.08]
+  fixed_trust          2.77       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True     0.00  [   -0.01,    0.02]
+  undefended           2.76       nan       nan       nan       nan   0.00  0.999  0.999  0.999     nan     nan     nan      8.9  True      nan                    -
+
+[safety_drift_s0.0] n_seeds=5  primary metric=rmse_h_att  undefended mean=107.873  threshold=111.241
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        1.93     78.67     172.2    600.70    1214.5  10.33  0.275  0.287  0.746   0.271   0.271   0.597     41.3  True   -33.78  [  -80.60,    7.39]
+  baseline_a           1.96    108.50     212.6     86.56     215.2   5.17  0.984  0.984  0.984   0.954   0.954   0.954      9.1  True     0.55  [    0.46,    0.81]
+  baseline_b_bin       1.91    108.98     213.0     86.94     214.8   0.00  0.971  0.971  0.971   0.908   0.908   0.908      9.0  True     1.09  [    0.94,    1.22]
+  baseline_b_cont      1.93     78.67     172.2    600.70    1214.5  10.33  0.275  0.287  0.746   0.271   0.271   0.597     41.3  True   -33.78  [  -80.60,    7.39]
+  bprime               1.89    107.97     212.4    361.86     553.0   3.44  0.497  0.497  0.497   1.000   1.000   1.000    644.7  True     0.10  [   -0.04,    0.22]
+  fixed_trust          1.94    107.87     212.2     86.54     213.9   5.17  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True    -0.00  [   -0.01,    0.01]
+  undefended           1.94    107.87     212.2     67.16     209.4  10.33  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True      nan                    -
+
+[safety_drift_s0.25] n_seeds=5  primary metric=rmse_h_att  undefended mean=107.925  threshold=111.293
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        1.93     83.13     190.7    895.21    1781.8  12.06  0.243  0.255  0.746   0.163   0.163   0.597     42.4  True   -24.89  [  -80.70,   18.32]
+  baseline_a           1.96    108.68     212.8     88.90     215.7   0.00  0.972  0.972  0.972   0.910   0.910   0.910      9.1  True     0.73  [    0.54,    0.92]
+  baseline_b_bin       1.91    109.69     213.6     89.84     216.4   0.00  0.940  0.940  0.940   0.804   0.804   0.804      9.0  True     1.74  [    1.54,    1.95]
+  baseline_b_cont      1.93     83.13     190.7    895.21    1781.8  12.06  0.243  0.255  0.746   0.163   0.163   0.597     42.4  True   -24.89  [  -80.70,   18.32]
+  bprime               1.89    108.02     212.4    368.37     566.5   3.44  0.495  0.495  0.495   1.000   1.000   1.000    646.1  True     0.09  [   -0.04,    0.19]
+  fixed_trust          1.94    107.93     212.2     89.29     215.0   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True    -0.00  [   -0.01,    0.01]
+  undefended           1.94    107.93     212.2     69.36     209.9   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.0  True      nan                    -
+
+[safety_drift_s0.5] n_seeds=5  primary metric=rmse_h_att  undefended mean=107.818  threshold=111.185
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        1.93     66.18     163.2     78.18     271.6  31.00  0.242  0.251  0.645   0.054   0.054   0.090    160.0  True   -53.45  [  -80.71,   -4.04]
+  baseline_a           1.96    109.14     212.9     88.73     215.9   0.00  0.899  0.899  0.899   0.668   0.668   0.668      9.5  True     1.33  [    0.76,    1.79]
+  baseline_b_bin       1.91    108.29     213.1     83.93     214.4   0.00  0.779  0.779  0.779   0.377   0.377   0.377      9.0  True     0.43  [   -2.16,    2.65]
+  baseline_b_cont      1.93     66.18     163.2     78.18     271.6  31.00  0.242  0.251  0.645   0.054   0.054   0.090    160.0  True   -53.45  [  -80.71,   -4.04]
+  bprime               1.89    107.91     212.0    375.44     578.8   3.44  0.493  0.493  0.493   1.000   1.000   1.000    649.0  True     0.08  [   -0.05,    0.16]
+  fixed_trust          1.94    107.82     211.9     92.10     216.0   0.00  0.999  0.999  0.999   1.000   1.000   1.000      8.9  True    -0.00  [   -0.01,    0.01]
+  undefended           1.94    107.82     211.9     71.74     210.0   0.00  0.999  0.999  0.999   1.000   1.000   1.000      8.9  True      nan                    -
+
+[safety_drift_s1.0] n_seeds=5  primary metric=rmse_h_att  undefended mean=108.103  threshold=111.471
+  method                pre       att   max_att      post  max_post  FAR/h     wG     wP     wC  wG_att  wP_att  wC_att     t_ns  prim       HL           95% BCa CI
+  fedqpnt_local        1.93     66.18     163.2     78.18     271.6  32.73  0.243  0.251  0.648   0.054   0.054   0.054    188.4  True   -53.81  [  -80.87,   -4.49]
+  baseline_a           1.96    170.72     408.2      2.99       7.1   0.00  0.706  0.706  0.706   0.032   0.032   0.032    145.4 False    62.37  [  -24.82,  121.86]
+  baseline_b_bin       1.91    106.60     210.3     77.96     209.4   0.00  0.553  0.553  0.553   0.063   0.063   0.063      9.2  True    -1.40  [   -2.93,   -0.25]
+  baseline_b_cont      1.93     66.18     163.2     78.18     271.6  32.73  0.243  0.251  0.648   0.054   0.054   0.054    188.4  True   -53.81  [  -80.87,   -4.49]
+  bprime               1.89    108.16     212.2    382.18     581.2   1.72  0.489  0.489  0.489   1.000   1.000   1.000    657.0  True     0.05  [   -0.05,    0.10]
+  fixed_trust          1.94    108.10     212.1     97.68     219.5   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.1  True    -0.00  [   -0.01,    0.01]
+  undefended           1.94    108.10     212.1     76.27     210.9   0.00  0.999  0.999  0.999   1.000   1.000   1.000      9.1  True      nan                    -
