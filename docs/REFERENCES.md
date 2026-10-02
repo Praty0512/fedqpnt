@@ -145,3 +145,34 @@ Example from this list:
 31. Efron, B. "Better bootstrap confidence intervals," *Journal of the American Statistical Association*, 82:171-185, 1987. DOI: [10.1080/01621459.1987.10478410](https://doi.org/10.1080/01621459.1987.10478410) **[verified 2026-10-03 via Consensus]** — Used for: BCa bootstrap interval. bib key efron1987better.
 
 32. Holm, S. "A simple sequentially rejective multiple test procedure," *Scandinavian Journal of Statistics*, 6:65-70, 1979. DOI: [10.2307/4615733](https://doi.org/10.2307/4615733) **[verified 2026-10-03 via Consensus]** — Used for: Holm-Bonferroni correction. bib key holm1979simple.
+
+## Resolved citations (REFS-2 addendum, 2026-10-03)
+
+33. McMahan, H. B., Moore, E., Ramage, D., Hampson, S., Aguera y Arcas, B. "Communication-Efficient Learning of Deep Networks from Decentralized Data," arXiv:1602.05629 (AISTATS 2017). **[verified 2026-10-03 via arXiv API; no Crossref match]** — FedAvg. bib key mcmahan2017fedavg.
+
+34. Li, T., Sahu, A. K., Zaheer, M., Sanjabi, M., Talwalkar, A., Smith, V. "Federated Optimization in Heterogeneous Networks," arXiv:1812.06127 (MLSys 2020). **[verified 2026-10-03 via arXiv API; no Crossref match]** — FedProx. bib key li2020fedprox.
+
+35. Baruch, M., Baruch, G., Goldberg, Y. "A Little Is Enough: Circumventing Defenses For Distributed Learning," arXiv:1902.06156 (NeurIPS 2019). **[verified 2026-10-03 via arXiv API; no Crossref match]** — ALIE poisoning attack. bib key baruch2019alie.
+
+36. Yin, D., Chen, Y., Ramchandran, K., Bartlett, P. "Byzantine-Robust Distributed Learning: Towards Optimal Statistical Rates," arXiv:1803.01498 (ICML 2018). **[verified 2026-10-03 via arXiv API; no Crossref match]** — coordinate-wise trimmed mean. bib key yin2018byzantine.
+
+37. Sun, Z., Kairouz, P., Suresh, A. T., McMahan, H. B. "Can You Really Backdoor Federated Learning?" arXiv:1911.07963 (2019). **[verified 2026-10-03 via arXiv API; no Crossref match]** — norm clipping. bib key sun2019really.
+
+38. Xie, C., Koyejo, S., Gupta, I. "Asynchronous Federated Optimization," arXiv:1903.03934 (2019). **[verified 2026-10-03 via arXiv API; no Crossref match]** — staleness discount. bib key xie2019asynchronous.
+
+39. Guo, C., Pleiss, G., Sun, Y., Weinberger, K. Q. "On Calibration of Modern Neural Networks," arXiv:1706.04599 (ICML 2017). **[verified 2026-10-03 via arXiv API; no Crossref match]** — probability calibration (primary reference for Platt-scaling use). bib key guo2017calibration. NOTE: Platt (1999) "Probabilistic outputs for support vector machines..." was searched in Crossref and is UNVERIFIED (no matching record), so it is not cited.
+
+40. Solà, J. "Quaternion kinematics for the error-state Kalman filter," arXiv:1711.02508 (2017). **[verified 2026-10-03 via arXiv API]** — ESKF. bib key sola2017quaternion.
+
+41. Pullen, S., Joerger, M. "GNSS Integrity and Receiver Autonomous Integrity Monitoring (RAIM)," in *Position, Navigation, and Timing Technologies in the 21st Century*, Wiley, 2020, pp. 591-617. DOI: [10.1002/9781119458449.ch23](https://doi.org/10.1002/9781119458449.ch23) **[verified 2026-10-03 via Crossref]** — snapshot residual-based RAIM (replaces Parkinson & Axelrad 1988). bib key pullen2020gnss.
+
+42. Jurado, J., Schubert Kabban, C. M., Raquet, J. "A regression-based methodology to improve estimation of inertial sensor errors using Allan variance data," *NAVIGATION*, 66(1):251-263, 2019. DOI: [10.1002/navi.278](https://doi.org/10.1002/navi.278) **[verified 2026-10-03 via Crossref]** — Allan-variance-based IMU error parameters (replaces El-Sheimy et al. 2008). bib key jurado2019regression.
+
+43. Cheiney, P., Fouché, L., Templier, S., Napolitano, F., Battelier, B., Bouyer, P., Barrett, B. "Navigation-Compatible Hybrid Quantum Accelerometer Using a Kalman Filter," *Physical Review Applied*, 10(3):034030, 2018. DOI: [10.1103/physrevapplied.10.034030](https://doi.org/10.1103/physrevapplied.10.034030) **[verified 2026-10-03 via Crossref]** — hybrid CAI. bib key cheiney2018navigation.
+
+44. Templier, S., Cheiney, P., d'Armagnac de Castanet, Q., Gouraud, B., Porte, H., Napolitano, F., Bouyer, P., Battelier, B., Barrett, B. "Tracking the vector acceleration with a hybrid quantum accelerometer triad," *Science Advances*, 8(45):eadd3854, 2022. DOI: [10.1126/sciadv.add3854](https://doi.org/10.1126/sciadv.add3854) **[verified 2026-10-03 via Crossref]** — hybrid CAI triad. bib key templier2022tracking.
+
+45. IEEE Standard Specification Format Guide and Test Procedure for Single-Axis Interferometric Fiber Optic Gyros, IEEE Std 952-1997. DOI: [10.1109/IEEESTD.1998.86153](https://doi.org/10.1109/IEEESTD.1998.86153) **[verified 2026-10-03 via Crossref: title and DOI match; Crossref carries no publication year, 1997 is from the standard's designation]** — IMU error-budget conventions. bib key ieee952.
+
+Unverified (not cited; TODO retained in main.tex): ADIS16470 datasheet (analog.com unreachable by curl), HG1700 AG58 datasheet (Honeywell product page confirms HG1700 but lists only brochure M61-1619-000-001, not datasheet M61-0115-000-003 or AG58); Platt 1999.
+

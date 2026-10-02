@@ -1,5 +1,6 @@
 \documentclass[journal]{IEEEtran}
 
+\usepackage{url}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx}
 \usepackage{booktabs}
@@ -364,11 +365,11 @@ already removed upstream, so no sensor model recomputes gravity.
 
 \paragraph{Classical IMU.}
 The accelerometer and gyroscope of each axis share one error budget in the IEEE Std~952 style
-\cite{TODO-ieee952}: a per-run constant turn-on bias, a first-order Gauss--Markov (GM1) bias-instability
+\cite{ieee952}: a per-run constant turn-on bias, a first-order Gauss--Markov (GM1) bias-instability
 process, white noise (velocity/angle random walk), per-run constant scale-factor and misalignment errors,
 quantisation and saturation. The GM1 standard deviation is set to $\sigma_{\mathrm{GM}} = B/0.664$ for a
 datasheet in-run stability $B$ and a chosen correlation time $\tau_c$, so that the process's
-Allan-deviation minimum equals $B$ \cite{TODO-elsheimy2008}. Two grades are evaluated and always reported
+Allan-deviation minimum equals $B$ \cite{jurado2019regression}. Two grades are evaluated and always reported
 separately (Table~\ref{tab:imu}): an industrial MEMS grade and a tactical grade. A consumer MEMS grade
 exists in the code but is not part of the evaluation.
 
@@ -376,7 +377,7 @@ exists in the code but is not part of the evaluation.
 \centering
 \caption{IMU grades. ``D'' = manufacturer datasheet figure, ``A'' = assumed. Both grades run at
 $100\,\mathrm{Hz}$. Industrial MEMS follows an ADIS16470-class part and tactical an HG1700~AG58-class part
-\protect\cite{TODO-adis16470-datasheet,TODO-hg1700-datasheet}.}
+\protect\cite{adi2017adis16470,honeywell2025hg1700}.}
 \label{tab:imu}
 \small
 \begin{tabular}{lcc}
@@ -406,7 +407,7 @@ multipath \cite{kaplan2017understanding}. The receiver tracks each satellite wit
 lock threshold and a $1\,\mathrm{s}$ reacquisition delay, and solves a position/velocity/clock
 \emph{fix} by weighted least squares with weights equal to the inverse of the same error budget
 \cite{misra2006global}, followed by a snapshot residual-based receiver autonomous integrity monitoring
-(RAIM) $\chi^2$ statistic \cite{TODO-parkinson1988raim}. A fix needs at least four locked satellites. It carries the
+(RAIM) $\chi^2$ statistic \cite{pullen2020gnss}. A fix needs at least four locked satellites. It carries the
 position and velocity covariances, the clock bias and drift, and the per-satellite C/N0 and elevation that
 the detector uses (Section~\ref{sec:detector}).
 
@@ -415,7 +416,7 @@ The CAI is a Mach--Zehnder light-pulse interferometer whose phase is $\phi = k_{
 $k_{\mathrm{eff}} = 1.61\times10^{7}\,\mathrm{rad/m}$ for the $^{87}$Rb D$_2$ Raman pair. The fringe is
 observed only modulo $2\pi$ (a fringe period of $3.9\times10^{-3}\,\mathrm{m/s^2}$ at $T = 10\,\mathrm{ms}$),
 so the model resolves the fringe order with a classical companion accelerometer, as in hybrid
-matter-wave/classical sensors \cite{wright2022cold}. The acceleration response is a triangular weighting
+matter-wave/classical sensors \cite{cheiney2018navigation,templier2022tracking,wright2022cold}. The acceleration response is a triangular weighting
 over $[t-2T,\,t]$, followed by a dead time to the end of the cycle. The primary (FIELD) grade is anchored to
 the real shot data of \cite{darmagnac2024atom,darmagnac2024dataset} through four fitted elements
 (Table~\ref{tab:cai}):
@@ -483,7 +484,7 @@ All methods share one loosely coupled 15-state error-state extended Kalman filte
 is position $p$ and velocity $v$ in a local ENU frame, the attitude matrix $C$, and the accelerometer and
 gyroscope biases $b_a, b_g$; the error state is
 $\delta x = [\delta p,\ \delta v,\ \psi,\ \delta b_a,\ \delta b_g] \in \mathbb{R}^{15}$, where $\psi$ is the
-navigation-frame attitude error \cite{TODO-sola2017}. Strapdown mechanisation uses trapezoidal integration
+navigation-frame attitude error \cite{sola2017quaternion}. Strapdown mechanisation uses trapezoidal integration
 of bias-corrected specific force and rate with a coning correction. The process model has the standard
 error-propagation blocks $F$ and noise-input blocks $G$ and continuous noise
 $Q_c = \mathrm{diag}(\mathrm{VRW}^2 I_3,\ \mathrm{ARW}^2 I_3,\ q_{b_a} I_3,\ q_{b_g} I_3)$ read from the IMU's
@@ -619,7 +620,7 @@ spoofing head and a jamming head ($1010$ parameters, about $4\,\mathrm{kB}$ in \
 logistic-regression detector ($60\rightarrow 2$) is the required ablation. Each head's output is Platt
 calibrated on the logit, $p = \sigma\!\big(a\,\mathrm{logit}(p_{\mathrm{raw}}) + b\big)$, with $(a,b)$ fitted at
 the natural class ratio on held-out tuning missions and applied at runtime, so the trust engine consumes
-calibrated probabilities \cite{TODO-platt1999}. The detector output is $p = \max(p_{\mathrm{spoof}}, p_{\mathrm{jam}})$.
+calibrated probabilities \cite{guo2017calibration}. The detector output is $p = \max(p_{\mathrm{spoof}}, p_{\mathrm{jam}})$.
 
 \paragraph{Supervised training with oracle labels.}
 The detector of every learning method is trained on ground-truth-labelled \emph{training missions}, the
@@ -854,7 +855,7 @@ untrusted. Trust-law and filter hyperparameters are not learned.
 Rounds are bulk-synchronous in simulation time with period $T_{\mathrm{round}} = 60\,\mathrm{s}$. At each
 round boundary a live node trains for $E = 2$ epochs (SGD, learning rate $0.05$, batch $64$) on a replay
 buffer of at most $20{,}000$ labelled samples, with an optional FedProx term
-$\tfrac{\mu}{2}\lVert\theta-\theta_g\rVert^2$ \cite{TODO-fedprox}; a node with fewer than $64$ labelled
+$\tfrac{\mu}{2}\lVert\theta-\theta_g\rVert^2$ \cite{li2020fedprox}; a node with fewer than $64$ labelled
 samples sends a heartbeat instead. A node installs a received global model at the first GNSS epoch after
 the simulated uplink and downlink delays, and its trust state is never reset by a model swap.
 Communications are simulated in simulation time: a log-normal delay (median $0.2\,\mathrm{s}$, log-scale
@@ -864,10 +865,11 @@ state). The round hyperparameters ($E=2$, learning rate $0.05$, $\mu=0$, $R=10$ 
 tuning seeds by the sanity check below, identically for all FL methods.
 
 \paragraph{Aggregators.}
-FedAvg \cite{TODO-fedavg} aggregates with weights $n_i(1+s_i)^{-1/2}$, where $n_i$ is the self-reported
-sample count and $s_i$ the staleness in rounds. Updates with $s_i > 3$ are discarded, and a round is skipped
+FedAvg \cite{mcmahan2017fedavg} aggregates with weights $n_i(1+s_i)^{-1/2}$, where $n_i$ is the self-reported
+sample count and $s_i$ the staleness in rounds (a staleness discount in the manner of asynchronous federated optimization \cite{xie2019asynchronous}). Updates with $s_i > 3$ are discarded, and a round is skipped
 (logged, never silent) unless at least $\lceil 0.5\,N_{\mathrm{live}}\rceil$ fresh updates arrive. FedProx
-aggregates as FedAvg; its proximal term acts only on the client. TRIM-NB-R proceeds as follows, on the
+aggregates as FedAvg; its proximal term acts only on the client. TRIM-NB-R, which combines norm clipping
+\cite{sun2019really} with a coordinate-wise trimmed mean \cite{yin2018byzantine}, proceeds as follows, on the
 flattened weight delta:
 \begin{align}
 \tilde\Delta_i &= \Delta_i \cdot \min\!\Big(1,\ \frac{c\cdot \mathrm{median}_j\lVert\Delta_j\rVert}{\lVert\Delta_i\rVert}\Big),
@@ -886,7 +888,7 @@ Normalisation statistics are aggregated by coordinate-wise median. The sample co
 aggregator, which is exactly the quantity a poisoning node can misreport, and FedAvg's use of it is why it is
 the vulnerable reference. The simulated poisoning attacks are sign flip (a factor of $-5$),
 Gaussian noise at ten times the median honest update norm, label flip, and ``A Little Is Enough''
-\cite{TODO-alie} using a closed-form $z$ (a simplification of the original bookkeeping).
+\cite{baruch2019alie} using a closed-form $z$ (a simplification of the original bookkeeping).
 
 \paragraph{The $\theta_0$ protocol and sanity check.}
 Every FL method and the local-only baselines start from the same $\theta_0$, pretrained offline on a
@@ -1065,7 +1067,7 @@ The primary test is the two-sided Wilcoxon signed-rank test on paired per-seed d
 differences gives $p > 0.05$. Effect sizes are the Hodges--Lehmann median of paired differences
 \cite{hodges1963estimates} with a $95\%$ BCa bootstrap interval ($10{,}000$ resamples, a dedicated
 seeded stream) \cite{efron1987better}, the matched-pairs rank-biserial correlation, and Cohen's $d_z$.
-Multiple methods in one scenario use a Friedman test with Nemenyi post-hoc \cite{TODO-demsar2006}; binary
+Multiple methods in one scenario use a Friedman test with Nemenyi post-hoc; binary
 outcomes use the exact McNemar test; proportions carry Wilson $95\%$ intervals. Censored latencies (misses)
 take the censoring value and are handled by the rank tests. Holm--Bonferroni \cite{holm1979simple}
 controls the family-wise error over the confirmatory family $\{\mathrm{H1},\ldots,\mathrm{H4}\}\times\{\text{primary

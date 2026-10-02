@@ -353,17 +353,11 @@ REPLACED; their claims are no longer in main.tex (see "Stale statements elsewher
 - (RESOLVED in PAPER-2) Abstract and Discussion κ_R wording reconciled with D-043/D-047/D-061 (velocity covariance honest; κ_R a surrogate for time-correlated error; attitude/bias over-confident).
 - Section III.A (per-tick sequence: "pseudo-labelling and FL buffering" → "FL round buffering") and III.D (parameter count, "positive-label rate") were edited to match D-052 and the code; the rest of Section III is unchanged.
 
-## Missing references (cited as `\cite{TODO-...}` in main.tex; not in refs.bib)
-- Resolved 2026-10-03 (verified via Consensus, now in refs.bib): wilcoxon1945individual (Breakthroughs in Statistics reprint), hodges1963estimates, efron1987better, holm1979simple.
-- `TODO-ieee952` — IEEE Std 952-1997 / 1293-1998 error-term conventions (Section IV.A).
-- `TODO-elsheimy2008` — El-Sheimy, Hou, Niu, "Analysis and modeling of inertial sensors using Allan variance", IEEE Trans. Instrum. Meas. 57(1):140–149, 2008 (GM1 tuning; named in `sensors/imu.py`).
-- `TODO-adis16470-datasheet` — Analog Devices ADIS16470 datasheet, Rev. C.
-- `TODO-hg1700-datasheet` — Honeywell HG1700 (AG58 variant) datasheet M61-0115-000-003.
-- `TODO-parkinson1988raim` — Parkinson & Axelrad, "Autonomous GPS integrity monitoring using the pseudorange residual", Navigation 35(2), 1988.
-- `TODO-sola2017` — Solà, "Quaternion kinematics for the error-state Kalman filter", arXiv:1711.02508.
-- `TODO-platt1999` — Platt, "Probabilistic outputs for support vector machines ...", 1999.
-- `TODO-fedavg` — McMahan et al., "Communication-efficient learning of deep networks from decentralized data", AISTATS 2017.
-- `TODO-fedprox` — Li et al., "Federated optimization in heterogeneous networks", MLSys 2020.
-- `TODO-alie` — Baruch, Baruch, Goldberg, "A little is enough: circumventing defenses for distributed learning", NeurIPS 2019.
-- `TODO-demsar2006` — Demšar, "Statistical comparisons of classifiers over multiple data sets", JMLR 7:1–30, 2006.
-- Not yet cited but needed if the text is extended: Lautier et al. 2014, Cheiney et al. 2018, Templier et al. 2022 (CAI hybridisation; named in `sensors/quantum.py`), Page 1954 (CUSUM, feature 12), Yin et al. 2018 (trimmed mean), Sun et al. 2019 (norm clipping), Xie 2019 (FedAsync staleness weight), (the oscillator model requirement is now met with `brown2012introduction`, `krawinkel2021improved`, `qin2021benefits`); Page 1954 is also needed for the quantum-trust CUSUM in IV.D (described by mechanism only, no \cite added). Bibliographic details above are from memory of the standard citations, not verified here; the Master must verify each entry (D-012) before it is added to refs.bib.
+## Missing references (REFS-2, 2026-10-03)
+
+Resolved (now in refs.bib, see docs/REFERENCES.md 33-45): fedavg, fedprox, alie, trimmed mean (Yin 2018), norm clipping (Sun 2019), staleness (Xie 2019), calibration (Guo 2017 replaces Platt), RAIM (Pullen & Joerger 2020 replaces Parkinson & Axelrad), IMU Allan variance (Jurado 2019 replaces El-Sheimy 2008), ESKF (Sola 2017), hybrid CAI (Cheiney 2018, Templier 2022; Lautier dropped), IEEE Std 952-1997. Dropped (sentence kept, no cite): Demsar 2006.
+
+Still missing (`\cite{TODO-...}` in main.tex, Table I caption):
+- `TODO-adis16470-datasheet` — Analog Devices ADIS16470 datasheet, Rev. C (analog.com not reachable; unverified).
+- `TODO-hg1700-datasheet` — Honeywell HG1700 (AG58) datasheet M61-0115-000-003 (product page found but does not confirm this datasheet; unverified).
+- Platt 1999 not verifiable via Crossref/arXiv; not cited.
