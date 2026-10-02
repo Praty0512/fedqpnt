@@ -26,6 +26,7 @@ from h2_abrupt_metrics import (calibrate_tau, onset_detection, onset_window_auc,
                                recovery_alarm_rate, paired_wilcoxon_summary)
 
 RUNS = Path("results/fleet/h2_abrupt_runs")
+CLOSED_DIR = None   # set by --tau-mode closedloop (D-077 AMENDMENT 2)
 CLEAN_CACHE = Path("results/fleet/h2_abrupt_clean_features.npz")
 OUT = Path("results/fleet/h2_abrupt_prereg_results.json")
 CLEAN_SEEDS = list(range(580, 600))
@@ -75,8 +76,8 @@ def _wil(x, y):
 
 
 def analyse(workers: int) -> dict:
-    clean = collect_clean(workers)
-    res = dict(git_head=subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
+    clean = None if CLOSED_DIR else collect_clean(workers)
+    res = dict(tau_mode='closedloop' if CLOSED_DIR else 'openloop', git_head=subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
                git_status_fedqpnt=subprocess.run(["git", "status", "--porcelain", "fedqpnt/"], capture_output=True, text=True).stdout.strip(),
                clean_seeds=CLEAN_SEEDS, clean_duration_s=CLEAN_DURATION_S, parts={}, invalid_runs=[])
     for part in PARTS:
@@ -89,7 +90,8 @@ def analyse(workers: int) -> dict:
                     continue
                 rec = json.loads(jp.read_text())
                 gs, ge = rec["git_start"], rec["git_end"]
-                changed = (gs.get("fedqpnt_tree"), gs["status_porcelain_fedqpnt"]) != (ge.get("fedqpnt_tree"), ge["status_porcelain_fedqpnt"])
+                changed = bool(subprocess.run(["git", "diff", "--quiet", gs["head"], ge["head"], "--", "fedqpnt"]).returncode
+                               or gs["status_porcelain_fedqpnt"] or ge["status_porcelain_fedqpnt"])   # D-077: git diff start end -- fedqpnt
                 if changed or rec.get("aborted"):
                     res["invalid_runs"].append(f"{jp.name}: fedqpnt_changed={changed} aborted={rec.get('aborted')}")
                 n0 = rec["n0"]
@@ -99,8 +101,11 @@ def analyse(workers: int) -> dict:
                 t, act, rp = (np.asarray(n0[k]) for k in ("epoch_t", "epoch_active", "epoch_raw_p"))
                 act = act.astype(bool)
                 theta = dict(np.load(jp.with_suffix(".npz")))
-                cs, ct = clean_scores(theta, clean)
-                cal = calibrate_tau(cs, ct, target_far_per_hour=1.0)
+                if CLOSED_DIR:
+                    cal = json.loads((CLOSED_DIR / f"tau_{part}_{arm}.json").read_text())
+                else:
+                    cs, ct = clean_scores(theta, clean)
+                    cal = calibrate_tau(cs, ct, target_far_per_hour=1.0)
                 tau = cal["tau"]
                 det = onset_detection(t, act, rp, tau)
                 per[arm].append(dict(
@@ -131,7 +136,14 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--collect-only", action="store_true")
+    ap.add_argument("--runs-dir", default=str(RUNS))
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--tau-mode", choices=["openloop", "closedloop"], default="openloop")
+    ap.add_argument("--clean-dir", default="results/fleet/h2_abrupt_clean_closedloop_freeze3")
     a = ap.parse_args()
+    RUNS, OUT = Path(a.runs_dir), Path(a.out)
+    if a.tau_mode == "closedloop":
+        CLOSED_DIR = Path(a.clean_dir)
     if a.collect_only:
         collect_clean(a.workers)
         print("clean features cached", CLEAN_CACHE)

@@ -152,9 +152,16 @@ def _run_or_load(part, method, seed, scenario, theta0, param_names):
     if result.final_theta is not None:
         np.savez(stem.with_suffix(".npz"), **{k: np.asarray(v) for k, v in result.final_theta.items()})
     rec = dict(part=part, method=method, seed=seed, aborted=bool(result.aborted), wall_s=result.wall_s,
-               git_start=git0, git_end=git1, fedqpnt_changed_during_run=((git0['fedqpnt_tree'], git0['status_porcelain_fedqpnt']) != (git1['fedqpnt_tree'], git1['status_porcelain_fedqpnt'])), n0=n0)
+               git_start=git0, git_end=git1, fedqpnt_changed_during_run=_fedqpnt_changed(git0, git1), n0=n0)
     jpath.write_text(json.dumps(rec, default=str))
     return n0, bool(result.aborted)
+
+
+def _fedqpnt_changed(g0, g1) -> bool:
+    """D-077: valid iff `git diff <start> <end> -- fedqpnt` is empty and fedqpnt/ porcelain is clean at both ends."""
+    root = str(Path(__file__).resolve().parent.parent)
+    rc = subprocess.run(["git", "diff", "--quiet", g0["head"], g1["head"], "--", "fedqpnt"], cwd=root).returncode
+    return bool(rc != 0 or g0["status_porcelain_fedqpnt"] or g1["status_porcelain_fedqpnt"])
 
 
 def _empty_per_arm():
@@ -270,8 +277,11 @@ def main():
     ap.add_argument("--parts", default="h2,h4,control",
                     help="comma list from {h2,h4,control}")
     ap.add_argument("--out", default="results/fleet/h2_abrupt.json")
+    ap.add_argument("--runs-dir", default="results/fleet/h2_abrupt_runs")
     ap.add_argument("--provenance-out", default="results/fleet/h2_abrupt_provenance.json")
     args = ap.parse_args()
+    global RUNS_DIR
+    RUNS_DIR = Path(args.runs_dir)
     parts = set(args.parts.split(","))
 
     theta0, param_names = _theta0()

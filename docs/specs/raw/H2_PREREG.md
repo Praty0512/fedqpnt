@@ -97,3 +97,15 @@ and the pre-freeze core and is superseded.
   data-collection mode (`build_supervised_dataset.collect_run`, model-independent) and scored offline with each arm's model, instead of running a
   closed-loop clean mission per model. Live raw_p is computed under closed-loop trust; this feature-path difference is part of the disclosure.
 - FAR = rising edges of raw_p > tau per clean hour (same definition as fedqpnt.eval.metrics.false_alarm_rate).
+
+## AMENDMENT 2 (2026-10-02, dated BEFORE the confirmatory run; Master ruling D-077)
+The core-freeze-2 H2/H4/control run is PRELIMINARY (leak-exposed). The CONFIRMATORY run is executed on core-freeze-3 (probe-exit fix merged). Changes
+vs the preliminary analysis (all other pre-registered metrics/windows/seeds/theta0 = theta0_noabrupt_v2 unchanged):
+1. tau calibration uses CLOSED-LOOP clean missions through the SAME runner as the live runs (`fedqpnt.fleet.node_runner._run_fleet_node`, n_rounds=0,
+   no attack, kappa_R = DEFAULT_KAPPA_R, 1000 s, 1 Hz epoch_raw_p), replacing the open-loop `collect_run` feature path (whose raw_p did not match live
+   closed-loop raw_p). Each arm's FINAL installed models (`FleetResult.final_theta` of that arm's 10 live seeds) are used: live-seed s's model is run on
+   clean seeds 580+2(s-500) and 581+2(s-500) (all 20 clean seeds 580-599 used once per arm); first 60 s of each mission excluded; pooled = 20 x 910 s = 5.06 h
+   per (part, arm). tau per (part, arm) = smallest threshold with FAR <= 1/h (rising edges per clean hour, same as `fedqpnt.eval.metrics.false_alarm_rate`).
+2. Validity: a run is valid iff `git diff <start> <end> -- fedqpnt` is empty and `git status --porcelain fedqpnt/` is clean (not HEAD equality).
+3. Confirmatory outputs: results/fleet/h2_abrupt_runs_freeze3/, results/fleet/h2_abrupt_clean_closedloop_freeze3/, results/fleet/h2_abrupt_prereg_results_freeze3.json
+   (the preliminary freeze-2 files are not overwritten).

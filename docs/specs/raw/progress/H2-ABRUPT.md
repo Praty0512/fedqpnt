@@ -749,3 +749,27 @@ Cause: live closed-loop raw_p distribution != open-loop clean (disclosed feature
 Abrupt sev0.15: position PROBE entries 65, PROBE->DISTRUST 36 (8/8 on seeds 501,502,504,509; 0 on 500,508), ok 28; clock entries 46, failed 6, ok 40.
 Drift sev1.0 control: position entries 76, failed 72, ok 3; clock entries 73, failed 47, ok 25.
 ALL ANALYSIS DONE. Report sent; awaiting Master (D-076 / core-freeze-3 decision).
+
+## D-077: freeze-2 run = PRELIMINARY; CONFIRMATORY on core-freeze-3. Prepared (scripts only, NO runs until Master sends "core-freeze-3")
+- H2_PREREG.md AMENDMENT 2 written (closed-loop tau via the same runner; validity = git diff start end -- fedqpnt empty + clean porcelain; freeze3 output paths).
+- scripts/h2_abrupt_calibrate_closedloop.py (NEW): per (part, arm) runs the arm's 10 final installed models closed loop through fedqpnt.fleet.node_runner._run_fleet_node (n_rounds=0, no attack, kappa_R=DEFAULT_KAPPA_R, 1000 s) on clean seeds 580..599 (2 per live seed), pools 20x910 s = 5.06 h, tau at FAR 1/h. Cost: 3 parts x 2 arms x 20 = 120 missions of 1000 s (~3 min each) ~ 6 CPU-h -> ~1.5 h at 4 workers. Resumable. NOT test-run (syntax-checked only; propose a 100 s smoke test on go).
+- scripts/h2_abrupt_prereg_analysis.py: new args --runs-dir --out --tau-mode closedloop --clean-dir; validity via git diff start end -- fedqpnt. scripts/h2_abrupt_h2h4_driver.py: --runs-dir, git-diff validity.
+- CONFIRMATORY COMMANDS (after "core-freeze-3"; 1 fleet at a time = 6 processes):
+  1) python -u scripts/h2_abrupt_h2h4_driver.py --parts h2,h4,control --runs-dir results/fleet/h2_abrupt_runs_freeze3 --out results/fleet/h2_abrupt_freeze3.json --provenance-out results/fleet/h2_abrupt_provenance_freeze3.json
+  2) python -u scripts/h2_abrupt_calibrate_closedloop.py --runs-dir results/fleet/h2_abrupt_runs_freeze3 --workers 4
+  3) python -u scripts/h2_abrupt_prereg_analysis.py --runs-dir results/fleet/h2_abrupt_runs_freeze3 --tau-mode closedloop --out results/fleet/h2_abrupt_prereg_results_freeze3.json
+- Parallel fleets (12 processes) only after Master says decisive is done AND free RAM is checked. Freeze-2 metric values NOT to be discussed until confirmatory run analysed.
+
+## Master: prep accepted; correction noted (FleetNodeSpec.kappa_R already defaults to DEFAULT_KAPPA_R, node_runner.py:64; explicit pass kept, harmless)
+On "core-freeze-3", in this order: (0) 100 s smoke test of scripts/h2_abrupt_calibrate_closedloop.py (temp cache dir, not results/) -> (1) driver, 1 fleet at a time (6 proc) -> (2) calibration -> (3) analysis. WAITING for the message.
+
+## core-freeze-3 CONFIRMATORY RUN LAUNCHED (tag a726d98; HEAD 51964fc, fedqpnt diff vs tag empty; fedqpnt tree c20a1cc8; free RAM only 2.1 GB -> 1 fleet at a time)
+- Smoke test of calibration script (100 s clean, theta0_v2): OK (100 epochs, t 31..130, mean raw_p 0.016, failed=False; temp cache outside results/).
+- Driver: task bclohyp3a -> /tmp/h2_abrupt_driver_freeze3.log; runs in results/fleet/h2_abrupt_runs_freeze3/ (resumable: rerun same command). First log lines confirmed (git state at launch + "=== H2 ... ===").
+- Chain waiter (calibration then analysis): see next line once launched. Final: results/fleet/h2_abrupt_prereg_results_freeze3.json.
+- Chain waiter launched: task bvnukk2gg (/tmp/h2_chain_freeze3.sh): after driver exit -> calibration (3 workers, /tmp/h2_abrupt_cal_freeze3.log) -> analysis (/tmp/h2_abrupt_analysis_freeze3.log). If it dies: run the 3 commands in the H2-ABRUPT D-077 section manually.
+
+## STOPPED by Master (D-078: permanent-lockout failure on clean data in the frozen trust design; core will change again)
+- Stopped via TaskStop: chain waiter bvnukk2gg, driver bclohyp3a. Verified no h2_abrupt python processes alive afterwards (children gone; only CORE-ROBUST's core_robust_clock_meaconing_trace.py PID 4016 remains, not mine). Calibration/analysis never started.
+- Partial outputs KEPT, renamed: results/fleet/h2_abrupt_runs_ABORTED_freeze3/ (+ *_ABORTED.json for freeze3 json/provenance if they existed). Confirmatory run INVALID.
+- PARKED. Re-run on the NEXT freeze with the same amendments (H2_PREREG AMENDMENT 1+2); commands in D-077 section above; use fresh dirs ..._freeze4 or the names Master gives.

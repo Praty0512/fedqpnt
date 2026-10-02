@@ -659,3 +659,43 @@ are computed from the NEW state (False). So the failure epoch reports w=0.3, sha
 After the leak the clock holds over a polluted state: est 1095 vs true 329 at t=290 (err 2556 ns); at t=301 the fix returns to truth (clk_event x8=249.7 fires legitimately) -> clock law DISTRUST (pinned 60 s) + PROBE 10 s, TRUST at t=331: est snaps 1245->427 (err 58 ns).
 => attack-window RMSE (2052 ns) is dominated by the probe-exit leak (epochs 191-300 at 0.6-2.6 us), not by missing exclusion; post RMSE (750 ns) = 30 s of pinned DISTRUST holding the polluted estimate.
 Proposed fix (needs Master + freeze exception): on probe failure set w = w_min in the same call (and report shadow for the failure epoch, i.e. the epoch whose fix just failed must NOT be applied); success epoch keeps w_probe (fix passed). Applies to both laws.
+
+## D-076: probe-exit leak fix in WORKTREE (main tree untouched; H2 driver live)
+STOPPED: decisive chain 2 (bs46g73cx) incl. its chain bash (pids 18464/31128), python 11564 and 33200 and their 8 spawn workers (all mine; H2 driver pid 35704 untouched). results/m1/decisive_v3_raw moved to
+results/m1/decisive_v3_raw_INVALID_leak (rawtest/tiny removed). Worktree: ../FEDQPNT_fix on branch probe-exit-fix from HEAD 19352c9. Fix (fedqpnt/trust/trust_law.py there): _LawCoreV2 gets _probe_failed_now (reset each advance);
+on probe FAILURE: state DISTRUST, timer 0, w = w_min IN THE SAME call, flag set; SensorTrustLaw.probe_shadow = PROBE or failed-now (so ESKF and, via clk_probe_shadow, ClockKF apply nothing from the failed fix); success epoch unchanged.
+Tests tests/test_probe_exit_leak.py (7: law-level fail/pre-exit/success, engine pos+clk weights+shadow, ClockKF/ESKF apply nothing); they FAIL on the unfixed trust_law (3 failures) and pass with the fix; D-075 pin, shadow-probe, split tests pass.
+Running in worktree (bg blo9qyq99): full suite (suite_fix.log), clock_law_trace_mems_FIX.txt, drift_tactical_v3_FIX.txt, meacon_timing_v3_mems_FIX.log; git: scratchpad/fix_worktree_git.log.
+FIX RESULTS (worktree, probe-exit-fix; trust_law only): suite_fix.log: 2 failures: tests/test_data_jarlaud.py::test_manifest_covers_every_extracted_file (worktree lacks data/raw extracted files: environment artifact, 4029 manifest rows missing)
+and tests/test_sensors_imu.py::test_imu_static_adev_matches_cited_params[tactical] (checking in both trees: adev_fix.log / adev_main.log). Meaconing clock RMSE (MEMS, seeds 500-504, node 'clktrace'): fedqpnt_local FIX att 168.2 ns (per seed 207.2/238.3/141.0/98.4/155.9), post 83.4, whole 117.4, pre 13.1,
+nominal 13.9; before the fix att 2052.5 / post 750.2 / whole 1255.1; undefended att 2363.3 / post 369.1 / whole 1323.2. Clock-law trace (node 'cl', seed 500): t=121 40.8 ns, 150 7.5, 180 277.5, 191 374.2 (no jump; w=0.02 and shadow=1 at the exit epoch), 250 1090.6, 300 1699.0 (holdover only), 331 TRUST err 3.6 ns (before fix: 2.8 us at 191 and 58 ns at 331).
+
+## core-freeze-3 pending: decisive relaunch queued (bg bkpwkj20k, scripts/core_robust_chain_v3c.sh): polls for tag core-freeze-3 then decisive MEMS -> tactical with v3 (4 workers, persistent results/m1/decisive_v3_raw, git in scratchpad/chain_v3c_git.log).
+Detector-v3 independence from the leak fix CONFIRMED (collect_run: fixed_trust/w==1, v2 law inactive; reported to Master).
+core-freeze-3 (a726d98) decisive STARTED: chain bkpwkj20k, git HEAD=51964fc379b61c8309a610a836abf579380a3355 status clean (scratchpad/chain_v3c_git.log); MEMS then tactical; persistent raw results/m1/decisive_v3_raw/<grade>/.
+Queued chain bynkbr6jj (core_robust_chain_v3d.sh) waits for "CHAIN V3C DONE", then drift trace (drift_tactical_freeze3.txt), jam summary, meaconing timing both grades (meacon_timing_freeze3_<grade>.log).
+FULL TABLES: python scripts/core_robust_decisive_report.py (reads the persisted raw files; pre/att/post/max, FAR, w means whole+att, rmse_t_ns, D-068 criterion, HL+BCa CI, 7 methods x scenarios, per grade). Run it when both grades finish.
+
+## DECISIVE v3 on core-freeze-3 DONE (630 runs; results/m1/decisive_v3_raw/<grade>/, full tables results/m1/decisive_v3_report_freeze3.txt; git HEAD=51964fc clean at start and end)
+KEY FINDINGS (fedqpnt_local vs undefended): MEMS: nominal fine (pre 2.78 vs 2.83); drift att 250.04 vs 107.66 (HL +141.4 [85.3,180.5]); meaconing att 248.31 vs 2.49 (HL +244.8); jam att 259.84 vs 268.93 (HL -8.3 [-19.2,-1.9]), post 3.00 vs 3.08.
+Tactical: drift att 68.95 vs 107.61 (HL -43.5 [-59.9,-9.6], criterion True), meaconing att 68.04 vs 2.52 (HL +58.7), jam 70.60 vs 72.01 (HL -1.3). FAR/h (attack scenarios) 25-43; w_att 0.054 (w_pos = w_clk under meaconing: detector p drives both).
+SAFETY GROUP: seed 9604 on CLEAN nominal diverges for fedqpnt_local (MEMS rmse_h_pre 233,585 m, tactical 36,179 m; w_gnss 0.057); drives safety_nominal mean 46,719 / 7,238 and all safety_drift s rows (att 5.4-5.6 km MEMS, 0.89 km tactical).
+Trace (scratchpad/nominal_lockout_9604_mems.txt): t=35 single-epoch xsat/cn0 E_s event (xc=1) on clean data at mission start -> DISTRUST (pinned w_min 60 s, no corrections) -> MEMS coast error 28 m (t=50) -> 317 m (t=75) -> 955 m (t=95) -> PROBE: shadow NIS 402 >> 25.07 -> probe FAILS -> pinned DISTRUST again, w_pos = 0.02 forever, shadow NIS 66..9726 (err 1.5-7.9 km), E_s position jump evidence also fires from coast drift (pos=1): PERMANENT LOCKOUT. Before the D-076 fix the leak (and before D-075 the ramp) re-admitted GNSS and masked this.
+
+## D-078 work (worktree ../FEDQPNT_cq, branch coast-consistency from master 287a0f2; chain-4 traces still run in the main tree)
+(1) DONE in worktree: GnssFeatureExtractor.corr_window_full (len(_cn0_window) >= CORR_WINDOW_EPOCHS=20); trust_law xsat_event gated by it (seed 9604 t=35 false event: window=5, x14=0.30=threshold; cn0 term was not involved).
+Tests tests/test_es_window_validity.py (flag; xsat suppressed before/live after; seed 9604 clean no E_s event in first 60 s, both grades) pass.
+(2) IN PROGRESS: scripts/core_robust_kappa_q_calibration.py (pre-registered rule: clean 180 s outage, seeds 530-549, undefended w=1, CAI on, NEES 3-D pos block at 60/120/179 s pooled, ANEES=NEES/3 <= 1.5, grid {1,2,3,5,8,12,20,30,50}, per grade, 3 workers).
+Sanity run bg btlqfmbzh. Then: per-grade KAPPA_Q in core/defaults.py applied by make_agent_config (RunSpec/fleet kappa_Q default -> None), S1/nominal ANEES check with kappa_R=60, what-ifs, full suite, report.
+Freeze-3 decisive report/raw dir are in place in the main tree (results/m1/decisive_v3_report_freeze3.txt, results/m1/decisive_v3_raw/) for Master's commit.
+Chain 4 (freeze-3, for the record; start HEAD 51964fc, end e3da252, fedqpnt/ clean): jam recovery seed 500: tactical post RMSE_h 5.14 (max 51.9), err<5 m in 4 s, w>0.9 in 34 s; MEMS 25.61 (max 328.6), 4 s, 34 s.
+Meaconing clock RMSE (5 seeds, both grades identical): fedqpnt_local nominal 13.9, pre 13.1, att 168.2, post 83.4, whole 117.4 ns; undefended 13.8/12.2/2363.3/369.1/1323.2.
+Tactical drift trace seed 500 (drift_tactical_freeze3.txt): err_h 7.05 m (t=180), 8.82 (t=191, probe-exit; spoof offset 40.9 m: no drag), 38.5 (t=250), 89.1 (t=300, spoof 206.5), 2.17 (t=331 TRUST).
+kappa_Q calibration running (bg brr4wkpc3; logs scratchpad/kappa_q_<grade>.log).
+
+## D-079: finalise fix (1) only (worktree coast-consistency). kappa_Q curves (clean 180 s outage, seeds 530-549, pooled ANEES at 60/120/179 s): MEMS kappa_Q=1: 0.91 (0.90/0.90/0.93), 2: 0.48, 3: 0.35, 5: 0.26, 8: 0.20, 12: 0.18, 20: 0.15, 30: 0.13, 50: 0.12;
+tactical 1: 0.68 (0.60/0.69/0.74), 2: 0.57, 3: 0.50, 5: 0.42, 8: 0.35, 12: 0.30, 20: 0.25, 30: 0.22, 50: 0.19 -> rule chooses kappa_Q=1 both grades (no code change). Saved: results/m1/kappa_q_calibration.json (worktree).
+Verifying fix (1): suite in worktree (suite_fix1.log), seed-9604 clean traces (nominal_9604_fix1_<grade>.txt), then run_single rmse_h_pre what-if; then commit in the worktree.
+D-079 fix (1) VERIFIED+COMMITTED in worktree ../FEDQPNT_cq branch coast-consistency commit d65f5ad (features.py corr_window_full, trust_law xsat gate, tests/test_es_window_validity.py, kappa_Q calibration script + results/m1/kappa_q_calibration.json + per-grade jsons, nominal_lockout_trace, decisive_report).
+Suite (worktree): only the known env failure test_data_jarlaud (suite_fix1.log). Seed-9604 clean what-if (run_single, 600 s, v3): MEMS fedqpnt_local rmse_h_pre 2.848 (max 4.54, w_gnss 0.988, FAR 0) vs undefended 2.878; tactical 3.040 (max 4.65, w 0.988, FAR 0) vs undefended 2.952 (before: 233,585 / 36,179 m).
+chain v4 queued: bg bumsag39c waits for tag core-freeze-4 -> decisive MEMS+tactical -> results/m1/decisive_v4_raw, log chain_v4_git.log
