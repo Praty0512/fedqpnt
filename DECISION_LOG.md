@@ -33,6 +33,15 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-079 · 2026-10-03 · κ_Q rule picks 1 (the coast covariance is honest); freeze-4 = the E_s window-validity fix only; the remaining deficits are the stated operating envelope
+- **κ_Q calibration** (pre-registered D-078 rule; clean 180 s outages, seeds 530–549, n = 20; CAI on): pooled outage position ANEES at κ_Q = 1 is MEMS 0.91 and tactical 0.68 (both ≤ 1.5), so **κ_Q = 1, no change**. The coast covariance is consistent (slightly conservative) once the filter has converged.
+- **Lockout cause, refined:** seed 9604's xsat event fired at t = 35 s with the C/N0 correlation window holding 5 of 20 epochs (x14 = 0.30 at threshold), before filter convergence. **Freeze-4 = the window-validity gating only.**
+- **Decision:** no further trust-design changes before evaluation. The remaining deficits are design properties, reported as the operating envelope (no tuning to win, D-002):
+  - (a) on MEMS, coast error over a long exclusion is comparable to slow-drift spoof drag, so exclusion does not pay; on tactical it does (drift 69 vs 108 m);
+  - (b) co-located meaconing: cn0/xsat evidence routes to both laws by design (D-066, the ambiguity of single-antenna evidence), so position coasts while timing is protected (168 vs 2363 ns). The displaced-meaconer scenario (S2-DM) measures the case where exclusion is warranted.
+- **Next:** core-freeze-4 → decisive re-run → H2/H4 confirmatory run → gate → M4.
+- **Owner:** Master
+
 ### D-078 · 2026-10-02 · Decisive check on core-freeze-3: defended loses on MEMS and meaconing; a permanent lockout on clean data → startup E_s validity fix + κ_Q coast-consistency calibration
 - **Decisive results** (v3, 5 seeds, attack-window RMSE_h, fedqpnt_local vs undefended; report results/m1/decisive_v3_report_freeze3.txt):
 
