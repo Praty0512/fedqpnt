@@ -1061,13 +1061,13 @@ seeds $600$--$609$ shows $d_z < 0.5$ on a primary metric, $n$ is raised to
 $\lceil (z_{0.975}+z_{0.8})^2/d_z^2\rceil + 2$, decided before any test seed is examined. The unit of analysis
 is the per-run value averaged over the nodes of the run, since nodes within a run are not independent.
 The primary test is the two-sided Wilcoxon signed-rank test on paired per-seed differences
-\cite{TODO-wilcoxon1945}; the paired $t$-test is reported in addition only when a Shapiro--Wilk test on the
+\cite{wilcoxon1945individual}; the paired $t$-test is reported in addition only when a Shapiro--Wilk test on the
 differences gives $p > 0.05$. Effect sizes are the Hodges--Lehmann median of paired differences
-\cite{TODO-hodgeslehmann1963} with a $95\%$ BCa bootstrap interval ($10{,}000$ resamples, a dedicated
-seeded stream) \cite{TODO-efron1987bca}, the matched-pairs rank-biserial correlation, and Cohen's $d_z$.
+\cite{hodges1963estimates} with a $95\%$ BCa bootstrap interval ($10{,}000$ resamples, a dedicated
+seeded stream) \cite{efron1987better}, the matched-pairs rank-biserial correlation, and Cohen's $d_z$.
 Multiple methods in one scenario use a Friedman test with Nemenyi post-hoc \cite{TODO-demsar2006}; binary
 outcomes use the exact McNemar test; proportions carry Wilson $95\%$ intervals. Censored latencies (misses)
-take the censoring value and are handled by the rank tests. Holm--Bonferroni \cite{TODO-holm1979}
+take the censoring value and are handled by the rank tests. Holm--Bonferroni \cite{holm1979simple}
 controls the family-wise error over the confirmatory family $\{\mathrm{H1},\ldots,\mathrm{H4}\}\times\{\text{primary
 metrics}\}$ (scenarios where applicable); secondary metrics carry unadjusted $p$-values labelled
 exploratory. \todo{Reconcile the implemented confirmatory family with this specification: the report code

@@ -354,6 +354,7 @@ REPLACED; their claims are no longer in main.tex (see "Stale statements elsewher
 - Section III.A (per-tick sequence: "pseudo-labelling and FL buffering" → "FL round buffering") and III.D (parameter count, "positive-label rate") were edited to match D-052 and the code; the rest of Section III is unchanged.
 
 ## Missing references (cited as `\cite{TODO-...}` in main.tex; not in refs.bib)
+- Resolved 2026-10-03 (verified via Consensus, now in refs.bib): wilcoxon1945individual (Breakthroughs in Statistics reprint), hodges1963estimates, efron1987better, holm1979simple.
 - `TODO-ieee952` — IEEE Std 952-1997 / 1293-1998 error-term conventions (Section IV.A).
 - `TODO-elsheimy2008` — El-Sheimy, Hou, Niu, "Analysis and modeling of inertial sensors using Allan variance", IEEE Trans. Instrum. Meas. 57(1):140–149, 2008 (GM1 tuning; named in `sensors/imu.py`).
 - `TODO-adis16470-datasheet` — Analog Devices ADIS16470 datasheet, Rev. C.
@@ -364,9 +365,5 @@ REPLACED; their claims are no longer in main.tex (see "Stale statements elsewher
 - `TODO-fedavg` — McMahan et al., "Communication-efficient learning of deep networks from decentralized data", AISTATS 2017.
 - `TODO-fedprox` — Li et al., "Federated optimization in heterogeneous networks", MLSys 2020.
 - `TODO-alie` — Baruch, Baruch, Goldberg, "A little is enough: circumventing defenses for distributed learning", NeurIPS 2019.
-- `TODO-wilcoxon1945` — Wilcoxon, "Individual comparisons by ranking methods", Biometrics Bulletin 1:80–83, 1945.
-- `TODO-hodgeslehmann1963` — Hodges & Lehmann, "Estimates of location based on rank tests", Ann. Math. Statist. 34:598–611, 1963.
-- `TODO-efron1987bca` — Efron, "Better bootstrap confidence intervals", JASA 82:171–185, 1987.
 - `TODO-demsar2006` — Demšar, "Statistical comparisons of classifiers over multiple data sets", JMLR 7:1–30, 2006.
-- `TODO-holm1979` — Holm, "A simple sequentially rejective multiple test procedure", Scand. J. Statist. 6:65–70, 1979.
 - Not yet cited but needed if the text is extended: Lautier et al. 2014, Cheiney et al. 2018, Templier et al. 2022 (CAI hybridisation; named in `sensors/quantum.py`), Page 1954 (CUSUM, feature 12), Yin et al. 2018 (trimmed mean), Sun et al. 2019 (norm clipping), Xie 2019 (FedAsync staleness weight), (the oscillator model requirement is now met with `brown2012introduction`, `krawinkel2021improved`, `qin2021benefits`); Page 1954 is also needed for the quantum-trust CUSUM in IV.D (described by mechanism only, no \cite added). Bibliographic details above are from memory of the standard citations, not verified here; the Master must verify each entry (D-012) before it is added to refs.bib.

@@ -135,3 +135,13 @@ Example from this list:
 27. Qin, W.-J., Wang, X., Su, H., Zhang, Z., Li, X., Yang, X. "The Benefits of Receiver Clock Modelling in Satellite Timing," *Sensors*, 21(2):466, 2021. DOI: [10.3390/s21020466](https://doi.org/10.3390/s21020466) **[verified 2026-09-29 via Consensus]** — Used for: FedQPNT receiver clock model (D-066 addendum): TCXO truth clock and ClockKF process noise, q_bias = c²h0/2 ≈ 9e-3 m²/s, q_drift = c²·2π²h-2 ≈ 3.55e-2 m²/s³. Two-state clock model with q_b = h0/2 and q_d = 2π² h-2.
 
 28. Brown, R. G., Hwang, P. Y. C. *Introduction to Random Signals and Applied Kalman Filtering*, 4th ed. Wiley, 2012. **[verified 2026-09-29 via Consensus: values as reported by Krawinkel & Schön 2021]** — Used for: FedQPNT receiver clock model (D-066 addendum): TCXO truth clock and ClockKF process noise, q_bias = c²h0/2 ≈ 9e-3 m²/s, q_drift = c²·2π²h-2 ≈ 3.55e-2 m²/s³. Two-state clock model (S_f = h0/2, S_g = 2π² h-2) and TCXO h-parameters h0 = 2e-19 s, h-2 = 2e-20 1/s underlying ClockKFConfig.q_bias / q_drift and simulated truth clock (fedqpnt/gnss/signal.py ClockState).
+
+## Statistical methods (PAPER-3 addendum)
+
+29. Wilcoxon, F. "Individual comparisons by ranking methods," in S. Kotz & N. L. Johnson (eds.), *Breakthroughs in Statistics*, Springer, 1992, pp. 196-202 (reprint of *Biometrics Bulletin*, 1945). DOI: [10.1007/978-1-4612-4380-9_16](https://doi.org/10.1007/978-1-4612-4380-9_16) **[verified 2026-10-03 via Consensus]** — Used for: paired Wilcoxon signed-rank test (paper, statistics section). bib key wilcoxon1945individual.
+
+30. Hodges, J. L., Lehmann, E. L. "Estimates of location based on rank tests," *Annals of Mathematical Statistics*, 34:598-611, 1963. DOI: [10.1214/aoms/1177704172](https://doi.org/10.1214/aoms/1177704172) **[verified 2026-10-03 via Consensus]** — Used for: Hodges-Lehmann estimator. bib key hodges1963estimates.
+
+31. Efron, B. "Better bootstrap confidence intervals," *Journal of the American Statistical Association*, 82:171-185, 1987. DOI: [10.1080/01621459.1987.10478410](https://doi.org/10.1080/01621459.1987.10478410) **[verified 2026-10-03 via Consensus]** — Used for: BCa bootstrap interval. bib key efron1987better.
+
+32. Holm, S. "A simple sequentially rejective multiple test procedure," *Scandinavian Journal of Statistics*, 6:65-70, 1979. DOI: [10.2307/4615733](https://doi.org/10.2307/4615733) **[verified 2026-10-03 via Consensus]** — Used for: Holm-Bonferroni correction. bib key holm1979simple.
