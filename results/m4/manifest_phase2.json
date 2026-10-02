@@ -1,0 +1,2543 @@
+{
+ "n_scenarios_registry": 39,
+ "n_tasks": 360,
+ "per_result_id": {
+  "S5": 90,
+  "S8": 60,
+  "S9": 60,
+  "S12-f20": 60,
+  "S12-f40": 60,
+  "S15": 30
+ },
+ "weights": "results/m1/detector_weights_sup_v3.npz",
+ "seeds": [
+  10000,
+  10029
+ ],
+ "grades": [
+  "industrial_mems",
+  "tactical"
+ ],
+ "tasks": [
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "06afb5a497296603"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "405590b9f648d07b"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "a6214cd0d12c9592"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "75cb5b69583d501b"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "788c6ee278fd547a"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "67347ed47fc32d1d"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "f83e87d4f80d00c2"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "6e9f3b070fb4c5db"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "31e09cdf7e8fb3be"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "2465ac06d531ae13"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "2f5c033f0a304d93"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "523ff253013ebaef"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "ae314d8fe2d846b2"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "ab184a9880d83a5b"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "315af645bee837f2"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "f16fde68ed08a92b"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "d3e2993b6a9a4c11"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "86c62a425a3ac706"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "90744bb1c1168256"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "e0ed6fc645f15f2e"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "ccab3a251de4488c"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "f31d6dd1e7831b1d"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "0549a777b64b3a4c"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "f949c61a3073ecae"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "5ad11d20d425636e"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "6430f2a030ba97c9"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "27f37e1915fde518"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "a1d6e40223f5d229"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "2238947ce3f4ce29"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "fd1fb6f4a0dc9a30"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "bb56efd90263258a"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "b2c291991dd3d071"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "16c04a8e0d13f741"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "1f43b58a4ee6bd0f"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "7c20c05e83e55997"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "9ea3cd8c2fe6c473"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "0d35496d08a755dd"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "96b0d16b741f4648"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "35bc71a2e5277a61"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "ea0ac2340d7902f0"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "2de0b317fe1088f8"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "644344bdc96a4c78"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "24b8aefbcaf4fc1e"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "3c6a057ab2bce87f"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "c40fae7fbee95dd3"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "66321b88ac8a7ee9"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "4b1adc57ed13ed2c"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "a68ed0f82eeb6e09"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "4111b4254ce78d9f"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "64c86f79c0ba4fd6"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "cd4c42f8c78781ab"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "bb21b7323567049d"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "36340a2f50c07fe6"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "643ace285d5dfcb8"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "f845fa2de28d01fc"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "4369136392eacd1d"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "0cbd387160bee646"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "ca9c328ac918f293"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "ad0ddaeb223021c3"
+  },
+  {
+   "rid": "S5",
+   "method": "baseline_a",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "4d066b0e140d70f3"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "b3238c15af093c48"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "feb70142f73ed7ea"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "bd945320d55b1c2a"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "2de619f8ce8c3b4d"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "db777f7642ac5942"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "58ecac733809b7ac"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "745d4ac006923ce9"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "184f6821d8804478"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "0dfe89512d35175b"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "ed09ecc8165b2606"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "3e595517bd03493a"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "38fd3a965713979a"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "9e9ae192c8b8fd0f"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "91412f8b05e1db03"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "e068d8df5be6fda9"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "d31771a03a2eea2c"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "6db50c46a3992b45"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "6e39e78b56b1ff89"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "acaf6ae7c114d0de"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "d755d1a603652ef1"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "049834dcd598c174"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "b475442f3ec86a12"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "2619aedee93a147f"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "a80005fe825af830"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "e49a42674b40823d"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "26d36adf6c24ac47"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "89d64e232161cf13"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "9956ad3880fcb5be"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "8e825212d792629c"
+  },
+  {
+   "rid": "S5",
+   "method": "fedqpnt_nofault",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "1bac663c40dd0f42"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "f8a924b822d9771a"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "2385c6bf99c65ed3"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "7cf1ecfb7b793d17"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "204a16793368c1dc"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "e05ee941cdf13bc8"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "72de88b5feb4bde4"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "3c5f8ae4f67ff0bb"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "9f618d7ee188364b"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "28e136d748d9e9ca"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "efaa5e1643c72c34"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "d9dc005d1c74ec42"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "f956713989b6eeda"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "c61abb0bc31d0418"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "dd96e0948bc99dc9"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "b64dd3cabab866e5"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "4c8b609103bcd5d4"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "6cab348b2e6ecd7e"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "9d0c40bf3d73c951"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "a2314427f609aed0"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "eb8064aea97beb84"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "5a4eb4327c308bf7"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "10192cd47a0f7c7e"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "fa64421358e34398"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "b156bb03f2153791"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "b921ba022a32e445"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "c3ee0d7697fee448"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "a94884d579c5fe0f"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "524fd3213582bb0b"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "49b9524e8b37ba69"
+  },
+  {
+   "rid": "S8",
+   "method": "fedqpnt",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "ebe4fd40807ce6ca"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "13df87b8b95638aa"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "3fb03983afc049e2"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "832626918e8a3541"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "8b48145723ea5ce1"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "be9f52f57425dd9b"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "01ac97c325eb1f80"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "7606ef9f9c4eb07a"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "f2dba1c8115409f1"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "f09da07ed3803578"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "178b699d753177f3"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "c5a7f76a81431a54"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "b8dbca9cf36f852b"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "9791fd7ec82ee321"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "d3616e67a7caf753"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "6cb6264f56066494"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "a41407127203b9f6"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "93d97e22dcb0ef6f"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "ed03aa016fe3995b"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "a2abb3fb4572791c"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "76960ac1e626be20"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "9272b17262ec528d"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "0d0f21101cfe2806"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "023df465bdb70755"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "9b2a342719b8e293"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "2ce3550fd62d2988"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "b15cc93b6b38a085"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "8f214629189eae7d"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "783125666af3b009"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "c15eb971b6130eee"
+  },
+  {
+   "rid": "S8",
+   "method": "baseline_b_cont",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "1a0f3eddc5ba3724"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "ad0236a5e2a00d42"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "93564c9fc5f98c35"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "a8a4705722f875dd"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "b631cbf663723e3e"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "f2b4766c062016ea"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "097056e4e4bed6ec"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "46dbb5a61078b75d"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "0b73fd328caf0300"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "de17e6efb8c0b58c"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "bdfd95a2d2e461d3"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "2f5604f7069e03bd"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "092d524fba3b9994"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "2c9fe30e536444d5"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "192a83ad127c2477"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "a0dd70b45521c662"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "dd45c3511036a908"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "c02c455b68b4e2f0"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "95dd6f4ed64b847a"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "526121194cfc36dc"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "f755aa7d7e8afba8"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "05a74ac3be77efc6"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "403ac29d09952b2c"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "18705d676dd7d376"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "4f523b19582e24ea"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "6a81b2dc1d4e5bf2"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "7896388b162d379a"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "21db074b75a77609"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "996cc04cd3e861bf"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "0b22b7ee3a925a44"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "0600df02a33745b8"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "b0253dce06be130c"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "1f93357555716dc5"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "c11ac3beda91c17a"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "3083a716a40770fc"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "53913fbaddd70428"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "21bdb6869322158b"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "52ca1df4042e8542"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "a93fe03df812cab3"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "28cc186da0f41f71"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "3b9ed987b27262d5"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "132a98198129803b"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "9d4a35b696112ac3"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "f8e094b006b73871"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "478a0fb6cf77214f"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "3235cbceb1700976"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "a7ed58338720d3dc"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "dea7593fcb7ce1ff"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "5ce139026c61c0b7"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "03160357c064ca24"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "47bb0e9f81ebc879"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "d62a0e6df4a4dfa6"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "5cd466da992aba68"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "e7f53e38b292afee"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "d5ab8c5f901a97a4"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "2024dec1a1d160f4"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "60ff7b4a0b49bfbf"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "98d0dd428138fe2c"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "a00a2e5724897230"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "de750423c756471c"
+  },
+  {
+   "rid": "S9",
+   "method": "fedqpnt_noloss",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "99bd09c2efb83364"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "0cb1b26c83883463"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "c97f023affd5ccac"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "2f303779128ebea4"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "7daf20e1cf305d22"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "57d27bd3cb3c0a78"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "2d859fd72a3f0562"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "d555dbce6883d005"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "dea87f877930915e"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "14a718855319d05a"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "42f4b84a126b6904"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "35ec8de58e0d458a"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "6492caf9d0cef9fd"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "494b197fd7b090b7"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "148bb5b7028b564d"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "805b9cb3de6851a5"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "89ae613880139202"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "d4210112312c8165"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "4195198733390e9d"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "69c76729cee8d52a"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "f496a3418be3860c"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "c1668f5c4a348e18"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "9b2a0d4965fb2c04"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "6c58cb9bca603ed1"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "f659e0f0d80864bc"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "c3e7e8f9c1fe0ab7"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "93dbcd4a810d1f84"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "ee8fe3d40776597f"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "651021a1df3465d0"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "0b7a410c2bc217a7"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "9f55c7be9b4d7933"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "d4a6dc704fc0527d"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "8f5df4d2fc1f8aa9"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "071ef125b52eecbd"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "7912b2095a3fdc59"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "0e23cd40761a184a"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "147c87ed59a17a0e"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "122778b10a4217d6"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "9b9b4a5e332f4945"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "a34917e44937f72e"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "e670ec608bf85486"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "bbaf8d12f073ae14"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "6e38e90ff28c3866"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "a94c2c44a7cfd7fd"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "5f8d78ea3b021424"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "53e3dbe832163cc7"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "b56bcc047f38c46f"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "61f8213cc22d6912"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "0670e087ee51c573"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "33df8d82d09fbb8a"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "0139275cf821cb1e"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "bf48d2f8c98bfc10"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "d83609b1447d8d7d"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "03f0a1509ebd1da4"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "d6de88fa4d00ba8a"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "d6e2ad7cffee75fa"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "26dc9561290bb3fe"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "ce245cfa02195fe1"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "646a98130c0c118c"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "3dca1291537cf9d7"
+  },
+  {
+   "rid": "S12-f20",
+   "method": "fedqpnt_clean",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "375c9b0dfe87f076"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "391150a71f511532"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "37450d3b996aeafb"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "b9a36a2dbfcea700"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "d6d4da3c3ff70dbf"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "1d5389de83a2bc01"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "52565f9f5e97f525"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "fce383f82884ff6b"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "057f9a43afbb44e2"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "92d59938bd02b6a7"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "9fd893c854c3672d"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "3fdae380655084cd"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "ea7e42e540ac2242"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "7ad6cb3704eb9a07"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "b3f26ce5e53c4046"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "0e0a70531b245959"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "69511f76da2fcd36"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "92d5f4cfec32135e"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "c76de5313639fd96"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "f3d7970887dd46b4"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "fb7a34e9ac56f8dc"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "f0c94ee22ce4a9dc"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "55deae96ef6121bd"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "9178331cdedcdb33"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "fefe0b4e0b40a2b5"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "83ccf0bb27d0eb1e"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "1cdcd82d57c760d0"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "fffd2380123dc2ab"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "733137a5d2f8d753"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "997950b54f65099c"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "fcfdcd38294cedfc"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "309d01e2efb29bf1"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "354abd44cc328226"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "9c530a908a55af38"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "d10c4cd99413e234"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "d46865595283259d"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "e20cebe113f3997e"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "1fbad620300e5b7f"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "7770caf5195c8214"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "c5bb6161dffe3daf"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "3c7c295033fb1694"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "430b8e8df1f6cd8e"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "657bc1456e97661e"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "8a6784b7afcd1e19"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "b31db124933deb58"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "920bb0f9dfb5fed3"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "5297ddb8fe9bf112"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "ce79f9381697e9fb"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "a73c7d2089d7c8b1"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "040e681751b26ff6"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "171d36a4c253e6d8"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "c0fcef0f88e543f4"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "7e43027c8b2eb2a5"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "26e78a644f56ee35"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "9afd0a5d7ffb2f78"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "8a68535f9a1eea6a"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "ebd7f141c48fac8a"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "1c5c30867a6c9f89"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "8038d3c07ae49cc8"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "073c4337af9383da"
+  },
+  {
+   "rid": "S12-f40",
+   "method": "fedqpnt_clean",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "7a9e280b81f1cb1b"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10000,
+   "fleet": true,
+   "hash": "d7f33c6ed71caccd"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10001,
+   "fleet": true,
+   "hash": "cd2996f4cbae27da"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10002,
+   "fleet": true,
+   "hash": "1ea617afae32c733"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10003,
+   "fleet": true,
+   "hash": "60b3dbf64ee2749c"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10004,
+   "fleet": true,
+   "hash": "e41cd692f82da01c"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10005,
+   "fleet": true,
+   "hash": "a5f69709ebc61eb9"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10006,
+   "fleet": true,
+   "hash": "e5b8b87f976c9cec"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10007,
+   "fleet": true,
+   "hash": "388de6d414dca25e"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10008,
+   "fleet": true,
+   "hash": "cc0e94fc944bd93f"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10009,
+   "fleet": true,
+   "hash": "63e768be9f58fc67"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10010,
+   "fleet": true,
+   "hash": "3562f3abac0dc1eb"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10011,
+   "fleet": true,
+   "hash": "880b956e19f8fcd3"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10012,
+   "fleet": true,
+   "hash": "9fd83db0c80d3365"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10013,
+   "fleet": true,
+   "hash": "c5e4e607aec13c99"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10014,
+   "fleet": true,
+   "hash": "0cb42e7873f0fc7d"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10015,
+   "fleet": true,
+   "hash": "388a06cd45febef7"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10016,
+   "fleet": true,
+   "hash": "f587926e52b0caae"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10017,
+   "fleet": true,
+   "hash": "e640ca5f02e45f8f"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10018,
+   "fleet": true,
+   "hash": "d56486d012fd7d52"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10019,
+   "fleet": true,
+   "hash": "08421a4132815be9"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10020,
+   "fleet": true,
+   "hash": "e68eb13e242ef228"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10021,
+   "fleet": true,
+   "hash": "744cec486ffd3234"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10022,
+   "fleet": true,
+   "hash": "4c777fa73f08cb9d"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10023,
+   "fleet": true,
+   "hash": "a21b5d6f311c2c50"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10024,
+   "fleet": true,
+   "hash": "71d278cb82a6d2d8"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10025,
+   "fleet": true,
+   "hash": "d5cc46620660d898"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10026,
+   "fleet": true,
+   "hash": "c52cd99258dc5dd3"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10027,
+   "fleet": true,
+   "hash": "69c741b682947b4e"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10028,
+   "fleet": true,
+   "hash": "eec53b2922a1a3e7"
+  },
+  {
+   "rid": "S15",
+   "method": "fedqpnt",
+   "seed": 10029,
+   "fleet": true,
+   "hash": "26e06d5875f2c7f9"
+  }
+ ]
+}
