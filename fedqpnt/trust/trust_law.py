@@ -826,7 +826,13 @@ class TrustEngineImpl:
         clk_event = (raw[_IDX_CLK_JUMP] >= c.es_clk_sigma) or (raw[_IDX_DRIFT_JUMP] >= c.es_clk_sigma)
         mu = self.detector.normalizer.mu
         sd = apply_sigma_floor(self.detector.normalizer.sd)
-        xsat_event = raw[_IDX_XSAT_CORR] > (mu[_IDX_XSAT_CORR] + c.es_xsat_quantile_z * sd[_IDX_XSAT_CORR])
+        # D-078 statistic-validity rule: the cross-satellite C/N0 correlation x14 is a WINDOWED statistic; until its
+        # window is full (CORR_WINDOW_EPOCHS epochs) it is computed from a few samples and false-fired on clean data
+        # (seed 9604 at t=35, window=5, x14 = 0.30 = threshold) -> DISTRUST -> coast divergence -> permanent lockout.
+        # xsat evidence is suppressed until the window is full. (The other E_s inputs are not windowed statistics:
+        # clk jump uses the last clock reference, the position test needs one previous epoch, cn0 is per-epoch.)
+        xsat_event = (self.extractor.corr_window_full
+                      and raw[_IDX_XSAT_CORR] > (mu[_IDX_XSAT_CORR] + c.es_xsat_quantile_z * sd[_IDX_XSAT_CORR]))
         cn0_event = raw[_IDX_CN0_MEAN] > (mu[_IDX_CN0_MEAN] + c.es_xsat_quantile_z * sd[_IDX_CN0_MEAN]
                                           + c.es_cn0_band_excess_db)
 

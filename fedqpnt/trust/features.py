@@ -99,6 +99,12 @@ class GnssFeatureExtractor:
     _prev_was_outage: bool = field(default=False, repr=False)
     _cn0_window: deque = field(default_factory=lambda: deque(maxlen=CORR_WINDOW_EPOCHS), repr=False)
 
+    @property
+    def corr_window_full(self) -> bool:
+        """D-078: True once the cross-satellite C/N0 correlation window (x14) holds CORR_WINDOW_EPOCHS epochs. Before
+        that the statistic is estimated from only a handful of samples (min overlap 5) and is not a valid E_s input."""
+        return len(self._cn0_window) >= CORR_WINDOW_EPOCHS
+
     def reset(self) -> None:
         self._last_t = None
         self._last_mean_cn0 = None
