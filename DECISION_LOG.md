@@ -33,6 +33,19 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-081 · 2026-10-03 · H2/H4 confirmatory result (core-freeze-4): NULL by ceiling
+- **Validity:** 60/60 runs; fedqpnt diff empty for every run (tree 7223e641); invalid_runs = []; closed-loop τ calibration of 5.39 h per (part, arm) on clean seeds 580–599, achieved clean FAR 0.37/h.
+- **Primary (pre-registered, D-064):** P_D@10 s = 1.000 and onset latency = 0.0 s for every seed in every arm and part (0/10 censored). Paired Wilcoxon p = 1.0 for H2 and H4. **No difference.**
+- **Secondary:**
+  - onset AUC N = 10: H2 0.701 vs 0.703 (p = 0.31); H4 0.739 vs 0.700 (p = 0.19);
+  - N = 5: H2 0.644 vs 0.647; H4 0.674 vs 0.644;
+  - all non-significant.
+- **Tertiary:** full-window AUC H2 0.556 vs 0.539 (p = 0.56); H4 0.548 vs 0.587 (p = 0.0195, B-cont higher; exploratory, uncorrected); recovery alarm rate 1.0 in all arms (the spoof-removal discontinuity is always flagged).
+- **Interpretation:** at equal clean FAR, the 12 m abrupt onset is detected at the first epoch by both arms (θ0 zero-shot already detects it), so the event-level primary is saturated and the FL arm has no headroom. **H2 and H4 are NOT supported; this is reported as a null.** The low-headroom check (D-061a) used AUC, which did not anticipate event-level saturation; this is stated in the paper.
+- **The FL claim in the paper is reframed to the evidence:** FL matches centralised training (D-056), Byzantine-robust aggregation resists poisoning (S12), and the detector generalises to an unseen attack (the displaced meaconer, AUC 0.9985). FL does not improve novel-family onset detection in this setting.
+- **No re-run or re-design (D-002).** The freeze-2 preliminary and the freeze-3 aborted/partial outputs are kept and labelled.
+- **Owner:** Master
+
 ### D-080 · 2026-10-03 · Final M1 characterisation (freeze-4); TEST-SEED GATE CLEARED; M4 launched
 - **Decisive v4** (core-freeze-4, detector v3, tuning seeds; report results/m1/decisive_v4_report.txt):
   - **Nominal:** never worse (MEMS 2.78 vs 2.83 m; tactical 2.72 vs 2.78), FAR 0. **The lockout is resolved** (safety_nominal passes at both grades).

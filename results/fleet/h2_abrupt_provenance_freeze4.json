@@ -1,0 +1,5292 @@
+[
+  {
+    "part": "h2_abrupt",
+    "seed": 500,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 67,
+        "hash_post_train": "341d4d690025",
+        "installed": true,
+        "hash_post_install": "55df11e39551"
+      },
+      {
+        "round": 1,
+        "hash_pre": "55df11e39551",
+        "n_local_samples": 133,
+        "hash_post_train": "a151aa03efb9",
+        "installed": true,
+        "hash_post_install": "66587e231f54"
+      },
+      {
+        "round": 2,
+        "hash_pre": "66587e231f54",
+        "n_local_samples": 200,
+        "hash_post_train": "a71b88bfc2c4",
+        "installed": true,
+        "hash_post_install": "540b7a9af6af"
+      },
+      {
+        "round": 3,
+        "hash_pre": "540b7a9af6af",
+        "n_local_samples": 266,
+        "hash_post_train": "f09ee8b13445",
+        "installed": true,
+        "hash_post_install": "f76262fe6055"
+      },
+      {
+        "round": 4,
+        "hash_pre": "f76262fe6055",
+        "n_local_samples": 333,
+        "hash_post_train": "3b61d5136507",
+        "installed": true,
+        "hash_post_install": "3598344a1cc5"
+      },
+      {
+        "round": 5,
+        "hash_pre": "3598344a1cc5",
+        "n_local_samples": 400,
+        "hash_post_train": "d124aaa885ad",
+        "installed": true,
+        "hash_post_install": "b105746c5008"
+      },
+      {
+        "round": 6,
+        "hash_pre": "b105746c5008",
+        "n_local_samples": 466,
+        "hash_post_train": "f4e55c31e9d6",
+        "installed": true,
+        "hash_post_install": "73e3dc0d9d5a"
+      },
+      {
+        "round": 7,
+        "hash_pre": "73e3dc0d9d5a",
+        "n_local_samples": 533,
+        "hash_post_train": "5dba795dc820",
+        "installed": true,
+        "hash_post_install": "42a4b0cbe7d7"
+      },
+      {
+        "round": 8,
+        "hash_pre": "42a4b0cbe7d7",
+        "n_local_samples": 599,
+        "hash_post_train": "87f1539e663b",
+        "installed": true,
+        "hash_post_install": "ae338023460b"
+      },
+      {
+        "round": 9,
+        "hash_pre": "ae338023460b",
+        "n_local_samples": 666,
+        "hash_post_train": "f734b49186b4",
+        "installed": true,
+        "hash_post_install": "465f10e8f7a0"
+      }
+    ],
+    "final_theta_hash": "465f10e8f7a0"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 500,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 67,
+        "hash_post_train": "341d4d690025",
+        "installed": true,
+        "hash_post_install": "fad15fa38343"
+      },
+      {
+        "round": 1,
+        "hash_pre": "fad15fa38343",
+        "n_local_samples": 133,
+        "hash_post_train": "16d13382bbf9",
+        "installed": true,
+        "hash_post_install": "a5c4ff0e6f6e"
+      },
+      {
+        "round": 2,
+        "hash_pre": "a5c4ff0e6f6e",
+        "n_local_samples": 200,
+        "hash_post_train": "e47a813b7c71",
+        "installed": true,
+        "hash_post_install": "5559e77b5a00"
+      },
+      {
+        "round": 3,
+        "hash_pre": "5559e77b5a00",
+        "n_local_samples": 266,
+        "hash_post_train": "09fa6b7379f8",
+        "installed": true,
+        "hash_post_install": "cd2525741696"
+      },
+      {
+        "round": 4,
+        "hash_pre": "cd2525741696",
+        "n_local_samples": 333,
+        "hash_post_train": "44264861a117",
+        "installed": true,
+        "hash_post_install": "95c2c189e2a9"
+      },
+      {
+        "round": 5,
+        "hash_pre": "95c2c189e2a9",
+        "n_local_samples": 400,
+        "hash_post_train": "6935768fd99e",
+        "installed": true,
+        "hash_post_install": "4a8ce7af46c8"
+      },
+      {
+        "round": 6,
+        "hash_pre": "4a8ce7af46c8",
+        "n_local_samples": 466,
+        "hash_post_train": "d5ec507c3b95",
+        "installed": true,
+        "hash_post_install": "9b54d0a9fc9f"
+      },
+      {
+        "round": 7,
+        "hash_pre": "9b54d0a9fc9f",
+        "n_local_samples": 533,
+        "hash_post_train": "b56f3c747d5b",
+        "installed": true,
+        "hash_post_install": "38df15700dfe"
+      },
+      {
+        "round": 8,
+        "hash_pre": "38df15700dfe",
+        "n_local_samples": 599,
+        "hash_post_train": "36f6e31514a4",
+        "installed": true,
+        "hash_post_install": "0f8f798c6b5c"
+      },
+      {
+        "round": 9,
+        "hash_pre": "0f8f798c6b5c",
+        "n_local_samples": 666,
+        "hash_post_train": "e2ad3893fe1a",
+        "installed": true,
+        "hash_post_install": "15c99fcbc194"
+      }
+    ],
+    "final_theta_hash": "15c99fcbc194"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 501,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "a9aac8a48bb1",
+        "installed": true,
+        "hash_post_install": "4ded9e6c11f1"
+      },
+      {
+        "round": 1,
+        "hash_pre": "4ded9e6c11f1",
+        "n_local_samples": 108,
+        "hash_post_train": "d3d976ab1627",
+        "installed": true,
+        "hash_post_install": "94e36c46d973"
+      },
+      {
+        "round": 2,
+        "hash_pre": "94e36c46d973",
+        "n_local_samples": 162,
+        "hash_post_train": "994abc59abf4",
+        "installed": true,
+        "hash_post_install": "435c14816cfd"
+      },
+      {
+        "round": 3,
+        "hash_pre": "435c14816cfd",
+        "n_local_samples": 216,
+        "hash_post_train": "d04e73a4470d",
+        "installed": true,
+        "hash_post_install": "dacaa81586c7"
+      },
+      {
+        "round": 4,
+        "hash_pre": "dacaa81586c7",
+        "n_local_samples": 270,
+        "hash_post_train": "64b96999f176",
+        "installed": true,
+        "hash_post_install": "9b196ac9e6e9"
+      },
+      {
+        "round": 5,
+        "hash_pre": "9b196ac9e6e9",
+        "n_local_samples": 324,
+        "hash_post_train": "ea3258aabe55",
+        "installed": true,
+        "hash_post_install": "c9347d640856"
+      },
+      {
+        "round": 6,
+        "hash_pre": "c9347d640856",
+        "n_local_samples": 378,
+        "hash_post_train": "350c1d0d4f81",
+        "installed": true,
+        "hash_post_install": "52f5918e2e92"
+      },
+      {
+        "round": 7,
+        "hash_pre": "52f5918e2e92",
+        "n_local_samples": 432,
+        "hash_post_train": "741595980ec2",
+        "installed": true,
+        "hash_post_install": "650aad40493a"
+      },
+      {
+        "round": 8,
+        "hash_pre": "650aad40493a",
+        "n_local_samples": 486,
+        "hash_post_train": "6d3c7eed6f80",
+        "installed": true,
+        "hash_post_install": "06871ff797b5"
+      },
+      {
+        "round": 9,
+        "hash_pre": "06871ff797b5",
+        "n_local_samples": 540,
+        "hash_post_train": "e1c09cf9fa4f",
+        "installed": true,
+        "hash_post_install": "e481dc3088e8"
+      }
+    ],
+    "final_theta_hash": "e481dc3088e8"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 501,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "a9aac8a48bb1",
+        "installed": true,
+        "hash_post_install": "d43cc32ffc02"
+      },
+      {
+        "round": 1,
+        "hash_pre": "d43cc32ffc02",
+        "n_local_samples": 108,
+        "hash_post_train": "f2378808a27c",
+        "installed": true,
+        "hash_post_install": "06293d25745a"
+      },
+      {
+        "round": 2,
+        "hash_pre": "06293d25745a",
+        "n_local_samples": 162,
+        "hash_post_train": "d03cb03e4272",
+        "installed": true,
+        "hash_post_install": "fcddc17e5c53"
+      },
+      {
+        "round": 3,
+        "hash_pre": "fcddc17e5c53",
+        "n_local_samples": 216,
+        "hash_post_train": "2ebb4e04daa7",
+        "installed": true,
+        "hash_post_install": "553295641468"
+      },
+      {
+        "round": 4,
+        "hash_pre": "553295641468",
+        "n_local_samples": 270,
+        "hash_post_train": "a7462608b217",
+        "installed": true,
+        "hash_post_install": "34cccb6600bb"
+      },
+      {
+        "round": 5,
+        "hash_pre": "34cccb6600bb",
+        "n_local_samples": 324,
+        "hash_post_train": "e7a8bfac040f",
+        "installed": true,
+        "hash_post_install": "642623e3095b"
+      },
+      {
+        "round": 6,
+        "hash_pre": "642623e3095b",
+        "n_local_samples": 378,
+        "hash_post_train": "0bbccfec3627",
+        "installed": true,
+        "hash_post_install": "24b6e71c705a"
+      },
+      {
+        "round": 7,
+        "hash_pre": "24b6e71c705a",
+        "n_local_samples": 432,
+        "hash_post_train": "bc49c75c802a",
+        "installed": true,
+        "hash_post_install": "b9b2878aa345"
+      },
+      {
+        "round": 8,
+        "hash_pre": "b9b2878aa345",
+        "n_local_samples": 486,
+        "hash_post_train": "00301f86d720",
+        "installed": true,
+        "hash_post_install": "f9700f69ed6d"
+      },
+      {
+        "round": 9,
+        "hash_pre": "f9700f69ed6d",
+        "n_local_samples": 540,
+        "hash_post_train": "157f5c584b64",
+        "installed": true,
+        "hash_post_install": "3d85d98033f5"
+      }
+    ],
+    "final_theta_hash": "3d85d98033f5"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 502,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 50,
+        "hash_post_train": "baa0d9bc868b",
+        "installed": true,
+        "hash_post_install": "ef115cfecfad"
+      },
+      {
+        "round": 1,
+        "hash_pre": "ef115cfecfad",
+        "n_local_samples": 99,
+        "hash_post_train": "752942e4daa5",
+        "installed": true,
+        "hash_post_install": "efcd554dcb0d"
+      },
+      {
+        "round": 2,
+        "hash_pre": "efcd554dcb0d",
+        "n_local_samples": 148,
+        "hash_post_train": "da8e867e67a5",
+        "installed": true,
+        "hash_post_install": "40fe8233634e"
+      },
+      {
+        "round": 3,
+        "hash_pre": "40fe8233634e",
+        "n_local_samples": 198,
+        "hash_post_train": "18f08ddebbc6",
+        "installed": true,
+        "hash_post_install": "902f5cc93736"
+      },
+      {
+        "round": 4,
+        "hash_pre": "902f5cc93736",
+        "n_local_samples": 248,
+        "hash_post_train": "9474178206d6",
+        "installed": true,
+        "hash_post_install": "de564a181f95"
+      },
+      {
+        "round": 5,
+        "hash_pre": "de564a181f95",
+        "n_local_samples": 297,
+        "hash_post_train": "fc391979beff",
+        "installed": true,
+        "hash_post_install": "0e6a2de4edaa"
+      },
+      {
+        "round": 6,
+        "hash_pre": "0e6a2de4edaa",
+        "n_local_samples": 346,
+        "hash_post_train": "cbc8fd50a5e2",
+        "installed": true,
+        "hash_post_install": "b557d5cf7be7"
+      },
+      {
+        "round": 7,
+        "hash_pre": "b557d5cf7be7",
+        "n_local_samples": 396,
+        "hash_post_train": "3d36e3afc6e0",
+        "installed": true,
+        "hash_post_install": "16eb277c251e"
+      },
+      {
+        "round": 8,
+        "hash_pre": "16eb277c251e",
+        "n_local_samples": 446,
+        "hash_post_train": "1741adcf74bc",
+        "installed": true,
+        "hash_post_install": "d4fb33b3e806"
+      },
+      {
+        "round": 9,
+        "hash_pre": "d4fb33b3e806",
+        "n_local_samples": 495,
+        "hash_post_train": "d3596f4d898a",
+        "installed": true,
+        "hash_post_install": "9137fb9c638e"
+      }
+    ],
+    "final_theta_hash": "9137fb9c638e"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 502,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 50,
+        "hash_post_train": "baa0d9bc868b",
+        "installed": true,
+        "hash_post_install": "fc6481720bfc"
+      },
+      {
+        "round": 1,
+        "hash_pre": "fc6481720bfc",
+        "n_local_samples": 99,
+        "hash_post_train": "5816fd8c8adb",
+        "installed": true,
+        "hash_post_install": "8a942bf36ffd"
+      },
+      {
+        "round": 2,
+        "hash_pre": "8a942bf36ffd",
+        "n_local_samples": 148,
+        "hash_post_train": "10a461099344",
+        "installed": true,
+        "hash_post_install": "1f9622eb6bb1"
+      },
+      {
+        "round": 3,
+        "hash_pre": "1f9622eb6bb1",
+        "n_local_samples": 198,
+        "hash_post_train": "e29895e2099b",
+        "installed": true,
+        "hash_post_install": "897c82049c2a"
+      },
+      {
+        "round": 4,
+        "hash_pre": "897c82049c2a",
+        "n_local_samples": 248,
+        "hash_post_train": "ea2920e49c85",
+        "installed": true,
+        "hash_post_install": "3ec987b15742"
+      },
+      {
+        "round": 5,
+        "hash_pre": "3ec987b15742",
+        "n_local_samples": 297,
+        "hash_post_train": "51e2e8a6a285",
+        "installed": true,
+        "hash_post_install": "001e02b11241"
+      },
+      {
+        "round": 6,
+        "hash_pre": "001e02b11241",
+        "n_local_samples": 346,
+        "hash_post_train": "a7e20e152f9c",
+        "installed": true,
+        "hash_post_install": "3d62de0f57f4"
+      },
+      {
+        "round": 7,
+        "hash_pre": "3d62de0f57f4",
+        "n_local_samples": 396,
+        "hash_post_train": "a42e58bcb99b",
+        "installed": true,
+        "hash_post_install": "cb9d9412aec8"
+      },
+      {
+        "round": 8,
+        "hash_pre": "cb9d9412aec8",
+        "n_local_samples": 446,
+        "hash_post_train": "62635fe0950c",
+        "installed": true,
+        "hash_post_install": "94bb79d97251"
+      },
+      {
+        "round": 9,
+        "hash_pre": "94bb79d97251",
+        "n_local_samples": 495,
+        "hash_post_train": "10e553e302c5",
+        "installed": true,
+        "hash_post_install": "0ec9fc0066a4"
+      }
+    ],
+    "final_theta_hash": "0ec9fc0066a4"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 503,
+    "method": "fedqpnt_local",
+    "round_installs": 8,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "b22f847fec04",
+        "installed": true,
+        "hash_post_install": "f3342c3ccbdc"
+      },
+      {
+        "round": 1,
+        "hash_pre": "f3342c3ccbdc",
+        "n_local_samples": 136,
+        "hash_post_train": "67efd3045fbb",
+        "installed": true,
+        "hash_post_install": "c1561d7c073e"
+      },
+      {
+        "round": 2,
+        "hash_pre": "c1561d7c073e",
+        "n_local_samples": 204,
+        "hash_post_train": "02f5536aed36",
+        "installed": true,
+        "hash_post_install": "ed938479b7ca"
+      },
+      {
+        "round": 3,
+        "hash_pre": "ed938479b7ca",
+        "n_local_samples": 272,
+        "hash_post_train": "8413d7c4f2a0",
+        "installed": false,
+        "hash_post_install": "8413d7c4f2a0"
+      },
+      {
+        "round": 4,
+        "hash_pre": "8413d7c4f2a0",
+        "n_local_samples": 340,
+        "hash_post_train": "186543609b04",
+        "installed": false,
+        "hash_post_install": "186543609b04"
+      },
+      {
+        "round": 5,
+        "hash_pre": "186543609b04",
+        "n_local_samples": 409,
+        "hash_post_train": "9b200404a7dd",
+        "installed": true,
+        "hash_post_install": "723e7b57afc3"
+      },
+      {
+        "round": 6,
+        "hash_pre": "723e7b57afc3",
+        "n_local_samples": 477,
+        "hash_post_train": "587e798c703b",
+        "installed": true,
+        "hash_post_install": "bb2473698aea"
+      },
+      {
+        "round": 7,
+        "hash_pre": "bb2473698aea",
+        "n_local_samples": 545,
+        "hash_post_train": "070a281ecb14",
+        "installed": true,
+        "hash_post_install": "aa5166895bfb"
+      },
+      {
+        "round": 8,
+        "hash_pre": "aa5166895bfb",
+        "n_local_samples": 613,
+        "hash_post_train": "003f444c72ae",
+        "installed": true,
+        "hash_post_install": "2189fcc84b8d"
+      },
+      {
+        "round": 9,
+        "hash_pre": "2189fcc84b8d",
+        "n_local_samples": 681,
+        "hash_post_train": "308075d90f1e",
+        "installed": true,
+        "hash_post_install": "b8672dfc9406"
+      }
+    ],
+    "final_theta_hash": "b8672dfc9406"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 503,
+    "method": "baseline_b_cont",
+    "round_installs": 3,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "b22f847fec04",
+        "installed": true,
+        "hash_post_install": "5659c3355014"
+      },
+      {
+        "round": 1,
+        "hash_pre": "5659c3355014",
+        "n_local_samples": 136,
+        "hash_post_train": "7fb2b100bbd0",
+        "installed": true,
+        "hash_post_install": "52ae8a5ee2a4"
+      },
+      {
+        "round": 2,
+        "hash_pre": "52ae8a5ee2a4",
+        "n_local_samples": 204,
+        "hash_post_train": "0f47e28d01e7",
+        "installed": true,
+        "hash_post_install": "c94af6923bad"
+      },
+      {
+        "round": 3,
+        "hash_pre": "c94af6923bad",
+        "n_local_samples": 272,
+        "hash_post_train": "644fb384d26f",
+        "installed": false,
+        "hash_post_install": "644fb384d26f"
+      },
+      {
+        "round": 4,
+        "hash_pre": "644fb384d26f",
+        "n_local_samples": 340,
+        "hash_post_train": "d31022ea5b39",
+        "installed": false,
+        "hash_post_install": "d31022ea5b39"
+      },
+      {
+        "round": 5,
+        "hash_pre": "d31022ea5b39",
+        "n_local_samples": 409,
+        "hash_post_train": "7b41fe48a906",
+        "installed": false,
+        "hash_post_install": "7b41fe48a906"
+      },
+      {
+        "round": 6,
+        "hash_pre": "7b41fe48a906",
+        "n_local_samples": 477,
+        "hash_post_train": "842952b6b3f6",
+        "installed": false,
+        "hash_post_install": "842952b6b3f6"
+      },
+      {
+        "round": 7,
+        "hash_pre": "842952b6b3f6",
+        "n_local_samples": 545,
+        "hash_post_train": "08291ffc7503",
+        "installed": false,
+        "hash_post_install": "08291ffc7503"
+      },
+      {
+        "round": 8,
+        "hash_pre": "08291ffc7503",
+        "n_local_samples": 613,
+        "hash_post_train": "7d609dcc1322",
+        "installed": false,
+        "hash_post_install": "7d609dcc1322"
+      },
+      {
+        "round": 9,
+        "hash_pre": "7d609dcc1322",
+        "n_local_samples": 681,
+        "hash_post_train": "a87ef3e2fdb8",
+        "installed": false,
+        "hash_post_install": "a87ef3e2fdb8"
+      }
+    ],
+    "final_theta_hash": "a87ef3e2fdb8"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 504,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 48,
+        "hash_post_train": "dad963241364",
+        "installed": true,
+        "hash_post_install": "db5d7256a747"
+      },
+      {
+        "round": 1,
+        "hash_pre": "db5d7256a747",
+        "n_local_samples": 97,
+        "hash_post_train": "978f3fe78baa",
+        "installed": true,
+        "hash_post_install": "7bee5b17ac83"
+      },
+      {
+        "round": 2,
+        "hash_pre": "7bee5b17ac83",
+        "n_local_samples": 145,
+        "hash_post_train": "03f38bbdef6a",
+        "installed": true,
+        "hash_post_install": "f78ca29767ed"
+      },
+      {
+        "round": 3,
+        "hash_pre": "f78ca29767ed",
+        "n_local_samples": 194,
+        "hash_post_train": "56b72958c3ae",
+        "installed": true,
+        "hash_post_install": "fcbc88523e29"
+      },
+      {
+        "round": 4,
+        "hash_pre": "fcbc88523e29",
+        "n_local_samples": 242,
+        "hash_post_train": "17e5d5b23f98",
+        "installed": true,
+        "hash_post_install": "de419e7ebfb4"
+      },
+      {
+        "round": 5,
+        "hash_pre": "de419e7ebfb4",
+        "n_local_samples": 290,
+        "hash_post_train": "2ba4c7cf91f5",
+        "installed": true,
+        "hash_post_install": "9cb2dc62fca2"
+      },
+      {
+        "round": 6,
+        "hash_pre": "9cb2dc62fca2",
+        "n_local_samples": 339,
+        "hash_post_train": "a9f5b8bf2112",
+        "installed": true,
+        "hash_post_install": "dcb2f302a377"
+      },
+      {
+        "round": 7,
+        "hash_pre": "dcb2f302a377",
+        "n_local_samples": 387,
+        "hash_post_train": "9c1ccaa22bec",
+        "installed": true,
+        "hash_post_install": "c943d3e27e1f"
+      },
+      {
+        "round": 8,
+        "hash_pre": "c943d3e27e1f",
+        "n_local_samples": 436,
+        "hash_post_train": "f7db230c186d",
+        "installed": true,
+        "hash_post_install": "aaef682c483d"
+      },
+      {
+        "round": 9,
+        "hash_pre": "aaef682c483d",
+        "n_local_samples": 484,
+        "hash_post_train": "1506cbafbf0f",
+        "installed": true,
+        "hash_post_install": "5d78ee6a923e"
+      }
+    ],
+    "final_theta_hash": "5d78ee6a923e"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 504,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 48,
+        "hash_post_train": "dad963241364",
+        "installed": true,
+        "hash_post_install": "622c8cb2264d"
+      },
+      {
+        "round": 1,
+        "hash_pre": "622c8cb2264d",
+        "n_local_samples": 97,
+        "hash_post_train": "a233de0d7007",
+        "installed": true,
+        "hash_post_install": "d7b7f5802cbc"
+      },
+      {
+        "round": 2,
+        "hash_pre": "d7b7f5802cbc",
+        "n_local_samples": 145,
+        "hash_post_train": "91cb2ba6264c",
+        "installed": true,
+        "hash_post_install": "3aba8a0749c2"
+      },
+      {
+        "round": 3,
+        "hash_pre": "3aba8a0749c2",
+        "n_local_samples": 194,
+        "hash_post_train": "ec7523fe838d",
+        "installed": true,
+        "hash_post_install": "2b028dc4cc99"
+      },
+      {
+        "round": 4,
+        "hash_pre": "2b028dc4cc99",
+        "n_local_samples": 242,
+        "hash_post_train": "275528a88881",
+        "installed": true,
+        "hash_post_install": "2d8cff5efba1"
+      },
+      {
+        "round": 5,
+        "hash_pre": "2d8cff5efba1",
+        "n_local_samples": 290,
+        "hash_post_train": "fdf23d900727",
+        "installed": true,
+        "hash_post_install": "0de5d77a4cf4"
+      },
+      {
+        "round": 6,
+        "hash_pre": "0de5d77a4cf4",
+        "n_local_samples": 339,
+        "hash_post_train": "d6c8d3f1d705",
+        "installed": true,
+        "hash_post_install": "6f6f3deede2a"
+      },
+      {
+        "round": 7,
+        "hash_pre": "6f6f3deede2a",
+        "n_local_samples": 387,
+        "hash_post_train": "613f27f6d29f",
+        "installed": true,
+        "hash_post_install": "df224d4cd837"
+      },
+      {
+        "round": 8,
+        "hash_pre": "df224d4cd837",
+        "n_local_samples": 436,
+        "hash_post_train": "bd31421a9939",
+        "installed": true,
+        "hash_post_install": "be7f74ac254a"
+      },
+      {
+        "round": 9,
+        "hash_pre": "be7f74ac254a",
+        "n_local_samples": 484,
+        "hash_post_train": "49c634881de7",
+        "installed": true,
+        "hash_post_install": "dc87c770a056"
+      }
+    ],
+    "final_theta_hash": "dc87c770a056"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 505,
+    "method": "fedqpnt_local",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 66,
+        "hash_post_train": "fc8da80562e6",
+        "installed": true,
+        "hash_post_install": "71ef960f9214"
+      },
+      {
+        "round": 1,
+        "hash_pre": "71ef960f9214",
+        "n_local_samples": 133,
+        "hash_post_train": "3a79b7b0f548",
+        "installed": false,
+        "hash_post_install": "3a79b7b0f548"
+      },
+      {
+        "round": 2,
+        "hash_pre": "3a79b7b0f548",
+        "n_local_samples": 199,
+        "hash_post_train": "a137e690d5e0",
+        "installed": true,
+        "hash_post_install": "cc58199f4775"
+      },
+      {
+        "round": 3,
+        "hash_pre": "cc58199f4775",
+        "n_local_samples": 266,
+        "hash_post_train": "1b3215fa2a35",
+        "installed": true,
+        "hash_post_install": "f4634f32a2a2"
+      },
+      {
+        "round": 4,
+        "hash_pre": "f4634f32a2a2",
+        "n_local_samples": 332,
+        "hash_post_train": "234805f38d3e",
+        "installed": true,
+        "hash_post_install": "9f0a748cf09d"
+      },
+      {
+        "round": 5,
+        "hash_pre": "9f0a748cf09d",
+        "n_local_samples": 398,
+        "hash_post_train": "3a4b340bdcb8",
+        "installed": true,
+        "hash_post_install": "3fef8f574573"
+      },
+      {
+        "round": 6,
+        "hash_pre": "3fef8f574573",
+        "n_local_samples": 465,
+        "hash_post_train": "0a2f58aa82ed",
+        "installed": true,
+        "hash_post_install": "9c43c60cdbba"
+      },
+      {
+        "round": 7,
+        "hash_pre": "9c43c60cdbba",
+        "n_local_samples": 531,
+        "hash_post_train": "134deb97d154",
+        "installed": true,
+        "hash_post_install": "8d07b79e0c50"
+      },
+      {
+        "round": 8,
+        "hash_pre": "8d07b79e0c50",
+        "n_local_samples": 598,
+        "hash_post_train": "5a92df305664",
+        "installed": true,
+        "hash_post_install": "adf1541982cf"
+      },
+      {
+        "round": 9,
+        "hash_pre": "adf1541982cf",
+        "n_local_samples": 664,
+        "hash_post_train": "a98e0a64b11a",
+        "installed": true,
+        "hash_post_install": "755eddf5052d"
+      }
+    ],
+    "final_theta_hash": "755eddf5052d"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 505,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 66,
+        "hash_post_train": "fc8da80562e6",
+        "installed": true,
+        "hash_post_install": "f62c624babb0"
+      },
+      {
+        "round": 1,
+        "hash_pre": "f62c624babb0",
+        "n_local_samples": 133,
+        "hash_post_train": "a0fc6f4067d1",
+        "installed": false,
+        "hash_post_install": "a0fc6f4067d1"
+      },
+      {
+        "round": 2,
+        "hash_pre": "a0fc6f4067d1",
+        "n_local_samples": 199,
+        "hash_post_train": "8da54c9bc3e3",
+        "installed": true,
+        "hash_post_install": "98443a48ce6c"
+      },
+      {
+        "round": 3,
+        "hash_pre": "98443a48ce6c",
+        "n_local_samples": 266,
+        "hash_post_train": "216fad1db53e",
+        "installed": true,
+        "hash_post_install": "238cfec421d2"
+      },
+      {
+        "round": 4,
+        "hash_pre": "238cfec421d2",
+        "n_local_samples": 332,
+        "hash_post_train": "446352172063",
+        "installed": true,
+        "hash_post_install": "da31e6b70036"
+      },
+      {
+        "round": 5,
+        "hash_pre": "da31e6b70036",
+        "n_local_samples": 398,
+        "hash_post_train": "387bf74f8495",
+        "installed": true,
+        "hash_post_install": "d2a69eafc3ca"
+      },
+      {
+        "round": 6,
+        "hash_pre": "d2a69eafc3ca",
+        "n_local_samples": 465,
+        "hash_post_train": "0524ce1dfccb",
+        "installed": true,
+        "hash_post_install": "47bdb9fcfba5"
+      },
+      {
+        "round": 7,
+        "hash_pre": "47bdb9fcfba5",
+        "n_local_samples": 531,
+        "hash_post_train": "232a7d159895",
+        "installed": true,
+        "hash_post_install": "a18c4c0feb55"
+      },
+      {
+        "round": 8,
+        "hash_pre": "a18c4c0feb55",
+        "n_local_samples": 598,
+        "hash_post_train": "5513e0d2ff2c",
+        "installed": true,
+        "hash_post_install": "b21643f22d7d"
+      },
+      {
+        "round": 9,
+        "hash_pre": "b21643f22d7d",
+        "n_local_samples": 664,
+        "hash_post_train": "4e0f89ef2c2b",
+        "installed": true,
+        "hash_post_install": "f8194b4ca49e"
+      }
+    ],
+    "final_theta_hash": "f8194b4ca49e"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 506,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 63,
+        "hash_post_train": "40d06e7de780",
+        "installed": true,
+        "hash_post_install": "4ce642b733ac"
+      },
+      {
+        "round": 1,
+        "hash_pre": "4ce642b733ac",
+        "n_local_samples": 126,
+        "hash_post_train": "4861a3d74aa2",
+        "installed": true,
+        "hash_post_install": "69033541c5bc"
+      },
+      {
+        "round": 2,
+        "hash_pre": "69033541c5bc",
+        "n_local_samples": 189,
+        "hash_post_train": "2e00f8b6a59f",
+        "installed": true,
+        "hash_post_install": "5d65a69dd04f"
+      },
+      {
+        "round": 3,
+        "hash_pre": "5d65a69dd04f",
+        "n_local_samples": 252,
+        "hash_post_train": "5a581c91cb7f",
+        "installed": true,
+        "hash_post_install": "330e0354b3ac"
+      },
+      {
+        "round": 4,
+        "hash_pre": "330e0354b3ac",
+        "n_local_samples": 315,
+        "hash_post_train": "28c698ee0301",
+        "installed": true,
+        "hash_post_install": "1862637d3f9c"
+      },
+      {
+        "round": 5,
+        "hash_pre": "1862637d3f9c",
+        "n_local_samples": 378,
+        "hash_post_train": "2e9af902be69",
+        "installed": true,
+        "hash_post_install": "d724ba471eb3"
+      },
+      {
+        "round": 6,
+        "hash_pre": "d724ba471eb3",
+        "n_local_samples": 441,
+        "hash_post_train": "94377849c54c",
+        "installed": true,
+        "hash_post_install": "8592456dc163"
+      },
+      {
+        "round": 7,
+        "hash_pre": "8592456dc163",
+        "n_local_samples": 504,
+        "hash_post_train": "6b6de74c5aed",
+        "installed": true,
+        "hash_post_install": "5255bc6a5ef3"
+      },
+      {
+        "round": 8,
+        "hash_pre": "5255bc6a5ef3",
+        "n_local_samples": 567,
+        "hash_post_train": "59094ca8c98c",
+        "installed": true,
+        "hash_post_install": "4805382d6429"
+      },
+      {
+        "round": 9,
+        "hash_pre": "4805382d6429",
+        "n_local_samples": 630,
+        "hash_post_train": "da3c6e72e0c4",
+        "installed": true,
+        "hash_post_install": "6af9bd6cd97c"
+      }
+    ],
+    "final_theta_hash": "6af9bd6cd97c"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 506,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 63,
+        "hash_post_train": "40d06e7de780",
+        "installed": true,
+        "hash_post_install": "6b4f0a49715a"
+      },
+      {
+        "round": 1,
+        "hash_pre": "6b4f0a49715a",
+        "n_local_samples": 126,
+        "hash_post_train": "457453624820",
+        "installed": true,
+        "hash_post_install": "2675b0f80e49"
+      },
+      {
+        "round": 2,
+        "hash_pre": "2675b0f80e49",
+        "n_local_samples": 189,
+        "hash_post_train": "4572ec9ce988",
+        "installed": true,
+        "hash_post_install": "d9b80553b46a"
+      },
+      {
+        "round": 3,
+        "hash_pre": "d9b80553b46a",
+        "n_local_samples": 252,
+        "hash_post_train": "e76a378894bc",
+        "installed": true,
+        "hash_post_install": "b44e4e0fc441"
+      },
+      {
+        "round": 4,
+        "hash_pre": "b44e4e0fc441",
+        "n_local_samples": 315,
+        "hash_post_train": "594cebfbf84b",
+        "installed": true,
+        "hash_post_install": "3e815c228d90"
+      },
+      {
+        "round": 5,
+        "hash_pre": "3e815c228d90",
+        "n_local_samples": 378,
+        "hash_post_train": "3b773e48b90d",
+        "installed": true,
+        "hash_post_install": "50254160fc78"
+      },
+      {
+        "round": 6,
+        "hash_pre": "50254160fc78",
+        "n_local_samples": 441,
+        "hash_post_train": "f5aeb002171a",
+        "installed": true,
+        "hash_post_install": "14eae0b54b12"
+      },
+      {
+        "round": 7,
+        "hash_pre": "14eae0b54b12",
+        "n_local_samples": 504,
+        "hash_post_train": "5ec4c8927034",
+        "installed": true,
+        "hash_post_install": "d57dc508ebff"
+      },
+      {
+        "round": 8,
+        "hash_pre": "d57dc508ebff",
+        "n_local_samples": 567,
+        "hash_post_train": "a642a9827d2b",
+        "installed": true,
+        "hash_post_install": "f5fc4c244522"
+      },
+      {
+        "round": 9,
+        "hash_pre": "f5fc4c244522",
+        "n_local_samples": 630,
+        "hash_post_train": "edc2986776e7",
+        "installed": true,
+        "hash_post_install": "50cfebdd6db7"
+      }
+    ],
+    "final_theta_hash": "50cfebdd6db7"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 507,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 49,
+        "hash_post_train": "22fed15f0210",
+        "installed": true,
+        "hash_post_install": "905fbc82b0a8"
+      },
+      {
+        "round": 1,
+        "hash_pre": "905fbc82b0a8",
+        "n_local_samples": 97,
+        "hash_post_train": "cc3a742ca0d8",
+        "installed": true,
+        "hash_post_install": "9468d1988416"
+      },
+      {
+        "round": 2,
+        "hash_pre": "9468d1988416",
+        "n_local_samples": 146,
+        "hash_post_train": "271a115e8fa7",
+        "installed": true,
+        "hash_post_install": "7e1d729d6db3"
+      },
+      {
+        "round": 3,
+        "hash_pre": "7e1d729d6db3",
+        "n_local_samples": 195,
+        "hash_post_train": "be7da1ae1e1c",
+        "installed": true,
+        "hash_post_install": "38426794e7e6"
+      },
+      {
+        "round": 4,
+        "hash_pre": "38426794e7e6",
+        "n_local_samples": 244,
+        "hash_post_train": "4390fcc95319",
+        "installed": true,
+        "hash_post_install": "94211fabb0fe"
+      },
+      {
+        "round": 5,
+        "hash_pre": "94211fabb0fe",
+        "n_local_samples": 292,
+        "hash_post_train": "e954d37a4200",
+        "installed": true,
+        "hash_post_install": "d30e3ecb1629"
+      },
+      {
+        "round": 6,
+        "hash_pre": "d30e3ecb1629",
+        "n_local_samples": 341,
+        "hash_post_train": "5281beed615d",
+        "installed": true,
+        "hash_post_install": "273f92f91230"
+      },
+      {
+        "round": 7,
+        "hash_pre": "273f92f91230",
+        "n_local_samples": 390,
+        "hash_post_train": "55d2c8271b48",
+        "installed": true,
+        "hash_post_install": "06097e1acb34"
+      },
+      {
+        "round": 8,
+        "hash_pre": "06097e1acb34",
+        "n_local_samples": 438,
+        "hash_post_train": "0e8c6c84c829",
+        "installed": true,
+        "hash_post_install": "e1a0308321b0"
+      },
+      {
+        "round": 9,
+        "hash_pre": "e1a0308321b0",
+        "n_local_samples": 487,
+        "hash_post_train": "6d65b08b214b",
+        "installed": true,
+        "hash_post_install": "265333d4c122"
+      }
+    ],
+    "final_theta_hash": "265333d4c122"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 507,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 49,
+        "hash_post_train": "22fed15f0210",
+        "installed": true,
+        "hash_post_install": "6f6bbfe89103"
+      },
+      {
+        "round": 1,
+        "hash_pre": "6f6bbfe89103",
+        "n_local_samples": 97,
+        "hash_post_train": "e9864132a944",
+        "installed": true,
+        "hash_post_install": "d18fbd20b37e"
+      },
+      {
+        "round": 2,
+        "hash_pre": "d18fbd20b37e",
+        "n_local_samples": 146,
+        "hash_post_train": "918858e6d836",
+        "installed": true,
+        "hash_post_install": "fe2bc4c70695"
+      },
+      {
+        "round": 3,
+        "hash_pre": "fe2bc4c70695",
+        "n_local_samples": 195,
+        "hash_post_train": "a060c87f0ce8",
+        "installed": true,
+        "hash_post_install": "6991d8ab3dd6"
+      },
+      {
+        "round": 4,
+        "hash_pre": "6991d8ab3dd6",
+        "n_local_samples": 244,
+        "hash_post_train": "4e3bb1622d98",
+        "installed": true,
+        "hash_post_install": "d2dc244f523d"
+      },
+      {
+        "round": 5,
+        "hash_pre": "d2dc244f523d",
+        "n_local_samples": 292,
+        "hash_post_train": "a47dcf1a0752",
+        "installed": true,
+        "hash_post_install": "b8d110808e6a"
+      },
+      {
+        "round": 6,
+        "hash_pre": "b8d110808e6a",
+        "n_local_samples": 341,
+        "hash_post_train": "0bf8b7b843d4",
+        "installed": false,
+        "hash_post_install": "0bf8b7b843d4"
+      },
+      {
+        "round": 7,
+        "hash_pre": "0bf8b7b843d4",
+        "n_local_samples": 390,
+        "hash_post_train": "8952fd3376cb",
+        "installed": true,
+        "hash_post_install": "fa91c7960e08"
+      },
+      {
+        "round": 8,
+        "hash_pre": "fa91c7960e08",
+        "n_local_samples": 438,
+        "hash_post_train": "bc76845f8c9f",
+        "installed": true,
+        "hash_post_install": "e0a160f758e8"
+      },
+      {
+        "round": 9,
+        "hash_pre": "e0a160f758e8",
+        "n_local_samples": 487,
+        "hash_post_train": "30f9a1bafc8a",
+        "installed": true,
+        "hash_post_install": "38897cbdcd25"
+      }
+    ],
+    "final_theta_hash": "38897cbdcd25"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 508,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "fe40c9530b6d",
+        "installed": true,
+        "hash_post_install": "b663ed96360b"
+      },
+      {
+        "round": 1,
+        "hash_pre": "b663ed96360b",
+        "n_local_samples": 136,
+        "hash_post_train": "56eab2059089",
+        "installed": true,
+        "hash_post_install": "c37d77075951"
+      },
+      {
+        "round": 2,
+        "hash_pre": "c37d77075951",
+        "n_local_samples": 204,
+        "hash_post_train": "e81b7d0d66b9",
+        "installed": true,
+        "hash_post_install": "4a48dc7ac73d"
+      },
+      {
+        "round": 3,
+        "hash_pre": "4a48dc7ac73d",
+        "n_local_samples": 272,
+        "hash_post_train": "618fc786ef26",
+        "installed": true,
+        "hash_post_install": "f5642c386ed0"
+      },
+      {
+        "round": 4,
+        "hash_pre": "f5642c386ed0",
+        "n_local_samples": 340,
+        "hash_post_train": "7ede6c03cd74",
+        "installed": true,
+        "hash_post_install": "6f3eb46ad499"
+      },
+      {
+        "round": 5,
+        "hash_pre": "6f3eb46ad499",
+        "n_local_samples": 409,
+        "hash_post_train": "0e3d65121a6a",
+        "installed": true,
+        "hash_post_install": "ef5cb07ebc67"
+      },
+      {
+        "round": 6,
+        "hash_pre": "ef5cb07ebc67",
+        "n_local_samples": 477,
+        "hash_post_train": "595a467cbd29",
+        "installed": true,
+        "hash_post_install": "e3f2f91f03c6"
+      },
+      {
+        "round": 7,
+        "hash_pre": "e3f2f91f03c6",
+        "n_local_samples": 545,
+        "hash_post_train": "795d4e7bd22b",
+        "installed": true,
+        "hash_post_install": "72106e7f8ea4"
+      },
+      {
+        "round": 8,
+        "hash_pre": "72106e7f8ea4",
+        "n_local_samples": 613,
+        "hash_post_train": "a3e4e4ce682a",
+        "installed": true,
+        "hash_post_install": "8e142c360b87"
+      },
+      {
+        "round": 9,
+        "hash_pre": "8e142c360b87",
+        "n_local_samples": 681,
+        "hash_post_train": "3839cb603322",
+        "installed": true,
+        "hash_post_install": "f239775465af"
+      }
+    ],
+    "final_theta_hash": "f239775465af"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 508,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "fe40c9530b6d",
+        "installed": true,
+        "hash_post_install": "0f3a4355be26"
+      },
+      {
+        "round": 1,
+        "hash_pre": "0f3a4355be26",
+        "n_local_samples": 136,
+        "hash_post_train": "4df81694e311",
+        "installed": true,
+        "hash_post_install": "f8436bf81b26"
+      },
+      {
+        "round": 2,
+        "hash_pre": "f8436bf81b26",
+        "n_local_samples": 204,
+        "hash_post_train": "025dc2ebf222",
+        "installed": true,
+        "hash_post_install": "76982389e235"
+      },
+      {
+        "round": 3,
+        "hash_pre": "76982389e235",
+        "n_local_samples": 272,
+        "hash_post_train": "329c2059623e",
+        "installed": true,
+        "hash_post_install": "24f06bc7377d"
+      },
+      {
+        "round": 4,
+        "hash_pre": "24f06bc7377d",
+        "n_local_samples": 340,
+        "hash_post_train": "be451e2ffcff",
+        "installed": true,
+        "hash_post_install": "0c10d8919148"
+      },
+      {
+        "round": 5,
+        "hash_pre": "0c10d8919148",
+        "n_local_samples": 409,
+        "hash_post_train": "ab9e6e916798",
+        "installed": true,
+        "hash_post_install": "5f10be312962"
+      },
+      {
+        "round": 6,
+        "hash_pre": "5f10be312962",
+        "n_local_samples": 477,
+        "hash_post_train": "433b61e05d5e",
+        "installed": true,
+        "hash_post_install": "eacea77b9311"
+      },
+      {
+        "round": 7,
+        "hash_pre": "eacea77b9311",
+        "n_local_samples": 545,
+        "hash_post_train": "9c0fa63a5973",
+        "installed": true,
+        "hash_post_install": "c2da1c726fd4"
+      },
+      {
+        "round": 8,
+        "hash_pre": "c2da1c726fd4",
+        "n_local_samples": 613,
+        "hash_post_train": "dae975aae1a3",
+        "installed": false,
+        "hash_post_install": "dae975aae1a3"
+      },
+      {
+        "round": 9,
+        "hash_pre": "dae975aae1a3",
+        "n_local_samples": 681,
+        "hash_post_train": "e474511f9470",
+        "installed": true,
+        "hash_post_install": "25e8637e9950"
+      }
+    ],
+    "final_theta_hash": "25e8637e9950"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 509,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "5a59921ac70f",
+        "installed": true,
+        "hash_post_install": "f7660067c217"
+      },
+      {
+        "round": 1,
+        "hash_pre": "f7660067c217",
+        "n_local_samples": 108,
+        "hash_post_train": "28e9aea1a08c",
+        "installed": true,
+        "hash_post_install": "ff4b19117a02"
+      },
+      {
+        "round": 2,
+        "hash_pre": "ff4b19117a02",
+        "n_local_samples": 162,
+        "hash_post_train": "9fa2c141f930",
+        "installed": true,
+        "hash_post_install": "be75950013ab"
+      },
+      {
+        "round": 3,
+        "hash_pre": "be75950013ab",
+        "n_local_samples": 216,
+        "hash_post_train": "3795e35f8bd3",
+        "installed": true,
+        "hash_post_install": "46e21d6e10d8"
+      },
+      {
+        "round": 4,
+        "hash_pre": "46e21d6e10d8",
+        "n_local_samples": 270,
+        "hash_post_train": "2cc5fd8edd5b",
+        "installed": true,
+        "hash_post_install": "fa27e7a2452f"
+      },
+      {
+        "round": 5,
+        "hash_pre": "fa27e7a2452f",
+        "n_local_samples": 324,
+        "hash_post_train": "fe349a94f8a4",
+        "installed": true,
+        "hash_post_install": "1360bda7a221"
+      },
+      {
+        "round": 6,
+        "hash_pre": "1360bda7a221",
+        "n_local_samples": 378,
+        "hash_post_train": "cc8f75e650f0",
+        "installed": true,
+        "hash_post_install": "ba03b28459de"
+      },
+      {
+        "round": 7,
+        "hash_pre": "ba03b28459de",
+        "n_local_samples": 432,
+        "hash_post_train": "16ae021256a7",
+        "installed": true,
+        "hash_post_install": "2e3815a36d58"
+      },
+      {
+        "round": 8,
+        "hash_pre": "2e3815a36d58",
+        "n_local_samples": 486,
+        "hash_post_train": "db8ae5115f39",
+        "installed": true,
+        "hash_post_install": "30e2ec8591f4"
+      },
+      {
+        "round": 9,
+        "hash_pre": "30e2ec8591f4",
+        "n_local_samples": 540,
+        "hash_post_train": "18c1699413ea",
+        "installed": true,
+        "hash_post_install": "66165d4482ce"
+      }
+    ],
+    "final_theta_hash": "66165d4482ce"
+  },
+  {
+    "part": "h2_abrupt",
+    "seed": 509,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "5a59921ac70f",
+        "installed": true,
+        "hash_post_install": "571fc1b09064"
+      },
+      {
+        "round": 1,
+        "hash_pre": "571fc1b09064",
+        "n_local_samples": 108,
+        "hash_post_train": "31a7989e6cd3",
+        "installed": true,
+        "hash_post_install": "ffd5db45da0d"
+      },
+      {
+        "round": 2,
+        "hash_pre": "ffd5db45da0d",
+        "n_local_samples": 162,
+        "hash_post_train": "95a6b9516f64",
+        "installed": true,
+        "hash_post_install": "8cd6b63f8d24"
+      },
+      {
+        "round": 3,
+        "hash_pre": "8cd6b63f8d24",
+        "n_local_samples": 216,
+        "hash_post_train": "e9ba077468df",
+        "installed": true,
+        "hash_post_install": "e83d500fcf95"
+      },
+      {
+        "round": 4,
+        "hash_pre": "e83d500fcf95",
+        "n_local_samples": 270,
+        "hash_post_train": "450f21751b37",
+        "installed": true,
+        "hash_post_install": "429758b3b70f"
+      },
+      {
+        "round": 5,
+        "hash_pre": "429758b3b70f",
+        "n_local_samples": 324,
+        "hash_post_train": "8fc23c23f881",
+        "installed": true,
+        "hash_post_install": "118f5616ab85"
+      },
+      {
+        "round": 6,
+        "hash_pre": "118f5616ab85",
+        "n_local_samples": 378,
+        "hash_post_train": "09a08cc761b7",
+        "installed": true,
+        "hash_post_install": "963d61254c20"
+      },
+      {
+        "round": 7,
+        "hash_pre": "963d61254c20",
+        "n_local_samples": 432,
+        "hash_post_train": "312c39750fa0",
+        "installed": true,
+        "hash_post_install": "d4e319043044"
+      },
+      {
+        "round": 8,
+        "hash_pre": "d4e319043044",
+        "n_local_samples": 486,
+        "hash_post_train": "7a4a60ff6b49",
+        "installed": true,
+        "hash_post_install": "a214f4f26cbf"
+      },
+      {
+        "round": 9,
+        "hash_pre": "a214f4f26cbf",
+        "n_local_samples": 540,
+        "hash_post_train": "aa7af2892b98",
+        "installed": true,
+        "hash_post_install": "b8e6af96940d"
+      }
+    ],
+    "final_theta_hash": "b8e6af96940d"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 500,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 349,
+        "hash_post_train": "f61309f9d9ff",
+        "installed": true,
+        "hash_post_install": "67b0a4975812"
+      },
+      {
+        "round": 6,
+        "hash_pre": "67b0a4975812",
+        "n_local_samples": 407,
+        "hash_post_train": "021b5f90b5ef",
+        "installed": true,
+        "hash_post_install": "3639042ca36d"
+      },
+      {
+        "round": 7,
+        "hash_pre": "3639042ca36d",
+        "n_local_samples": 466,
+        "hash_post_train": "10080a88272b",
+        "installed": true,
+        "hash_post_install": "8ff6d48cd62e"
+      },
+      {
+        "round": 8,
+        "hash_pre": "8ff6d48cd62e",
+        "n_local_samples": 524,
+        "hash_post_train": "4ce10029398b",
+        "installed": true,
+        "hash_post_install": "5b60ea193efa"
+      },
+      {
+        "round": 9,
+        "hash_pre": "5b60ea193efa",
+        "n_local_samples": 582,
+        "hash_post_train": "810e299b2952",
+        "installed": true,
+        "hash_post_install": "c33cac13e7bd"
+      }
+    ],
+    "final_theta_hash": "c33cac13e7bd"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 500,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 58,
+        "hash_post_train": "00b279130e99",
+        "installed": true,
+        "hash_post_install": "5b6a8adffd9a"
+      },
+      {
+        "round": 1,
+        "hash_pre": "5b6a8adffd9a",
+        "n_local_samples": 116,
+        "hash_post_train": "c3b5de78d473",
+        "installed": true,
+        "hash_post_install": "faef78603b25"
+      },
+      {
+        "round": 2,
+        "hash_pre": "faef78603b25",
+        "n_local_samples": 175,
+        "hash_post_train": "43b497de70ce",
+        "installed": true,
+        "hash_post_install": "2b6525013594"
+      },
+      {
+        "round": 3,
+        "hash_pre": "2b6525013594",
+        "n_local_samples": 233,
+        "hash_post_train": "d93409cff95b",
+        "installed": true,
+        "hash_post_install": "4e75a0f4f398"
+      },
+      {
+        "round": 4,
+        "hash_pre": "4e75a0f4f398",
+        "n_local_samples": 291,
+        "hash_post_train": "5e665d091f63",
+        "installed": true,
+        "hash_post_install": "919427fb7c63"
+      },
+      {
+        "round": 5,
+        "hash_pre": "919427fb7c63",
+        "n_local_samples": 349,
+        "hash_post_train": "b53c8f0585c2",
+        "installed": true,
+        "hash_post_install": "5a95f5a157b0"
+      },
+      {
+        "round": 6,
+        "hash_pre": "5a95f5a157b0",
+        "n_local_samples": 407,
+        "hash_post_train": "0067af1e860a",
+        "installed": true,
+        "hash_post_install": "c3fca0d17fbb"
+      },
+      {
+        "round": 7,
+        "hash_pre": "c3fca0d17fbb",
+        "n_local_samples": 466,
+        "hash_post_train": "d2e3bcb4b9c9",
+        "installed": true,
+        "hash_post_install": "9fa4166bcdd3"
+      },
+      {
+        "round": 8,
+        "hash_pre": "9fa4166bcdd3",
+        "n_local_samples": 524,
+        "hash_post_train": "4d0800264e45",
+        "installed": true,
+        "hash_post_install": "703d31de6bae"
+      },
+      {
+        "round": 9,
+        "hash_pre": "703d31de6bae",
+        "n_local_samples": 582,
+        "hash_post_train": "86cc27e08bf9",
+        "installed": true,
+        "hash_post_install": "04172d2cc630"
+      }
+    ],
+    "final_theta_hash": "04172d2cc630"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 501,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 324,
+        "hash_post_train": "2d4942b4820c",
+        "installed": true,
+        "hash_post_install": "dc7229d95b1c"
+      },
+      {
+        "round": 6,
+        "hash_pre": "dc7229d95b1c",
+        "n_local_samples": 378,
+        "hash_post_train": "224ebde65d8f",
+        "installed": true,
+        "hash_post_install": "b941d804bc03"
+      },
+      {
+        "round": 7,
+        "hash_pre": "b941d804bc03",
+        "n_local_samples": 432,
+        "hash_post_train": "701fe1cc44cc",
+        "installed": true,
+        "hash_post_install": "8b86a249bb63"
+      },
+      {
+        "round": 8,
+        "hash_pre": "8b86a249bb63",
+        "n_local_samples": 486,
+        "hash_post_train": "3ef89a21d3c6",
+        "installed": true,
+        "hash_post_install": "8613e7d4afe8"
+      },
+      {
+        "round": 9,
+        "hash_pre": "8613e7d4afe8",
+        "n_local_samples": 540,
+        "hash_post_train": "0b3039532fbd",
+        "installed": true,
+        "hash_post_install": "5d4be3f29a55"
+      }
+    ],
+    "final_theta_hash": "5d4be3f29a55"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 501,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "13d9a6ffc8a5",
+        "installed": true,
+        "hash_post_install": "5141880cd45a"
+      },
+      {
+        "round": 1,
+        "hash_pre": "5141880cd45a",
+        "n_local_samples": 108,
+        "hash_post_train": "ecbab1a225d5",
+        "installed": true,
+        "hash_post_install": "8710da96bc5f"
+      },
+      {
+        "round": 2,
+        "hash_pre": "8710da96bc5f",
+        "n_local_samples": 162,
+        "hash_post_train": "3c50e521f77c",
+        "installed": true,
+        "hash_post_install": "736982b232cf"
+      },
+      {
+        "round": 3,
+        "hash_pre": "736982b232cf",
+        "n_local_samples": 216,
+        "hash_post_train": "b6d73da738f5",
+        "installed": true,
+        "hash_post_install": "bb93b291f6ea"
+      },
+      {
+        "round": 4,
+        "hash_pre": "bb93b291f6ea",
+        "n_local_samples": 270,
+        "hash_post_train": "c360a16a1365",
+        "installed": true,
+        "hash_post_install": "79e05baa44fa"
+      },
+      {
+        "round": 5,
+        "hash_pre": "79e05baa44fa",
+        "n_local_samples": 324,
+        "hash_post_train": "32f72db101a1",
+        "installed": true,
+        "hash_post_install": "08f77720a8b6"
+      },
+      {
+        "round": 6,
+        "hash_pre": "08f77720a8b6",
+        "n_local_samples": 378,
+        "hash_post_train": "81badb74f46b",
+        "installed": true,
+        "hash_post_install": "bed9beb21bb5"
+      },
+      {
+        "round": 7,
+        "hash_pre": "bed9beb21bb5",
+        "n_local_samples": 432,
+        "hash_post_train": "2f9d499ed839",
+        "installed": true,
+        "hash_post_install": "bae01b90ad04"
+      },
+      {
+        "round": 8,
+        "hash_pre": "bae01b90ad04",
+        "n_local_samples": 486,
+        "hash_post_train": "739365e47405",
+        "installed": true,
+        "hash_post_install": "30c545ed52d0"
+      },
+      {
+        "round": 9,
+        "hash_pre": "30c545ed52d0",
+        "n_local_samples": 540,
+        "hash_post_train": "fb2074ea2e5e",
+        "installed": true,
+        "hash_post_install": "a521ba14d3c2"
+      }
+    ],
+    "final_theta_hash": "a521ba14d3c2"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 502,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 292,
+        "hash_post_train": "5789c48a81aa",
+        "installed": true,
+        "hash_post_install": "bbf50874db95"
+      },
+      {
+        "round": 6,
+        "hash_pre": "bbf50874db95",
+        "n_local_samples": 341,
+        "hash_post_train": "bda579174d0e",
+        "installed": true,
+        "hash_post_install": "4e6e0aa98dca"
+      },
+      {
+        "round": 7,
+        "hash_pre": "4e6e0aa98dca",
+        "n_local_samples": 390,
+        "hash_post_train": "fb99e2b58345",
+        "installed": true,
+        "hash_post_install": "2c6326219ff3"
+      },
+      {
+        "round": 8,
+        "hash_pre": "2c6326219ff3",
+        "n_local_samples": 438,
+        "hash_post_train": "29a05ea3b6c0",
+        "installed": true,
+        "hash_post_install": "a829036fabb9"
+      },
+      {
+        "round": 9,
+        "hash_pre": "a829036fabb9",
+        "n_local_samples": 487,
+        "hash_post_train": "ea9d918b9bfc",
+        "installed": true,
+        "hash_post_install": "a4d130fc4929"
+      }
+    ],
+    "final_theta_hash": "a4d130fc4929"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 502,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 49,
+        "hash_post_train": "db7f316656d9",
+        "installed": true,
+        "hash_post_install": "9c3a787c7167"
+      },
+      {
+        "round": 1,
+        "hash_pre": "9c3a787c7167",
+        "n_local_samples": 97,
+        "hash_post_train": "3b0cfa976d70",
+        "installed": true,
+        "hash_post_install": "75e726378aef"
+      },
+      {
+        "round": 2,
+        "hash_pre": "75e726378aef",
+        "n_local_samples": 146,
+        "hash_post_train": "4c2716ae8cfa",
+        "installed": true,
+        "hash_post_install": "2ab2748ee72f"
+      },
+      {
+        "round": 3,
+        "hash_pre": "2ab2748ee72f",
+        "n_local_samples": 195,
+        "hash_post_train": "c80683098c4b",
+        "installed": true,
+        "hash_post_install": "cbc598dca56f"
+      },
+      {
+        "round": 4,
+        "hash_pre": "cbc598dca56f",
+        "n_local_samples": 244,
+        "hash_post_train": "3547f78975f6",
+        "installed": true,
+        "hash_post_install": "4c55ecd3f7bb"
+      },
+      {
+        "round": 5,
+        "hash_pre": "4c55ecd3f7bb",
+        "n_local_samples": 292,
+        "hash_post_train": "05f805783f67",
+        "installed": true,
+        "hash_post_install": "a20076c42c82"
+      },
+      {
+        "round": 6,
+        "hash_pre": "a20076c42c82",
+        "n_local_samples": 341,
+        "hash_post_train": "8fd0811d8987",
+        "installed": true,
+        "hash_post_install": "9a475cf99b0b"
+      },
+      {
+        "round": 7,
+        "hash_pre": "9a475cf99b0b",
+        "n_local_samples": 390,
+        "hash_post_train": "8fd62bb7dda9",
+        "installed": true,
+        "hash_post_install": "ebd723b9cf66"
+      },
+      {
+        "round": 8,
+        "hash_pre": "ebd723b9cf66",
+        "n_local_samples": 438,
+        "hash_post_train": "1d3f5b3056fd",
+        "installed": true,
+        "hash_post_install": "4bb2d318784a"
+      },
+      {
+        "round": 9,
+        "hash_pre": "4bb2d318784a",
+        "n_local_samples": 487,
+        "hash_post_train": "cc63ec3206bf",
+        "installed": true,
+        "hash_post_install": "43ac9d0a6b54"
+      }
+    ],
+    "final_theta_hash": "43ac9d0a6b54"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 503,
+    "method": "fedqpnt_local",
+    "round_installs": 3,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 414,
+        "hash_post_train": "acbea64b98d5",
+        "installed": true,
+        "hash_post_install": "4cb3a89b719d"
+      },
+      {
+        "round": 6,
+        "hash_pre": "4cb3a89b719d",
+        "n_local_samples": 483,
+        "hash_post_train": "49094c1a7dcd",
+        "installed": true,
+        "hash_post_install": "f712c4775fe7"
+      },
+      {
+        "round": 7,
+        "hash_pre": "f712c4775fe7",
+        "n_local_samples": 552,
+        "hash_post_train": "2d38b49007bc",
+        "installed": true,
+        "hash_post_install": "83a11e9500f3"
+      },
+      {
+        "round": 8,
+        "hash_pre": "83a11e9500f3",
+        "n_local_samples": 621,
+        "hash_post_train": "a3befb9882b6",
+        "installed": false,
+        "hash_post_install": "a3befb9882b6"
+      },
+      {
+        "round": 9,
+        "hash_pre": "a3befb9882b6",
+        "n_local_samples": 690,
+        "hash_post_train": "83dbda004b09",
+        "installed": false,
+        "hash_post_install": "83dbda004b09"
+      }
+    ],
+    "final_theta_hash": "83dbda004b09"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 503,
+    "method": "baseline_b_cont",
+    "round_installs": 3,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 69,
+        "hash_post_train": "ebd77d115063",
+        "installed": true,
+        "hash_post_install": "6c48947db068"
+      },
+      {
+        "round": 1,
+        "hash_pre": "6c48947db068",
+        "n_local_samples": 138,
+        "hash_post_train": "139606cefd84",
+        "installed": true,
+        "hash_post_install": "514c9669d379"
+      },
+      {
+        "round": 2,
+        "hash_pre": "514c9669d379",
+        "n_local_samples": 207,
+        "hash_post_train": "733c95c085ab",
+        "installed": true,
+        "hash_post_install": "299ea5e3f4c2"
+      },
+      {
+        "round": 3,
+        "hash_pre": "299ea5e3f4c2",
+        "n_local_samples": 276,
+        "hash_post_train": "a2bec772dcdc",
+        "installed": false,
+        "hash_post_install": "a2bec772dcdc"
+      },
+      {
+        "round": 4,
+        "hash_pre": "a2bec772dcdc",
+        "n_local_samples": 345,
+        "hash_post_train": "9d09870c031a",
+        "installed": false,
+        "hash_post_install": "9d09870c031a"
+      },
+      {
+        "round": 5,
+        "hash_pre": "9d09870c031a",
+        "n_local_samples": 414,
+        "hash_post_train": "dadbdb6bd4a5",
+        "installed": false,
+        "hash_post_install": "dadbdb6bd4a5"
+      },
+      {
+        "round": 6,
+        "hash_pre": "dadbdb6bd4a5",
+        "n_local_samples": 483,
+        "hash_post_train": "b79226f68b09",
+        "installed": false,
+        "hash_post_install": "b79226f68b09"
+      },
+      {
+        "round": 7,
+        "hash_pre": "b79226f68b09",
+        "n_local_samples": 552,
+        "hash_post_train": "269f81061e38",
+        "installed": false,
+        "hash_post_install": "269f81061e38"
+      },
+      {
+        "round": 8,
+        "hash_pre": "269f81061e38",
+        "n_local_samples": 621,
+        "hash_post_train": "d5c4ce20239a",
+        "installed": false,
+        "hash_post_install": "d5c4ce20239a"
+      },
+      {
+        "round": 9,
+        "hash_pre": "d5c4ce20239a",
+        "n_local_samples": 690,
+        "hash_post_train": "3516e89fdc67",
+        "installed": false,
+        "hash_post_install": "3516e89fdc67"
+      }
+    ],
+    "final_theta_hash": "3516e89fdc67"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 504,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 325,
+        "hash_post_train": "97b4430c480f",
+        "installed": true,
+        "hash_post_install": "60ddfd2439af"
+      },
+      {
+        "round": 6,
+        "hash_pre": "60ddfd2439af",
+        "n_local_samples": 379,
+        "hash_post_train": "5743325a2fb3",
+        "installed": true,
+        "hash_post_install": "3b45c9edf871"
+      },
+      {
+        "round": 7,
+        "hash_pre": "3b45c9edf871",
+        "n_local_samples": 433,
+        "hash_post_train": "9e8363b45161",
+        "installed": true,
+        "hash_post_install": "87c291b2b04a"
+      },
+      {
+        "round": 8,
+        "hash_pre": "87c291b2b04a",
+        "n_local_samples": 487,
+        "hash_post_train": "abbb764630d5",
+        "installed": true,
+        "hash_post_install": "e0cab41e7d56"
+      },
+      {
+        "round": 9,
+        "hash_pre": "e0cab41e7d56",
+        "n_local_samples": 541,
+        "hash_post_train": "57d2a7cac079",
+        "installed": true,
+        "hash_post_install": "accfb435cc4c"
+      }
+    ],
+    "final_theta_hash": "accfb435cc4c"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 504,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "3524fdc4f083",
+        "installed": true,
+        "hash_post_install": "86cc692f6796"
+      },
+      {
+        "round": 1,
+        "hash_pre": "86cc692f6796",
+        "n_local_samples": 108,
+        "hash_post_train": "2471b78db59c",
+        "installed": true,
+        "hash_post_install": "5818e34c0bea"
+      },
+      {
+        "round": 2,
+        "hash_pre": "5818e34c0bea",
+        "n_local_samples": 162,
+        "hash_post_train": "b037e5a38d5a",
+        "installed": true,
+        "hash_post_install": "dcac7ea411d5"
+      },
+      {
+        "round": 3,
+        "hash_pre": "dcac7ea411d5",
+        "n_local_samples": 216,
+        "hash_post_train": "78033c7f8ff4",
+        "installed": true,
+        "hash_post_install": "a8a0bf93aafb"
+      },
+      {
+        "round": 4,
+        "hash_pre": "a8a0bf93aafb",
+        "n_local_samples": 270,
+        "hash_post_train": "425569dfe07f",
+        "installed": true,
+        "hash_post_install": "b83469daca44"
+      },
+      {
+        "round": 5,
+        "hash_pre": "b83469daca44",
+        "n_local_samples": 325,
+        "hash_post_train": "b6482652bc17",
+        "installed": true,
+        "hash_post_install": "67635e4f40ea"
+      },
+      {
+        "round": 6,
+        "hash_pre": "67635e4f40ea",
+        "n_local_samples": 379,
+        "hash_post_train": "efe2550a039b",
+        "installed": true,
+        "hash_post_install": "cc119080351d"
+      },
+      {
+        "round": 7,
+        "hash_pre": "cc119080351d",
+        "n_local_samples": 433,
+        "hash_post_train": "5636b68d34bc",
+        "installed": true,
+        "hash_post_install": "578acd48c972"
+      },
+      {
+        "round": 8,
+        "hash_pre": "578acd48c972",
+        "n_local_samples": 487,
+        "hash_post_train": "6915d2b53639",
+        "installed": true,
+        "hash_post_install": "542456d31e85"
+      },
+      {
+        "round": 9,
+        "hash_pre": "542456d31e85",
+        "n_local_samples": 541,
+        "hash_post_train": "4a1e5eb0fa94",
+        "installed": true,
+        "hash_post_install": "b22c10ae1b71"
+      }
+    ],
+    "final_theta_hash": "b22c10ae1b71"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 505,
+    "method": "fedqpnt_local",
+    "round_installs": 4,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 320,
+        "hash_post_train": "438c6ba652ad",
+        "installed": true,
+        "hash_post_install": "cab9d58fcec8"
+      },
+      {
+        "round": 6,
+        "hash_pre": "cab9d58fcec8",
+        "n_local_samples": 373,
+        "hash_post_train": "4ab8131438f0",
+        "installed": false,
+        "hash_post_install": "4ab8131438f0"
+      },
+      {
+        "round": 7,
+        "hash_pre": "4ab8131438f0",
+        "n_local_samples": 426,
+        "hash_post_train": "5a970ee76367",
+        "installed": true,
+        "hash_post_install": "617f8afd0690"
+      },
+      {
+        "round": 8,
+        "hash_pre": "617f8afd0690",
+        "n_local_samples": 480,
+        "hash_post_train": "fdaff89be42a",
+        "installed": true,
+        "hash_post_install": "bfdbeade929d"
+      },
+      {
+        "round": 9,
+        "hash_pre": "bfdbeade929d",
+        "n_local_samples": 533,
+        "hash_post_train": "d14bd103af5a",
+        "installed": true,
+        "hash_post_install": "74ac46e599d5"
+      }
+    ],
+    "final_theta_hash": "74ac46e599d5"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 505,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 53,
+        "hash_post_train": "a1aa4771e1b1",
+        "installed": true,
+        "hash_post_install": "053a4a61cd60"
+      },
+      {
+        "round": 1,
+        "hash_pre": "053a4a61cd60",
+        "n_local_samples": 107,
+        "hash_post_train": "0dc446e9cdd8",
+        "installed": false,
+        "hash_post_install": "0dc446e9cdd8"
+      },
+      {
+        "round": 2,
+        "hash_pre": "0dc446e9cdd8",
+        "n_local_samples": 160,
+        "hash_post_train": "9eede479256a",
+        "installed": true,
+        "hash_post_install": "e9dc5889b8fa"
+      },
+      {
+        "round": 3,
+        "hash_pre": "e9dc5889b8fa",
+        "n_local_samples": 213,
+        "hash_post_train": "e8e18d2eb06e",
+        "installed": true,
+        "hash_post_install": "442d5737494f"
+      },
+      {
+        "round": 4,
+        "hash_pre": "442d5737494f",
+        "n_local_samples": 266,
+        "hash_post_train": "3762a0995ffd",
+        "installed": true,
+        "hash_post_install": "e7dcb3339a8b"
+      },
+      {
+        "round": 5,
+        "hash_pre": "e7dcb3339a8b",
+        "n_local_samples": 320,
+        "hash_post_train": "a7e531e13ba1",
+        "installed": true,
+        "hash_post_install": "4fb634f2e28e"
+      },
+      {
+        "round": 6,
+        "hash_pre": "4fb634f2e28e",
+        "n_local_samples": 373,
+        "hash_post_train": "1ef2f23ba211",
+        "installed": true,
+        "hash_post_install": "0edd6ab9fbaa"
+      },
+      {
+        "round": 7,
+        "hash_pre": "0edd6ab9fbaa",
+        "n_local_samples": 426,
+        "hash_post_train": "d7271fe236d5",
+        "installed": true,
+        "hash_post_install": "7e3bef11706f"
+      },
+      {
+        "round": 8,
+        "hash_pre": "7e3bef11706f",
+        "n_local_samples": 480,
+        "hash_post_train": "9c6ea8f83d27",
+        "installed": true,
+        "hash_post_install": "67af2642124a"
+      },
+      {
+        "round": 9,
+        "hash_pre": "67af2642124a",
+        "n_local_samples": 533,
+        "hash_post_train": "516c01a354b4",
+        "installed": true,
+        "hash_post_install": "ddb04cc3083c"
+      }
+    ],
+    "final_theta_hash": "ddb04cc3083c"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 506,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 359,
+        "hash_post_train": "4205895d14b2",
+        "installed": true,
+        "hash_post_install": "599c164d3397"
+      },
+      {
+        "round": 6,
+        "hash_pre": "599c164d3397",
+        "n_local_samples": 419,
+        "hash_post_train": "f4ee5213f163",
+        "installed": true,
+        "hash_post_install": "850a46652c4d"
+      },
+      {
+        "round": 7,
+        "hash_pre": "850a46652c4d",
+        "n_local_samples": 479,
+        "hash_post_train": "41840e1621ce",
+        "installed": true,
+        "hash_post_install": "e80c66df179e"
+      },
+      {
+        "round": 8,
+        "hash_pre": "e80c66df179e",
+        "n_local_samples": 539,
+        "hash_post_train": "a2aa5fafc283",
+        "installed": true,
+        "hash_post_install": "ec034b17113e"
+      },
+      {
+        "round": 9,
+        "hash_pre": "ec034b17113e",
+        "n_local_samples": 599,
+        "hash_post_train": "dd4bfae3ed6a",
+        "installed": true,
+        "hash_post_install": "942b3e849662"
+      }
+    ],
+    "final_theta_hash": "942b3e849662"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 506,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 60,
+        "hash_post_train": "5a902784b720",
+        "installed": true,
+        "hash_post_install": "7e8209c217dc"
+      },
+      {
+        "round": 1,
+        "hash_pre": "7e8209c217dc",
+        "n_local_samples": 120,
+        "hash_post_train": "5f4a770f4f2c",
+        "installed": true,
+        "hash_post_install": "68e847bfaa68"
+      },
+      {
+        "round": 2,
+        "hash_pre": "68e847bfaa68",
+        "n_local_samples": 180,
+        "hash_post_train": "1ae70c7390ca",
+        "installed": true,
+        "hash_post_install": "5f0fdaecc55c"
+      },
+      {
+        "round": 3,
+        "hash_pre": "5f0fdaecc55c",
+        "n_local_samples": 240,
+        "hash_post_train": "9dba04a09fd4",
+        "installed": true,
+        "hash_post_install": "f4a7c8165dcd"
+      },
+      {
+        "round": 4,
+        "hash_pre": "f4a7c8165dcd",
+        "n_local_samples": 300,
+        "hash_post_train": "6eca02c62704",
+        "installed": true,
+        "hash_post_install": "fe5d23b262f0"
+      },
+      {
+        "round": 5,
+        "hash_pre": "fe5d23b262f0",
+        "n_local_samples": 359,
+        "hash_post_train": "784e1984445f",
+        "installed": true,
+        "hash_post_install": "fa866ce4d1aa"
+      },
+      {
+        "round": 6,
+        "hash_pre": "fa866ce4d1aa",
+        "n_local_samples": 419,
+        "hash_post_train": "aae4213e94ab",
+        "installed": true,
+        "hash_post_install": "bd7f1e67e428"
+      },
+      {
+        "round": 7,
+        "hash_pre": "bd7f1e67e428",
+        "n_local_samples": 479,
+        "hash_post_train": "8ac295590cd9",
+        "installed": true,
+        "hash_post_install": "3d9196d8d7ea"
+      },
+      {
+        "round": 8,
+        "hash_pre": "3d9196d8d7ea",
+        "n_local_samples": 539,
+        "hash_post_train": "078763787f07",
+        "installed": true,
+        "hash_post_install": "cd6afaad60b6"
+      },
+      {
+        "round": 9,
+        "hash_pre": "cd6afaad60b6",
+        "n_local_samples": 599,
+        "hash_post_train": "d71a13dcf48b",
+        "installed": true,
+        "hash_post_install": "3328336f147e"
+      }
+    ],
+    "final_theta_hash": "3328336f147e"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 507,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 292,
+        "hash_post_train": "bf2e9f09c7c5",
+        "installed": true,
+        "hash_post_install": "2b9789564d65"
+      },
+      {
+        "round": 6,
+        "hash_pre": "2b9789564d65",
+        "n_local_samples": 340,
+        "hash_post_train": "1e07b2b7f4f1",
+        "installed": true,
+        "hash_post_install": "2b0f47c706b1"
+      },
+      {
+        "round": 7,
+        "hash_pre": "2b0f47c706b1",
+        "n_local_samples": 389,
+        "hash_post_train": "0214b398ee68",
+        "installed": true,
+        "hash_post_install": "8bc2127782bc"
+      },
+      {
+        "round": 8,
+        "hash_pre": "8bc2127782bc",
+        "n_local_samples": 437,
+        "hash_post_train": "454806118345",
+        "installed": true,
+        "hash_post_install": "a786a1035a4d"
+      },
+      {
+        "round": 9,
+        "hash_pre": "a786a1035a4d",
+        "n_local_samples": 486,
+        "hash_post_train": "3b05dd17a04f",
+        "installed": true,
+        "hash_post_install": "be5e6038be46"
+      }
+    ],
+    "final_theta_hash": "be5e6038be46"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 507,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 49,
+        "hash_post_train": "c2c7e569d6c5",
+        "installed": true,
+        "hash_post_install": "40dceb1b4ad9"
+      },
+      {
+        "round": 1,
+        "hash_pre": "40dceb1b4ad9",
+        "n_local_samples": 97,
+        "hash_post_train": "53670302845a",
+        "installed": true,
+        "hash_post_install": "092e657ee11b"
+      },
+      {
+        "round": 2,
+        "hash_pre": "092e657ee11b",
+        "n_local_samples": 146,
+        "hash_post_train": "87254fc1ff4e",
+        "installed": true,
+        "hash_post_install": "93e70545b562"
+      },
+      {
+        "round": 3,
+        "hash_pre": "93e70545b562",
+        "n_local_samples": 194,
+        "hash_post_train": "bc7ed1f45182",
+        "installed": true,
+        "hash_post_install": "efc9959d92f9"
+      },
+      {
+        "round": 4,
+        "hash_pre": "efc9959d92f9",
+        "n_local_samples": 243,
+        "hash_post_train": "63b10981eb71",
+        "installed": true,
+        "hash_post_install": "639d9d0da588"
+      },
+      {
+        "round": 5,
+        "hash_pre": "639d9d0da588",
+        "n_local_samples": 292,
+        "hash_post_train": "2688d7919f42",
+        "installed": true,
+        "hash_post_install": "7f746abc70ab"
+      },
+      {
+        "round": 6,
+        "hash_pre": "7f746abc70ab",
+        "n_local_samples": 340,
+        "hash_post_train": "aeaaee220c6a",
+        "installed": false,
+        "hash_post_install": "aeaaee220c6a"
+      },
+      {
+        "round": 7,
+        "hash_pre": "aeaaee220c6a",
+        "n_local_samples": 389,
+        "hash_post_train": "d52987884d75",
+        "installed": true,
+        "hash_post_install": "63a6e552134a"
+      },
+      {
+        "round": 8,
+        "hash_pre": "63a6e552134a",
+        "n_local_samples": 437,
+        "hash_post_train": "dedac9dfd1a9",
+        "installed": true,
+        "hash_post_install": "f788fdecab41"
+      },
+      {
+        "round": 9,
+        "hash_pre": "f788fdecab41",
+        "n_local_samples": 486,
+        "hash_post_train": "4711bf7e3dc1",
+        "installed": true,
+        "hash_post_install": "0db0eb23a67a"
+      }
+    ],
+    "final_theta_hash": "0db0eb23a67a"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 508,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 348,
+        "hash_post_train": "a13b6be86bc3",
+        "installed": true,
+        "hash_post_install": "b39e33573e14"
+      },
+      {
+        "round": 6,
+        "hash_pre": "b39e33573e14",
+        "n_local_samples": 406,
+        "hash_post_train": "6fc839c4736b",
+        "installed": true,
+        "hash_post_install": "52bd3e40b64e"
+      },
+      {
+        "round": 7,
+        "hash_pre": "52bd3e40b64e",
+        "n_local_samples": 464,
+        "hash_post_train": "a9195b95cce4",
+        "installed": true,
+        "hash_post_install": "f5dac7ffeaa0"
+      },
+      {
+        "round": 8,
+        "hash_pre": "f5dac7ffeaa0",
+        "n_local_samples": 522,
+        "hash_post_train": "24ff0257e250",
+        "installed": true,
+        "hash_post_install": "75a6b3a21d80"
+      },
+      {
+        "round": 9,
+        "hash_pre": "75a6b3a21d80",
+        "n_local_samples": 580,
+        "hash_post_train": "907fa817955b",
+        "installed": true,
+        "hash_post_install": "76433c2f404d"
+      }
+    ],
+    "final_theta_hash": "76433c2f404d"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 508,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 58,
+        "hash_post_train": "dd8fad050f76",
+        "installed": true,
+        "hash_post_install": "4f2a6ff91616"
+      },
+      {
+        "round": 1,
+        "hash_pre": "4f2a6ff91616",
+        "n_local_samples": 116,
+        "hash_post_train": "92fcb499fd42",
+        "installed": true,
+        "hash_post_install": "85b7ad182b37"
+      },
+      {
+        "round": 2,
+        "hash_pre": "85b7ad182b37",
+        "n_local_samples": 174,
+        "hash_post_train": "1a1e990d944c",
+        "installed": true,
+        "hash_post_install": "4059c22c82f9"
+      },
+      {
+        "round": 3,
+        "hash_pre": "4059c22c82f9",
+        "n_local_samples": 232,
+        "hash_post_train": "c6cb7d279018",
+        "installed": true,
+        "hash_post_install": "7299d308effd"
+      },
+      {
+        "round": 4,
+        "hash_pre": "7299d308effd",
+        "n_local_samples": 290,
+        "hash_post_train": "f4d72ba58a15",
+        "installed": true,
+        "hash_post_install": "ea38ef89b400"
+      },
+      {
+        "round": 5,
+        "hash_pre": "ea38ef89b400",
+        "n_local_samples": 348,
+        "hash_post_train": "0670d263ad10",
+        "installed": true,
+        "hash_post_install": "7822d4651609"
+      },
+      {
+        "round": 6,
+        "hash_pre": "7822d4651609",
+        "n_local_samples": 406,
+        "hash_post_train": "59d3b781a16c",
+        "installed": true,
+        "hash_post_install": "423e79282ade"
+      },
+      {
+        "round": 7,
+        "hash_pre": "423e79282ade",
+        "n_local_samples": 464,
+        "hash_post_train": "3d20635ef0b8",
+        "installed": true,
+        "hash_post_install": "a7ed3d13f839"
+      },
+      {
+        "round": 8,
+        "hash_pre": "a7ed3d13f839",
+        "n_local_samples": 522,
+        "hash_post_train": "1f9187a676a1",
+        "installed": false,
+        "hash_post_install": "1f9187a676a1"
+      },
+      {
+        "round": 9,
+        "hash_pre": "1f9187a676a1",
+        "n_local_samples": 580,
+        "hash_post_train": "689777875ff1",
+        "installed": true,
+        "hash_post_install": "13121ca382df"
+      }
+    ],
+    "final_theta_hash": "13121ca382df"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 509,
+    "method": "fedqpnt_local",
+    "round_installs": 5,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 1,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 2,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 3,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 4,
+        "hash_pre": "abb4edf7a446",
+        "hash_post_train": "abb4edf7a446",
+        "installed": false,
+        "hash_post_install": "abb4edf7a446"
+      },
+      {
+        "round": 5,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 324,
+        "hash_post_train": "462cc6dde6e5",
+        "installed": true,
+        "hash_post_install": "72024745f781"
+      },
+      {
+        "round": 6,
+        "hash_pre": "72024745f781",
+        "n_local_samples": 378,
+        "hash_post_train": "fd30736404b7",
+        "installed": true,
+        "hash_post_install": "7451bdf2bbfa"
+      },
+      {
+        "round": 7,
+        "hash_pre": "7451bdf2bbfa",
+        "n_local_samples": 432,
+        "hash_post_train": "c17c6aa82f78",
+        "installed": true,
+        "hash_post_install": "d3c88a22bf3f"
+      },
+      {
+        "round": 8,
+        "hash_pre": "d3c88a22bf3f",
+        "n_local_samples": 486,
+        "hash_post_train": "6a03ac8fedb2",
+        "installed": true,
+        "hash_post_install": "c188237505b2"
+      },
+      {
+        "round": 9,
+        "hash_pre": "c188237505b2",
+        "n_local_samples": 540,
+        "hash_post_train": "adb2eccaf56c",
+        "installed": true,
+        "hash_post_install": "87f1ad742e4f"
+      }
+    ],
+    "final_theta_hash": "87f1ad742e4f"
+  },
+  {
+    "part": "h4_abrupt",
+    "seed": 509,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "d4ab5e8da550",
+        "installed": true,
+        "hash_post_install": "5dacea602352"
+      },
+      {
+        "round": 1,
+        "hash_pre": "5dacea602352",
+        "n_local_samples": 108,
+        "hash_post_train": "934fb89708b2",
+        "installed": true,
+        "hash_post_install": "b93e9545879b"
+      },
+      {
+        "round": 2,
+        "hash_pre": "b93e9545879b",
+        "n_local_samples": 162,
+        "hash_post_train": "ccf50e8d16da",
+        "installed": true,
+        "hash_post_install": "82dc5c7ec448"
+      },
+      {
+        "round": 3,
+        "hash_pre": "82dc5c7ec448",
+        "n_local_samples": 216,
+        "hash_post_train": "e1371efdaa0b",
+        "installed": true,
+        "hash_post_install": "7e7b49969d5c"
+      },
+      {
+        "round": 4,
+        "hash_pre": "7e7b49969d5c",
+        "n_local_samples": 270,
+        "hash_post_train": "855ee9b33032",
+        "installed": true,
+        "hash_post_install": "c65c4a970508"
+      },
+      {
+        "round": 5,
+        "hash_pre": "c65c4a970508",
+        "n_local_samples": 324,
+        "hash_post_train": "64b5aab54d5e",
+        "installed": true,
+        "hash_post_install": "701d26889006"
+      },
+      {
+        "round": 6,
+        "hash_pre": "701d26889006",
+        "n_local_samples": 378,
+        "hash_post_train": "3bc69e870395",
+        "installed": true,
+        "hash_post_install": "84eecab2325b"
+      },
+      {
+        "round": 7,
+        "hash_pre": "84eecab2325b",
+        "n_local_samples": 432,
+        "hash_post_train": "0327da1fd257",
+        "installed": true,
+        "hash_post_install": "8925c24428ab"
+      },
+      {
+        "round": 8,
+        "hash_pre": "8925c24428ab",
+        "n_local_samples": 486,
+        "hash_post_train": "eebb78b18b45",
+        "installed": true,
+        "hash_post_install": "d0ff1201efa4"
+      },
+      {
+        "round": 9,
+        "hash_pre": "d0ff1201efa4",
+        "n_local_samples": 540,
+        "hash_post_train": "7100a6c57436",
+        "installed": true,
+        "hash_post_install": "31665bf9931d"
+      }
+    ],
+    "final_theta_hash": "31665bf9931d"
+  },
+  {
+    "part": "control_drift",
+    "seed": 500,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 67,
+        "hash_post_train": "341d4d690025",
+        "installed": true,
+        "hash_post_install": "55df11e39551"
+      },
+      {
+        "round": 1,
+        "hash_pre": "55df11e39551",
+        "n_local_samples": 133,
+        "hash_post_train": "a151aa03efb9",
+        "installed": true,
+        "hash_post_install": "66587e231f54"
+      },
+      {
+        "round": 2,
+        "hash_pre": "66587e231f54",
+        "n_local_samples": 200,
+        "hash_post_train": "a71b88bfc2c4",
+        "installed": true,
+        "hash_post_install": "0289f2c7f86e"
+      },
+      {
+        "round": 3,
+        "hash_pre": "0289f2c7f86e",
+        "n_local_samples": 266,
+        "hash_post_train": "0b248a5a8577",
+        "installed": true,
+        "hash_post_install": "f698eba32369"
+      },
+      {
+        "round": 4,
+        "hash_pre": "f698eba32369",
+        "n_local_samples": 333,
+        "hash_post_train": "fa4acfdb237a",
+        "installed": true,
+        "hash_post_install": "bc6fb39f1975"
+      },
+      {
+        "round": 5,
+        "hash_pre": "bc6fb39f1975",
+        "n_local_samples": 400,
+        "hash_post_train": "732890e86be4",
+        "installed": true,
+        "hash_post_install": "061a1425d17b"
+      },
+      {
+        "round": 6,
+        "hash_pre": "061a1425d17b",
+        "n_local_samples": 466,
+        "hash_post_train": "51f3398a4b54",
+        "installed": true,
+        "hash_post_install": "e8c86832be83"
+      },
+      {
+        "round": 7,
+        "hash_pre": "e8c86832be83",
+        "n_local_samples": 533,
+        "hash_post_train": "6480346b8b8e",
+        "installed": true,
+        "hash_post_install": "e4546df10fb8"
+      },
+      {
+        "round": 8,
+        "hash_pre": "e4546df10fb8",
+        "n_local_samples": 599,
+        "hash_post_train": "149a60e269b4",
+        "installed": true,
+        "hash_post_install": "06dbf9cbaf6a"
+      },
+      {
+        "round": 9,
+        "hash_pre": "06dbf9cbaf6a",
+        "n_local_samples": 666,
+        "hash_post_train": "bc50d2300d83",
+        "installed": true,
+        "hash_post_install": "32a8f613e739"
+      }
+    ],
+    "final_theta_hash": "32a8f613e739"
+  },
+  {
+    "part": "control_drift",
+    "seed": 500,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 67,
+        "hash_post_train": "341d4d690025",
+        "installed": true,
+        "hash_post_install": "fad15fa38343"
+      },
+      {
+        "round": 1,
+        "hash_pre": "fad15fa38343",
+        "n_local_samples": 133,
+        "hash_post_train": "16d13382bbf9",
+        "installed": true,
+        "hash_post_install": "a5c4ff0e6f6e"
+      },
+      {
+        "round": 2,
+        "hash_pre": "a5c4ff0e6f6e",
+        "n_local_samples": 200,
+        "hash_post_train": "e47a813b7c71",
+        "installed": true,
+        "hash_post_install": "5559e77b5a00"
+      },
+      {
+        "round": 3,
+        "hash_pre": "5559e77b5a00",
+        "n_local_samples": 266,
+        "hash_post_train": "09fa6b7379f8",
+        "installed": true,
+        "hash_post_install": "cd2525741696"
+      },
+      {
+        "round": 4,
+        "hash_pre": "cd2525741696",
+        "n_local_samples": 333,
+        "hash_post_train": "44264861a117",
+        "installed": true,
+        "hash_post_install": "95c2c189e2a9"
+      },
+      {
+        "round": 5,
+        "hash_pre": "95c2c189e2a9",
+        "n_local_samples": 400,
+        "hash_post_train": "6935768fd99e",
+        "installed": true,
+        "hash_post_install": "4a8ce7af46c8"
+      },
+      {
+        "round": 6,
+        "hash_pre": "4a8ce7af46c8",
+        "n_local_samples": 466,
+        "hash_post_train": "d5ec507c3b95",
+        "installed": true,
+        "hash_post_install": "9b54d0a9fc9f"
+      },
+      {
+        "round": 7,
+        "hash_pre": "9b54d0a9fc9f",
+        "n_local_samples": 533,
+        "hash_post_train": "b56f3c747d5b",
+        "installed": true,
+        "hash_post_install": "38df15700dfe"
+      },
+      {
+        "round": 8,
+        "hash_pre": "38df15700dfe",
+        "n_local_samples": 599,
+        "hash_post_train": "36f6e31514a4",
+        "installed": true,
+        "hash_post_install": "0f8f798c6b5c"
+      },
+      {
+        "round": 9,
+        "hash_pre": "0f8f798c6b5c",
+        "n_local_samples": 666,
+        "hash_post_train": "e2ad3893fe1a",
+        "installed": true,
+        "hash_post_install": "15c99fcbc194"
+      }
+    ],
+    "final_theta_hash": "15c99fcbc194"
+  },
+  {
+    "part": "control_drift",
+    "seed": 501,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "a9aac8a48bb1",
+        "installed": true,
+        "hash_post_install": "9cc9b76e0db9"
+      },
+      {
+        "round": 1,
+        "hash_pre": "9cc9b76e0db9",
+        "n_local_samples": 108,
+        "hash_post_train": "adec8671ad48",
+        "installed": true,
+        "hash_post_install": "59a7922b8776"
+      },
+      {
+        "round": 2,
+        "hash_pre": "59a7922b8776",
+        "n_local_samples": 161,
+        "hash_post_train": "713aa74ed812",
+        "installed": true,
+        "hash_post_install": "159d85c45fb5"
+      },
+      {
+        "round": 3,
+        "hash_pre": "159d85c45fb5",
+        "n_local_samples": 215,
+        "hash_post_train": "ad71e3d2de18",
+        "installed": true,
+        "hash_post_install": "cba2550531e1"
+      },
+      {
+        "round": 4,
+        "hash_pre": "cba2550531e1",
+        "n_local_samples": 269,
+        "hash_post_train": "7956dc29e912",
+        "installed": true,
+        "hash_post_install": "85b437b0da4e"
+      },
+      {
+        "round": 5,
+        "hash_pre": "85b437b0da4e",
+        "n_local_samples": 323,
+        "hash_post_train": "bb908cd2fc4a",
+        "installed": true,
+        "hash_post_install": "322d54600581"
+      },
+      {
+        "round": 6,
+        "hash_pre": "322d54600581",
+        "n_local_samples": 377,
+        "hash_post_train": "a3fd7b7650b2",
+        "installed": true,
+        "hash_post_install": "23f59848ba91"
+      },
+      {
+        "round": 7,
+        "hash_pre": "23f59848ba91",
+        "n_local_samples": 430,
+        "hash_post_train": "b3b3768851a5",
+        "installed": true,
+        "hash_post_install": "8135133861b5"
+      },
+      {
+        "round": 8,
+        "hash_pre": "8135133861b5",
+        "n_local_samples": 484,
+        "hash_post_train": "786736594230",
+        "installed": true,
+        "hash_post_install": "946d76b09aa7"
+      },
+      {
+        "round": 9,
+        "hash_pre": "946d76b09aa7",
+        "n_local_samples": 538,
+        "hash_post_train": "b3f591c297cc",
+        "installed": true,
+        "hash_post_install": "972de1b2f0a1"
+      }
+    ],
+    "final_theta_hash": "972de1b2f0a1"
+  },
+  {
+    "part": "control_drift",
+    "seed": 501,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "a9aac8a48bb1",
+        "installed": true,
+        "hash_post_install": "d43cc32ffc02"
+      },
+      {
+        "round": 1,
+        "hash_pre": "d43cc32ffc02",
+        "n_local_samples": 108,
+        "hash_post_train": "f2378808a27c",
+        "installed": true,
+        "hash_post_install": "06293d25745a"
+      },
+      {
+        "round": 2,
+        "hash_pre": "06293d25745a",
+        "n_local_samples": 161,
+        "hash_post_train": "618ec9905cbc",
+        "installed": true,
+        "hash_post_install": "01a100705519"
+      },
+      {
+        "round": 3,
+        "hash_pre": "01a100705519",
+        "n_local_samples": 215,
+        "hash_post_train": "a7959ae3cb99",
+        "installed": true,
+        "hash_post_install": "a09f3dc923e6"
+      },
+      {
+        "round": 4,
+        "hash_pre": "a09f3dc923e6",
+        "n_local_samples": 269,
+        "hash_post_train": "a0012387ab5a",
+        "installed": true,
+        "hash_post_install": "51a9235e7e50"
+      },
+      {
+        "round": 5,
+        "hash_pre": "51a9235e7e50",
+        "n_local_samples": 323,
+        "hash_post_train": "de3bf52b4c42",
+        "installed": true,
+        "hash_post_install": "39390940d57d"
+      },
+      {
+        "round": 6,
+        "hash_pre": "39390940d57d",
+        "n_local_samples": 377,
+        "hash_post_train": "51e58fbeb2e0",
+        "installed": true,
+        "hash_post_install": "a032487f86b5"
+      },
+      {
+        "round": 7,
+        "hash_pre": "a032487f86b5",
+        "n_local_samples": 430,
+        "hash_post_train": "f7be9ade0ae0",
+        "installed": true,
+        "hash_post_install": "3c90aa766e75"
+      },
+      {
+        "round": 8,
+        "hash_pre": "3c90aa766e75",
+        "n_local_samples": 484,
+        "hash_post_train": "d60656a62315",
+        "installed": true,
+        "hash_post_install": "2bff5b80f0d1"
+      },
+      {
+        "round": 9,
+        "hash_pre": "2bff5b80f0d1",
+        "n_local_samples": 538,
+        "hash_post_train": "7204095d4d28",
+        "installed": true,
+        "hash_post_install": "28edfdd43f53"
+      }
+    ],
+    "final_theta_hash": "28edfdd43f53"
+  },
+  {
+    "part": "control_drift",
+    "seed": 502,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 57,
+        "hash_post_train": "3a1b8f4a116a",
+        "installed": true,
+        "hash_post_install": "ce84ca9e3ae8"
+      },
+      {
+        "round": 1,
+        "hash_pre": "ce84ca9e3ae8",
+        "n_local_samples": 115,
+        "hash_post_train": "0d7683a4c0b2",
+        "installed": true,
+        "hash_post_install": "a40f158a4994"
+      },
+      {
+        "round": 2,
+        "hash_pre": "a40f158a4994",
+        "n_local_samples": 172,
+        "hash_post_train": "727905a3fd6e",
+        "installed": true,
+        "hash_post_install": "59e26fd72873"
+      },
+      {
+        "round": 3,
+        "hash_pre": "59e26fd72873",
+        "n_local_samples": 229,
+        "hash_post_train": "2f88b5f12b20",
+        "installed": true,
+        "hash_post_install": "028798217798"
+      },
+      {
+        "round": 4,
+        "hash_pre": "028798217798",
+        "n_local_samples": 286,
+        "hash_post_train": "d32acd6ae271",
+        "installed": true,
+        "hash_post_install": "b02d7bb4a006"
+      },
+      {
+        "round": 5,
+        "hash_pre": "b02d7bb4a006",
+        "n_local_samples": 344,
+        "hash_post_train": "cd4d2c951535",
+        "installed": true,
+        "hash_post_install": "bc701980529e"
+      },
+      {
+        "round": 6,
+        "hash_pre": "bc701980529e",
+        "n_local_samples": 401,
+        "hash_post_train": "7adedb954d88",
+        "installed": true,
+        "hash_post_install": "d2b7b4c38ec3"
+      },
+      {
+        "round": 7,
+        "hash_pre": "d2b7b4c38ec3",
+        "n_local_samples": 458,
+        "hash_post_train": "e11d0c7ace1d",
+        "installed": true,
+        "hash_post_install": "861299ca6be7"
+      },
+      {
+        "round": 8,
+        "hash_pre": "861299ca6be7",
+        "n_local_samples": 516,
+        "hash_post_train": "ac9c41ee9b8a",
+        "installed": true,
+        "hash_post_install": "b56bacb1c395"
+      },
+      {
+        "round": 9,
+        "hash_pre": "b56bacb1c395",
+        "n_local_samples": 573,
+        "hash_post_train": "ec502b49e238",
+        "installed": true,
+        "hash_post_install": "15dead868b16"
+      }
+    ],
+    "final_theta_hash": "15dead868b16"
+  },
+  {
+    "part": "control_drift",
+    "seed": 502,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 57,
+        "hash_post_train": "3a1b8f4a116a",
+        "installed": true,
+        "hash_post_install": "eca3963335cc"
+      },
+      {
+        "round": 1,
+        "hash_pre": "eca3963335cc",
+        "n_local_samples": 115,
+        "hash_post_train": "789ddcf48408",
+        "installed": true,
+        "hash_post_install": "288d9a853c84"
+      },
+      {
+        "round": 2,
+        "hash_pre": "288d9a853c84",
+        "n_local_samples": 172,
+        "hash_post_train": "eb67dae63c02",
+        "installed": true,
+        "hash_post_install": "b5e99a7e56d3"
+      },
+      {
+        "round": 3,
+        "hash_pre": "b5e99a7e56d3",
+        "n_local_samples": 229,
+        "hash_post_train": "b27dbbd31cfa",
+        "installed": true,
+        "hash_post_install": "d71d8b4b185e"
+      },
+      {
+        "round": 4,
+        "hash_pre": "d71d8b4b185e",
+        "n_local_samples": 286,
+        "hash_post_train": "984968cd4bff",
+        "installed": true,
+        "hash_post_install": "b9a46946ea74"
+      },
+      {
+        "round": 5,
+        "hash_pre": "b9a46946ea74",
+        "n_local_samples": 344,
+        "hash_post_train": "bf44709576c1",
+        "installed": true,
+        "hash_post_install": "048f579e780c"
+      },
+      {
+        "round": 6,
+        "hash_pre": "048f579e780c",
+        "n_local_samples": 401,
+        "hash_post_train": "437ab1002ca7",
+        "installed": true,
+        "hash_post_install": "3ccc0dbab7f9"
+      },
+      {
+        "round": 7,
+        "hash_pre": "3ccc0dbab7f9",
+        "n_local_samples": 458,
+        "hash_post_train": "1b0c58084ffe",
+        "installed": true,
+        "hash_post_install": "4072ee00f40b"
+      },
+      {
+        "round": 8,
+        "hash_pre": "4072ee00f40b",
+        "n_local_samples": 516,
+        "hash_post_train": "6c155ae35671",
+        "installed": true,
+        "hash_post_install": "a67cb91b0a5e"
+      },
+      {
+        "round": 9,
+        "hash_pre": "a67cb91b0a5e",
+        "n_local_samples": 573,
+        "hash_post_train": "e155f09e6122",
+        "installed": true,
+        "hash_post_install": "17b5a55925d2"
+      }
+    ],
+    "final_theta_hash": "17b5a55925d2"
+  },
+  {
+    "part": "control_drift",
+    "seed": 503,
+    "method": "fedqpnt_local",
+    "round_installs": 8,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "b22f847fec04",
+        "installed": true,
+        "hash_post_install": "f3342c3ccbdc"
+      },
+      {
+        "round": 1,
+        "hash_pre": "f3342c3ccbdc",
+        "n_local_samples": 136,
+        "hash_post_train": "67efd3045fbb",
+        "installed": true,
+        "hash_post_install": "c1561d7c073e"
+      },
+      {
+        "round": 2,
+        "hash_pre": "c1561d7c073e",
+        "n_local_samples": 204,
+        "hash_post_train": "02f5536aed36",
+        "installed": true,
+        "hash_post_install": "79485737f2ff"
+      },
+      {
+        "round": 3,
+        "hash_pre": "79485737f2ff",
+        "n_local_samples": 272,
+        "hash_post_train": "7f3d91679e7b",
+        "installed": false,
+        "hash_post_install": "7f3d91679e7b"
+      },
+      {
+        "round": 4,
+        "hash_pre": "7f3d91679e7b",
+        "n_local_samples": 340,
+        "hash_post_train": "f27cefb5d58b",
+        "installed": false,
+        "hash_post_install": "f27cefb5d58b"
+      },
+      {
+        "round": 5,
+        "hash_pre": "f27cefb5d58b",
+        "n_local_samples": 409,
+        "hash_post_train": "09b146341a50",
+        "installed": true,
+        "hash_post_install": "5206c1603b2d"
+      },
+      {
+        "round": 6,
+        "hash_pre": "5206c1603b2d",
+        "n_local_samples": 477,
+        "hash_post_train": "42b5a5a5e695",
+        "installed": true,
+        "hash_post_install": "da57d9d43e9a"
+      },
+      {
+        "round": 7,
+        "hash_pre": "da57d9d43e9a",
+        "n_local_samples": 545,
+        "hash_post_train": "403df7ce32e5",
+        "installed": true,
+        "hash_post_install": "a0f0a23a2d55"
+      },
+      {
+        "round": 8,
+        "hash_pre": "a0f0a23a2d55",
+        "n_local_samples": 613,
+        "hash_post_train": "3aa79aceaa46",
+        "installed": true,
+        "hash_post_install": "66d93363a2da"
+      },
+      {
+        "round": 9,
+        "hash_pre": "66d93363a2da",
+        "n_local_samples": 681,
+        "hash_post_train": "048eb60fd2b6",
+        "installed": true,
+        "hash_post_install": "300285df8d1b"
+      }
+    ],
+    "final_theta_hash": "300285df8d1b"
+  },
+  {
+    "part": "control_drift",
+    "seed": 503,
+    "method": "baseline_b_cont",
+    "round_installs": 3,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "b22f847fec04",
+        "installed": true,
+        "hash_post_install": "5659c3355014"
+      },
+      {
+        "round": 1,
+        "hash_pre": "5659c3355014",
+        "n_local_samples": 136,
+        "hash_post_train": "7fb2b100bbd0",
+        "installed": true,
+        "hash_post_install": "52ae8a5ee2a4"
+      },
+      {
+        "round": 2,
+        "hash_pre": "52ae8a5ee2a4",
+        "n_local_samples": 204,
+        "hash_post_train": "0f47e28d01e7",
+        "installed": true,
+        "hash_post_install": "c94af6923bad"
+      },
+      {
+        "round": 3,
+        "hash_pre": "c94af6923bad",
+        "n_local_samples": 272,
+        "hash_post_train": "644fb384d26f",
+        "installed": false,
+        "hash_post_install": "644fb384d26f"
+      },
+      {
+        "round": 4,
+        "hash_pre": "644fb384d26f",
+        "n_local_samples": 340,
+        "hash_post_train": "d31022ea5b39",
+        "installed": false,
+        "hash_post_install": "d31022ea5b39"
+      },
+      {
+        "round": 5,
+        "hash_pre": "d31022ea5b39",
+        "n_local_samples": 409,
+        "hash_post_train": "7b41fe48a906",
+        "installed": false,
+        "hash_post_install": "7b41fe48a906"
+      },
+      {
+        "round": 6,
+        "hash_pre": "7b41fe48a906",
+        "n_local_samples": 477,
+        "hash_post_train": "842952b6b3f6",
+        "installed": false,
+        "hash_post_install": "842952b6b3f6"
+      },
+      {
+        "round": 7,
+        "hash_pre": "842952b6b3f6",
+        "n_local_samples": 545,
+        "hash_post_train": "08291ffc7503",
+        "installed": false,
+        "hash_post_install": "08291ffc7503"
+      },
+      {
+        "round": 8,
+        "hash_pre": "08291ffc7503",
+        "n_local_samples": 613,
+        "hash_post_train": "7d609dcc1322",
+        "installed": false,
+        "hash_post_install": "7d609dcc1322"
+      },
+      {
+        "round": 9,
+        "hash_pre": "7d609dcc1322",
+        "n_local_samples": 681,
+        "hash_post_train": "a87ef3e2fdb8",
+        "installed": false,
+        "hash_post_install": "a87ef3e2fdb8"
+      }
+    ],
+    "final_theta_hash": "a87ef3e2fdb8"
+  },
+  {
+    "part": "control_drift",
+    "seed": 504,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 48,
+        "hash_post_train": "dad963241364",
+        "installed": true,
+        "hash_post_install": "db5d7256a747"
+      },
+      {
+        "round": 1,
+        "hash_pre": "db5d7256a747",
+        "n_local_samples": 96,
+        "hash_post_train": "1ae9201e7e2e",
+        "installed": true,
+        "hash_post_install": "e74f63310f73"
+      },
+      {
+        "round": 2,
+        "hash_pre": "e74f63310f73",
+        "n_local_samples": 145,
+        "hash_post_train": "85cd1390bc25",
+        "installed": true,
+        "hash_post_install": "d9e382e3de41"
+      },
+      {
+        "round": 3,
+        "hash_pre": "d9e382e3de41",
+        "n_local_samples": 193,
+        "hash_post_train": "3be04478af3b",
+        "installed": true,
+        "hash_post_install": "626987502b3d"
+      },
+      {
+        "round": 4,
+        "hash_pre": "626987502b3d",
+        "n_local_samples": 241,
+        "hash_post_train": "870426c05842",
+        "installed": true,
+        "hash_post_install": "e6d3245a9211"
+      },
+      {
+        "round": 5,
+        "hash_pre": "e6d3245a9211",
+        "n_local_samples": 289,
+        "hash_post_train": "a9b822506475",
+        "installed": true,
+        "hash_post_install": "044828a5866f"
+      },
+      {
+        "round": 6,
+        "hash_pre": "044828a5866f",
+        "n_local_samples": 337,
+        "hash_post_train": "a60d8e09572d",
+        "installed": true,
+        "hash_post_install": "1eaae4ece3c5"
+      },
+      {
+        "round": 7,
+        "hash_pre": "1eaae4ece3c5",
+        "n_local_samples": 386,
+        "hash_post_train": "7b71564c301b",
+        "installed": true,
+        "hash_post_install": "4c86be1ea754"
+      },
+      {
+        "round": 8,
+        "hash_pre": "4c86be1ea754",
+        "n_local_samples": 434,
+        "hash_post_train": "710134decc39",
+        "installed": true,
+        "hash_post_install": "c9a9fb1eddd3"
+      },
+      {
+        "round": 9,
+        "hash_pre": "c9a9fb1eddd3",
+        "n_local_samples": 482,
+        "hash_post_train": "61a19fb41a47",
+        "installed": true,
+        "hash_post_install": "909656f93cff"
+      }
+    ],
+    "final_theta_hash": "909656f93cff"
+  },
+  {
+    "part": "control_drift",
+    "seed": 504,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 48,
+        "hash_post_train": "dad963241364",
+        "installed": true,
+        "hash_post_install": "622c8cb2264d"
+      },
+      {
+        "round": 1,
+        "hash_pre": "622c8cb2264d",
+        "n_local_samples": 96,
+        "hash_post_train": "cd62752b37c4",
+        "installed": true,
+        "hash_post_install": "e5430e9d71c1"
+      },
+      {
+        "round": 2,
+        "hash_pre": "e5430e9d71c1",
+        "n_local_samples": 145,
+        "hash_post_train": "9bbf69018443",
+        "installed": true,
+        "hash_post_install": "64d9c98dfb41"
+      },
+      {
+        "round": 3,
+        "hash_pre": "64d9c98dfb41",
+        "n_local_samples": 193,
+        "hash_post_train": "daac098f7164",
+        "installed": true,
+        "hash_post_install": "feed6605f902"
+      },
+      {
+        "round": 4,
+        "hash_pre": "feed6605f902",
+        "n_local_samples": 241,
+        "hash_post_train": "a67de4e949b0",
+        "installed": true,
+        "hash_post_install": "af544953843b"
+      },
+      {
+        "round": 5,
+        "hash_pre": "af544953843b",
+        "n_local_samples": 289,
+        "hash_post_train": "097cbdf4dd80",
+        "installed": true,
+        "hash_post_install": "a0593456d8ae"
+      },
+      {
+        "round": 6,
+        "hash_pre": "a0593456d8ae",
+        "n_local_samples": 337,
+        "hash_post_train": "ae878bd3742c",
+        "installed": true,
+        "hash_post_install": "2e3e9642430e"
+      },
+      {
+        "round": 7,
+        "hash_pre": "2e3e9642430e",
+        "n_local_samples": 386,
+        "hash_post_train": "c5e4074e63a7",
+        "installed": true,
+        "hash_post_install": "cb3bd61aeb8e"
+      },
+      {
+        "round": 8,
+        "hash_pre": "cb3bd61aeb8e",
+        "n_local_samples": 434,
+        "hash_post_train": "8e1940c571b4",
+        "installed": true,
+        "hash_post_install": "72661d770436"
+      },
+      {
+        "round": 9,
+        "hash_pre": "72661d770436",
+        "n_local_samples": 482,
+        "hash_post_train": "f619d29af85f",
+        "installed": true,
+        "hash_post_install": "3cd679699649"
+      }
+    ],
+    "final_theta_hash": "3cd679699649"
+  },
+  {
+    "part": "control_drift",
+    "seed": 505,
+    "method": "fedqpnt_local",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 67,
+        "hash_post_train": "d51207a6b705",
+        "installed": true,
+        "hash_post_install": "44a06047c676"
+      },
+      {
+        "round": 1,
+        "hash_pre": "44a06047c676",
+        "n_local_samples": 134,
+        "hash_post_train": "ec5d0a0c5abd",
+        "installed": false,
+        "hash_post_install": "ec5d0a0c5abd"
+      },
+      {
+        "round": 2,
+        "hash_pre": "ec5d0a0c5abd",
+        "n_local_samples": 200,
+        "hash_post_train": "4da2262b54d5",
+        "installed": true,
+        "hash_post_install": "e4ec0881d811"
+      },
+      {
+        "round": 3,
+        "hash_pre": "e4ec0881d811",
+        "n_local_samples": 267,
+        "hash_post_train": "1a2b08e8a4ee",
+        "installed": true,
+        "hash_post_install": "d44a90b41194"
+      },
+      {
+        "round": 4,
+        "hash_pre": "d44a90b41194",
+        "n_local_samples": 334,
+        "hash_post_train": "47c184448725",
+        "installed": true,
+        "hash_post_install": "0b3f18038948"
+      },
+      {
+        "round": 5,
+        "hash_pre": "0b3f18038948",
+        "n_local_samples": 401,
+        "hash_post_train": "f5c726dda06e",
+        "installed": true,
+        "hash_post_install": "c36623309855"
+      },
+      {
+        "round": 6,
+        "hash_pre": "c36623309855",
+        "n_local_samples": 468,
+        "hash_post_train": "463f0e3dbf5e",
+        "installed": true,
+        "hash_post_install": "df69d849a0bb"
+      },
+      {
+        "round": 7,
+        "hash_pre": "df69d849a0bb",
+        "n_local_samples": 534,
+        "hash_post_train": "6f5248fa774e",
+        "installed": true,
+        "hash_post_install": "525a64e86cb9"
+      },
+      {
+        "round": 8,
+        "hash_pre": "525a64e86cb9",
+        "n_local_samples": 601,
+        "hash_post_train": "9852cea4f338",
+        "installed": true,
+        "hash_post_install": "224526b29b36"
+      },
+      {
+        "round": 9,
+        "hash_pre": "224526b29b36",
+        "n_local_samples": 668,
+        "hash_post_train": "9fa3b42aee4d",
+        "installed": true,
+        "hash_post_install": "f509c8e1e393"
+      }
+    ],
+    "final_theta_hash": "f509c8e1e393"
+  },
+  {
+    "part": "control_drift",
+    "seed": 505,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 67,
+        "hash_post_train": "d51207a6b705",
+        "installed": true,
+        "hash_post_install": "1004fc985d40"
+      },
+      {
+        "round": 1,
+        "hash_pre": "1004fc985d40",
+        "n_local_samples": 134,
+        "hash_post_train": "b0b4eaf12f5a",
+        "installed": false,
+        "hash_post_install": "b0b4eaf12f5a"
+      },
+      {
+        "round": 2,
+        "hash_pre": "b0b4eaf12f5a",
+        "n_local_samples": 200,
+        "hash_post_train": "ddf8864744eb",
+        "installed": true,
+        "hash_post_install": "a9782f3dcbeb"
+      },
+      {
+        "round": 3,
+        "hash_pre": "a9782f3dcbeb",
+        "n_local_samples": 267,
+        "hash_post_train": "2f1142bbccbc",
+        "installed": true,
+        "hash_post_install": "0fe1ce727d9c"
+      },
+      {
+        "round": 4,
+        "hash_pre": "0fe1ce727d9c",
+        "n_local_samples": 334,
+        "hash_post_train": "d860db945399",
+        "installed": true,
+        "hash_post_install": "de711a69f817"
+      },
+      {
+        "round": 5,
+        "hash_pre": "de711a69f817",
+        "n_local_samples": 401,
+        "hash_post_train": "0f711ae57604",
+        "installed": true,
+        "hash_post_install": "5266d2ed4aaf"
+      },
+      {
+        "round": 6,
+        "hash_pre": "5266d2ed4aaf",
+        "n_local_samples": 468,
+        "hash_post_train": "5ff923953da3",
+        "installed": true,
+        "hash_post_install": "29a704b2dcf6"
+      },
+      {
+        "round": 7,
+        "hash_pre": "29a704b2dcf6",
+        "n_local_samples": 534,
+        "hash_post_train": "937b443fcef0",
+        "installed": true,
+        "hash_post_install": "9a26f129c43d"
+      },
+      {
+        "round": 8,
+        "hash_pre": "9a26f129c43d",
+        "n_local_samples": 601,
+        "hash_post_train": "004fe8fc4427",
+        "installed": true,
+        "hash_post_install": "bc21ac0c3fc1"
+      },
+      {
+        "round": 9,
+        "hash_pre": "bc21ac0c3fc1",
+        "n_local_samples": 668,
+        "hash_post_train": "3f684ad0e55c",
+        "installed": true,
+        "hash_post_install": "de77543e17da"
+      }
+    ],
+    "final_theta_hash": "de77543e17da"
+  },
+  {
+    "part": "control_drift",
+    "seed": 506,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 63,
+        "hash_post_train": "40d06e7de780",
+        "installed": true,
+        "hash_post_install": "3a9213463059"
+      },
+      {
+        "round": 1,
+        "hash_pre": "3a9213463059",
+        "n_local_samples": 126,
+        "hash_post_train": "37919f78241d",
+        "installed": true,
+        "hash_post_install": "2ecf9780fbb4"
+      },
+      {
+        "round": 2,
+        "hash_pre": "2ecf9780fbb4",
+        "n_local_samples": 189,
+        "hash_post_train": "b942e6125935",
+        "installed": true,
+        "hash_post_install": "cc4066d55f19"
+      },
+      {
+        "round": 3,
+        "hash_pre": "cc4066d55f19",
+        "n_local_samples": 252,
+        "hash_post_train": "7cc04fb8cbe8",
+        "installed": true,
+        "hash_post_install": "f8623199f0e9"
+      },
+      {
+        "round": 4,
+        "hash_pre": "f8623199f0e9",
+        "n_local_samples": 315,
+        "hash_post_train": "a50891ad05c2",
+        "installed": true,
+        "hash_post_install": "87cf3ac02c8b"
+      },
+      {
+        "round": 5,
+        "hash_pre": "87cf3ac02c8b",
+        "n_local_samples": 378,
+        "hash_post_train": "a5705729d8a0",
+        "installed": true,
+        "hash_post_install": "323eb7590ea1"
+      },
+      {
+        "round": 6,
+        "hash_pre": "323eb7590ea1",
+        "n_local_samples": 441,
+        "hash_post_train": "1bb6fadf609e",
+        "installed": true,
+        "hash_post_install": "0684af805329"
+      },
+      {
+        "round": 7,
+        "hash_pre": "0684af805329",
+        "n_local_samples": 504,
+        "hash_post_train": "647a2b779e23",
+        "installed": true,
+        "hash_post_install": "22c0f4e87a3c"
+      },
+      {
+        "round": 8,
+        "hash_pre": "22c0f4e87a3c",
+        "n_local_samples": 567,
+        "hash_post_train": "0900b310d799",
+        "installed": true,
+        "hash_post_install": "94110f1be07b"
+      },
+      {
+        "round": 9,
+        "hash_pre": "94110f1be07b",
+        "n_local_samples": 630,
+        "hash_post_train": "32169a18ca3c",
+        "installed": true,
+        "hash_post_install": "91b48416177d"
+      }
+    ],
+    "final_theta_hash": "91b48416177d"
+  },
+  {
+    "part": "control_drift",
+    "seed": 506,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 63,
+        "hash_post_train": "40d06e7de780",
+        "installed": true,
+        "hash_post_install": "6b4f0a49715a"
+      },
+      {
+        "round": 1,
+        "hash_pre": "6b4f0a49715a",
+        "n_local_samples": 126,
+        "hash_post_train": "457453624820",
+        "installed": true,
+        "hash_post_install": "2675b0f80e49"
+      },
+      {
+        "round": 2,
+        "hash_pre": "2675b0f80e49",
+        "n_local_samples": 189,
+        "hash_post_train": "4572ec9ce988",
+        "installed": true,
+        "hash_post_install": "d9b80553b46a"
+      },
+      {
+        "round": 3,
+        "hash_pre": "d9b80553b46a",
+        "n_local_samples": 252,
+        "hash_post_train": "e76a378894bc",
+        "installed": true,
+        "hash_post_install": "b44e4e0fc441"
+      },
+      {
+        "round": 4,
+        "hash_pre": "b44e4e0fc441",
+        "n_local_samples": 315,
+        "hash_post_train": "594cebfbf84b",
+        "installed": true,
+        "hash_post_install": "3e815c228d90"
+      },
+      {
+        "round": 5,
+        "hash_pre": "3e815c228d90",
+        "n_local_samples": 378,
+        "hash_post_train": "3b773e48b90d",
+        "installed": true,
+        "hash_post_install": "50254160fc78"
+      },
+      {
+        "round": 6,
+        "hash_pre": "50254160fc78",
+        "n_local_samples": 441,
+        "hash_post_train": "f5aeb002171a",
+        "installed": true,
+        "hash_post_install": "14eae0b54b12"
+      },
+      {
+        "round": 7,
+        "hash_pre": "14eae0b54b12",
+        "n_local_samples": 504,
+        "hash_post_train": "5ec4c8927034",
+        "installed": true,
+        "hash_post_install": "d57dc508ebff"
+      },
+      {
+        "round": 8,
+        "hash_pre": "d57dc508ebff",
+        "n_local_samples": 567,
+        "hash_post_train": "a642a9827d2b",
+        "installed": true,
+        "hash_post_install": "f5fc4c244522"
+      },
+      {
+        "round": 9,
+        "hash_pre": "f5fc4c244522",
+        "n_local_samples": 630,
+        "hash_post_train": "edc2986776e7",
+        "installed": true,
+        "hash_post_install": "50cfebdd6db7"
+      }
+    ],
+    "final_theta_hash": "50cfebdd6db7"
+  },
+  {
+    "part": "control_drift",
+    "seed": 507,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 48,
+        "hash_post_train": "278f3bfa6463",
+        "installed": true,
+        "hash_post_install": "1f15203d965e"
+      },
+      {
+        "round": 1,
+        "hash_pre": "1f15203d965e",
+        "n_local_samples": 97,
+        "hash_post_train": "4ab6c657e06a",
+        "installed": true,
+        "hash_post_install": "bddcd005b49e"
+      },
+      {
+        "round": 2,
+        "hash_pre": "bddcd005b49e",
+        "n_local_samples": 146,
+        "hash_post_train": "44d676efccd2",
+        "installed": true,
+        "hash_post_install": "366bbbcce69a"
+      },
+      {
+        "round": 3,
+        "hash_pre": "366bbbcce69a",
+        "n_local_samples": 194,
+        "hash_post_train": "6bb5f181856b",
+        "installed": true,
+        "hash_post_install": "ce6bfc1ac5e1"
+      },
+      {
+        "round": 4,
+        "hash_pre": "ce6bfc1ac5e1",
+        "n_local_samples": 242,
+        "hash_post_train": "140cd662b5ae",
+        "installed": true,
+        "hash_post_install": "ebe5a1971a4b"
+      },
+      {
+        "round": 5,
+        "hash_pre": "ebe5a1971a4b",
+        "n_local_samples": 291,
+        "hash_post_train": "a5a9e4febef6",
+        "installed": true,
+        "hash_post_install": "72a2f1d227e2"
+      },
+      {
+        "round": 6,
+        "hash_pre": "72a2f1d227e2",
+        "n_local_samples": 340,
+        "hash_post_train": "8f0cd5609d14",
+        "installed": true,
+        "hash_post_install": "ed1ea12deab1"
+      },
+      {
+        "round": 7,
+        "hash_pre": "ed1ea12deab1",
+        "n_local_samples": 388,
+        "hash_post_train": "23b2c558517f",
+        "installed": true,
+        "hash_post_install": "e4c0482dc60d"
+      },
+      {
+        "round": 8,
+        "hash_pre": "e4c0482dc60d",
+        "n_local_samples": 436,
+        "hash_post_train": "2c34983d9f86",
+        "installed": true,
+        "hash_post_install": "4f060d8014f0"
+      },
+      {
+        "round": 9,
+        "hash_pre": "4f060d8014f0",
+        "n_local_samples": 485,
+        "hash_post_train": "130c64bf2b2a",
+        "installed": true,
+        "hash_post_install": "c53436d8b9fc"
+      }
+    ],
+    "final_theta_hash": "c53436d8b9fc"
+  },
+  {
+    "part": "control_drift",
+    "seed": 507,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 48,
+        "hash_post_train": "278f3bfa6463",
+        "installed": true,
+        "hash_post_install": "ea009c8c4fe1"
+      },
+      {
+        "round": 1,
+        "hash_pre": "ea009c8c4fe1",
+        "n_local_samples": 97,
+        "hash_post_train": "8a32706db2b0",
+        "installed": true,
+        "hash_post_install": "662d7823f718"
+      },
+      {
+        "round": 2,
+        "hash_pre": "662d7823f718",
+        "n_local_samples": 146,
+        "hash_post_train": "c98a26a8e570",
+        "installed": true,
+        "hash_post_install": "54f9b7e7863b"
+      },
+      {
+        "round": 3,
+        "hash_pre": "54f9b7e7863b",
+        "n_local_samples": 194,
+        "hash_post_train": "95197eebe5e9",
+        "installed": true,
+        "hash_post_install": "494f2b81a0e4"
+      },
+      {
+        "round": 4,
+        "hash_pre": "494f2b81a0e4",
+        "n_local_samples": 242,
+        "hash_post_train": "70d88cd703ff",
+        "installed": true,
+        "hash_post_install": "422fa15eed5f"
+      },
+      {
+        "round": 5,
+        "hash_pre": "422fa15eed5f",
+        "n_local_samples": 291,
+        "hash_post_train": "25c9cb5313fc",
+        "installed": true,
+        "hash_post_install": "57bce8f7df72"
+      },
+      {
+        "round": 6,
+        "hash_pre": "57bce8f7df72",
+        "n_local_samples": 340,
+        "hash_post_train": "aa9189377895",
+        "installed": false,
+        "hash_post_install": "aa9189377895"
+      },
+      {
+        "round": 7,
+        "hash_pre": "aa9189377895",
+        "n_local_samples": 388,
+        "hash_post_train": "24c925127c78",
+        "installed": true,
+        "hash_post_install": "8e5727f428bc"
+      },
+      {
+        "round": 8,
+        "hash_pre": "8e5727f428bc",
+        "n_local_samples": 436,
+        "hash_post_train": "49bc1f7eda2e",
+        "installed": true,
+        "hash_post_install": "ffe3702ec65b"
+      },
+      {
+        "round": 9,
+        "hash_pre": "ffe3702ec65b",
+        "n_local_samples": 485,
+        "hash_post_train": "711be3b8f089",
+        "installed": true,
+        "hash_post_install": "d380fe100b99"
+      }
+    ],
+    "final_theta_hash": "d380fe100b99"
+  },
+  {
+    "part": "control_drift",
+    "seed": 508,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "fe40c9530b6d",
+        "installed": true,
+        "hash_post_install": "bff938aea53b"
+      },
+      {
+        "round": 1,
+        "hash_pre": "bff938aea53b",
+        "n_local_samples": 136,
+        "hash_post_train": "eb277cf3935d",
+        "installed": true,
+        "hash_post_install": "25f2a69ad7e8"
+      },
+      {
+        "round": 2,
+        "hash_pre": "25f2a69ad7e8",
+        "n_local_samples": 204,
+        "hash_post_train": "40bd3ab4fa54",
+        "installed": true,
+        "hash_post_install": "40cce8f031e0"
+      },
+      {
+        "round": 3,
+        "hash_pre": "40cce8f031e0",
+        "n_local_samples": 272,
+        "hash_post_train": "9d0626efd3a9",
+        "installed": true,
+        "hash_post_install": "c1fab1eeddeb"
+      },
+      {
+        "round": 4,
+        "hash_pre": "c1fab1eeddeb",
+        "n_local_samples": 340,
+        "hash_post_train": "5160a0a9f8cf",
+        "installed": true,
+        "hash_post_install": "67c08f6d892b"
+      },
+      {
+        "round": 5,
+        "hash_pre": "67c08f6d892b",
+        "n_local_samples": 407,
+        "hash_post_train": "54c444d6efaf",
+        "installed": true,
+        "hash_post_install": "293cb623f884"
+      },
+      {
+        "round": 6,
+        "hash_pre": "293cb623f884",
+        "n_local_samples": 475,
+        "hash_post_train": "db89e0fd6217",
+        "installed": true,
+        "hash_post_install": "e11e8a7a6758"
+      },
+      {
+        "round": 7,
+        "hash_pre": "e11e8a7a6758",
+        "n_local_samples": 543,
+        "hash_post_train": "efaffff347ea",
+        "installed": true,
+        "hash_post_install": "9373308ab967"
+      },
+      {
+        "round": 8,
+        "hash_pre": "9373308ab967",
+        "n_local_samples": 611,
+        "hash_post_train": "34af46c2ac2a",
+        "installed": true,
+        "hash_post_install": "163a84d02172"
+      },
+      {
+        "round": 9,
+        "hash_pre": "163a84d02172",
+        "n_local_samples": 679,
+        "hash_post_train": "e150cc227a47",
+        "installed": true,
+        "hash_post_install": "fbed131f9205"
+      }
+    ],
+    "final_theta_hash": "fbed131f9205"
+  },
+  {
+    "part": "control_drift",
+    "seed": 508,
+    "method": "baseline_b_cont",
+    "round_installs": 9,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 68,
+        "hash_post_train": "fe40c9530b6d",
+        "installed": true,
+        "hash_post_install": "0f3a4355be26"
+      },
+      {
+        "round": 1,
+        "hash_pre": "0f3a4355be26",
+        "n_local_samples": 136,
+        "hash_post_train": "4df81694e311",
+        "installed": true,
+        "hash_post_install": "f8436bf81b26"
+      },
+      {
+        "round": 2,
+        "hash_pre": "f8436bf81b26",
+        "n_local_samples": 204,
+        "hash_post_train": "025dc2ebf222",
+        "installed": true,
+        "hash_post_install": "76982389e235"
+      },
+      {
+        "round": 3,
+        "hash_pre": "76982389e235",
+        "n_local_samples": 272,
+        "hash_post_train": "329c2059623e",
+        "installed": true,
+        "hash_post_install": "24f06bc7377d"
+      },
+      {
+        "round": 4,
+        "hash_pre": "24f06bc7377d",
+        "n_local_samples": 340,
+        "hash_post_train": "be451e2ffcff",
+        "installed": true,
+        "hash_post_install": "0c10d8919148"
+      },
+      {
+        "round": 5,
+        "hash_pre": "0c10d8919148",
+        "n_local_samples": 407,
+        "hash_post_train": "dfd0fb7b7ee6",
+        "installed": true,
+        "hash_post_install": "1eacbfaf7194"
+      },
+      {
+        "round": 6,
+        "hash_pre": "1eacbfaf7194",
+        "n_local_samples": 475,
+        "hash_post_train": "b8b5f43c6092",
+        "installed": true,
+        "hash_post_install": "6ec3569678e4"
+      },
+      {
+        "round": 7,
+        "hash_pre": "6ec3569678e4",
+        "n_local_samples": 543,
+        "hash_post_train": "b5f216c92504",
+        "installed": true,
+        "hash_post_install": "ac99b90a175c"
+      },
+      {
+        "round": 8,
+        "hash_pre": "ac99b90a175c",
+        "n_local_samples": 611,
+        "hash_post_train": "6579b47600a7",
+        "installed": false,
+        "hash_post_install": "6579b47600a7"
+      },
+      {
+        "round": 9,
+        "hash_pre": "6579b47600a7",
+        "n_local_samples": 679,
+        "hash_post_train": "85644363bdb3",
+        "installed": true,
+        "hash_post_install": "cc12732c6b0f"
+      }
+    ],
+    "final_theta_hash": "cc12732c6b0f"
+  },
+  {
+    "part": "control_drift",
+    "seed": 509,
+    "method": "fedqpnt_local",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "5a59921ac70f",
+        "installed": true,
+        "hash_post_install": "f7660067c217"
+      },
+      {
+        "round": 1,
+        "hash_pre": "f7660067c217",
+        "n_local_samples": 108,
+        "hash_post_train": "28e9aea1a08c",
+        "installed": true,
+        "hash_post_install": "ff4b19117a02"
+      },
+      {
+        "round": 2,
+        "hash_pre": "ff4b19117a02",
+        "n_local_samples": 162,
+        "hash_post_train": "9fa2c141f930",
+        "installed": true,
+        "hash_post_install": "1d80faaf6a58"
+      },
+      {
+        "round": 3,
+        "hash_pre": "1d80faaf6a58",
+        "n_local_samples": 216,
+        "hash_post_train": "891e8eaa46eb",
+        "installed": true,
+        "hash_post_install": "bed2444a1448"
+      },
+      {
+        "round": 4,
+        "hash_pre": "bed2444a1448",
+        "n_local_samples": 270,
+        "hash_post_train": "0915aa4f24e5",
+        "installed": true,
+        "hash_post_install": "2f6b73c320b6"
+      },
+      {
+        "round": 5,
+        "hash_pre": "2f6b73c320b6",
+        "n_local_samples": 324,
+        "hash_post_train": "b17170f22026",
+        "installed": true,
+        "hash_post_install": "072413755993"
+      },
+      {
+        "round": 6,
+        "hash_pre": "072413755993",
+        "n_local_samples": 378,
+        "hash_post_train": "297bcf787487",
+        "installed": true,
+        "hash_post_install": "e4a5910bb161"
+      },
+      {
+        "round": 7,
+        "hash_pre": "e4a5910bb161",
+        "n_local_samples": 432,
+        "hash_post_train": "a673cdf2ca5c",
+        "installed": true,
+        "hash_post_install": "e3bd6232df3b"
+      },
+      {
+        "round": 8,
+        "hash_pre": "e3bd6232df3b",
+        "n_local_samples": 486,
+        "hash_post_train": "bd8c191df19b",
+        "installed": true,
+        "hash_post_install": "286914c2e054"
+      },
+      {
+        "round": 9,
+        "hash_pre": "286914c2e054",
+        "n_local_samples": 540,
+        "hash_post_train": "fe34cd0fabef",
+        "installed": true,
+        "hash_post_install": "b93df637a7b0"
+      }
+    ],
+    "final_theta_hash": "b93df637a7b0"
+  },
+  {
+    "part": "control_drift",
+    "seed": 509,
+    "method": "baseline_b_cont",
+    "round_installs": 10,
+    "provenance": [
+      {
+        "round": 0,
+        "hash_pre": "abb4edf7a446",
+        "n_local_samples": 54,
+        "hash_post_train": "5a59921ac70f",
+        "installed": true,
+        "hash_post_install": "571fc1b09064"
+      },
+      {
+        "round": 1,
+        "hash_pre": "571fc1b09064",
+        "n_local_samples": 108,
+        "hash_post_train": "31a7989e6cd3",
+        "installed": true,
+        "hash_post_install": "ffd5db45da0d"
+      },
+      {
+        "round": 2,
+        "hash_pre": "ffd5db45da0d",
+        "n_local_samples": 162,
+        "hash_post_train": "95a6b9516f64",
+        "installed": true,
+        "hash_post_install": "8cd6b63f8d24"
+      },
+      {
+        "round": 3,
+        "hash_pre": "8cd6b63f8d24",
+        "n_local_samples": 216,
+        "hash_post_train": "e9ba077468df",
+        "installed": true,
+        "hash_post_install": "e83d500fcf95"
+      },
+      {
+        "round": 4,
+        "hash_pre": "e83d500fcf95",
+        "n_local_samples": 270,
+        "hash_post_train": "450f21751b37",
+        "installed": true,
+        "hash_post_install": "429758b3b70f"
+      },
+      {
+        "round": 5,
+        "hash_pre": "429758b3b70f",
+        "n_local_samples": 324,
+        "hash_post_train": "8fc23c23f881",
+        "installed": true,
+        "hash_post_install": "118f5616ab85"
+      },
+      {
+        "round": 6,
+        "hash_pre": "118f5616ab85",
+        "n_local_samples": 378,
+        "hash_post_train": "09a08cc761b7",
+        "installed": true,
+        "hash_post_install": "963d61254c20"
+      },
+      {
+        "round": 7,
+        "hash_pre": "963d61254c20",
+        "n_local_samples": 432,
+        "hash_post_train": "312c39750fa0",
+        "installed": true,
+        "hash_post_install": "d4e319043044"
+      },
+      {
+        "round": 8,
+        "hash_pre": "d4e319043044",
+        "n_local_samples": 486,
+        "hash_post_train": "7a4a60ff6b49",
+        "installed": true,
+        "hash_post_install": "a214f4f26cbf"
+      },
+      {
+        "round": 9,
+        "hash_pre": "a214f4f26cbf",
+        "n_local_samples": 540,
+        "hash_post_train": "aa7af2892b98",
+        "installed": true,
+        "hash_post_install": "b8e6af96940d"
+      }
+    ],
+    "final_theta_hash": "b8e6af96940d"
+  }
+]
