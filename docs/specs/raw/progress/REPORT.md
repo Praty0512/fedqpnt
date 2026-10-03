@@ -1,0 +1,4 @@
+# REPORT agent checkpoint (M3 report + figures)
+- 2026-10-03: scripts/m3_report.py (-> docs/M3_REPORT.md, results/m3/*.json) and scripts/make_figures_results.py (-> figures/results_*.pdf/png, docs/M3_FIGURE_CAPTIONS.md) written and run on partial data (~3,430/5,340 tasks). No fedqpnt/ edits, no commit.
+- Re-run when the campaign completes: `python scripts/m3_report.py && python scripts/make_figures_results.py` (~1.5 min, 1 process). Confirmatory p-values are computed only when all input tasks for a test are present; otherwise "INCOMPLETE - pending".
+- Decisions flagged for Master: (1) H1 grade (PREREG gives none) -> industrial_mems, tactical H1 exploratory; (2) registry blocked_by_D047 on S3/S4/S6/S6-coast treated as stale (gate cleared D-080), outcomes shown with a dagger; (3) safety field = max_h_att (registry never-worse field), max_h_pre for S1; (4) fig (iv) skipped (no per-epoch trust data).

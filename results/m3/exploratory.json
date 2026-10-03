@@ -1,0 +1,24 @@
+{
+ "S6-coast@industrial_mems": {
+  "coast": {
+   "n": 30,
+   "median_ratio_minusq_over_cai": 1.0117319859617602,
+   "hl_cai_minus_minusq": -15.221465180798788,
+   "hl_ci95": [
+    -64.55885801719481,
+    19.15567003543875
+   ]
+  }
+ },
+ "S6-coast@tactical": {
+  "coast": {
+   "n": 30,
+   "median_ratio_minusq_over_cai": 0.9843807140700671,
+   "hl_cai_minus_minusq": 1.1639934004371781,
+   "hl_ci95": [
+    -5.725664385483334,
+    5.219634360561616
+   ]
+  }
+ }
+}

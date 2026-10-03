@@ -1,0 +1,1324 @@
+{
+ "S1@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "rmse_h_vs_fixed_trust",
+    "status": "PASS",
+    "value": 0.9945416044415638,
+    "detail": "median(rmse_h_pre ratio fedqpnt_local/fixed_trust) = 0.9945 (bound 1.05)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "far_le_1_per_hour",
+    "status": "PASS",
+    "value": 0.0,
+    "detail": "FAR=0.000/h/node (bound 1.0)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "anees_in_band",
+    "status": "PASS",
+    "value": 0.8066822220883982,
+    "detail": "ANEES_pos=0.807 (band [0.5,2])",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "mean_w_gnss_ge_0_95",
+    "status": "PASS",
+    "value": 0.9856777512155793,
+    "detail": "mean w_gnss=0.9857 (bound >=0.95)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "tv_w_le_1_per_hour",
+    "status": "FAIL",
+    "value": 8.505417472053047,
+    "detail": "TV_w=8.505/h (bound 1.0; ARCH S7 row 'in S1')",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S1@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "rmse_h_vs_fixed_trust",
+    "status": "PASS",
+    "value": 0.9930092749340005,
+    "detail": "median(rmse_h_pre ratio fedqpnt_local/fixed_trust) = 0.9930 (bound 1.05)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "far_le_1_per_hour",
+    "status": "PASS",
+    "value": 0.0,
+    "detail": "FAR=0.000/h/node (bound 1.0)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "anees_in_band",
+    "status": "PASS",
+    "value": 0.8054375630669561,
+    "detail": "ANEES_pos=0.805 (band [0.5,2])",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "mean_w_gnss_ge_0_95",
+    "status": "PASS",
+    "value": 0.9856741167540464,
+    "detail": "mean w_gnss=0.9857 (bound >=0.95)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "tv_w_le_1_per_hour",
+    "status": "FAIL",
+    "value": 8.50715966476451,
+    "detail": "TV_w=8.507/h (bound 1.0; ARCH S7 row 'in S1')",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-low@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 18805.923100223525,
+    "detail": "mean(max_h_att) defended-undefended=18805.923 (bound 3*sigma_nom=3.540, grade=industrial_mems)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-low@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 3283.9601070502554,
+    "detail": "mean(max_h_att) defended-undefended=3283.960 (bound 3*sigma_nom=3.367, grade=tactical)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-med@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 36.79400520617922,
+    "detail": "median MAX_h ratio=36.7940 (bound 0.5)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 18216.656481072456,
+    "detail": "mean(max_h_att) defended-undefended=18216.656 (bound 3*sigma_nom=3.540, grade=industrial_mems)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-med@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 6.865299785934042,
+    "detail": "median MAX_h ratio=6.8653 (bound 0.5)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 2995.702556124889,
+    "detail": "mean(max_h_att) defended-undefended=2995.703 (bound 3*sigma_nom=3.367, grade=tactical)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-high@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 23.843815246253136,
+    "detail": "median MAX_h ratio=23.8438 (bound 0.5)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 17490.986341145424,
+    "detail": "mean(max_h_att) defended-undefended=17490.986 (bound 3*sigma_nom=3.540, grade=industrial_mems)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-high@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 4.45632556608814,
+    "detail": "median MAX_h ratio=4.4563 (bound 0.5)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 2686.9348421051855,
+    "detail": "mean(max_h_att) defended-undefended=2686.935 (bound 3*sigma_nom=3.367, grade=tactical)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-DM@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 16425.610926526184,
+    "detail": "mean(max_h_att) defended-undefended=16425.611 (bound 3*sigma_nom=3.540, grade=industrial_mems)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S2-DM@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "detail": "P_D=1.000 (n=30)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 740.6984511016362,
+    "detail": "mean(max_h_att) defended-undefended=740.698 (bound 3*sigma_nom=3.367, grade=tactical)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S3@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "tdist_consistency_no_update",
+    "status": "FAIL",
+    "value": 64.0,
+    "detail": "t_dist: runs with t_dist<=3s: 0.000 (==1 required; NaN counts as failure) | consistency: min over runs of frac(e_h<=3 sigma_h(P_pos)) in P_att=0.127 (>=0.95 each run) | no_update_while_jammed: runner does not emit n_gnss_accepted_jammed yet (P3); not evaluable",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S3@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "tdist_consistency_no_update",
+    "status": "FAIL",
+    "value": 62.0,
+    "detail": "t_dist: runs with t_dist<=3s: 0.000 (==1 required; NaN counts as failure) | consistency: min over runs of frac(e_h<=3 sigma_h(P_pos)) in P_att=1.000 (>=0.95 each run) | no_update_while_jammed: runner does not emit n_gnss_accepted_jammed yet (P3); not evaluable",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S4@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "s2_s3_joint_plus_reacq_cap",
+    "status": "FAIL",
+    "value": 42.0,
+    "detail": "t_dist: runs with t_dist<=3s: 0.000 (==1 required; NaN counts as failure) | consistency: min over runs of frac(e_h<=3 sigma_h(P_pos)) in P_att=0.032 (>=0.95 each run) | s2_damage_halved: median MAX_h ratio=37.068 (<=0.5) | never_worse: mean(max_h_att) defended-undefended=10990.960 (bound 3*sigma_nom=3.540, grade=industrial_mems) | reacq_cap: max w_gnss at reacquisition=0.020 (<= w_reacq=0.5 in 100% of runs)",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S4@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "baseline_a": 30,
+   "baseline_b_bin": 30,
+   "baseline_b_cont": 30,
+   "bprime": 30,
+   "fixed_trust": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "s2_s3_joint_plus_reacq_cap",
+    "status": "FAIL",
+    "value": 42.0,
+    "detail": "t_dist: runs with t_dist<=3s: 0.000 (==1 required; NaN counts as failure) | consistency: min over runs of frac(e_h<=3 sigma_h(P_pos)) in P_att=1.000 (>=0.95 each run) | s2_damage_halved: median MAX_h ratio=6.456 (<=0.5) | never_worse: mean(max_h_att) defended-undefended=1767.190 (bound 3*sigma_nom=3.367, grade=tactical) | reacq_cap: max w_gnss at reacquisition=0.020 (<= w_reacq=0.5 in 100% of runs)",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S6@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "abl_minus_quantum": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "h3_latency_eff",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "H3 primary (paired latency_eff vs abl_minus_quantum, per grade) is evaluated in the confirmatory family; no pass/fail here",
+    "registry_blocked_flag": true
+   },
+   {
+    "criterion": "never_worse",
+    "status": "FAIL",
+    "value": 47622.33340424155,
+    "detail": "mean(max_h_att) defended-undefended=47622.333 (bound 3*sigma_nom=3.540, grade=industrial_mems)",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S6@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "abl_minus_quantum": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "h3_latency_eff",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "H3 primary (paired latency_eff vs abl_minus_quantum, per grade) is evaluated in the confirmatory family; no pass/fail here",
+    "registry_blocked_flag": true
+   },
+   {
+    "criterion": "never_worse",
+    "status": "FAIL",
+    "value": 5255.270600794501,
+    "detail": "mean(max_h_att) defended-undefended=5255.271 (bound 3*sigma_nom=3.367, grade=tactical)",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S6-coast@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "abl_minus_quantum": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "coast_ratio_exploratory",
+    "status": "not-evaluable",
+    "value": 1.0117319859617602,
+    "detail": "EXPLORATORY: median max coasting error ratio (-quantum / CAI)=1.012 (D-065 tuning envelope 2.1-3.4x); no pass/fail",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S6-coast@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "abl_minus_quantum": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "coast_ratio_exploratory",
+    "status": "not-evaluable",
+    "value": 0.9843807140700671,
+    "detail": "EXPLORATORY: median max coasting error ratio (-quantum / CAI)=0.984 (D-065 tuning envelope 2.1-3.4x); no pass/fail",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S7-p2@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 1
+  },
+  "n_paired": 1,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 1.0000027777854938,
+    "detail": "max N_cyc/h=1.00 (formal bound 137.93)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "missing/mismatched fedqpnt_local/undefended",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p2@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "missing/mismatched fedqpnt_local/undefended",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p5@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "missing/mismatched fedqpnt_local/undefended",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p5@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "missing/mismatched fedqpnt_local/undefended",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p10@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 0.0,
+    "detail": "max N_cyc/h=0.00 (formal bound 137.93)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 8100836.111756246,
+    "detail": "mean(max_h_att) defended-undefended=8100836.112 (bound 3*sigma_nom=3.540, grade=industrial_mems)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p10@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 1.0000027777854938,
+    "detail": "max N_cyc/h=1.00 (formal bound 137.93)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 688143.7383911776,
+    "detail": "mean(max_h_att) defended-undefended=688143.738 (bound 3*sigma_nom=3.367, grade=tactical)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p20@industrial_mems": {
+  "n_by_method": {
+   "fedqpnt_local": 30,
+   "undefended": 30
+  },
+  "n_paired": 30,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 0.0,
+    "detail": "max N_cyc/h=0.00 (formal bound 137.93)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 5503036.308088847,
+    "detail": "mean(max_h_att) defended-undefended=5503036.308 (bound 3*sigma_nom=3.540, grade=industrial_mems)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p20@tactical": {
+  "n_by_method": {
+   "fedqpnt_local": 4
+  },
+  "n_paired": 4,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 0.0,
+    "detail": "max N_cyc/h=0.00 (formal bound 137.93)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "missing/mismatched fedqpnt_local/undefended",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p60@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "missing/mismatched fedqpnt_local/undefended",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S7-p60@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "missing/mismatched fedqpnt_local/undefended",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1-c0.5@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1-c0.5@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1-c0.73@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1-c0.73@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1-c2@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r1-c2@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2-c0.5@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2-c0.5@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2-c0.73@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2-c0.73@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2-c2@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r2-c2@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5-c0.5@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5-c0.5@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5-c0.73@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5-c0.73@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5-c2@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r5-c2@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10-c0.5@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10-c0.5@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10-c0.73@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10-c0.73@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10-c2@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S10-r10-c2@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S11@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "finite_spd_and_vs_raw_gnss",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S11@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "finite_spd_and_vs_raw_gnss",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S13@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "t_rec_bounds",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S13@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "t_rec_bounds",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no fedqpnt_local runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S14@industrial_mems": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_slow_drift",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "last_vs_first_hour: runner does not emit rmse_h_hour_first/last yet (P3) | P_SPD: runner does not emit p_spd_finite yet (P3) | far: no runs | rss_growth: runner does not emit rss_growth_frac yet (P3)",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S14@tactical": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_slow_drift",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "last_vs_first_hour: runner does not emit rmse_h_hour_first/last yet (P3) | P_SPD: runner does not emit p_spd_finite yet (P3) | far: no runs | rss_growth: runner does not emit rss_growth_frac yet (P3)",
+    "registry_blocked_flag": true
+   }
+  ]
+ },
+ "S5": {
+  "n_by_method": {
+   "fedqpnt": 6
+  },
+  "n_paired": 6,
+  "criteria": [
+   {
+    "criterion": "quorum_or_skip_no_deadlock",
+    "status": "PASS",
+    "value": 1.0,
+    "detail": "P(no deadlock/ABORT)=1.000 (==1 required); mean ROUND_SKIPPED events/run=10.00 (graceful degrade, not a failure)",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "auc_drop_le_0_02",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no matched 'fedqpnt_nofault' reference runs (run the same scenario/seeds with failure_round/delay_window cleared to populate this baseline)",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S8": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "global_model_within_2_rounds",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no 'fedqpnt' fleet runs",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "first_attack_auc",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no 'fedqpnt' fleet runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S9": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "no_deadlock_auc_bound",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no 'fedqpnt' fleet runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S12-f20": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "auc_drop_f20",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no 'fedqpnt' (poisoned) fleet runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S12-f40": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "auc_drop_f40",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no 'fedqpnt' (poisoned) fleet runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ },
+ "S15": {
+  "n_by_method": {},
+  "n_paired": 0,
+  "criteria": [
+   {
+    "criterion": "attacked_meet_s2_pd",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no 'fedqpnt' fleet runs",
+    "registry_blocked_flag": false
+   },
+   {
+    "criterion": "unattacked_far_no_quarantine",
+    "status": "not-evaluable",
+    "value": null,
+    "detail": "no 'fedqpnt' fleet runs",
+    "registry_blocked_flag": false
+   }
+  ]
+ }
+}
