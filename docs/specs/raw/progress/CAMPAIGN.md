@@ -7,3 +7,7 @@
 - Note: my attempt to enumerate/kill stray python processes was denied by classifier (not retried); PIDs not recorded.
 - Resume: rerun `results\m4\launch_phase1.cmd`. Phase 2 (fleet): `python scripts/m4_campaign.py --phase 2` only after Master says "H2 done".
 - 01:02 progress ~12 runs, ~45-50 s/run/worker (S1) => ~5 runs/min, est. >=15 h for 4980 (other scenarios may differ). Handing back to Master with detached job running.
+- 10:35 Phase 1: S7-p2/p5 (240) failed with WinError 206. Added scripts/m4_run_spec_file.py + `--phase 1b` (spec via temp file, launcher="spec_file"), verified on 1 task (S7-p2@industrial_mems/fedqpnt_local/seed_10000 ok, 1155 s). Launched 1b detached, 2 workers: results/m4/launch_phase1b.cmd, log phase1b.log.
+- 10:23 Phase 2 launched detached (1 fleet at a time): results/m4/launch_phase2.cmd, log phase2.log. `--reverse` option available (second instance NOT started).
+- Claim files (`<result>.claim`, O_CREAT|O_EXCL, removed on completion) added to phase 1b and phase 2 in scripts/m4_campaign.py (+ `--clear-claims` to wipe stale claims after a crash; a crashed instance leaves its claim, so resume with --clear-claims only when no other instance is live). Already-running instances (old code) do not use claims.
+- Autoscale waiter: scripts/m4_autoscale.sh via results/m4/launch_autoscale.cmd, log results/m4/autoscale.log: on phase1.log "DONE" -> 1b --reverse (2 workers, log phase1b_rev.log); then phase 2 --reverse if free RAM >= 3.5 GB (recheck every 10 min x13; log phase2_rev.log).
