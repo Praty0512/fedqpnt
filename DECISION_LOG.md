@@ -33,6 +33,20 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-084 · 2026-10-08 · Round-2 preparations: σ_nom re-measured on the Schuler world; fleet θ0 retrained on core-freeze-5 (same path, the old one backed up); campaign orchestration
+- **σ_nom:** re-measured with the unchanged D-068 rule on core-freeze-5 (world schuler_tangent; seeds 560–579; per grade) into results/sigma_nom_freeze5.json, because the scenario world changed.
+- **Fleet θ0:** results/fleet/theta0_d054.npz (hard-coded in the frozen fleet_adapter) was pretrained on an old core. It is retrained on core-freeze-5 with the unchanged D-054 protocol, in the fleet's own world ('flat': the fleet runner ignores scenario.world, which is disclosed), and written to the same path. The previous file is backed up as theta0_d054_pre_freeze5.npz.
+- **Single-node detector:** v4 (schuler_tangent).
+- **Orchestration (scripts/m4_campaign.py):**
+  - seeds 10030–10059;
+  - required weights;
+  - preflight `git diff core-freeze-5 HEAD -- fedqpnt` empty;
+  - a spec-file launcher for long specs (7200 s timeout);
+  - claim files;
+  - phase 2 forward + reverse.
+- **Round-2 PREREG amendment** follows once v4, σ_nom and θ0 exist.
+- **Owner:** Master
+
 ### D-083 · 2026-10-08 · Freeze-5 contents: CAI contrast from the grade preset, round-Earth scenarios, bit-identical S7 speed-up, R_q SF/misalignment term; detector v4 retrained on round Earth
 - **Fixes in branch freeze5-fixes:**
   - (1) QuantumTrust contrast range from the CAI grade preset (FIELD: 0.08 / 0.394);
