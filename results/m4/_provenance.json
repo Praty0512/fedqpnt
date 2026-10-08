@@ -1,0 +1,17 @@
+[
+  {
+    "valid": false,
+    "reasons": [
+      "HEAD changed during run: 0f223b2fcca83642bb44bf5539e2e3ea0256a709 -> 5e02b527ecde62206c25da7efe0e0213a70af9ed"
+    ],
+    "start": {
+      "head": "0f223b2fcca83642bb44bf5539e2e3ea0256a709",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "5e02b527ecde62206c25da7efe0e0213a70af9ed",
+      "dirty_files": []
+    },
+    "time": 1791003870.2521658
+  }
+]

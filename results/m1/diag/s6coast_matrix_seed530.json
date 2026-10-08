@@ -1,0 +1,86 @@
+{
+ "industrial_mems|fedqpnt_local|CAI=on": {
+  "max_h_att": 523.4414295981567,
+  "rmse_h_att": 185.8890677039378,
+  "max_h_post": 7.414435988404969,
+  "mean_w_gnss_att": 0.9999999989821707,
+  "t_det": NaN
+ },
+ "industrial_mems|fedqpnt_local|CAI=off": {
+  "max_h_att": 513.2119493503063,
+  "rmse_h_att": 182.79672323572476,
+  "max_h_post": 7.414366933925867,
+  "mean_w_gnss_att": 0.9999999989825463,
+  "t_det": NaN
+ },
+ "industrial_mems|fixed_trust|CAI=on": {
+  "max_h_att": 531.9293516790981,
+  "rmse_h_att": 189.75548740434274,
+  "max_h_post": 10.874131580425194,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ },
+ "industrial_mems|fixed_trust|CAI=off": {
+  "max_h_att": 512.0893650334423,
+  "rmse_h_att": 182.3337352892516,
+  "max_h_post": 11.124133974316504,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ },
+ "industrial_mems|undefended|CAI=on": {
+  "max_h_att": 530.6117865378983,
+  "rmse_h_att": 189.22887181261254,
+  "max_h_post": 10.83879376469783,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ },
+ "industrial_mems|undefended|CAI=off": {
+  "max_h_att": 512.0893650334423,
+  "rmse_h_att": 182.3337352892516,
+  "max_h_post": 11.124133974316504,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ },
+ "tactical|fedqpnt_local|CAI=on": {
+  "max_h_att": 104.35842663512857,
+  "rmse_h_att": 47.798154244764376,
+  "max_h_post": 13.057255397447005,
+  "mean_w_gnss_att": 0.99999999898086,
+  "t_det": NaN
+ },
+ "tactical|fedqpnt_local|CAI=off": {
+  "max_h_att": 121.14179701546452,
+  "rmse_h_att": 53.99457937722753,
+  "max_h_post": 12.556470028035449,
+  "mean_w_gnss_att": 0.9999999989808864,
+  "t_det": NaN
+ },
+ "tactical|fixed_trust|CAI=on": {
+  "max_h_att": 98.88204332228763,
+  "rmse_h_att": 46.05707095547383,
+  "max_h_post": 16.487878011176644,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ },
+ "tactical|fixed_trust|CAI=off": {
+  "max_h_att": 121.07188537039947,
+  "rmse_h_att": 53.96803234746786,
+  "max_h_post": 15.918867063488376,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ },
+ "tactical|undefended|CAI=on": {
+  "max_h_att": 100.0158780703912,
+  "rmse_h_att": 46.26891530600619,
+  "max_h_post": 16.100394072215053,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ },
+ "tactical|undefended|CAI=off": {
+  "max_h_att": 121.07188537039947,
+  "rmse_h_att": 53.96803234746786,
+  "max_h_post": 15.918867063488376,
+  "mean_w_gnss_att": 1.0,
+  "t_det": NaN
+ }
+}

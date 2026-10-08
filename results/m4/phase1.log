@@ -1,0 +1,394 @@
+Sat Oct  3 00:58:53 2026 total 4980 todo 4980 workers 4
+Sat Oct  3 01:04:18 2026 25/4980 {'ok': 25} elapsed 325s
+Sat Oct  3 01:10:02 2026 50/4980 {'ok': 50} elapsed 669s
+Sat Oct  3 01:13:26 2026 75/4980 {'ok': 75} elapsed 873s
+Sat Oct  3 01:16:48 2026 100/4980 {'ok': 100} elapsed 1075s
+Sat Oct  3 01:20:31 2026 125/4980 {'ok': 125} elapsed 1298s
+Sat Oct  3 01:24:01 2026 150/4980 {'ok': 150} elapsed 1508s
+Sat Oct  3 01:27:51 2026 175/4980 {'ok': 175} elapsed 1738s
+Sat Oct  3 01:31:39 2026 200/4980 {'ok': 200} elapsed 1966s
+Sat Oct  3 01:35:58 2026 225/4980 {'ok': 225} elapsed 2225s
+Sat Oct  3 01:39:44 2026 250/4980 {'ok': 250} elapsed 2451s
+Sat Oct  3 01:43:36 2026 275/4980 {'ok': 275} elapsed 2683s
+Sat Oct  3 01:47:24 2026 300/4980 {'ok': 300} elapsed 2911s
+Sat Oct  3 01:51:41 2026 325/4980 {'ok': 325} elapsed 3168s
+Sat Oct  3 01:55:27 2026 350/4980 {'ok': 350} elapsed 3394s
+Sat Oct  3 01:59:03 2026 375/4980 {'ok': 375} elapsed 3610s
+Sat Oct  3 02:01:47 2026 400/4980 {'ok': 400} elapsed 3774s
+Sat Oct  3 02:04:48 2026 425/4980 {'ok': 425} elapsed 3955s
+Sat Oct  3 02:07:33 2026 450/4980 {'ok': 450} elapsed 4120s
+Sat Oct  3 02:10:21 2026 475/4980 {'ok': 475} elapsed 4288s
+Sat Oct  3 02:13:03 2026 500/4980 {'ok': 500} elapsed 4450s
+Sat Oct  3 02:16:04 2026 525/4980 {'ok': 525} elapsed 4631s
+Sat Oct  3 02:18:47 2026 550/4980 {'ok': 550} elapsed 4794s
+Sat Oct  3 02:21:35 2026 575/4980 {'ok': 575} elapsed 4962s
+Sat Oct  3 02:24:18 2026 600/4980 {'ok': 600} elapsed 5125s
+Sat Oct  3 02:27:17 2026 625/4980 {'ok': 625} elapsed 5303s
+Sat Oct  3 02:30:01 2026 650/4980 {'ok': 650} elapsed 5468s
+Sat Oct  3 02:32:52 2026 675/4980 {'ok': 675} elapsed 5639s
+Sat Oct  3 02:35:37 2026 700/4980 {'ok': 700} elapsed 5804s
+Sat Oct  3 02:38:35 2026 725/4980 {'ok': 725} elapsed 5982s
+Sat Oct  3 02:41:19 2026 750/4980 {'ok': 750} elapsed 6146s
+Sat Oct  3 02:44:12 2026 775/4980 {'ok': 775} elapsed 6319s
+Sat Oct  3 02:46:58 2026 800/4980 {'ok': 800} elapsed 6485s
+Sat Oct  3 02:49:59 2026 825/4980 {'ok': 825} elapsed 6666s
+Sat Oct  3 02:52:45 2026 850/4980 {'ok': 850} elapsed 6831s
+Sat Oct  3 02:55:38 2026 875/4980 {'ok': 875} elapsed 7005s
+Sat Oct  3 02:58:26 2026 900/4980 {'ok': 900} elapsed 7173s
+Sat Oct  3 03:01:37 2026 925/4980 {'ok': 925} elapsed 7364s
+Sat Oct  3 03:04:23 2026 950/4980 {'ok': 950} elapsed 7530s
+Sat Oct  3 03:07:10 2026 975/4980 {'ok': 975} elapsed 7697s
+Sat Oct  3 03:09:56 2026 1000/4980 {'ok': 1000} elapsed 7863s
+Sat Oct  3 03:13:01 2026 1025/4980 {'ok': 1025} elapsed 8047s
+Sat Oct  3 03:15:40 2026 1050/4980 {'ok': 1050} elapsed 8207s
+Sat Oct  3 03:18:25 2026 1075/4980 {'ok': 1075} elapsed 8372s
+Sat Oct  3 03:21:11 2026 1100/4980 {'ok': 1100} elapsed 8538s
+Sat Oct  3 03:24:08 2026 1125/4980 {'ok': 1125} elapsed 8715s
+Sat Oct  3 03:26:49 2026 1150/4980 {'ok': 1150} elapsed 8876s
+Sat Oct  3 03:29:40 2026 1175/4980 {'ok': 1175} elapsed 9047s
+Sat Oct  3 03:32:26 2026 1200/4980 {'ok': 1200} elapsed 9213s
+Sat Oct  3 03:35:14 2026 1225/4980 {'ok': 1225} elapsed 9381s
+Sat Oct  3 03:37:55 2026 1250/4980 {'ok': 1250} elapsed 9542s
+Sat Oct  3 03:40:55 2026 1275/4980 {'ok': 1275} elapsed 9722s
+Sat Oct  3 03:43:39 2026 1300/4980 {'ok': 1300} elapsed 9886s
+Sat Oct  3 03:46:20 2026 1325/4980 {'ok': 1325} elapsed 10047s
+Sat Oct  3 03:49:04 2026 1350/4980 {'ok': 1350} elapsed 10211s
+Sat Oct  3 03:52:06 2026 1375/4980 {'ok': 1375} elapsed 10393s
+Sat Oct  3 03:54:45 2026 1400/4980 {'ok': 1400} elapsed 10552s
+Sat Oct  3 03:57:29 2026 1425/4980 {'ok': 1425} elapsed 10716s
+Sat Oct  3 04:00:18 2026 1450/4980 {'ok': 1450} elapsed 10885s
+Sat Oct  3 04:03:12 2026 1475/4980 {'ok': 1475} elapsed 11059s
+Sat Oct  3 04:05:52 2026 1500/4980 {'ok': 1500} elapsed 11219s
+Sat Oct  3 04:08:45 2026 1525/4980 {'ok': 1525} elapsed 11392s
+Sat Oct  3 04:11:30 2026 1550/4980 {'ok': 1550} elapsed 11557s
+Sat Oct  3 04:14:20 2026 1575/4980 {'ok': 1575} elapsed 11727s
+Sat Oct  3 04:17:01 2026 1600/4980 {'ok': 1600} elapsed 11888s
+Sat Oct  3 04:19:58 2026 1625/4980 {'ok': 1625} elapsed 12065s
+Sat Oct  3 04:22:42 2026 1650/4980 {'ok': 1650} elapsed 12229s
+Sat Oct  3 04:25:27 2026 1675/4980 {'ok': 1675} elapsed 12394s
+Sat Oct  3 04:28:08 2026 1700/4980 {'ok': 1700} elapsed 12554s
+Sat Oct  3 04:31:10 2026 1725/4980 {'ok': 1725} elapsed 12737s
+Sat Oct  3 04:33:52 2026 1750/4980 {'ok': 1750} elapsed 12899s
+Sat Oct  3 04:36:35 2026 1775/4980 {'ok': 1775} elapsed 13062s
+Sat Oct  3 04:39:20 2026 1800/4980 {'ok': 1800} elapsed 13227s
+Sat Oct  3 04:42:17 2026 1825/4980 {'ok': 1825} elapsed 13404s
+Sat Oct  3 04:44:57 2026 1850/4980 {'ok': 1850} elapsed 13564s
+Sat Oct  3 04:47:44 2026 1875/4980 {'ok': 1875} elapsed 13731s
+Sat Oct  3 04:50:27 2026 1900/4980 {'ok': 1900} elapsed 13894s
+Sat Oct  3 04:53:24 2026 1925/4980 {'ok': 1925} elapsed 14071s
+Sat Oct  3 04:56:06 2026 1950/4980 {'ok': 1950} elapsed 14233s
+Sat Oct  3 04:58:52 2026 1975/4980 {'ok': 1975} elapsed 14399s
+Sat Oct  3 05:01:33 2026 2000/4980 {'ok': 2000} elapsed 14560s
+Sat Oct  3 05:04:30 2026 2025/4980 {'ok': 2025} elapsed 14737s
+Sat Oct  3 05:07:09 2026 2050/4980 {'ok': 2050} elapsed 14896s
+Sat Oct  3 05:09:57 2026 2075/4980 {'ok': 2075} elapsed 15064s
+Sat Oct  3 05:12:38 2026 2100/4980 {'ok': 2100} elapsed 15225s
+Sat Oct  3 05:14:15 2026 2125/4980 {'ok': 2125} elapsed 15322s
+Sat Oct  3 05:15:45 2026 2150/4980 {'ok': 2150} elapsed 15412s
+Sat Oct  3 05:17:22 2026 2175/4980 {'ok': 2175} elapsed 15509s
+Sat Oct  3 05:18:53 2026 2200/4980 {'ok': 2200} elapsed 15600s
+Sat Oct  3 05:20:29 2026 2225/4980 {'ok': 2225} elapsed 15696s
+Sat Oct  3 05:21:58 2026 2250/4980 {'ok': 2250} elapsed 15785s
+Sat Oct  3 05:23:36 2026 2275/4980 {'ok': 2275} elapsed 15883s
+Sat Oct  3 05:25:06 2026 2300/4980 {'ok': 2300} elapsed 15973s
+Sat Oct  3 05:26:41 2026 2325/4980 {'ok': 2325} elapsed 16068s
+Sat Oct  3 05:28:13 2026 2350/4980 {'ok': 2350} elapsed 16160s
+Sat Oct  3 05:29:52 2026 2375/4980 {'ok': 2375} elapsed 16259s
+Sat Oct  3 05:31:23 2026 2400/4980 {'ok': 2400} elapsed 16350s
+Sat Oct  3 05:32:56 2026 2425/4980 {'ok': 2425} elapsed 16443s
+Sat Oct  3 05:34:30 2026 2450/4980 {'ok': 2450} elapsed 16536s
+Sat Oct  3 05:36:07 2026 2475/4980 {'ok': 2475} elapsed 16634s
+Sat Oct  3 05:37:37 2026 2500/4980 {'ok': 2500} elapsed 16724s
+Sat Oct  3 05:39:22 2026 2525/4980 {'ok': 2525} elapsed 16829s
+Sat Oct  3 05:41:18 2026 2550/4980 {'ok': 2550} elapsed 16945s
+Sat Oct  3 05:43:18 2026 2575/4980 {'ok': 2575} elapsed 17065s
+Sat Oct  3 05:45:13 2026 2600/4980 {'ok': 2600} elapsed 17180s
+Sat Oct  3 05:47:19 2026 2625/4980 {'ok': 2625} elapsed 17306s
+Sat Oct  3 05:49:13 2026 2650/4980 {'ok': 2650} elapsed 17420s
+Sat Oct  3 05:51:14 2026 2675/4980 {'ok': 2675} elapsed 17541s
+Sat Oct  3 05:53:08 2026 2700/4980 {'ok': 2700} elapsed 17655s
+Sat Oct  3 05:55:14 2026 2725/4980 {'ok': 2725} elapsed 17781s
+Sat Oct  3 05:57:21 2026 2750/4980 {'ok': 2750} elapsed 17908s
+Sat Oct  3 05:59:16 2026 2775/4980 {'ok': 2775} elapsed 18023s
+Sat Oct  3 06:01:15 2026 2800/4980 {'ok': 2800} elapsed 18142s
+Sat Oct  3 06:03:24 2026 2825/4980 {'ok': 2825} elapsed 18271s
+Sat Oct  3 06:05:20 2026 2850/4980 {'ok': 2850} elapsed 18386s
+Sat Oct  3 06:07:12 2026 2875/4980 {'ok': 2875} elapsed 18499s
+Sat Oct  3 06:09:18 2026 2900/4980 {'ok': 2900} elapsed 18625s
+Sat Oct  3 06:11:19 2026 2925/4980 {'ok': 2925} elapsed 18746s
+Sat Oct  3 06:15:27 2026 2950/4980 {'ok': 2950} elapsed 18994s
+Sat Oct  3 06:21:41 2026 2975/4980 {'ok': 2975} elapsed 19368s
+Sat Oct  3 06:28:12 2026 3000/4980 {'ok': 3000} elapsed 19759s
+Sat Oct  3 06:35:02 2026 3025/4980 {'ok': 3025} elapsed 20169s
+Sat Oct  3 06:41:17 2026 3050/4980 {'ok': 3050} elapsed 20544s
+Sat Oct  3 06:47:32 2026 3075/4980 {'ok': 3075} elapsed 20918s
+Sat Oct  3 06:54:01 2026 3100/4980 {'ok': 3100} elapsed 21308s
+Sat Oct  3 07:00:20 2026 3125/4980 {'ok': 3125} elapsed 21686s
+Sat Oct  3 07:05:24 2026 3150/4980 {'ok': 3150} elapsed 21991s
+Sat Oct  3 07:10:20 2026 3175/4980 {'ok': 3175} elapsed 22287s
+Sat Oct  3 07:15:38 2026 3200/4980 {'ok': 3200} elapsed 22605s
+Sat Oct  3 07:20:54 2026 3225/4980 {'ok': 3225} elapsed 22921s
+Sat Oct  3 07:23:19 2026 3238/4980 {'ok': 3237, 'EXC:FileNotFoundError': 1} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3239/4980 {'ok': 3237, 'EXC:FileNotFoundError': 2} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3240/4980 {'ok': 3237, 'EXC:FileNotFoundError': 3} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3241/4980 {'ok': 3237, 'EXC:FileNotFoundError': 4} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3242/4980 {'ok': 3237, 'EXC:FileNotFoundError': 5} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3243/4980 {'ok': 3237, 'EXC:FileNotFoundError': 6} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3244/4980 {'ok': 3237, 'EXC:FileNotFoundError': 7} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3245/4980 {'ok': 3237, 'EXC:FileNotFoundError': 8} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3246/4980 {'ok': 3237, 'EXC:FileNotFoundError': 9} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3247/4980 {'ok': 3237, 'EXC:FileNotFoundError': 10} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3248/4980 {'ok': 3237, 'EXC:FileNotFoundError': 11} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3249/4980 {'ok': 3237, 'EXC:FileNotFoundError': 12} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3250/4980 {'ok': 3237, 'EXC:FileNotFoundError': 13} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3251/4980 {'ok': 3237, 'EXC:FileNotFoundError': 14} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3252/4980 {'ok': 3237, 'EXC:FileNotFoundError': 15} elapsed 23066s
+Sat Oct  3 07:23:19 2026 3253/4980 {'ok': 3237, 'EXC:FileNotFoundError': 16} elapsed 23066s
+Sat Oct  3 07:23:20 2026 3254/4980 {'ok': 3237, 'EXC:FileNotFoundError': 17} elapsed 23066s
+Sat Oct  3 07:23:20 2026 3255/4980 {'ok': 3237, 'EXC:FileNotFoundError': 18} elapsed 23066s
+Sat Oct  3 07:23:20 2026 3256/4980 {'ok': 3237, 'EXC:FileNotFoundError': 19} elapsed 23066s
+Sat Oct  3 07:23:20 2026 3257/4980 {'ok': 3237, 'EXC:FileNotFoundError': 20} elapsed 23066s
+Sat Oct  3 07:23:20 2026 3258/4980 {'ok': 3237, 'EXC:FileNotFoundError': 21} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3259/4980 {'ok': 3237, 'EXC:FileNotFoundError': 22} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3260/4980 {'ok': 3237, 'EXC:FileNotFoundError': 23} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3261/4980 {'ok': 3237, 'EXC:FileNotFoundError': 24} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3262/4980 {'ok': 3237, 'EXC:FileNotFoundError': 25} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3263/4980 {'ok': 3237, 'EXC:FileNotFoundError': 26} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3264/4980 {'ok': 3237, 'EXC:FileNotFoundError': 27} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3265/4980 {'ok': 3237, 'EXC:FileNotFoundError': 28} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3266/4980 {'ok': 3237, 'EXC:FileNotFoundError': 29} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3267/4980 {'ok': 3237, 'EXC:FileNotFoundError': 30} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3268/4980 {'ok': 3237, 'EXC:FileNotFoundError': 31} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3269/4980 {'ok': 3237, 'EXC:FileNotFoundError': 32} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3270/4980 {'ok': 3237, 'EXC:FileNotFoundError': 33} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3271/4980 {'ok': 3237, 'EXC:FileNotFoundError': 34} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3272/4980 {'ok': 3237, 'EXC:FileNotFoundError': 35} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3273/4980 {'ok': 3237, 'EXC:FileNotFoundError': 36} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3274/4980 {'ok': 3237, 'EXC:FileNotFoundError': 37} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3275/4980 {'ok': 3237, 'EXC:FileNotFoundError': 38} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3276/4980 {'ok': 3237, 'EXC:FileNotFoundError': 39} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3277/4980 {'ok': 3237, 'EXC:FileNotFoundError': 40} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3278/4980 {'ok': 3237, 'EXC:FileNotFoundError': 41} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3279/4980 {'ok': 3237, 'EXC:FileNotFoundError': 42} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3280/4980 {'ok': 3237, 'EXC:FileNotFoundError': 43} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3281/4980 {'ok': 3237, 'EXC:FileNotFoundError': 44} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3282/4980 {'ok': 3237, 'EXC:FileNotFoundError': 45} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3283/4980 {'ok': 3237, 'EXC:FileNotFoundError': 46} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3284/4980 {'ok': 3237, 'EXC:FileNotFoundError': 47} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3285/4980 {'ok': 3237, 'EXC:FileNotFoundError': 48} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3286/4980 {'ok': 3237, 'EXC:FileNotFoundError': 49} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3287/4980 {'ok': 3237, 'EXC:FileNotFoundError': 50} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3288/4980 {'ok': 3237, 'EXC:FileNotFoundError': 51} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3289/4980 {'ok': 3237, 'EXC:FileNotFoundError': 52} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3290/4980 {'ok': 3237, 'EXC:FileNotFoundError': 53} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3291/4980 {'ok': 3237, 'EXC:FileNotFoundError': 54} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3292/4980 {'ok': 3237, 'EXC:FileNotFoundError': 55} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3293/4980 {'ok': 3237, 'EXC:FileNotFoundError': 56} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3294/4980 {'ok': 3237, 'EXC:FileNotFoundError': 57} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3295/4980 {'ok': 3237, 'EXC:FileNotFoundError': 58} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3296/4980 {'ok': 3237, 'EXC:FileNotFoundError': 59} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3297/4980 {'ok': 3237, 'EXC:FileNotFoundError': 60} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3298/4980 {'ok': 3237, 'EXC:FileNotFoundError': 61} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3299/4980 {'ok': 3237, 'EXC:FileNotFoundError': 62} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3300/4980 {'ok': 3237, 'EXC:FileNotFoundError': 63} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3301/4980 {'ok': 3237, 'EXC:FileNotFoundError': 64} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3302/4980 {'ok': 3237, 'EXC:FileNotFoundError': 65} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3303/4980 {'ok': 3237, 'EXC:FileNotFoundError': 66} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3304/4980 {'ok': 3237, 'EXC:FileNotFoundError': 67} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3305/4980 {'ok': 3237, 'EXC:FileNotFoundError': 68} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3306/4980 {'ok': 3237, 'EXC:FileNotFoundError': 69} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3307/4980 {'ok': 3237, 'EXC:FileNotFoundError': 70} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3308/4980 {'ok': 3237, 'EXC:FileNotFoundError': 71} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3309/4980 {'ok': 3237, 'EXC:FileNotFoundError': 72} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3310/4980 {'ok': 3237, 'EXC:FileNotFoundError': 73} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3311/4980 {'ok': 3237, 'EXC:FileNotFoundError': 74} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3312/4980 {'ok': 3237, 'EXC:FileNotFoundError': 75} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3313/4980 {'ok': 3237, 'EXC:FileNotFoundError': 76} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3314/4980 {'ok': 3237, 'EXC:FileNotFoundError': 77} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3315/4980 {'ok': 3237, 'EXC:FileNotFoundError': 78} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3316/4980 {'ok': 3237, 'EXC:FileNotFoundError': 79} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3317/4980 {'ok': 3237, 'EXC:FileNotFoundError': 80} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3318/4980 {'ok': 3237, 'EXC:FileNotFoundError': 81} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3319/4980 {'ok': 3237, 'EXC:FileNotFoundError': 82} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3320/4980 {'ok': 3237, 'EXC:FileNotFoundError': 83} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3321/4980 {'ok': 3237, 'EXC:FileNotFoundError': 84} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3322/4980 {'ok': 3237, 'EXC:FileNotFoundError': 85} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3323/4980 {'ok': 3237, 'EXC:FileNotFoundError': 86} elapsed 23067s
+Sat Oct  3 07:23:20 2026 3324/4980 {'ok': 3237, 'EXC:FileNotFoundError': 87} elapsed 23067s
+Sat Oct  3 07:23:21 2026 3325/4980 {'ok': 3237, 'EXC:FileNotFoundError': 88} elapsed 23067s
+Sat Oct  3 07:23:21 2026 3326/4980 {'ok': 3237, 'EXC:FileNotFoundError': 89} elapsed 23067s
+Sat Oct  3 07:23:21 2026 3327/4980 {'ok': 3237, 'EXC:FileNotFoundError': 90} elapsed 23067s
+Sat Oct  3 07:23:21 2026 3328/4980 {'ok': 3237, 'EXC:FileNotFoundError': 91} elapsed 23067s
+Sat Oct  3 07:23:21 2026 3329/4980 {'ok': 3237, 'EXC:FileNotFoundError': 92} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3330/4980 {'ok': 3237, 'EXC:FileNotFoundError': 93} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3331/4980 {'ok': 3237, 'EXC:FileNotFoundError': 94} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3332/4980 {'ok': 3237, 'EXC:FileNotFoundError': 95} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3333/4980 {'ok': 3237, 'EXC:FileNotFoundError': 96} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3334/4980 {'ok': 3237, 'EXC:FileNotFoundError': 97} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3335/4980 {'ok': 3237, 'EXC:FileNotFoundError': 98} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3336/4980 {'ok': 3237, 'EXC:FileNotFoundError': 99} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3337/4980 {'ok': 3237, 'EXC:FileNotFoundError': 100} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3338/4980 {'ok': 3237, 'EXC:FileNotFoundError': 101} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3339/4980 {'ok': 3237, 'EXC:FileNotFoundError': 102} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3340/4980 {'ok': 3237, 'EXC:FileNotFoundError': 103} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3341/4980 {'ok': 3237, 'EXC:FileNotFoundError': 104} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3342/4980 {'ok': 3237, 'EXC:FileNotFoundError': 105} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3343/4980 {'ok': 3237, 'EXC:FileNotFoundError': 106} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3344/4980 {'ok': 3237, 'EXC:FileNotFoundError': 107} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3345/4980 {'ok': 3237, 'EXC:FileNotFoundError': 108} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3346/4980 {'ok': 3237, 'EXC:FileNotFoundError': 109} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3347/4980 {'ok': 3237, 'EXC:FileNotFoundError': 110} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3348/4980 {'ok': 3237, 'EXC:FileNotFoundError': 111} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3349/4980 {'ok': 3237, 'EXC:FileNotFoundError': 112} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3350/4980 {'ok': 3237, 'EXC:FileNotFoundError': 113} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3351/4980 {'ok': 3237, 'EXC:FileNotFoundError': 114} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3352/4980 {'ok': 3237, 'EXC:FileNotFoundError': 115} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3353/4980 {'ok': 3237, 'EXC:FileNotFoundError': 116} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3354/4980 {'ok': 3237, 'EXC:FileNotFoundError': 117} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3355/4980 {'ok': 3237, 'EXC:FileNotFoundError': 118} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3356/4980 {'ok': 3237, 'EXC:FileNotFoundError': 119} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3357/4980 {'ok': 3237, 'EXC:FileNotFoundError': 120} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3358/4980 {'ok': 3237, 'EXC:FileNotFoundError': 121} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3359/4980 {'ok': 3237, 'EXC:FileNotFoundError': 122} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3360/4980 {'ok': 3237, 'EXC:FileNotFoundError': 123} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3361/4980 {'ok': 3237, 'EXC:FileNotFoundError': 124} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3362/4980 {'ok': 3237, 'EXC:FileNotFoundError': 125} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3363/4980 {'ok': 3237, 'EXC:FileNotFoundError': 126} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3364/4980 {'ok': 3237, 'EXC:FileNotFoundError': 127} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3365/4980 {'ok': 3237, 'EXC:FileNotFoundError': 128} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3366/4980 {'ok': 3237, 'EXC:FileNotFoundError': 129} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3367/4980 {'ok': 3237, 'EXC:FileNotFoundError': 130} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3368/4980 {'ok': 3237, 'EXC:FileNotFoundError': 131} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3369/4980 {'ok': 3237, 'EXC:FileNotFoundError': 132} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3370/4980 {'ok': 3237, 'EXC:FileNotFoundError': 133} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3371/4980 {'ok': 3237, 'EXC:FileNotFoundError': 134} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3372/4980 {'ok': 3237, 'EXC:FileNotFoundError': 135} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3373/4980 {'ok': 3237, 'EXC:FileNotFoundError': 136} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3374/4980 {'ok': 3237, 'EXC:FileNotFoundError': 137} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3375/4980 {'ok': 3237, 'EXC:FileNotFoundError': 138} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3376/4980 {'ok': 3237, 'EXC:FileNotFoundError': 139} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3377/4980 {'ok': 3237, 'EXC:FileNotFoundError': 140} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3378/4980 {'ok': 3237, 'EXC:FileNotFoundError': 141} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3379/4980 {'ok': 3237, 'EXC:FileNotFoundError': 142} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3380/4980 {'ok': 3237, 'EXC:FileNotFoundError': 143} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3381/4980 {'ok': 3237, 'EXC:FileNotFoundError': 144} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3382/4980 {'ok': 3237, 'EXC:FileNotFoundError': 145} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3383/4980 {'ok': 3237, 'EXC:FileNotFoundError': 146} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3384/4980 {'ok': 3237, 'EXC:FileNotFoundError': 147} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3385/4980 {'ok': 3237, 'EXC:FileNotFoundError': 148} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3386/4980 {'ok': 3237, 'EXC:FileNotFoundError': 149} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3387/4980 {'ok': 3237, 'EXC:FileNotFoundError': 150} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3388/4980 {'ok': 3237, 'EXC:FileNotFoundError': 151} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3389/4980 {'ok': 3237, 'EXC:FileNotFoundError': 152} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3390/4980 {'ok': 3237, 'EXC:FileNotFoundError': 153} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3391/4980 {'ok': 3237, 'EXC:FileNotFoundError': 154} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3392/4980 {'ok': 3237, 'EXC:FileNotFoundError': 155} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3393/4980 {'ok': 3237, 'EXC:FileNotFoundError': 156} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3394/4980 {'ok': 3237, 'EXC:FileNotFoundError': 157} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3395/4980 {'ok': 3237, 'EXC:FileNotFoundError': 158} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3396/4980 {'ok': 3237, 'EXC:FileNotFoundError': 159} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3397/4980 {'ok': 3237, 'EXC:FileNotFoundError': 160} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3398/4980 {'ok': 3237, 'EXC:FileNotFoundError': 161} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3399/4980 {'ok': 3237, 'EXC:FileNotFoundError': 162} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3400/4980 {'ok': 3237, 'EXC:FileNotFoundError': 163} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3401/4980 {'ok': 3237, 'EXC:FileNotFoundError': 164} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3402/4980 {'ok': 3237, 'EXC:FileNotFoundError': 165} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3403/4980 {'ok': 3237, 'EXC:FileNotFoundError': 166} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3404/4980 {'ok': 3237, 'EXC:FileNotFoundError': 167} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3406/4980 {'ok': 3238, 'EXC:FileNotFoundError': 168} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3407/4980 {'ok': 3238, 'EXC:FileNotFoundError': 169} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3408/4980 {'ok': 3238, 'EXC:FileNotFoundError': 170} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3409/4980 {'ok': 3238, 'EXC:FileNotFoundError': 171} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3410/4980 {'ok': 3238, 'EXC:FileNotFoundError': 172} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3411/4980 {'ok': 3238, 'EXC:FileNotFoundError': 173} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3412/4980 {'ok': 3238, 'EXC:FileNotFoundError': 174} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3413/4980 {'ok': 3238, 'EXC:FileNotFoundError': 175} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3414/4980 {'ok': 3238, 'EXC:FileNotFoundError': 176} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3415/4980 {'ok': 3238, 'EXC:FileNotFoundError': 177} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3416/4980 {'ok': 3238, 'EXC:FileNotFoundError': 178} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3417/4980 {'ok': 3238, 'EXC:FileNotFoundError': 179} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3418/4980 {'ok': 3238, 'EXC:FileNotFoundError': 180} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3419/4980 {'ok': 3238, 'EXC:FileNotFoundError': 181} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3420/4980 {'ok': 3238, 'EXC:FileNotFoundError': 182} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3421/4980 {'ok': 3238, 'EXC:FileNotFoundError': 183} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3422/4980 {'ok': 3238, 'EXC:FileNotFoundError': 184} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3423/4980 {'ok': 3238, 'EXC:FileNotFoundError': 185} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3424/4980 {'ok': 3238, 'EXC:FileNotFoundError': 186} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3425/4980 {'ok': 3238, 'EXC:FileNotFoundError': 187} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3426/4980 {'ok': 3238, 'EXC:FileNotFoundError': 188} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3427/4980 {'ok': 3238, 'EXC:FileNotFoundError': 189} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3428/4980 {'ok': 3238, 'EXC:FileNotFoundError': 190} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3429/4980 {'ok': 3238, 'EXC:FileNotFoundError': 191} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3430/4980 {'ok': 3238, 'EXC:FileNotFoundError': 192} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3431/4980 {'ok': 3238, 'EXC:FileNotFoundError': 193} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3432/4980 {'ok': 3238, 'EXC:FileNotFoundError': 194} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3433/4980 {'ok': 3238, 'EXC:FileNotFoundError': 195} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3434/4980 {'ok': 3238, 'EXC:FileNotFoundError': 196} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3435/4980 {'ok': 3238, 'EXC:FileNotFoundError': 197} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3436/4980 {'ok': 3238, 'EXC:FileNotFoundError': 198} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3437/4980 {'ok': 3238, 'EXC:FileNotFoundError': 199} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3438/4980 {'ok': 3238, 'EXC:FileNotFoundError': 200} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3439/4980 {'ok': 3238, 'EXC:FileNotFoundError': 201} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3440/4980 {'ok': 3238, 'EXC:FileNotFoundError': 202} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3441/4980 {'ok': 3238, 'EXC:FileNotFoundError': 203} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3442/4980 {'ok': 3238, 'EXC:FileNotFoundError': 204} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3443/4980 {'ok': 3238, 'EXC:FileNotFoundError': 205} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3444/4980 {'ok': 3238, 'EXC:FileNotFoundError': 206} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3445/4980 {'ok': 3238, 'EXC:FileNotFoundError': 207} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3446/4980 {'ok': 3238, 'EXC:FileNotFoundError': 208} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3447/4980 {'ok': 3238, 'EXC:FileNotFoundError': 209} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3448/4980 {'ok': 3238, 'EXC:FileNotFoundError': 210} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3449/4980 {'ok': 3238, 'EXC:FileNotFoundError': 211} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3450/4980 {'ok': 3238, 'EXC:FileNotFoundError': 212} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3451/4980 {'ok': 3238, 'EXC:FileNotFoundError': 213} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3452/4980 {'ok': 3238, 'EXC:FileNotFoundError': 214} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3453/4980 {'ok': 3238, 'EXC:FileNotFoundError': 215} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3454/4980 {'ok': 3238, 'EXC:FileNotFoundError': 216} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3455/4980 {'ok': 3238, 'EXC:FileNotFoundError': 217} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3456/4980 {'ok': 3238, 'EXC:FileNotFoundError': 218} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3457/4980 {'ok': 3238, 'EXC:FileNotFoundError': 219} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3458/4980 {'ok': 3238, 'EXC:FileNotFoundError': 220} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3459/4980 {'ok': 3238, 'EXC:FileNotFoundError': 221} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3460/4980 {'ok': 3238, 'EXC:FileNotFoundError': 222} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3461/4980 {'ok': 3238, 'EXC:FileNotFoundError': 223} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3462/4980 {'ok': 3238, 'EXC:FileNotFoundError': 224} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3463/4980 {'ok': 3238, 'EXC:FileNotFoundError': 225} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3464/4980 {'ok': 3238, 'EXC:FileNotFoundError': 226} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3465/4980 {'ok': 3238, 'EXC:FileNotFoundError': 227} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3466/4980 {'ok': 3238, 'EXC:FileNotFoundError': 228} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3467/4980 {'ok': 3238, 'EXC:FileNotFoundError': 229} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3468/4980 {'ok': 3238, 'EXC:FileNotFoundError': 230} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3469/4980 {'ok': 3238, 'EXC:FileNotFoundError': 231} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3470/4980 {'ok': 3238, 'EXC:FileNotFoundError': 232} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3471/4980 {'ok': 3238, 'EXC:FileNotFoundError': 233} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3472/4980 {'ok': 3238, 'EXC:FileNotFoundError': 234} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3473/4980 {'ok': 3238, 'EXC:FileNotFoundError': 235} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3474/4980 {'ok': 3238, 'EXC:FileNotFoundError': 236} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3475/4980 {'ok': 3238, 'EXC:FileNotFoundError': 237} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3476/4980 {'ok': 3238, 'EXC:FileNotFoundError': 238} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3477/4980 {'ok': 3238, 'EXC:FileNotFoundError': 239} elapsed 23068s
+Sat Oct  3 07:23:21 2026 3478/4980 {'ok': 3238, 'EXC:FileNotFoundError': 240} elapsed 23068s
+Sat Oct  3 07:45:46 2026 3500/4980 {'ok': 3260, 'EXC:FileNotFoundError': 240} elapsed 24413s
+Sat Oct  3 08:15:41 2026 3525/4980 {'ok': 3285, 'EXC:FileNotFoundError': 240} elapsed 26208s
+Sat Oct  3 08:42:02 2026 3550/4980 {'ok': 3310, 'EXC:FileNotFoundError': 240} elapsed 27789s
+Sat Oct  3 09:08:19 2026 3575/4980 {'ok': 3335, 'EXC:FileNotFoundError': 240} elapsed 29366s
+Sat Oct  3 09:34:32 2026 3600/4980 {'ok': 3360, 'EXC:FileNotFoundError': 240} elapsed 30939s
+Sat Oct  3 09:57:07 2026 3625/4980 {'ok': 3385, 'EXC:FileNotFoundError': 240} elapsed 32294s
+Sat Oct  3 10:19:02 2026 3650/4980 {'ok': 3410, 'EXC:FileNotFoundError': 240} elapsed 33609s
+Sat Oct  3 11:08:44 2026 3675/4980 {'ok': 3435, 'EXC:FileNotFoundError': 240} elapsed 36591s
+Sat Oct  3 11:49:05 2026 3700/4980 {'ok': 3460, 'EXC:FileNotFoundError': 240} elapsed 39012s
+Sat Oct  3 17:06:20 2026 3705/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 1} elapsed 58047s
+Sat Oct  3 17:06:23 2026 3706/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 2} elapsed 58050s
+Sat Oct  3 17:10:53 2026 3707/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 3} elapsed 58320s
+Sat Oct  3 17:12:20 2026 3708/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 4} elapsed 58407s
+Sun Oct  4 00:34:54 2026 3709/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 5} elapsed 84961s
+Sun Oct  4 00:35:11 2026 3710/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 6} elapsed 84978s
+Sun Oct  4 00:38:09 2026 3711/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 7} elapsed 85156s
+Sun Oct  4 00:39:06 2026 3712/4980 {'ok': 3464, 'EXC:FileNotFoundError': 240, 'timeout': 8} elapsed 85213s
+Sun Oct  4 02:09:38 2026 3725/4980 {'ok': 3477, 'EXC:FileNotFoundError': 240, 'timeout': 8} elapsed 90645s
+Sun Oct  4 10:52:16 2026 3729/4980 {'ok': 3480, 'EXC:FileNotFoundError': 240, 'timeout': 9} elapsed 122003s
+Sun Oct  4 10:52:17 2026 3730/4980 {'ok': 3480, 'EXC:FileNotFoundError': 240, 'timeout': 10} elapsed 122004s
+Sun Oct  4 10:54:14 2026 3731/4980 {'ok': 3480, 'EXC:FileNotFoundError': 240, 'timeout': 11} elapsed 122120s
+Sun Oct  4 10:55:15 2026 3732/4980 {'ok': 3480, 'EXC:FileNotFoundError': 240, 'timeout': 12} elapsed 122182s
+Sun Oct  4 13:07:44 2026 3750/4980 {'ok': 3498, 'EXC:FileNotFoundError': 240, 'timeout': 12} elapsed 130131s
+Sun Oct  4 15:18:08 2026 3775/4980 {'ok': 3523, 'EXC:FileNotFoundError': 240, 'timeout': 12} elapsed 137955s

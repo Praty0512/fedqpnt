@@ -1,0 +1,11 @@
+{
+  "status": "timeout",
+  "scenario_id": "S7-p2@industrial_mems",
+  "method": "fedqpnt_local",
+  "seed": 10019,
+  "config_hash": "472a1fc0155d93d1",
+  "kappa_R_status": "D-061_kappa_R=60",
+  "launcher": "spec_file",
+  "wall_s": 3600.228534936905,
+  "stderr": "Command '['C:\\\\Users\\\\DELL\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe', 'C:\\\\Users\\\\DELL\\\\Downloads\\\\FEDQPNT\\\\scripts\\\\m4_run_spec_file.py', 'C:\\\\Users\\\\DELL\\\\AppData\\\\Local\\\\Temp\\\\m4spec_wwqps4m9.json']' timed out after 3600 seconds"
+}

@@ -33,6 +33,28 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-082 · 2026-10-03 (recorded 2026-10-08) · CAI-trust calibration bug found in core-freeze-4 → round 1 stopped (partial); fix + fresh test round on NEW seeds (user decision)
+- **Bug** (CORE-ROBUST diagnosis, tuning seed 530):
+  - QuantumTrust.c_nom = 1.0 (trust_law.py:549), while the simulated FIELD CAI contrast is C0 = 0.394 (Jarlaud 2024);
+  - so p_q ≈ 0.67 > θ_on = 0.6 on every HEALTHY epoch, w_q is pinned at w_min, and the ESKF skips 92–100% of CAI updates (eskf.py:417).
+  - FedQPNT, B-cont and Baseline A therefore effectively never used the CAI. This explains the H3/S6-coast null in round 1 (130.4 vs 130.1 m).
+- **Also found:**
+  - the S2 scenarios use world = 'flat' while the ESKF models a round Earth (Schuler). This truth/model mismatch causes unbounded coast divergence (31 km in 5 min on MEMS) and an overconfident P, hence the probe failures. The control (a pure blackout) matches within 5%, so this is not a trust-logic bug;
+  - the S7-p2/p5 runs are very slow (~19 min to > 1 h; O(n_segments) attack lookup).
+- **User decision (2026-10-03):** fix, then run a FRESH test round on new, never-used seeds; report both rounds.
+- **Round 1 (core-freeze-4, seeds 10000–10029):** STOPPED and recorded as PARTIAL; it ended 2026-10-04 ~15:47 when the machine stopped.
+  - Single-node: 3,775/4,980 processed (3,523 ok; 240 command-line-length failures; 12 timeouts).
+  - Phase 1b: 20/239 (mostly 3600 s timeouts).
+  - Fleet: S5 partial.
+  - All files are kept as the round-1 record.
+- **Freeze-5 fixes:**
+  - (1) c_nom from the CAI grade preset (physics value, not tuned);
+  - (2) scenarios use the round-Earth world the filter models;
+  - (3) a bit-identical speed-up of the attack-segment lookup.
+  - Then a tuning-seed sanity check, then **PREREG amendment: round-2 test seeds 10030–10059**, run once.
+- **H2/H4 (D-081):** stands. Its primary is onset detection, independent of CAI trust; the paper discloses that it was run on freeze-4.
+- **Owner:** Master; the option was chosen by the user.
+
 ### D-081 · 2026-10-03 · H2/H4 confirmatory result (core-freeze-4): NULL by ceiling
 - **Validity:** 60/60 runs; fedqpnt diff empty for every run (tree 7223e641); invalid_runs = []; closed-loop τ calibration of 5.39 h per (part, arm) on clean seeds 580–599, achieved clean FAR 0.37/h.
 - **Primary (pre-registered, D-064):** P_D@10 s = 1.000 and onset latency = 0.0 s for every seed in every arm and part (0/10 censored). Paired Wilcoxon p = 1.0 for H2 and H4. **No difference.**

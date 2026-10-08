@@ -1,0 +1,22 @@
+{
+  "status": "error",
+  "scenario_id": "S5",
+  "method": "baseline_a",
+  "seed": 10015,
+  "config_hash": "27c9e12bc79ca8da",
+  "wall_s": 2966.2356462478638,
+  "metrics": {
+    "nodes": {},
+    "fleet": {
+      "rounds_skipped": 0,
+      "quarantine_events": 0,
+      "wall_s": 2966.2356462478638,
+      "wall_s_per_fleet_hour": 1779.7413877487181,
+      "n_nodes": 10,
+      "aborted": true,
+      "abort_reason": "watchdog timeout / server crash before producing a result",
+      "server_log": []
+    }
+  },
+  "kappa_R_status": "D-061_kappa_R=60"
+}

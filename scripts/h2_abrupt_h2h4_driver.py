@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -196,7 +197,7 @@ def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str, proven
     PART = "h2_abrupt"
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
-    for seed in LIVE_SEEDS:
+    for seed in (LIVE_SEEDS[::-1] if os.environ.get("H2_REVERSE_SEEDS") else LIVE_SEEDS):   # parallel driver goes in reverse to avoid meeting the forward driver
         local_seeds = {
             "n0": _seeds_excluding_family(300_000 + seed * 100, family_name, 6),
             **{f"n{i}": _seeds_including_family(300_000 + seed * 100 + i * 1000, family_name, 6)
@@ -223,7 +224,7 @@ def run_h4(theta0, param_names, attack: dict, family_name: str, tag: str, proven
     PART = "h4_abrupt"
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
-    for seed in LIVE_SEEDS:
+    for seed in (LIVE_SEEDS[::-1] if os.environ.get("H2_REVERSE_SEEDS") else LIVE_SEEDS):   # parallel driver goes in reverse to avoid meeting the forward driver
         local_seeds = {
             "n0": _seeds_excluding_family(400_000 + seed * 100, family_name, 6),
             **{f"n{i}": _seeds_including_family(400_000 + seed * 100 + i * 1000, family_name, 6)
@@ -252,7 +253,7 @@ def run_control(theta0, param_names, attack: dict, provenance_log: list) -> dict
     PART = "control_drift"
     node_ids = [f"n{i}" for i in range(N_NODES)]
     per_arm = _empty_per_arm()
-    for seed in LIVE_SEEDS:
+    for seed in (LIVE_SEEDS[::-1] if os.environ.get("H2_REVERSE_SEEDS") else LIVE_SEEDS):   # parallel driver goes in reverse to avoid meeting the forward driver
         local_seeds = {f"n{i}": list(range(300_000 + seed * 100 + i * 1000,
                                             300_000 + seed * 100 + i * 1000 + 6))
                         for i in range(N_NODES)}
