@@ -137,11 +137,11 @@ def collect_run(args: tuple[int, str, float]) -> dict:
     this is data COLLECTION, not evaluation of a trust law."""
     seed, pool, duration_s = args
     family, atk_list = plan_for(seed, pool)
-    env_cfg = EnvConfig(platform="ground", world="flat", imu_grade="industrial_mems",
+    env_cfg = EnvConfig(platform="ground", world="schuler_tangent", imu_grade="industrial_mems",
                          quantum_grade="field", gnss_rate_hz=1.0, hold_s=HOLD_S,
                          heading_noise_deg=2.0, attacks=atk_list or [])
     env = NodeEnvironment(env_cfg, seed=seed, node_id="sup", dt=0.01, duration_s=duration_s)
-    agent_cfg = make_agent_config("fixed_trust", kappa_R=DEFAULT_KAPPA_R, kappa_Q=1.0, world="flat",
+    agent_cfg = make_agent_config("fixed_trust", kappa_R=DEFAULT_KAPPA_R, kappa_Q=1.0, world="schuler_tangent",
                                    quantum_enabled=True, detector_weights_path=None)
     agent = Agent(agent_cfg, env.imu.config(), node_id="sup")
 
