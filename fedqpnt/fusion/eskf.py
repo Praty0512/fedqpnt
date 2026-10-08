@@ -389,7 +389,18 @@ class ESKF:
                             H[row, 9 + ax] = 1.0
                         T_W = win_len
                         sigma_win2 = (self.cfg.sigma_win_g * G0) ** 2
-                        R_q = np.diag(quantum.variance[axes] + (self.vrw ** 2 / max(T_W, 1e-6)) + sigma_win2)
+                        # D-083: IMU scale-factor / misalignment aliasing into the INS-side specific force
+                        # f_bar_imu is an unmodelled error of nu (same model as the propagation Q under
+                        # ``model_sf_mis``, D-028; sigma_* read from the IMU config, no tuning constant):
+                        # var_i = (sigma_sf * |f_i|)^2 + (sigma_mis)^2 * (|f|^2 - f_i^2).
+                        # KNOWN LIMIT (documented, deliberately NOT modelled): the CAI window-vs-IMU-buffer
+                        # mismatch on dynamic trajectories (innovation correlates with jerk, ~ -0.4 on
+                        # tactical) is only covered by the constant sigma_win_g term, so quantum NIS stays
+                        # somewhat above chi2 on manoeuvring runs (see CORE_ROBUST_NOTES, D-083).
+                        f_sq = float(np.sum(f_bar_imu ** 2))
+                        sfmis2 = ((self.sigma_sf_a * np.abs(f_bar_imu)) ** 2
+                                  + (self.sigma_mis_a ** 2) * np.maximum(f_sq - f_bar_imu ** 2, 0.0))
+                        R_q = np.diag(quantum.variance[axes] + (self.vrw ** 2 / max(T_W, 1e-6)) + sigma_win2 + sfmis2[axes])
                         S_q = H @ self.P @ H.T + R_q
                         nis_q = float(nu_q @ np.linalg.solve(S_q, nu_q))
                         dof = len(axes)

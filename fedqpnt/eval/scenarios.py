@@ -66,7 +66,7 @@ class Scenario:
     title: str
     fleet_size: int
     duration_s: float
-    world: str                       # "flat" | "schuler_tangent"
+    world: str                       # "flat" | "schuler_tangent" (D-082: single-node scenarios use schuler_tangent, the world the filter models: bounded INS coast error; fleet scenarios S5/S8/S9/S12/S15 stay "flat" -- the fleet node runner does not read scenario.world)
     cai_grade: str | None            # quantum_grade passed to RunSpec, or None (CAI off)
     attack: dict | None              # RunSpec.attack dict, or None (nominal)
     methods: tuple[str, ...]
@@ -231,7 +231,7 @@ def _s1_tv(results):
 
 
 S1 = Scenario(
-    id="S1", title="Nominal", fleet_size=1, duration_s=600.0, world="flat", cai_grade="field",
+    id="S1", title="Nominal", fleet_size=1, duration_s=600.0, world="schuler_tangent", cai_grade="field",
     attack=None, methods=METHOD_ALL,
     criteria=(
         _paired_ratio_check("rmse_h_vs_fixed_trust", "Trust must cost <=5% when nothing is wrong",
@@ -294,7 +294,7 @@ def _make_spoof_scenario(sid: str, title: str, attack: dict, final_offset_ge_50m
         crits.append(Criterion("damage_halved", "Halve the damage", _halve))
     crits.append(Criterion("damage_never_worse", "Defence never makes it worse (undefended + 3 sigma_nom)",
                             _never_worse))
-    return Scenario(id=sid, title=title, fleet_size=1, duration_s=duration_s, world="flat", cai_grade="field",
+    return Scenario(id=sid, title=title, fleet_size=1, duration_s=duration_s, world="schuler_tangent", cai_grade="field",
                     attack=attack, methods=METHOD_ALL, criteria=tuple(crits), base_id=base_id, notes=notes)
 
 
@@ -343,7 +343,7 @@ def _s3_check(results):
 
 
 S3 = Scenario(
-    id="S3", title="Sudden jamming", fleet_size=1, duration_s=300.0, world="flat", cai_grade="field",
+    id="S3", title="Sudden jamming", fleet_size=1, duration_s=300.0, world="schuler_tangent", cai_grade="field",
     attack=dict(kind="jam_wideband", onset_s=60.0, duration_s=60.0, severity=1.0),
     methods=METHOD_ALL,
     criteria=(Criterion("tdist_consistency_no_update",
@@ -388,7 +388,7 @@ def _s4_check(results):
 
 
 S4 = Scenario(
-    id="S4", title="Combined jam-then-spoof capture", fleet_size=1, duration_s=400.0, world="flat",
+    id="S4", title="Combined jam-then-spoof capture", fleet_size=1, duration_s=400.0, world="schuler_tangent",
     cai_grade="field", attack=S4_JAM, attacks=(S4_JAM, S4_SPOOF),
     methods=METHOD_ALL,
     criteria=(Criterion("s2_s3_joint_plus_reacq_cap", "Tests the reacquisition cap", _s4_check,
@@ -561,7 +561,7 @@ def _make_s7(period_s: float) -> Scenario:
     atk = toggle_attacks(period_s, S7_T0_S, S7_DURATION_S - S7_T0_S)
     return Scenario(
         id=f"S7-p{period_s:g}", title=f"Trust chattering (toggled spoof, period {period_s:g} s)", fleet_size=1,
-        duration_s=S7_DURATION_S, world="flat", cai_grade="field", attack=atk[0], attacks=atk,
+        duration_s=S7_DURATION_S, world="schuler_tangent", cai_grade="field", attack=atk[0], attacks=atk,
         methods=("fedqpnt_local", "undefended"), base_id="S7", group="S7",
         criteria=(Criterion("n_cyc_bound", "Checks the formal chattering bound (section 3.3) holds in code",
                              _s7_ncyc),
@@ -678,7 +678,7 @@ def _make_s10(rate_hz: float, tc_s: float = S10_TC_DEFAULT) -> Scenario:
     sid = f"S10-r{rate_hz:g}" + ("" if default_tc else f"-c{tc_s:g}")
     return Scenario(
         id=sid, title=f"Sample-rate mismatch (GNSS {rate_hz:g} Hz, assumed T_c {tc_s:g} s)", fleet_size=1,
-        duration_s=300.0, world="flat", cai_grade="field", attack=None, methods=("fedqpnt_local",),
+        duration_s=300.0, world="schuler_tangent", cai_grade="field", attack=None, methods=("fedqpnt_local",),
         gnss_rate_hz=rate_hz, quantum_cycle_time_s=(None if default_tc else tc_s), base_id="S10", group="S10",
         criteria=(Criterion("no_crash_anees_band", "Rate handling correctness", _s10_anees_band),),
         notes="GNSS-rate x T_c grid of the ARCH row; T_c is the AGENT's assumed CAI cycle time (the sensor's true "
@@ -735,7 +735,7 @@ def _s11_check(results):
 
 
 S11 = Scenario(
-    id="S11", title="Extreme noise (filter not told)", fleet_size=1, duration_s=300.0, world="flat",
+    id="S11", title="Extreme noise (filter not told)", fleet_size=1, duration_s=300.0, world="schuler_tangent",
     cai_grade="field", attack=None,     # D-068: intent has no attack (registry had an abrupt spoof)
     noise_scale=dict(imu=10.0, gnss=5.0, cai_contrast_div=3.0),
     methods=("fedqpnt_local",),
@@ -791,7 +791,7 @@ def _s13_trec(results):
 
 
 S13 = Scenario(
-    id="S13", title="Recovery after attack", fleet_size=1, duration_s=300.0, world="flat", cai_grade="field",
+    id="S13", title="Recovery after attack", fleet_size=1, duration_s=300.0, world="schuler_tangent", cai_grade="field",
     attack=dict(kind="abrupt_spoof", onset_s=60.0, duration_s=60.0, severity=0.8),
     methods=("fedqpnt_local",),
     criteria=(Criterion("t_rec_bounds", "Design recovery ~33s + EKF reconvergence [ASSUMPTION]", _s13_trec),),

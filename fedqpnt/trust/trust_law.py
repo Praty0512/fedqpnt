@@ -634,6 +634,10 @@ class TrustEngineConfig:
     p_source: Literal["detector", "bprime"] = "detector"
     detector_arch: Literal["mlp", "logreg"] = "mlp"
     quantum_cycle_time_s: float = 1.0
+    # D-082: nominal / minimum fringe contrast of the configured CAI grade (single-sourced from the sensor preset
+    # by ``fedqpnt.node.methods.make_agent_config``). Legacy defaults (1.0 / 0.1) apply only when no grade is given.
+    quantum_contrast_nom: float = 1.0
+    quantum_contrast_min: float = 0.1
     gnss_law_cfg: TrustLawConfig = field(default_factory=TrustLawConfig)
     detector_seed: int = 0
     # D-051 sec C: v2 (evidence-bounded exclusion) applies ONLY to
@@ -716,6 +720,7 @@ class TrustEngineImpl:
                                       law_mode=self.cfg.law_mode, trust_law_version=self.cfg.trust_law_version)
         self.imu_trust = ImuTrust(w_min=self.cfg.gnss_law_cfg.w_min)
         self.quantum_trust = QuantumTrust(cycle_time_s=self.cfg.quantum_cycle_time_s,
+                                           c_min=self.cfg.quantum_contrast_min, c_nom=self.cfg.quantum_contrast_nom,
                                            law_mode=self.cfg.law_mode) if self.cfg.quantum_enabled else None
         self._last_valid_gnss_t: float | None = None
         # D-058: previous accepted GNSS epoch's raw fix position/cov_pos,

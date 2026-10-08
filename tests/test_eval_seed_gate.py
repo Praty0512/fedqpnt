@@ -47,8 +47,16 @@ def test_unregistered_always_refused(tmp_path):
             SG.enforce_seed(s, final=True, gate_path=g)
 
 
-def test_real_gate_file_is_closed():
-    assert json.loads(open("results/GATE_D047.json").read())["cleared"] is False
+def test_real_gate_file_structure():
+    """D-083: the gate is legitimately CLEARED since D-080; validate the file's structure instead of its state.
+    A cleared gate must record who/what/when/under which frozen code and prereg; an open gate is just cleared=false."""
+    g = json.loads(open("results/GATE_D047.json").read())
+    assert isinstance(g["cleared"], bool)
+    if g["cleared"]:
+        for k in ("decision", "date", "code", "prereg", "test_seeds", "detector"):
+            assert g.get(k), f"cleared gate file missing '{k}'"
+        lo, hi = g["test_seeds"]
+        assert lo >= 10000 and hi >= lo
 
 
 def test_run_campaign_refuses_unregistered(tmp_path):

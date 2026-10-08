@@ -1,0 +1,53 @@
+=== industrial_mems  (mean over seeds 530-534; n in brackets) ===
+[nominal]
+  fedqpnt_local      rmse_h_pre=2.578  mean_w_gnss=0.982  wq_mean=0.533  wq_min=0.020  cai_applied_frac=0.919  nis3_mean=0.500  nis3_frac_gt_clean=0.008
+  undefended         rmse_h_pre=2.571  mean_w_gnss=0.999  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=0.500  nis3_frac_gt_clean=0.007
+  abl_minus_quantum  rmse_h_pre=2.409  mean_w_gnss=0.982  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[drift_spoof]
+  fedqpnt_local      rmse_h_att=267.050  max_h_att=698.439  rmse_h_post=272.484  mean_w_gnss_att=0.054  wq_mean=0.533  wq_min=0.020  cai_applied_frac=0.919  nis3_mean=0.500  nis3_frac_gt_clean=0.008
+  undefended         rmse_h_att=109.128  max_h_att=213.800  rmse_h_post=78.167  mean_w_gnss_att=1.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=0.500  nis3_frac_gt_clean=0.007
+  abl_minus_quantum  rmse_h_att=954.492  max_h_att=2359.101  rmse_h_post=14123.511  mean_w_gnss_att=0.054  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[meaconing]
+  fedqpnt_local      rmse_h_att=262.832  max_h_att=686.603  rmse_h_post=279.194  mean_w_gnss_att=0.054  wq_mean=0.533  wq_min=0.020  cai_applied_frac=0.919  nis3_mean=0.500  nis3_frac_gt_clean=0.008
+  undefended         rmse_h_att=2.710  max_h_att=3.364  rmse_h_post=2.201  mean_w_gnss_att=1.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=0.500  nis3_frac_gt_clean=0.007
+  abl_minus_quantum  rmse_h_att=936.368  max_h_att=2312.314  rmse_h_post=14164.518  mean_w_gnss_att=0.054  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[jam_cw]
+  fedqpnt_local      rmse_h_att=275.645  max_h_att=718.680  rmse_h_post=2.224  mean_w_gnss_att=0.986  wq_mean=0.533  wq_min=0.020  cai_applied_frac=0.919  nis3_mean=0.500  nis3_frac_gt_clean=0.008
+  undefended         rmse_h_att=277.293  max_h_att=723.325  rmse_h_post=2.259  mean_w_gnss_att=1.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=0.500  nis3_frac_gt_clean=0.007
+  abl_minus_quantum  rmse_h_att=969.448  max_h_att=2394.294  rmse_h_post=2.739  mean_w_gnss_att=0.986  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[s6coast]
+  fedqpnt_local      max_h_att=452.455  rmse_h_att=180.605  max_h_post=6.094  wq_mean=0.483  wq_min=0.020  cai_applied_frac=0.897  nis3_mean=0.493  nis3_frac_gt_clean=0.009
+  abl_minus_quantum  max_h_att=418.754  rmse_h_att=173.507  max_h_post=5.733  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+  undefended         max_h_att=452.819  rmse_h_att=180.767  max_h_post=9.095  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=0.494  nis3_frac_gt_clean=0.009
+  undefended_nocai   max_h_att=417.772  rmse_h_att=173.096  max_h_post=8.519  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[clean9604]
+  fedqpnt_local      rmse_h_pre=2.890  max_h_pre=4.472  mean_w_gnss=0.988  far_per_hour=0.000  wq_mean=0.526  wq_min=0.020  cai_applied_frac=0.933  nis3_mean=0.472  nis3_frac_gt_clean=0.008
+  undefended         rmse_h_pre=2.932  max_h_pre=4.474  mean_w_gnss=0.999  far_per_hour=0.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=0.474  nis3_frac_gt_clean=0.008
+  abl_minus_quantum  rmse_h_pre=3.072  max_h_pre=4.551  mean_w_gnss=0.988  far_per_hour=0.000  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+
+=== tactical  (mean over seeds 530-534; n in brackets) ===
+[nominal]
+  fedqpnt_local      rmse_h_pre=2.441  mean_w_gnss=0.982  wq_mean=0.362  wq_min=0.020  cai_applied_frac=0.823  nis3_mean=1.383  nis3_frac_gt_clean=0.118
+  undefended         rmse_h_pre=2.438  mean_w_gnss=0.999  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=1.427  nis3_frac_gt_clean=0.118
+  abl_minus_quantum  rmse_h_pre=2.392  mean_w_gnss=0.982  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[drift_spoof]
+  fedqpnt_local      rmse_h_att=72.450  max_h_att=172.327  rmse_h_post=101.433  mean_w_gnss_att=0.054  wq_mean=0.362  wq_min=0.020  cai_applied_frac=0.823  nis3_mean=1.383  nis3_frac_gt_clean=0.117
+  undefended         rmse_h_att=108.958  max_h_att=213.538  rmse_h_post=79.443  mean_w_gnss_att=1.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=1.427  nis3_frac_gt_clean=0.118
+  abl_minus_quantum  rmse_h_att=187.063  max_h_att=452.448  rmse_h_post=2238.280  mean_w_gnss_att=0.054  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[meaconing]
+  fedqpnt_local      rmse_h_att=71.928  max_h_att=170.351  rmse_h_post=103.098  mean_w_gnss_att=0.054  wq_mean=0.362  wq_min=0.020  cai_applied_frac=0.823  nis3_mean=1.383  nis3_frac_gt_clean=0.117
+  undefended         rmse_h_att=2.589  max_h_att=3.086  rmse_h_post=2.242  mean_w_gnss_att=1.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=1.427  nis3_frac_gt_clean=0.118
+  abl_minus_quantum  rmse_h_att=184.558  max_h_att=445.107  rmse_h_post=2236.408  mean_w_gnss_att=0.054  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[jam_cw]
+  fedqpnt_local      rmse_h_att=75.610  max_h_att=177.830  rmse_h_post=2.283  mean_w_gnss_att=0.986  wq_mean=0.362  wq_min=0.020  cai_applied_frac=0.823  nis3_mean=1.383  nis3_frac_gt_clean=0.117
+  undefended         rmse_h_att=74.868  max_h_att=175.955  rmse_h_post=2.320  mean_w_gnss_att=1.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=1.427  nis3_frac_gt_clean=0.118
+  abl_minus_quantum  rmse_h_att=192.463  max_h_att=462.801  rmse_h_post=2.383  mean_w_gnss_att=0.986  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[s6coast]
+  fedqpnt_local      max_h_att=108.818  rmse_h_att=48.284  max_h_post=8.447  wq_mean=0.310  wq_min=0.020  cai_applied_frac=0.818  nis3_mean=1.371  nis3_frac_gt_clean=0.111
+  abl_minus_quantum  max_h_att=116.546  rmse_h_att=50.763  max_h_post=7.648  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+  undefended         max_h_att=107.799  rmse_h_att=47.859  max_h_post=11.150  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=1.418  nis3_frac_gt_clean=0.113
+  undefended_nocai   max_h_att=116.544  rmse_h_att=50.761  max_h_post=10.222  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
+[clean9604]
+  fedqpnt_local      rmse_h_pre=2.936  max_h_pre=4.234  mean_w_gnss=0.988  far_per_hour=0.000  wq_mean=0.354  wq_min=0.020  cai_applied_frac=0.858  nis3_mean=1.385  nis3_frac_gt_clean=0.106
+  undefended         rmse_h_pre=2.967  max_h_pre=4.237  mean_w_gnss=0.999  far_per_hour=0.000  wq_mean=1.000  wq_min=1.000  cai_applied_frac=1.000  nis3_mean=1.435  nis3_frac_gt_clean=0.117
+  abl_minus_quantum  rmse_h_pre=3.121  max_h_pre=4.649  mean_w_gnss=0.988  far_per_hour=0.000  wq_mean=na  wq_min=na  cai_applied_frac=na  nis3_mean=na  nis3_frac_gt_clean=na
