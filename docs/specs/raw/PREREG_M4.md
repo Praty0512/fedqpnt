@@ -57,3 +57,22 @@ Results are reported whatever they show.
 - The trust design was iterated on tuning seeds only (D-051…D-079).
 - The test seeds are run once.
 - No design, parameter or threshold changes after the gate opens.
+
+---
+## AMENDMENT R2 — Round 2 (2026-10-08), written BEFORE any round-2 data exists
+Reason: round 1 (core-freeze-4, seeds 10000–10029) exposed a CAI-trust calibration bug (D-082). The user chose to fix the bug and run a fresh test round. Round 1 is reported as partial and superseded (`results/m4/ROUND1_STATUS.json`).
+
+**Changes from the original pre-registration (everything else stands, including §4 confirmatory family, §5 safety rule, §8 integrity):**
+- **Code:** tag `core-freeze-5` (D-082/D-083). Validity is judged by `git diff <launch> <end> -- fedqpnt` being empty and `fedqpnt/` equalling core-freeze-5 ("fedqpnt_verdict"). The frozen whole-repo HEAD verdict is also reported.
+- **Test seeds:** **10030–10059** (n = 30). These are new and never used.
+- **Single-node detector:** `results/m1/detector_weights_sup_v4.npz`, retrained with the unchanged D-052/D-053 protocol on the `schuler_tangent` world. Held-out AUC 0.958; displaced meaconer 0.9885; S1 FAR 0/h at both grades.
+- **Fleet θ0:** `results/fleet/theta0_d054.npz`, re-pretrained on core-freeze-5 with the D-054 protocol on the fleet world (`flat`). Provenance is in `theta0_d054_freeze5_provenance.json`; the old file is backed up.
+- **World:** single-node scenarios use `schuler_tangent`. Fleet scenarios use `flat` (the fleet runner default), which is disclosed.
+- **σ_nom** (D-068 rule, re-measured on schuler_tangent): MEMS **1.139 m**, tactical **1.120 m** (`results/sigma_nom_freeze5.json`).
+- **H2/H4:** the confirmatory fleet result stands from core-freeze-4 (D-081, null). Its primary (onset detection) does not involve CAI trust. Its inclusion in the Holm family is unchanged (it enters with its freeze-4 p-values), which is disclosed.
+- **Execution:**
+  - `scripts/m4_campaign.py --seeds 10030-10059 --weights <v4> --root results/m4r2`;
+  - long specs use the spec-file launcher with a 7200 s timeout, and tasks are claimed via claim files;
+  - test seeds are run ONCE;
+  - a task that times out or crashes may be retried once, with the same spec, only if the cause is infrastructure (a machine stop or OOM). The retry is logged;
+  - nothing else is re-run, and nothing is changed after launch.
