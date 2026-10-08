@@ -1,151 +1,268 @@
-"""M4 orchestration (CAMPAIGN agent): same functions as run_campaign, but passes the v3 detector weights
-explicitly (run_campaign does not expose detector_weights_path), logs progress, and is resumable."""
-import json, sys, time, argparse
-from pathlib import Path
+"""M4 orchestration (CAMPAIGN agent), round-2 form. Scripts only; no fedqpnt/ edits.
+
+Differs from fedqpnt.eval.campaign.run_campaign in that it (a) passes detector weights EXPLICITLY (required),
+(b) uses a spec-file launcher for tasks whose spec JSON exceeds the Windows command-line limit (2 s / 5 s
+toggling in S7-p2/p5), (c) claim files for every task so several instances can share one result store,
+(d) progress log + D-062 provenance.
+
+Examples (round 2; nothing is launched until the Master says "round 2 go"):
+    python scripts/m4_campaign.py --dry --weights <placeholder.npz>            # manifest + assertions only
+    python scripts/m4_campaign.py --phase 1 --weights results/m1/detector_weights_sup_v4.npz --workers 4
+    python scripts/m4_campaign.py --phase 2 --weights ...                       # fleet, 1 at a time
+    python scripts/m4_campaign.py --phase 2 --reverse --weights ...             # 2nd fleet instance, reverse order
+Resume = rerun the same command (done tasks skipped). After a crash use --clear-claims ONLY when no instance is live.
+"""
+import argparse
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import time
 from collections import Counter
-from dataclasses import asdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from fedqpnt.eval import campaign as C, scenarios as SC
-from fedqpnt.eval import seed_gate as SG
+from dataclasses import asdict
+from pathlib import Path
 
-W = "results/m1/detector_weights_sup_v3.npz"
-SEEDS = list(range(10000, 10030))
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+from fedqpnt.eval import campaign as C, scenarios as SC  # noqa: E402
+
 GRADES = ["industrial_mems", "tactical"]
-ROOT = "results/m4"
+LONG_SPEC_CHARS = 30_000          # Windows cmdline limit is 32,767
+TIMEOUT_NORMAL_S = 3600           # _execute_one's own timeout
+TIMEOUT_LONG_S = 7200
+CODE_TAG = "core-freeze-5"
+SPEC_FILE_SCRIPT = Path(__file__).with_name("m4_run_spec_file.py")
 
-def all_ids():
-    ids = [s.id if hasattr(s, "id") else s for s in (SC.REGISTRY.values() if hasattr(SC, "REGISTRY") else SC.all_scenarios())]
-    return ids
 
-def build(phase):
+# ---------------------------------------------------------------- args / preflight
+def parse_seeds(txt: str) -> list[int]:
+    out: list[int] = []
+    for part in txt.replace(",", " ").split():
+        if "-" in part:
+            a, b = part.split("-", 1)
+            out += list(range(int(a), int(b) + 1))
+        else:
+            out.append(int(part))
+    return sorted(set(out))
+
+
+def _git(*args: str) -> str:
+    r = subprocess.run(["git", *args], cwd=str(REPO), capture_output=True, text=True, timeout=120)
+    if r.returncode != 0:
+        raise SystemExit(f"git {' '.join(args)} failed: {r.stderr.strip()}")
+    return r.stdout
+
+
+def check_code(tag: str) -> dict:
+    """Code must equal <tag> on fedqpnt/ and the fedqpnt/ working tree must be clean (D-062)."""
+    diff = _git("diff", tag, "HEAD", "--", "fedqpnt").strip()
+    dirty = _git("status", "--porcelain", "--", "fedqpnt/").strip()
+    if diff or dirty:
+        raise SystemExit(f"CODE CHECK FAILED vs {tag}: diff={'non-empty' if diff else 'empty'} dirty={dirty!r}")
+    return dict(tag=tag, tag_commit=_git("rev-parse", tag).strip(), head=_git("rev-parse", "HEAD").strip())
+
+
+def all_ids() -> list[str]:
+    return [s.id for s in SC.all_scenarios()]
+
+
+def build(phase: str, seeds: list[int], weights: str):
     ids = all_ids()
-    single = [i for i in ids if not SC.get(i).requires_fl]
-    fleet = [i for i in ids if SC.get(i).requires_fl]
-    sel = single if phase == "1" else fleet
-    return ids, C.generate_tasks(sel, None, SEEDS, detector_weights_path=W, imu_grades=GRADES, final=True)
+    sel = [i for i in ids if (SC.get(i).requires_fl if phase == "2" else not SC.get(i).requires_fl)]
+    return ids, C.generate_tasks(sel, None, seeds, detector_weights_path=weights, imu_grades=GRADES, final=True)
 
-def claim(out_path):
-    """Atomic claim file; True if we got it. Caller deletes via release()."""
-    import os
+
+def is_long(task) -> bool:
+    return (not task.is_fleet) and len(json.dumps(task.spec)) > LONG_SPEC_CHARS
+
+
+# ---------------------------------------------------------------- claims
+def claim(out_path) -> bool:
     cp = str(out_path) + ".claim"
     Path(cp).parent.mkdir(parents=True, exist_ok=True)
     try:
         fd = os.open(cp, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     except FileExistsError:
         return False
-    os.write(fd, f"{os.getpid()} {time.ctime()}".encode()); os.close(fd)
+    os.write(fd, f"{os.getpid()} {time.ctime()}".encode())
+    os.close(fd)
     return True
 
-def release(out_path):
-    import os
-    try: os.remove(str(out_path) + ".claim")
-    except OSError: pass
 
-def exec_spec_file(task_dict, run_root, python_exe, final=True):
-    t = C.RunTask(**task_dict); op = t.result_path(Path(run_root))
-    if not claim(op):
-        return dict(status="skipped_claimed")
+def release(out_path) -> None:
     try:
-        return _exec_spec_file(task_dict, run_root, python_exe, final)
-    finally:
-        release(op)
+        os.remove(str(out_path) + ".claim")
+    except OSError:
+        pass
 
-def _exec_spec_file(task_dict, run_root, python_exe, final=True):
-    """Phase 1b: same record format/path as campaign._execute_one, spec passed via temp file."""
-    import subprocess, tempfile, os
-    task = C.RunTask(**task_dict)
-    C._enforce_task_seed(task.seed, final)
+
+# ---------------------------------------------------------------- executors (run in worker processes)
+def exec_spec_file(task: "C.RunTask", run_root: str, python_exe: str, timeout_s: int) -> dict:
+    """Same record format/path as campaign._execute_one (+ launcher='spec_file'); spec passed via temp file."""
     out_path = task.result_path(Path(run_root))
-    if C._is_done(out_path):
-        return dict(status="skipped_done")
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(suffix=".json", prefix="m4spec_"); os.close(fd)
+    fd, tmp = tempfile.mkstemp(suffix=".json", prefix="m4spec_")
+    os.close(fd)
     Path(tmp).write_text(json.dumps(task.spec))
     t0 = time.time()
     base = dict(scenario_id=task.scenario_id, method=task.method, seed=task.seed, config_hash=task.hash,
                 kappa_R_status=SC.KAPPA_R_STATUS, launcher="spec_file")
     try:
-        proc = subprocess.run([python_exe, str(Path(__file__).with_name("m4_run_spec_file.py")), tmp],
-                              capture_output=True, text=True, timeout=3600)
+        proc = subprocess.run([python_exe, str(SPEC_FILE_SCRIPT), tmp], capture_output=True, text=True,
+                              timeout=timeout_s, cwd=str(REPO))
     except subprocess.TimeoutExpired as exc:
-        out_path.write_text(json.dumps(dict(status="timeout", **base, wall_s=time.time()-t0, stderr=str(exc)), default=str, indent=2))
+        out_path.write_text(json.dumps(dict(status="timeout", **base, wall_s=time.time() - t0, stderr=str(exc)),
+                                       default=str, indent=2))
         return dict(status="timeout")
     finally:
-        try: os.remove(tmp)
-        except OSError: pass
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
     if proc.returncode != 0:
-        out_path.write_text(json.dumps(dict(status="error", **base, wall_s=time.time()-t0, returncode=proc.returncode,
-                                            stderr=proc.stderr[-4000:]), default=str, indent=2))
+        out_path.write_text(json.dumps(dict(status="error", **base, wall_s=time.time() - t0,
+                                            returncode=proc.returncode, stderr=proc.stderr[-4000:]),
+                                       default=str, indent=2))
         return dict(status="error")
     try:
         metrics = json.loads(proc.stdout.strip().splitlines()[-1]) if proc.stdout.strip() else {}
     except json.JSONDecodeError:
         metrics = dict(_parse_error=True, raw_stdout=proc.stdout[-2000:])
-    out_path.write_text(json.dumps(dict(status="ok", **base, wall_s=time.time()-t0, metrics=metrics), default=str, indent=2))
+    out_path.write_text(json.dumps(dict(status="ok", **base, wall_s=time.time() - t0, metrics=metrics),
+                                   default=str, indent=2))
     return dict(status="ok")
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--phase", default="1"); ap.add_argument("--workers", type=int, default=4)
-    ap.add_argument("--dry", action="store_true"); ap.add_argument("--reverse", action="store_true"); ap.add_argument("--only1", action="store_true"); ap.add_argument("--clear-claims", action="store_true")
+
+def run_node_task(task_dict: dict, run_root: str, python_exe: str) -> dict:
+    """Claim -> (spec-file launcher if long else campaign._execute_one) -> release."""
+    task = C.RunTask(**task_dict)
+    out_path = task.result_path(Path(run_root))
+    if C._is_done(out_path):
+        return dict(status="skipped_done")
+    if not claim(out_path):
+        return dict(status="skipped_claimed")
+    try:
+        if C._is_done(out_path):
+            return dict(status="skipped_done")
+        C._enforce_task_seed(task.seed, True)
+        if is_long(task):
+            return exec_spec_file(task, run_root, python_exe, TIMEOUT_LONG_S)
+        return C._execute_one(task_dict, run_root, python_exe, True)
+    finally:
+        release(out_path)
+
+
+# ---------------------------------------------------------------- main
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--phase", choices=["1", "2"], help="1 = single-node (pool), 2 = fleet (sequential)")
+    ap.add_argument("--dry", action="store_true", help="build + assert + write manifest, run nothing")
+    ap.add_argument("--seeds", default="10030-10059")
+    ap.add_argument("--weights", required=True, help="detector weights path (no default)")
+    ap.add_argument("--root", default="results/m4r2")
+    ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--reverse", action="store_true")
+    ap.add_argument("--clear-claims", action="store_true")
+    ap.add_argument("--tag", default=CODE_TAG)
     a = ap.parse_args()
-    ids, tasks = build("1" if a.phase == "1b" else a.phase)
-    if a.reverse: tasks = tasks[::-1]
-    if a.dry:
-        cnt = Counter(t.scenario_id for t in tasks)
-        assert all(t.spec.get("detector_weights_path", W) == W for t in tasks if not t.is_fleet)
-        assert all(10000 <= t.seed <= 10029 for t in tasks)
-        man = dict(n_scenarios_registry=len(ids), n_tasks=len(tasks), per_result_id=dict(cnt),
-                   weights=W, seeds=[10000, 10029], grades=GRADES,
-                   tasks=[dict(rid=t.scenario_id, method=t.method, seed=t.seed, fleet=t.is_fleet, hash=t.hash) for t in tasks])
-        Path(f"{ROOT}/manifest_phase{a.phase}.json").write_text(json.dumps(man, indent=1))
-        print(len(ids), "registry;", len(tasks), "tasks"); print(json.dumps(dict(cnt), indent=0)); return
-    C.ensure_gate_file(); assert C.gate_cleared()
-    prov0 = C.git_provenance()
-    if a.phase == "1b":
-        if a.clear_claims:
-            for cf in Path(ROOT).rglob("*.claim"): cf.unlink()
-        todo = [t for t in tasks if not C._is_done(t.result_path(Path(ROOT))) and len(json.dumps(t.spec)) > 30000]
-        if a.only1: todo = todo[:1]
-        print(f"{time.ctime()} 1b todo {len(todo)} workers {a.workers}", flush=True)
-        py = sys.executable; cnt = Counter(); t0 = time.time(); n = 0
-        with ProcessPoolExecutor(max_workers=min(a.workers, 4)) as ex:
-            futs = [ex.submit(exec_spec_file, asdict(t), ROOT, py, True) for t in todo]
-            for f in as_completed(futs):
-                try: st = f.result()["status"]
-                except Exception as e: st = "EXC:" + type(e).__name__
-                cnt[st] += 1; n += 1
-                if n % 10 == 0 or st != "ok":
-                    print(f"{time.ctime()} {n}/{len(todo)} {dict(cnt)} elapsed {time.time()-t0:.0f}s", flush=True)
-        print("DONE", dict(cnt), f"wall {time.time()-t0:.0f}s", flush=True)
-    elif a.phase == "1":
-        todo = [t for t in tasks if not C._is_done(t.result_path(Path(ROOT)))]
-        print(f"{time.ctime()} total {len(tasks)} todo {len(todo)} workers {a.workers}", flush=True)
-        py = sys.executable; cnt = Counter(); t0 = time.time(); n = 0
-        with ProcessPoolExecutor(max_workers=min(a.workers, 4)) as ex:
-            futs = [ex.submit(C._execute_one, asdict(t), ROOT, py, True) for t in todo]
-            for f in as_completed(futs):
-                try: st = f.result()["status"]
-                except Exception as e: st = "EXC:" + type(e).__name__
-                cnt[st] += 1; n += 1
-                if n % 25 == 0 or st != "ok":
-                    print(f"{time.ctime()} {n}/{len(todo)} {dict(cnt)} elapsed {time.time()-t0:.0f}s", flush=True)
-        print("DONE", dict(cnt), f"wall {time.time()-t0:.0f}s", flush=True)
-    else:
-        cnt = Counter()
-        if a.clear_claims:
-            for cf in Path(ROOT).rglob("*.claim"): cf.unlink()
+    if not a.dry and not a.phase:
+        ap.error("--phase required unless --dry")
+
+    seeds = parse_seeds(a.seeds)
+    root = Path(a.root)
+    assert seeds and all(SG_TEST_MIN <= s < SG_TEST_MAX for s in seeds), "seeds outside test range"
+    assert seeds == list(range(seeds[0], seeds[-1] + 1)), "seed list not contiguous"
+    code = check_code(a.tag)
+
+    # ---- manifest (both phases) with assertions
+    man_tasks = []
+    counts: dict[str, int] = {}
+    n_long = 0
+    for ph in ("1", "2"):
+        ids, tasks = build(ph, seeds, a.weights)
         for t in tasks:
-            if C._is_done(t.result_path(Path(ROOT))): cnt["skipped_done"] += 1; continue
-            op = t.result_path(Path(ROOT))
-            if not claim(op): cnt["skipped_claimed"] += 1; continue
-            try: r = C._execute_one_fleet(t, ROOT, True)
-            finally: release(op)
-            cnt[r["status"]] += 1
-            print(time.ctime(), t.scenario_id, t.method, t.seed, r["status"], flush=True)
-        print("DONE", dict(cnt), flush=True)
-    v = C.provenance_verdict(prov0, C.git_provenance()); C.record_provenance(ROOT, v)
+            assert 10000 <= t.seed and t.seed in seeds, f"seed {t.seed} out of range"
+            if not t.is_fleet:
+                assert t.spec["detector_weights_path"] == a.weights, "task without the requested weights"
+                assert t.spec.get("final") is True and t.spec["kappa_R"] == C.DEFAULT_KAPPA_R and t.spec["kappa_Q"] == 1.0
+            counts[t.scenario_id] = counts.get(t.scenario_id, 0) + 1
+            n_long += is_long(t)
+            man_tasks.append(dict(rid=t.scenario_id, method=t.method, seed=t.seed, fleet=t.is_fleet, hash=t.hash,
+                                  long_spec=is_long(t)))
+    keys = [(m["rid"], m["method"], m["seed"]) for m in man_tasks]
+    assert len(keys) == len(set(keys)), "duplicate tasks"
+    root.mkdir(parents=True, exist_ok=True)
+    manifest = dict(code=code, weights=a.weights, seeds=[seeds[0], seeds[-1]], grades=GRADES,
+                    n_tasks=len(man_tasks), n_single=sum(not m["fleet"] for m in man_tasks),
+                    n_fleet=sum(m["fleet"] for m in man_tasks), n_long_spec=n_long, per_result_id=counts,
+                    fleet_note="fleet tasks use fleet_adapter.THETA0_PATH (results/fleet/theta0_d054.npz), "
+                               "NOT --weights", tasks=man_tasks)
+    (root / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    print(f"manifest: {manifest['n_tasks']} tasks = {manifest['n_single']} single-node ({n_long} long-spec) "
+          f"+ {manifest['n_fleet']} fleet; weights={a.weights}; code {code['tag']} == HEAD on fedqpnt/", flush=True)
+    if a.dry:
+        return
+
+    # ---- launch checks
+    assert Path(a.weights).exists(), f"weights file missing: {a.weights}"
+    if a.phase == "2":
+        prov = Path("results/fleet/theta0_d054_freeze5_provenance.json")
+        assert prov.exists(), f"fleet theta0 not retrained on {a.tag}: {prov} missing; phase 2 refused"
+    C.ensure_gate_file()
+    assert C.gate_cleared(), "seed gate not cleared"
+    if a.clear_claims:
+        for cf in root.rglob("*.claim"):
+            cf.unlink()
+    prov0 = C.git_provenance()
+    ids, tasks = build(a.phase, seeds, a.weights)
+    if a.phase == "1":
+        tasks.sort(key=lambda t: not is_long(t))          # long S7-p2/p5 first so they don't tail
+    if a.reverse:
+        tasks = tasks[::-1]
+    todo = [t for t in tasks if not C._is_done(t.result_path(root))]
+    cnt: Counter = Counter()
+    t0 = time.time()
+    print(f"{time.ctime()} phase {a.phase} total {len(tasks)} todo {len(todo)} workers "
+          f"{a.workers if a.phase == '1' else 1} reverse={a.reverse}", flush=True)
+    if a.phase == "1":
+        with ProcessPoolExecutor(max_workers=max(1, min(a.workers, 4))) as ex:
+            futs = [ex.submit(run_node_task, asdict(t), str(root), sys.executable) for t in todo]
+            for n, f in enumerate(as_completed(futs), 1):
+                try:
+                    st = f.result()["status"]
+                except Exception as e:  # noqa: BLE001
+                    st = "EXC:" + type(e).__name__
+                cnt[st] += 1
+                if n % 25 == 0 or st not in ("ok", "skipped_claimed", "skipped_done"):
+                    print(f"{time.ctime()} {n}/{len(todo)} {dict(cnt)} elapsed {time.time() - t0:.0f}s", flush=True)
+    else:
+        for n, t in enumerate(todo, 1):
+            out = t.result_path(root)
+            if C._is_done(out):
+                cnt["skipped_done"] += 1
+                continue
+            if not claim(out):
+                cnt["skipped_claimed"] += 1
+                continue
+            try:
+                r = C._execute_one_fleet(t, str(root), True)
+                st = r["status"]
+            except Exception as e:  # noqa: BLE001
+                st = "EXC:" + type(e).__name__
+            finally:
+                release(out)
+            cnt[st] += 1
+            print(f"{time.ctime()} {n}/{len(todo)} {t.scenario_id} {t.method} {t.seed} {st}", flush=True)
+    print("DONE", dict(cnt), f"wall {time.time() - t0:.0f}s", flush=True)
+    v = C.provenance_verdict(prov0, C.git_provenance())
+    C.record_provenance(root, v)
     print("PROVENANCE valid:", v["valid"], v["reasons"], flush=True)
+
+
+from fedqpnt.eval import seed_gate as _SG  # noqa: E402
+SG_TEST_MIN, SG_TEST_MAX = _SG.TEST_MIN, _SG.TEST_MAX
+
 if __name__ == "__main__":
     main()

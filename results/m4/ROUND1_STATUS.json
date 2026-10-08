@@ -1,0 +1,552 @@
+{
+ "round": 1,
+ "note": "STOPPED early (D-082); partial record; calibration bug found; round 1 superseded by round 2 (seeds 10030-10059)",
+ "totals": {
+  "expected": 5340,
+  "done": 3602,
+  "failed_records": 28,
+  "missing": 1710,
+  "failure_records_by_type": {
+   "S7-p2:timeout": 14,
+   "S7-p20:timeout": 8,
+   "S7-p60:timeout": 4,
+   "S5:error": 2
+  }
+ },
+ "failure_causes": {
+  "S7_p2_p5_pre_fix": "240 tasks raised FileNotFoundError WinError 206 (cmdline too long) in phase 1 and wrote no records; reran via spec-file launcher (phase 1b); any still missing were not executed before the stop"
+ },
+ "provenance": {
+  "entries": [
+   {
+    "valid": false,
+    "reasons": [
+     "HEAD changed during run: 0f223b2fcca83642bb44bf5539e2e3ea0256a709 -> 5e02b527ecde62206c25da7efe0e0213a70af9ed"
+    ],
+    "start_head": "0f223b2fcca83642bb44bf5539e2e3ea0256a709",
+    "end_head": "5e02b527ecde62206c25da7efe0e0213a70af9ed"
+   }
+  ],
+  "verdict": "INVALID by D-062 rule for the one recorded entry (the phase-1b single-task verification run): 'HEAD changed during run' (repo HEAD moved by other agents' commits while it ran). The check compares whole-repo HEAD, not fedqpnt/; it was not a fedqpnt/ dirty-tree flag. Phase 1, 1b, 2 instances were stopped before writing their end-of-run provenance, so no end verdict exists for them. Note: HEAD vs core-freeze-4 now differs on fedqpnt/ (6 files, the core-freeze-5 fix) - round 1 results were produced on core-freeze-4 code and are superseded."
+ },
+ "per_result_id": {
+  "S1@industrial_mems": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S1@tactical": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-low@industrial_mems": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-low@tactical": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-med@industrial_mems": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-med@tactical": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-high@industrial_mems": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-high@tactical": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-DM@industrial_mems": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S2-DM@tactical": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S3@industrial_mems": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S3@tactical": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S4@industrial_mems": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S4@tactical": {
+   "expected": 210,
+   "done": 210,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S6@industrial_mems": {
+   "expected": 90,
+   "done": 90,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S6@tactical": {
+   "expected": 90,
+   "done": 90,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S6-coast@industrial_mems": {
+   "expected": 60,
+   "done": 60,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S6-coast@tactical": {
+   "expected": 60,
+   "done": 60,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S7-p2@industrial_mems": {
+   "expected": 60,
+   "done": 7,
+   "failed_records": 14,
+   "missing": 39,
+   "failure_types": {
+    "timeout": 14
+   }
+  },
+  "S7-p2@tactical": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S7-p5@industrial_mems": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S7-p5@tactical": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S7-p10@industrial_mems": {
+   "expected": 60,
+   "done": 60,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S7-p10@tactical": {
+   "expected": 60,
+   "done": 60,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S7-p20@industrial_mems": {
+   "expected": 60,
+   "done": 60,
+   "failed_records": 0,
+   "missing": 0,
+   "failure_types": {}
+  },
+  "S7-p20@tactical": {
+   "expected": 60,
+   "done": 52,
+   "failed_records": 8,
+   "missing": 0,
+   "failure_types": {
+    "timeout": 8
+   }
+  },
+  "S7-p60@industrial_mems": {
+   "expected": 60,
+   "done": 56,
+   "failed_records": 4,
+   "missing": 0,
+   "failure_types": {
+    "timeout": 4
+   }
+  },
+  "S7-p60@tactical": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S10-r1-c0.5@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r1-c0.5@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r1-c0.73@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r1-c0.73@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r1@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r1@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r1-c2@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r1-c2@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2-c0.5@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2-c0.5@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2-c0.73@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2-c0.73@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2-c2@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r2-c2@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5-c0.5@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5-c0.5@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5-c0.73@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5-c0.73@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5-c2@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r5-c2@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10-c0.5@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10-c0.5@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10-c0.73@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10-c0.73@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10-c2@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S10-r10-c2@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S11@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S11@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S13@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S13@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S14@industrial_mems": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S14@tactical": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  },
+  "S5": {
+   "expected": 90,
+   "done": 67,
+   "failed_records": 2,
+   "missing": 21,
+   "failure_types": {
+    "error": 2
+   }
+  },
+  "S8": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S9": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S12-f20": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S12-f40": {
+   "expected": 60,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 60,
+   "failure_types": {}
+  },
+  "S15": {
+   "expected": 30,
+   "done": 0,
+   "failed_records": 0,
+   "missing": 30,
+   "failure_types": {}
+  }
+ },
+ "failure_types_by_scenario": {
+  "S7-p2:timeout": 14,
+  "S7-p20:timeout": 8,
+  "S7-p60:timeout": 4,
+  "S5:error": 2
+ }
+}
