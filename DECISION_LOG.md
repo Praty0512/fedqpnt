@@ -33,6 +33,22 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 - **Rationale:** Adding/removing a component (e.g. an ablation) must not change the noise realization of other components; enables paired statistical tests across methods.
 - **Owner:** Master
 
+### D-083 · 2026-10-08 · Freeze-5 contents: CAI contrast from the grade preset, round-Earth scenarios, bit-identical S7 speed-up, R_q SF/misalignment term; detector v4 retrained on round Earth
+- **Fixes in branch freeze5-fixes:**
+  - (1) QuantumTrust contrast range from the CAI grade preset (FIELD: 0.08 / 0.394);
+  - (2) single-node scenarios moved from 'flat' to 'schuler_tangent' (fleet scenarios ignore the world field, so they are unchanged). Correction to D-082: the old S2 used flat for both truth and filter, so there was no model mismatch, just no Schuler bound on the coast;
+  - (3) the attack-label lookup via a bisect index: bit-identical (42/42 outputs), 5.4× faster on S7-p2;
+  - (4) **adopted:** IMU scale-factor/misalignment aliasing added to the CAI measurement covariance R_q (consistent with the propagation Q; D-028). Without it, healthy CAI innovations ran at NIS/3 ≈ 2.2–2.4, keeping w_q at 0.1–0.15. With it, tactical NIS/3 is 1.38 and 77% of CAI updates are applied; MEMS 0.49 / 85% (conservative). The jerk/window mismatch term stays unmodelled (documented).
+- **Sanity (tuning seeds 530–534, before the R_q patch):**
+  - the Schuler world bounds the coast (MEMS drift max 686 m vs 29.8 km flat);
+  - the CAI now matters to the defended filter (abl_minus_quantum post-attack 14.1 km MEMS / 2.2 km tactical vs 269 / 101 m with the CAI);
+  - S6-coast CAI gain is small (tactical 108 vs 117 m; MEMS on is worse than off, 454 vs 418, even undefended): to be re-checked after the patch;
+  - seed 9604 clean: no lockout, FAR 0.
+- **Detector:** v3 was trained on world = flat (build_supervised_dataset.py:140, 144), so **v4 is retrained on schuler_tangent** with the unchanged D-052/D-053 protocol after core-freeze-5.
+- **The outdated gate test** (expected the gate closed) is updated to validate the cleared-gate record (D-080).
+- **Sequence:** freeze-5 → v4 → tuning sanity → round-2 PREREG (seeds 10030–10059) → round 2.
+- **Owner:** Master
+
 ### D-082 · 2026-10-03 (recorded 2026-10-08) · CAI-trust calibration bug found in core-freeze-4 → round 1 stopped (partial); fix + fresh test round on NEW seeds (user decision)
 - **Bug** (CORE-ROBUST diagnosis, tuning seed 530):
   - QuantumTrust.c_nom = 1.0 (trust_law.py:549), while the simulated FIELD CAI contrast is C0 = 0.394 (Jarlaud 2024);
