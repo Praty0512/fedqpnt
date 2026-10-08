@@ -134,6 +134,7 @@ class NodeEnvironment:
         self._attacks = [build_attack(a["kind"], a.get("onset_s", 30.0), a.get("duration_s"),
                                        a.get("severity", 0.5), a.get("params"))
                           for a in cfg.attacks]
+        self._build_label_index()
 
         self.heading_noise_rad = np.radians(cfg.heading_noise_deg) * rng_init.normal()
 
@@ -205,7 +206,61 @@ class NodeEnvironment:
     def initial_heading_noise(self) -> float:
         return self.heading_noise_rad
 
+    # Attack classes whose ``label(t)`` is exactly ``is_active(t, onset_s, duration_s, off_ramp_s)`` (read from the
+    # attack modules); any other class (e.g. the JamThenSpoof composite) is always evaluated.
+    _LABEL_IS_ACTIVE_TYPES = frozenset({"Jamming", "DriftInSpoof", "MeaconingReplay", "AbruptSpoof",
+                                         "DisplacedMeaconing"})
+
+    def _build_label_index(self) -> None:
+        """D-082 perf: elementary-interval index for the active-attack lookup (S7-p2/p5 have 1,740 / ~700 toggled
+        segments; evaluating every attack's ``label`` on every 100 Hz tick was ~80% of the run time). Outputs are
+        bit-identical to the linear scan: the same ``label`` objects are combined in the same (original) order, and
+        an attack is skipped only when ``is_active`` is False at t (so its label is non-active and would be dropped)."""
+        always, bounds, spans = [], [], []
+        for i, a in enumerate(self._attacks):
+            if (type(a).__name__ in self._LABEL_IS_ACTIVE_TYPES and hasattr(a, "onset_s") and hasattr(a, "duration_s")
+                    and hasattr(a, "off_ramp_s")):
+                lo = a.onset_s
+                hi = float("inf") if a.duration_s is None else (a.onset_s + a.duration_s + a.off_ramp_s)  # == is_active's bound
+                spans.append((i, lo, hi))
+                bounds.extend((lo, hi))
+            else:
+                always.append(i)
+        self._lbl_always = tuple(always)
+        pts = sorted(set(b for b in bounds if b != float("inf")))
+        self._lbl_pts = pts
+        # elem[k] = original-order tuple of indices active on [pts[k-1], pts[k]) (k = 0: before pts[0]; k = len: after last)
+        by_lo = sorted(spans, key=lambda x: x[1])
+        cur: dict[int, float] = {}
+        ptr, elem = 0, [()]
+        for pt in pts:
+            while ptr < len(by_lo) and by_lo[ptr][1] <= pt:
+                cur[by_lo[ptr][0]] = by_lo[ptr][2]
+                ptr += 1
+            cur = {i: hi for i, hi in cur.items() if hi > pt}     # lo <= pt < hi  (is_active)
+            elem.append(tuple(sorted(cur)))
+        self._lbl_elem = elem
+
+    def _active_attack_indices(self, t: float) -> tuple:
+        from bisect import bisect_right
+        k = bisect_right(self._lbl_pts, t)       # t >= pts[k-1] and t < pts[k]
+        idx = self._lbl_elem[k]
+        if self._lbl_always:
+            idx = tuple(sorted(set(idx) | set(self._lbl_always)))
+        return idx
+
     def _label(self, t: float) -> AttackLabel:
+        if not self._attacks:
+            return AttackLabel(t=t, spoofing=False, jamming=False)
+        labels = [self._attacks[i].label(t) for i in self._active_attack_indices(t)]
+        active = [l for l in labels if l.spoofing or l.jamming]
+        if not active:
+            return AttackLabel(t=t, spoofing=False, jamming=False)
+        return AttackLabel(t=t, spoofing=any(l.spoofing for l in active), jamming=any(l.jamming for l in active),
+                            kind=active[0].kind, severity=max(l.severity for l in active))
+
+    def _label_reference(self, t: float) -> AttackLabel:
+        """Original linear scan (kept for the bit-identity test)."""
         if not self._attacks:
             return AttackLabel(t=t, spoofing=False, jamming=False)
         labels = [a.label(t) for a in self._attacks]

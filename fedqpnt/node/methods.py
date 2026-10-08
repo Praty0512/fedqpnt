@@ -91,6 +91,17 @@ def default_quantum_cycle_time_s(quantum_grade: str | None) -> float:
     return float(GRADES[quantum_grade]().axis.cycle_time_s)
 
 
+def default_quantum_contrast_range(quantum_grade: str | None) -> tuple[float, float] | None:
+    """D-082: (c_min, c_nom) for the quantum trust from the configured CAI grade preset: c_nom = the grade's
+    nominal contrast (axis.contrast0; FIELD = JARLAUD_C0 = 0.394), c_min = the sensor's own validity threshold
+    (axis.contrast_threshold, below which the sample is flagged invalid). None when no grade is given."""
+    if quantum_grade is None:
+        return None
+    from fedqpnt.sensors.quantum import GRADES
+    ax = GRADES[quantum_grade]().axis
+    return float(ax.contrast_threshold), float(ax.contrast0)
+
+
 def make_agent_config(method: str, *, kappa_R: float = DEFAULT_KAPPA_R, kappa_Q: float = 1.0,
                        world: str = "flat", quantum_enabled: bool = True,
                        quantum_cycle_time_s: float | None = None,
@@ -106,6 +117,11 @@ def make_agent_config(method: str, *, kappa_R: float = DEFAULT_KAPPA_R, kappa_Q:
         quantum_cycle_time_s = default_quantum_cycle_time_s(quantum_grade)
     trust_cfg: TrustEngineConfig = make_method_config(
         trust_key, quantum_enabled=quantum_enabled, quantum_cycle_time_s=quantum_cycle_time_s)
+    # D-082: the quantum trust's contrast normalisation follows the configured CAI grade (healthy FIELD CAI has
+    # contrast 0.394 < the legacy c_nom of 1.0, which made p_q = 0.67 > theta_on on every healthy epoch).
+    _cr = default_quantum_contrast_range(quantum_grade)
+    if _cr is not None:
+        trust_cfg.quantum_contrast_min, trust_cfg.quantum_contrast_nom = _cr
 
     # D-066/D-067: frozen per-IMU-grade shadow-NIS acceptance bound (unknown grade -> chi2_6(0.99)).
     if imu_grade in PROBE_NIS_BOUND_BY_GRADE:
