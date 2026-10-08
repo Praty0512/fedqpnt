@@ -36,6 +36,7 @@ def _git() -> tuple[str, str]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--world", default="flat", help="truth/filter world (default flat = original D-068 measurement)")
     ap.add_argument("--out", default=str(ROOT / "results" / "sigma_nom.json"))
     a = ap.parse_args()
     head0, status0 = _git()
@@ -43,7 +44,7 @@ def main() -> None:
     detail, sig = {}, {}
     for g in GRADES:
         specs = [RunSpec(name=f"sigmanom_{g}_{s}", master_seed=s, method="undefended", duration_s=600.0,
-                         hold_s=30.0, platform="ground", world="flat", imu_grade=g, quantum_grade="field",
+                         hold_s=30.0, platform="ground", world=a.world, imu_grade=g, quantum_grade="field",
                          gnss_rate_hz=1.0, heading_noise_deg=2.0, attack=None, detector_weights_path=None,
                          record=False) for s in SEEDS]
         res = run_many(specs, n_workers=min(a.workers, 4))
@@ -58,7 +59,7 @@ def main() -> None:
     head1, status1 = _git()
     for g in GRADES:
         detail[g].update(git_head=head0, git_status=status0, git_head_end=head1, git_status_end=status1)
-    out = dict(sigma_nom_m=sig, detail=detail, definition=("D-068: sample std (ddof=1) across tuning seeds "
+    out = dict(sigma_nom_m=sig, detail=detail, world=a.world, definition=("D-068: sample std (ddof=1) across tuning seeds "
                                                             "560-579 of rmse_h_pre, undefended, nominal, 600 s"))
     Path(a.out).write_text(json.dumps(out, indent=2), encoding="utf8")
     print("git at end:", f"HEAD={head1} status[fedqpnt/]={status1}", flush=True)
