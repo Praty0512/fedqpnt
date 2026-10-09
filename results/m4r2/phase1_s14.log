@@ -1,0 +1,2 @@
+manifest: 5340 tasks = 4980 single-node (240 long-spec) + 360 fleet; weights=results/m1/detector_weights_sup_v4.npz; code core-freeze-5 == HEAD on fedqpnt/
+Fri Oct  9 23:44:49 2026 phase 1 total 60 todo 60 workers 1 reverse=False

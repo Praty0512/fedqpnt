@@ -1,0 +1,11 @@
+{
+  "status": "error",
+  "scenario_id": "S14@tactical",
+  "method": "fedqpnt_local",
+  "seed": 10058,
+  "config_hash": "9dd82e4da8714c15",
+  "kappa_R_status": "D-061_kappa_R=60",
+  "wall_s": 235.6489143371582,
+  "returncode": 3221225786,
+  "stderr": "forrtl: error (200): program aborting due to window-CLOSE event\nImage              PC                Routine            Line        Source             \nKERNELBASE.dll     00007FFF2E896B9D  Unknown               Unknown  Unknown\nKERNEL32.DLL       00007FFF30A1CDF7  Unknown               Unknown  Unknown\nntdll.dll          00007FFF3145EE4C  Unknown               Unknown  Unknown\n"
+}

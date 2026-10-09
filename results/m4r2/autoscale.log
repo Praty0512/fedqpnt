@@ -1,0 +1,6 @@
+Thu 10/08/2026 18:07:05.11 launch_all weights=results/m1/detector_weights_sup_v4.npz 
+Thu Oct  8 18:07:05 IST 2026 waiter started
+Thu 10/08/2026 18:47:51.91 launch_all weights=results/m1/detector_weights_sup_v4.npz 
+Thu Oct  8 18:47:52 IST 2026 waiter started
+Fri Oct  9 23:44:29 IST 2026 phase1 DONE detected
+Fri Oct  9 23:44:29 IST 2026 phase2 already DONE; nothing to scale

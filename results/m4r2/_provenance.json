@@ -1,0 +1,64 @@
+[
+  {
+    "valid": true,
+    "reasons": [],
+    "start": {
+      "head": "b2677b7b540347eb3f802ecfa83d060f89d58cb4",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "b2677b7b540347eb3f802ecfa83d060f89d58cb4",
+      "dirty_files": []
+    },
+    "fedqpnt_verdict": {
+      "valid": true,
+      "reasons": [],
+      "tag": "core-freeze-5",
+      "start": {
+        "head": "b2677b7b540347eb3f802ecfa83d060f89d58cb4",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      },
+      "end": {
+        "head": "b2677b7b540347eb3f802ecfa83d060f89d58cb4",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      }
+    },
+    "phase": "2",
+    "reverse": false,
+    "time": 1791496069.8287086
+  },
+  {
+    "valid": false,
+    "reasons": [
+      "HEAD changed during run: b2677b7b540347eb3f802ecfa83d060f89d58cb4 -> 8ef13593c7ce07a82f2648bbfbd2b09c86426e8c"
+    ],
+    "start": {
+      "head": "b2677b7b540347eb3f802ecfa83d060f89d58cb4",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "8ef13593c7ce07a82f2648bbfbd2b09c86426e8c",
+      "dirty_files": []
+    },
+    "fedqpnt_verdict": {
+      "valid": true,
+      "reasons": [],
+      "tag": "core-freeze-5",
+      "start": {
+        "head": "b2677b7b540347eb3f802ecfa83d060f89d58cb4",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      },
+      "end": {
+        "head": "8ef13593c7ce07a82f2648bbfbd2b09c86426e8c",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      }
+    },
+    "phase": "1",
+    "reverse": false,
+    "time": 1791569619.0647388
+  }
+]
