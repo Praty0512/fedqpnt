@@ -1,0 +1,220 @@
+{
+ "family_complete": true,
+ "m": 8,
+ "tests": [
+  {
+   "label": "H1_rmse_h_att_vs_A",
+   "hypothesis": "H1",
+   "metric": "rmse_h_att",
+   "arm_a": "fedqpnt_local",
+   "arm_b": "baseline_a",
+   "status": "EVALUATED",
+   "p": 1.862645149230957e-09,
+   "hl": 4513.646424865299,
+   "hl_ci": [
+    3404.186356033614,
+    6286.854560327672
+   ],
+   "n": 30,
+   "extra": {
+    "rank_biserial_r": 1.0,
+    "cohens_dz": 1.451584479097481,
+    "n_excluded_never_effective": null
+   },
+   "setting": "S2-med@industrial_mems",
+   "holm_p": 1.4901161193847656e-08,
+   "decision": "REJECT H0 (supported)"
+  },
+  {
+   "label": "H1_latency_on_vs_A",
+   "hypothesis": "H1",
+   "metric": "latency_on",
+   "arm_a": "fedqpnt_local",
+   "arm_b": "baseline_a",
+   "status": "EVALUATED",
+   "p": 5.337263600339106e-07,
+   "hl": -2.0,
+   "hl_ci": [
+    -2.0,
+    -2.0
+   ],
+   "n": 30,
+   "extra": {
+    "rank_biserial_r": -1.0,
+    "cohens_dz": -0.7430397276664588,
+    "n_excluded_never_effective": null
+   },
+   "setting": "S2-med@industrial_mems",
+   "holm_p": 3.7360845202373745e-06,
+   "decision": "REJECT H0 (supported)"
+  },
+  {
+   "label": "H2_pd10_vs_Bcont",
+   "hypothesis": "H2",
+   "metric": "pd10",
+   "arm_a": "fedqpnt",
+   "arm_b": "baseline_b_cont",
+   "status": "EVALUATED",
+   "p": 1.0,
+   "hl": 0.0,
+   "hl_ci": [
+    0.0,
+    0.0
+   ],
+   "n": 10,
+   "extra": {
+    "rank_biserial_r": 0.0,
+    "cohens_dz": 0.0,
+    "source": "results/fleet/h2_abrupt_prereg_results_freeze4.json (D-081; seeds 500-509 of the separate H2 fleet experiment, not the 10000+ range)"
+   },
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h2",
+   "holm_p": 1.0,
+   "decision": "not rejected"
+  },
+  {
+   "label": "H2_onset_latency_vs_Bcont",
+   "hypothesis": "H2",
+   "metric": "onset_latency",
+   "arm_a": "fedqpnt",
+   "arm_b": "baseline_b_cont",
+   "status": "EVALUATED",
+   "p": 1.0,
+   "hl": 0.0,
+   "hl_ci": [
+    0.0,
+    0.0
+   ],
+   "n": 10,
+   "extra": {
+    "rank_biserial_r": 0.0,
+    "cohens_dz": 0.0,
+    "source": "results/fleet/h2_abrupt_prereg_results_freeze4.json (D-081; seeds 500-509 of the separate H2 fleet experiment, not the 10000+ range)"
+   },
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h2",
+   "holm_p": 1.0,
+   "decision": "not rejected"
+  },
+  {
+   "label": "H3_latency_eff_mems",
+   "hypothesis": "H3",
+   "metric": "latency_eff",
+   "arm_a": "fedqpnt_local",
+   "arm_b": "abl_minus_quantum",
+   "status": "EVALUATED",
+   "p": 1.0,
+   "hl": 0.0,
+   "hl_ci": [
+    0.0,
+    0.0
+   ],
+   "n": 30,
+   "extra": {
+    "rank_biserial_r": 0.0,
+    "cohens_dz": 0.0,
+    "n_excluded_never_effective": 0
+   },
+   "setting": "S6@industrial_mems",
+   "holm_p": 1.0,
+   "decision": "not rejected"
+  },
+  {
+   "label": "H3_latency_eff_tactical",
+   "hypothesis": "H3",
+   "metric": "latency_eff",
+   "arm_a": "fedqpnt_local",
+   "arm_b": "abl_minus_quantum",
+   "status": "EVALUATED",
+   "p": 1.0,
+   "hl": 0.0,
+   "hl_ci": [
+    0.0,
+    0.0
+   ],
+   "n": 30,
+   "extra": {
+    "rank_biserial_r": 0.0,
+    "cohens_dz": 0.0,
+    "n_excluded_never_effective": 0
+   },
+   "setting": "S6@tactical",
+   "holm_p": 1.0,
+   "decision": "not rejected"
+  },
+  {
+   "label": "H4_pd10_coldstart",
+   "hypothesis": "H4",
+   "metric": "pd10",
+   "arm_a": "fedqpnt",
+   "arm_b": "baseline_b_cont",
+   "status": "EVALUATED",
+   "p": 1.0,
+   "hl": 0.0,
+   "hl_ci": [
+    0.0,
+    0.0
+   ],
+   "n": 10,
+   "extra": {
+    "rank_biserial_r": 0.0,
+    "cohens_dz": 0.0,
+    "source": "results/fleet/h2_abrupt_prereg_results_freeze4.json (D-081; seeds 500-509 of the separate H2 fleet experiment, not the 10000+ range)"
+   },
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h4",
+   "holm_p": 1.0,
+   "decision": "not rejected"
+  },
+  {
+   "label": "H4_onset_latency_coldstart",
+   "hypothesis": "H4",
+   "metric": "onset_latency",
+   "arm_a": "fedqpnt",
+   "arm_b": "baseline_b_cont",
+   "status": "EVALUATED",
+   "p": 1.0,
+   "hl": 0.0,
+   "hl_ci": [
+    0.0,
+    0.0
+   ],
+   "n": 10,
+   "extra": {
+    "rank_biserial_r": 0.0,
+    "cohens_dz": 0.0,
+    "source": "results/fleet/h2_abrupt_prereg_results_freeze4.json (D-081; seeds 500-509 of the separate H2 fleet experiment, not the 10000+ range)"
+   },
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h4",
+   "holm_p": 1.0,
+   "decision": "not rejected"
+  }
+ ],
+ "exploratory_h1_tactical": [
+  {
+   "label": "H1_rmse_h_att_vs_A@tactical",
+   "label_class": "EXPLORATORY (not in the family; unadjusted p)",
+   "setting": "S2-med@tactical",
+   "metric": "rmse_h_att",
+   "status": "EVALUATED",
+   "n": 30,
+   "p": 1.862645149230957e-09,
+   "hl": 704.8085110632685,
+   "hl_ci": [
+    489.9633170913453,
+    910.5984057041181
+   ]
+  },
+  {
+   "label": "H1_latency_on_vs_A@tactical",
+   "label_class": "EXPLORATORY (not in the family; unadjusted p)",
+   "setting": "S2-med@tactical",
+   "metric": "latency_on",
+   "status": "EVALUATED",
+   "n": 30,
+   "p": 5.337263600339106e-07,
+   "hl": -2.0,
+   "hl_ci": [
+    -2.0,
+    -2.0
+   ]
+  }
+ ]
+}

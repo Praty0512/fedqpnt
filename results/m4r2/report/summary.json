@@ -1,0 +1,1707 @@
+{
+ "round": "round 2 (AMENDMENT R2)",
+ "code": "core-freeze-5",
+ "seeds": "10030-10059",
+ "detector": "results/m1/detector_weights_sup_v4.npz",
+ "sigma_nom": {
+  "industrial_mems": 1.1389239678816525,
+  "tactical": 1.120368101858129
+ },
+ "sigma_file": "results/sigma_nom_freeze5.json",
+ "family_m": 8,
+ "family_complete_inputs": true,
+ "confirmatory": [
+  {
+   "label": "H1_rmse_h_att_vs_A",
+   "setting": "S2-med@industrial_mems",
+   "metric": "rmse_h_att",
+   "arms": [
+    "fedqpnt_local",
+    "baseline_a"
+   ],
+   "status": "EVALUATED",
+   "n": 30,
+   "raw_p": 1.862645149230957e-09,
+   "holm_p": 1.4901161193847656e-08,
+   "reject": true,
+   "hl": 4513.646424865299,
+   "hl_ci95": [
+    3404.186356033614,
+    6286.854560327672
+   ],
+   "note": ""
+  },
+  {
+   "label": "H1_latency_on_vs_A",
+   "setting": "S2-med@industrial_mems",
+   "metric": "latency_on",
+   "arms": [
+    "fedqpnt_local",
+    "baseline_a"
+   ],
+   "status": "EVALUATED",
+   "n": 30,
+   "raw_p": 5.337263600339106e-07,
+   "holm_p": 3.7360845202373745e-06,
+   "reject": true,
+   "hl": -2.0,
+   "hl_ci95": [
+    -2.0,
+    -2.0
+   ],
+   "note": ""
+  },
+  {
+   "label": "H2_pd10_vs_Bcont",
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h2",
+   "metric": "pd10",
+   "arms": [
+    "fedqpnt",
+    "baseline_b_cont"
+   ],
+   "status": "EVALUATED",
+   "n": 10,
+   "raw_p": 1.0,
+   "holm_p": 1.0,
+   "reject": false,
+   "hl": 0.0,
+   "hl_ci95": [
+    0.0,
+    0.0
+   ],
+   "note": "enters with freeze-4 p-values (AMENDMENT R2)"
+  },
+  {
+   "label": "H2_onset_latency_vs_Bcont",
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h2",
+   "metric": "onset_latency",
+   "arms": [
+    "fedqpnt",
+    "baseline_b_cont"
+   ],
+   "status": "EVALUATED",
+   "n": 10,
+   "raw_p": 1.0,
+   "holm_p": 1.0,
+   "reject": false,
+   "hl": 0.0,
+   "hl_ci95": [
+    0.0,
+    0.0
+   ],
+   "note": "enters with freeze-4 p-values (AMENDMENT R2)"
+  },
+  {
+   "label": "H3_latency_eff_mems",
+   "setting": "S6@industrial_mems",
+   "metric": "latency_eff",
+   "arms": [
+    "fedqpnt_local",
+    "abl_minus_quantum"
+   ],
+   "status": "EVALUATED",
+   "n": 30,
+   "raw_p": 1.0,
+   "holm_p": 1.0,
+   "reject": false,
+   "hl": 0.0,
+   "hl_ci95": [
+    0.0,
+    0.0
+   ],
+   "note": ""
+  },
+  {
+   "label": "H3_latency_eff_tactical",
+   "setting": "S6@tactical",
+   "metric": "latency_eff",
+   "arms": [
+    "fedqpnt_local",
+    "abl_minus_quantum"
+   ],
+   "status": "EVALUATED",
+   "n": 30,
+   "raw_p": 1.0,
+   "holm_p": 1.0,
+   "reject": false,
+   "hl": 0.0,
+   "hl_ci95": [
+    0.0,
+    0.0
+   ],
+   "note": ""
+  },
+  {
+   "label": "H4_pd10_coldstart",
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h4",
+   "metric": "pd10",
+   "arms": [
+    "fedqpnt",
+    "baseline_b_cont"
+   ],
+   "status": "EVALUATED",
+   "n": 10,
+   "raw_p": 1.0,
+   "holm_p": 1.0,
+   "reject": false,
+   "hl": 0.0,
+   "hl_ci95": [
+    0.0,
+    0.0
+   ],
+   "note": "enters with freeze-4 p-values (AMENDMENT R2)"
+  },
+  {
+   "label": "H4_onset_latency_coldstart",
+   "setting": "results/fleet/h2_abrupt_prereg_results_freeze4.json::h4",
+   "metric": "onset_latency",
+   "arms": [
+    "fedqpnt",
+    "baseline_b_cont"
+   ],
+   "status": "EVALUATED",
+   "n": 10,
+   "raw_p": 1.0,
+   "holm_p": 1.0,
+   "reject": false,
+   "hl": 0.0,
+   "hl_ci95": [
+    0.0,
+    0.0
+   ],
+   "note": "enters with freeze-4 p-values (AMENDMENT R2)"
+  }
+ ],
+ "safety": {
+  "S1@industrial_mems": {
+   "field": "max_h_pre",
+   "n": 30,
+   "margin": 0.009513116607946959,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": true,
+   "hl": 0.01260210852164212,
+   "hl_ci95": [
+    -0.007229253695186566,
+    0.03003653905370296
+   ]
+  },
+  "S1@tactical": {
+   "field": "max_h_pre",
+   "n": 30,
+   "margin": 0.00612629440818635,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": true,
+   "hl": 0.004340226689778959,
+   "hl_ci95": [
+    -0.026413098715700745,
+    0.0382151616997064
+   ]
+  },
+  "S2-low@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 21576.868778855212,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 21041.95334750631,
+   "hl_ci95": [
+    16372.465635572837,
+    26124.068665536655
+   ]
+  },
+  "S2-low@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 3916.4575126667837,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 3850.079994294148,
+   "hl_ci95": [
+    3087.2134977829455,
+    4476.895173558241
+   ]
+  },
+  "S2-med@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 20918.771432809754,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 20356.95384145583,
+   "hl_ci95": [
+    15842.730287564296,
+    25450.923671859513
+   ]
+  },
+  "S2-med@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 3601.7134687787616,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 3530.8951111780298,
+   "hl_ci95": [
+    2778.3729314935918,
+    4156.397745731631
+   ]
+  },
+  "S2-high@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 20099.621802973317,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 19525.990174944964,
+   "hl_ci95": [
+    15157.740684559982,
+    24401.700776051657
+   ]
+  },
+  "S2-high@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 3255.5482787841456,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 3178.167778961848,
+   "hl_ci95": [
+    2439.192574004761,
+    3795.538212592242
+   ]
+  },
+  "S2-DM@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 19399.331585922457,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 18813.950671713246,
+   "hl_ci95": [
+    14399.435492276785,
+    23830.771587180698
+   ]
+  },
+  "S2-DM@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 1570.1687325058947,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 1399.4094153425576,
+   "hl_ci95": [
+    848.1202645186825,
+    2088.3337668377535
+   ]
+  },
+  "S3@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 0.491198270008681,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": true,
+   "hl": 0.4851023848719791,
+   "hl_ci95": [
+    0.15916344826791828,
+    0.7355440676822269
+   ]
+  },
+  "S3@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 0.10111168618745126,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": true,
+   "hl": 0.10734850606347734,
+   "hl_ci95": [
+    -0.004317172223252896,
+    0.19354196258364453
+   ]
+  },
+  "S4@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 12439.273836218617,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 12160.556566581135,
+   "hl_ci95": [
+    9631.376827498743,
+    14980.91328279819
+   ]
+  },
+  "S4@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 2138.5378899192815,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 2066.6477516369314,
+   "hl_ci95": [
+    1695.0808865333493,
+    2470.3977837738366
+   ]
+  },
+  "S6@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 46180.20230352166,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 44816.95590502477,
+   "hl_ci95": [
+    35892.269923423424,
+    54837.09762346997
+   ]
+  },
+  "S6@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 5682.298680863587,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 5365.283259495212,
+   "hl_ci95": [
+    4213.771690065244,
+    6766.467375969799
+   ]
+  },
+  "S7-p2@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 4.535177308374187,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 0.009263839546661767,
+   "hl_ci95": [
+    -0.0008077614948156508,
+    0.05653871300676627
+   ]
+  },
+  "S7-p2@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 0.28440242769836654,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": true,
+   "hl": 0.020028518931853423,
+   "hl_ci95": [
+    -0.029905740310752105,
+    0.05535468526932075
+   ]
+  },
+  "S7-p5@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 3.3852654660290575,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": true,
+   "hl": 0.002705319815612839,
+   "hl_ci95": [
+    -0.012224436211765166,
+    0.017611205539011188
+   ]
+  },
+  "S7-p5@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 2.5235201652899377,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": true,
+   "hl": 0.013842498819896853,
+   "hl_ci95": [
+    -0.03062474629313705,
+    0.05629099980083119
+   ]
+  },
+  "S7-p10@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 3316449.0142589966,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 3140503.969413394,
+   "hl_ci95": [
+    2289157.115105825,
+    4300557.959346178
+   ]
+  },
+  "S7-p10@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 364609.8914197036,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 211503.3869884435,
+   "hl_ci95": [
+    35515.38737239968,
+    566289.0015388804
+   ]
+  },
+  "S7-p20@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 2284812.5859178063,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 2134311.576433854,
+   "hl_ci95": [
+    1142129.887004564,
+    3121981.7453649035
+   ]
+  },
+  "S7-p20@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 313507.3482622254,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 250596.73086160855,
+   "hl_ci95": [
+    7548.8536149092515,
+    537573.4197912907
+   ]
+  },
+  "S7-p60@industrial_mems": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 240332.50300415873,
+   "bound_3sigma": 3.4167719036449578,
+   "primary_pass": false,
+   "hl": 273.99106698454386,
+   "hl_ci95": [
+    205.90507779456743,
+    454.4907611569149
+   ]
+  },
+  "S7-p60@tactical": {
+   "field": "max_h_att",
+   "n": 30,
+   "margin": 135795.218293587,
+   "bound_3sigma": 3.361104305574387,
+   "primary_pass": false,
+   "hl": 45188.86663454264,
+   "hl_ci95": [
+    7410.270804423609,
+    282177.9139297362
+   ]
+  }
+ },
+ "criteria": {
+  "S1@industrial_mems": [
+   {
+    "criterion": "rmse_h_vs_fixed_trust",
+    "status": "PASS",
+    "value": 1.00405767957397,
+    "metric_absent": false
+   },
+   {
+    "criterion": "far_le_1_per_hour",
+    "status": "PASS",
+    "value": 0.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "anees_in_band",
+    "status": "PASS",
+    "value": 0.8671443344831486,
+    "metric_absent": false
+   },
+   {
+    "criterion": "mean_w_gnss_ge_0_95",
+    "status": "PASS",
+    "value": 0.9837966099444893,
+    "metric_absent": false
+   },
+   {
+    "criterion": "tv_w_le_1_per_hour",
+    "status": "FAIL",
+    "value": 9.458201992991736,
+    "metric_absent": false
+   }
+  ],
+  "S1@tactical": [
+   {
+    "criterion": "rmse_h_vs_fixed_trust",
+    "status": "PASS",
+    "value": 1.00795147287664,
+    "metric_absent": false
+   },
+   {
+    "criterion": "far_le_1_per_hour",
+    "status": "PASS",
+    "value": 0.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "anees_in_band",
+    "status": "PASS",
+    "value": 0.9991813605638764,
+    "metric_absent": false
+   },
+   {
+    "criterion": "mean_w_gnss_ge_0_95",
+    "status": "PASS",
+    "value": 0.9838071674385425,
+    "metric_absent": false
+   },
+   {
+    "criterion": "tv_w_le_1_per_hour",
+    "status": "FAIL",
+    "value": 9.453094031418468,
+    "metric_absent": false
+   }
+  ],
+  "S2-low@industrial_mems": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 21576.868778855212,
+    "metric_absent": false
+   }
+  ],
+  "S2-low@tactical": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 3916.4575126667837,
+    "metric_absent": false
+   }
+  ],
+  "S2-med@industrial_mems": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 40.8895657645797,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 20918.771432809754,
+    "metric_absent": false
+   }
+  ],
+  "S2-med@tactical": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 8.517687404243324,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 3601.7134687787616,
+    "metric_absent": false
+   }
+  ],
+  "S2-high@industrial_mems": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 26.536293382632703,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 20099.621802973317,
+    "metric_absent": false
+   }
+  ],
+  "S2-high@tactical": [
+   {
+    "criterion": "detection_prob",
+    "status": "PASS",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_halved",
+    "status": "FAIL",
+    "value": 5.556214277577798,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 3255.5482787841456,
+    "metric_absent": false
+   }
+  ],
+  "S2-DM@industrial_mems": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 19399.331585922457,
+    "metric_absent": false
+   }
+  ],
+  "S2-DM@tactical": [
+   {
+    "criterion": "detection_prob",
+    "status": "not-evaluable",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "damage_never_worse",
+    "status": "FAIL",
+    "value": 1570.1687325058947,
+    "metric_absent": false
+   }
+  ],
+  "S3@industrial_mems": [
+   {
+    "criterion": "tdist_consistency_no_update",
+    "status": "FAIL",
+    "value": 64.0,
+    "metric_absent": true
+   }
+  ],
+  "S3@tactical": [
+   {
+    "criterion": "tdist_consistency_no_update",
+    "status": "FAIL",
+    "value": 62.0,
+    "metric_absent": true
+   }
+  ],
+  "S4@industrial_mems": [
+   {
+    "criterion": "s2_s3_joint_plus_reacq_cap",
+    "status": "FAIL",
+    "value": 42.0,
+    "metric_absent": true
+   }
+  ],
+  "S4@tactical": [
+   {
+    "criterion": "s2_s3_joint_plus_reacq_cap",
+    "status": "FAIL",
+    "value": 42.0,
+    "metric_absent": true
+   }
+  ],
+  "S6@industrial_mems": [
+   {
+    "criterion": "h3_latency_eff",
+    "status": "not-evaluable",
+    "value": null,
+    "metric_absent": false
+   },
+   {
+    "criterion": "never_worse",
+    "status": "FAIL",
+    "value": 46180.20230352166,
+    "metric_absent": false
+   }
+  ],
+  "S6@tactical": [
+   {
+    "criterion": "h3_latency_eff",
+    "status": "not-evaluable",
+    "value": null,
+    "metric_absent": false
+   },
+   {
+    "criterion": "never_worse",
+    "status": "FAIL",
+    "value": 5682.298680863587,
+    "metric_absent": false
+   }
+  ],
+  "S6-coast@industrial_mems": [
+   {
+    "criterion": "coast_ratio_exploratory",
+    "status": "not-evaluable",
+    "value": 1.092216708422995,
+    "metric_absent": false
+   }
+  ],
+  "S6-coast@tactical": [
+   {
+    "criterion": "coast_ratio_exploratory",
+    "status": "not-evaluable",
+    "value": 1.0070834696088529,
+    "metric_absent": false
+   }
+  ],
+  "S7-p2@industrial_mems": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 2.0000055555709877,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 4.535177308374187,
+    "metric_absent": false
+   }
+  ],
+  "S7-p2@tactical": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 2.0000055555709877,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "PASS",
+    "value": 0.28440242769836654,
+    "metric_absent": false
+   }
+  ],
+  "S7-p5@industrial_mems": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 2.0000055555709877,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "PASS",
+    "value": 3.3852654660290575,
+    "metric_absent": false
+   }
+  ],
+  "S7-p5@tactical": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 2.0000055555709877,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "PASS",
+    "value": 2.5235201652899377,
+    "metric_absent": false
+   }
+  ],
+  "S7-p10@industrial_mems": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 0.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 3316449.0142589966,
+    "metric_absent": false
+   }
+  ],
+  "S7-p10@tactical": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 1.0000027777854938,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 364609.8914197036,
+    "metric_absent": false
+   }
+  ],
+  "S7-p20@industrial_mems": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 1.0000027777854938,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 2284812.5859178063,
+    "metric_absent": false
+   }
+  ],
+  "S7-p20@tactical": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 0.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 313507.3482622254,
+    "metric_absent": false
+   }
+  ],
+  "S7-p60@industrial_mems": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 15.000041666782408,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 240332.50300415873,
+    "metric_absent": false
+   }
+  ],
+  "S7-p60@tactical": [
+   {
+    "criterion": "n_cyc_bound",
+    "status": "PASS",
+    "value": 12.000033333425927,
+    "metric_absent": false
+   },
+   {
+    "criterion": "max_h_never_worse",
+    "status": "FAIL",
+    "value": 135795.218293587,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1-c0.5@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.6871320496351089,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1-c0.5@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.7546740406733179,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1-c0.73@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.6871153912061324,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1-c0.73@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.7563525287191786,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.6874849297429706,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.7593351178458054,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1-c2@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.6870981042356754,
+    "metric_absent": false
+   }
+  ],
+  "S10-r1-c2@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 0.7602737268729906,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2-c0.5@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.3995907083150478,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2-c0.5@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.5544813998275275,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2-c0.73@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.3995241045642586,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2-c0.73@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.5563555590922356,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.4003089363519103,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.5590047957669608,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2-c2@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.400019941118105,
+    "metric_absent": false
+   }
+  ],
+  "S10-r2-c2@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "PASS",
+    "value": 1.55552676122153,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5-c0.5@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.012591300156786,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5-c0.5@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.327874705529668,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5-c0.73@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.012293072419799,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5-c0.73@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.325596728934665,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.012083141790894,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.326355619436035,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5-c2@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.0106035483012,
+    "metric_absent": false
+   }
+  ],
+  "S10-r5-c2@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 4.312785157486459,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10-c0.5@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.06101504163936,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10-c0.5@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.481760207926502,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10-c0.73@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.060602821610967,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10-c0.73@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.479638607538128,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.06043217106055,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.481546798700045,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10-c2@industrial_mems": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.05872481132052,
+    "metric_absent": false
+   }
+  ],
+  "S10-r10-c2@tactical": [
+   {
+    "criterion": "no_crash_anees_band",
+    "status": "FAIL",
+    "value": 8.461403367358837,
+    "metric_absent": false
+   }
+  ],
+  "S11@industrial_mems": [
+   {
+    "criterion": "finite_spd_and_vs_raw_gnss",
+    "status": "FAIL",
+    "value": 1.0,
+    "metric_absent": false
+   }
+  ],
+  "S11@tactical": [
+   {
+    "criterion": "finite_spd_and_vs_raw_gnss",
+    "status": "FAIL",
+    "value": 1.0,
+    "metric_absent": false
+   }
+  ],
+  "S13@industrial_mems": [
+   {
+    "criterion": "t_rec_bounds",
+    "status": "FAIL",
+    "value": 0.0,
+    "metric_absent": false
+   }
+  ],
+  "S13@tactical": [
+   {
+    "criterion": "t_rec_bounds",
+    "status": "FAIL",
+    "value": 0.0,
+    "metric_absent": false
+   }
+  ],
+  "S14@industrial_mems": [
+   {
+    "criterion": "no_slow_drift",
+    "status": "not-evaluable",
+    "value": null,
+    "metric_absent": true
+   }
+  ],
+  "S14@tactical": [
+   {
+    "criterion": "no_slow_drift",
+    "status": "not-evaluable",
+    "value": null,
+    "metric_absent": true
+   }
+  ],
+  "S5": [
+   {
+    "criterion": "quorum_or_skip_no_deadlock",
+    "status": "PASS",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "auc_drop_le_0_02",
+    "status": "FAIL",
+    "value": null,
+    "metric_absent": true
+   }
+  ],
+  "S8": [
+   {
+    "criterion": "global_model_within_2_rounds",
+    "status": "FAIL",
+    "value": 0.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "first_attack_auc",
+    "status": "not-evaluable",
+    "value": null,
+    "metric_absent": false
+   }
+  ],
+  "S9": [
+   {
+    "criterion": "no_deadlock_auc_bound",
+    "status": "FAIL",
+    "value": null,
+    "metric_absent": true
+   }
+  ],
+  "S12-f20": [
+   {
+    "criterion": "auc_drop_f20",
+    "status": "FAIL",
+    "value": null,
+    "metric_absent": true
+   }
+  ],
+  "S12-f40": [
+   {
+    "criterion": "auc_drop_f40",
+    "status": "not-evaluable",
+    "value": null,
+    "metric_absent": true
+   }
+  ],
+  "S15": [
+   {
+    "criterion": "attacked_meet_s2_pd",
+    "status": "PASS",
+    "value": 1.0,
+    "metric_absent": false
+   },
+   {
+    "criterion": "unattacked_far_no_quarantine",
+    "status": "FAIL",
+    "value": 20.742857142876005,
+    "metric_absent": false
+   }
+  ]
+ },
+ "s7_prereg": {
+  "S7-p2@industrial_mems": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p2@tactical": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p5@industrial_mems": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p5@tactical": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p10@industrial_mems": {
+   "n": 30,
+   "max_cycles_per_hour": 0.0,
+   "ceil_max": 0,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p10@tactical": {
+   "n": 30,
+   "max_cycles_per_hour": 1.0000027777854938,
+   "ceil_max": 2,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p20@industrial_mems": {
+   "n": 30,
+   "max_cycles_per_hour": 1.0000027777854938,
+   "ceil_max": 2,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p20@tactical": {
+   "n": 30,
+   "max_cycles_per_hour": 0.0,
+   "ceil_max": 0,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p60@industrial_mems": {
+   "n": 30,
+   "max_cycles_per_hour": 15.000041666782408,
+   "ceil_max": 16,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  },
+  "S7-p60@tactical": {
+   "n": 30,
+   "max_cycles_per_hour": 12.000033333425927,
+   "ceil_max": 13,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "counts": {
+  "expected": 5340,
+  "present": 5280,
+  "missing": 60,
+  "failed": [],
+  "missing_by_rid": {
+   "S14@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S14@tactical": {
+    "fedqpnt_local": 30
+   }
+  },
+  "n_by_rid": {
+   "S1@industrial_mems": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S1@tactical": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-low@industrial_mems": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-low@tactical": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-med@industrial_mems": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-med@tactical": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-high@industrial_mems": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-high@tactical": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-DM@industrial_mems": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S2-DM@tactical": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S3@industrial_mems": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S3@tactical": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S4@industrial_mems": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S4@tactical": {
+    "fedqpnt_local": 30,
+    "baseline_a": 30,
+    "baseline_b_bin": 30,
+    "baseline_b_cont": 30,
+    "bprime": 30,
+    "fixed_trust": 30,
+    "undefended": 30
+   },
+   "S6@industrial_mems": {
+    "fedqpnt_local": 30,
+    "abl_minus_quantum": 30,
+    "undefended": 30
+   },
+   "S6@tactical": {
+    "fedqpnt_local": 30,
+    "abl_minus_quantum": 30,
+    "undefended": 30
+   },
+   "S6-coast@industrial_mems": {
+    "fedqpnt_local": 30,
+    "abl_minus_quantum": 30
+   },
+   "S6-coast@tactical": {
+    "fedqpnt_local": 30,
+    "abl_minus_quantum": 30
+   },
+   "S7-p2@industrial_mems": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p2@tactical": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p5@industrial_mems": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p5@tactical": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p10@industrial_mems": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p10@tactical": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p20@industrial_mems": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p20@tactical": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p60@industrial_mems": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S7-p60@tactical": {
+    "fedqpnt_local": 30,
+    "undefended": 30
+   },
+   "S10-r1-c0.5@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r1-c0.5@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r1-c0.73@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r1-c0.73@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r1@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r1@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r1-c2@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r1-c2@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2-c0.5@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2-c0.5@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2-c0.73@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2-c0.73@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2-c2@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r2-c2@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5-c0.5@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5-c0.5@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5-c0.73@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5-c0.73@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5-c2@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r5-c2@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10-c0.5@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10-c0.5@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10-c0.73@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10-c0.73@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10-c2@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S10-r10-c2@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S11@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S11@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S13@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S13@tactical": {
+    "fedqpnt_local": 30
+   },
+   "S14@industrial_mems": {},
+   "S14@tactical": {},
+   "S5": {
+    "fedqpnt": 30,
+    "baseline_a": 30,
+    "fedqpnt_nofault": 30
+   },
+   "S8": {
+    "fedqpnt": 30,
+    "baseline_b_cont": 30
+   },
+   "S9": {
+    "fedqpnt": 30,
+    "fedqpnt_noloss": 30
+   },
+   "S12-f20": {
+    "fedqpnt": 30,
+    "fedqpnt_clean": 30
+   },
+   "S12-f40": {
+    "fedqpnt": 30,
+    "fedqpnt_clean": 30
+   },
+   "S15": {
+    "fedqpnt": 30
+   }
+  }
+ },
+ "pending": [
+  "S14@industrial_mems",
+  "S14@tactical"
+ ]
+}

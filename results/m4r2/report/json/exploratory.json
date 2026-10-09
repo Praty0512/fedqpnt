@@ -1,0 +1,134 @@
+{
+ "S6-coast@industrial_mems": {
+  "coast": {
+   "n": 30,
+   "median_ratio_minusq_over_cai": 1.092216708422995,
+   "hl_cai_minus_minusq": -61.730718383849805,
+   "hl_ci95": [
+    -126.11184281472003,
+    -19.262832730729315
+   ]
+  }
+ },
+ "S6-coast@tactical": {
+  "coast": {
+   "n": 30,
+   "median_ratio_minusq_over_cai": 1.0070834696088529,
+   "hl_cai_minus_minusq": 2.689047327977576,
+   "hl_ci95": [
+    -4.9686639949645794,
+    10.736273722550365
+   ]
+  }
+ },
+ "S7-p2@industrial_mems": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p2@tactical": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p5@industrial_mems": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p5@tactical": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 2.0000055555709877,
+   "ceil_max": 3,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p10@industrial_mems": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 0.0,
+   "ceil_max": 0,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p10@tactical": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 1.0000027777854938,
+   "ceil_max": 2,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p20@industrial_mems": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 1.0000027777854938,
+   "ceil_max": 2,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p20@tactical": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 0.0,
+   "ceil_max": 0,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p60@industrial_mems": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 15.000041666782408,
+   "ceil_max": 16,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ },
+ "S7-p60@tactical": {
+  "s7": {
+   "n": 30,
+   "max_cycles_per_hour": 12.000033333425927,
+   "ceil_max": 13,
+   "bound_prereg": 223,
+   "pass_prereg_223": true,
+   "annotation_133": 133,
+   "within_133": true
+  }
+ }
+}

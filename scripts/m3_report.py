@@ -40,6 +40,11 @@ TABLE_FIELDS = ("rmse_h_pre", "rmse_h_att", "rmse_h_post", "max_h_att", "far_per
                 "rmse_t_ns")
 DEFENDED, UNDEFENDED = "fedqpnt_local", "undefended"
 N_SEEDS = 30
+S7_BOUND_PREREG, S7_ANNOT = 223, 133     # PREREG_M4 section 3 (D-075): 223 binding (integer), 133 annotation only
+CTX = dict(label="round 1", root="results/m4", seed_range="10000-10029", code="core-freeze-4",
+           detector="results/m1/detector_weights_sup_v3.npz", pending_rids=())
+ROUND2_CTX = dict(label="round 2 (AMENDMENT R2)", root="results/m4r2", seed_range="10030-10059", code="core-freeze-5",
+                  detector="results/m1/detector_weights_sup_v4.npz", pending_rids=())
 
 
 # ----------------------------------------------------------------------------------------------- utilities
@@ -115,7 +120,7 @@ def completeness(manifest, run_root):
     for rid, bym in exp.items():
         for method, seeds in bym.items():
             for sd in sorted(seeds):
-                p = Path(run_root) / rid / method / f"seed_{sd}.json"
+                p = Path(run_root) / rid / method / f"seed_{sd}.json"   # *.claim / *.infra_abort* are never read
                 ok = False
                 if p.exists():
                     try:
@@ -290,7 +295,7 @@ def analyse_rid(rid, methods, run_root, sigma):
             o = c.check(paired)
         except Exception as exc:    # noqa: BLE001
             o = dict(passed=None, value=None, detail=f"{type(exc).__name__}: {exc}")
-        crits.append(dict(criterion=c.name, status=crit_status(o, scenario.blocked_by_D047 or c.blocked_by_D047),
+        crits.append(dict(criterion=c.name, metric_absent=bool("nan" in str(o.get("detail")).lower() or "does not emit" in str(o.get("detail"))), status=crit_status(o, scenario.blocked_by_D047 or c.blocked_by_D047),
                           value=o.get("value"), detail=o.get("detail"),
                           registry_blocked_flag=bool(scenario.blocked_by_D047 or c.blocked_by_D047)))
 
@@ -341,6 +346,14 @@ def analyse_rid(rid, methods, run_root, sigma):
             extra["coast"] = dict(n=int(ok.sum()), median_ratio_minusq_over_cai=float(np.median(ratio)),
                                   hl_cai_minus_minusq=ST.hodges_lehmann(d) if ok.sum() >= 1 else None,
                                   hl_ci95=ST.bca_bootstrap_ci(d, 0) if ok.sum() >= 5 else None)
+    if base.startswith("S7-") and DEFENDED in results:
+        v = np.array([r.get("n_cyc_per_hour", np.nan) for r in results[DEFENDED]], float)
+        v = v[np.isfinite(v)]
+        if v.size:
+            mx = float(v.max())
+            extra["s7"] = dict(n=int(v.size), max_cycles_per_hour=mx, ceil_max=int(math.ceil(mx - 1e-9)),
+                               bound_prereg=S7_BOUND_PREREG, pass_prereg_223=bool(math.ceil(mx - 1e-9) <= S7_BOUND_PREREG),
+                               annotation_133=S7_ANNOT, within_133=bool(math.ceil(mx - 1e-9) <= S7_ANNOT))
     return dict(rid=rid, base=base, grade=grade_eff, title=scenario.title, n_by_method=n_by_method,
                 n_paired=n_paired, criteria=crits, safety=safety, table=table, extra=extra,
                 requires_fl=scenario.requires_fl)
@@ -406,8 +419,8 @@ def md_criteria(an_list):
     return "\n".join(L)
 
 
-def md_safety(an_list):
-    L = ["Primary: mean_defended ≤ mean_undefended + 3σ_nom (σ_nom: MEMS 1.180 m, tactical 1.122 m). Secondary: paired HL "
+def md_safety(an_list, sigma_txt):
+    L = [f"Primary: mean_defended ≤ mean_undefended + 3σ_nom (σ_nom: {sigma_txt}). Secondary: paired HL "
          "difference (defended − undefended) with 95% BCa CI. Defended = `fedqpnt_local`, undefended = `undefended`; "
          "field = `max_h_att` (the registry's never-worse field; `max_h_pre` for the attack-free S1).\n",
          "| Scenario@grade | field | n | mean def | mean undef | margin | 3σ_nom | Primary | HL (def−undef) | 95% BCa CI | CI excludes 0 |",
@@ -516,7 +529,7 @@ def md_exploratory(an_by_rid, h2, h1_tac):
 
 def md_completeness(comp, all_final):
     L = ["## DATA COMPLETENESS", "",
-         f"Generated {dt.datetime.now().strftime('%Y-%m-%d %H:%M')} from `results/m4` against `results/m4/manifest.json`.",
+         f"Generated {dt.datetime.now().strftime('%Y-%m-%d %H:%M')} from `{CTX['root']}` against `{CTX['root']}/manifest.json` ({CTX['label']}).",
          "",
          f"- Expected tasks: **{comp['expected']}**; present (status ok): **{comp['present']}**; "
          f"**missing: {comp['missing_n']}** ({100 * comp['missing_n'] / max(1, comp['expected']):.1f}%).",
@@ -529,7 +542,7 @@ def md_completeness(comp, all_final):
               "| result id | method | #missing | missing seeds |", "|---|---|---|---|"]
         for rid in sorted(comp["missing"]):
             for m, sds in sorted(comp["missing"][rid].items()):
-                L.append(f"| {rid} | {m} | {len(sds)} | {seed_ranges(sds) if len(sds) < N_SEEDS else 'all (10000-10029)'} |")
+                L.append(f"| {rid} | {m} | {len(sds)} | {seed_ranges(sds) if len(sds) < N_SEEDS else f'all ({CTX["seed_range"]})'} |")
     if comp["failed"]:
         L += ["", "Failed (status != ok):", ""] + [f"- {x}" for x in comp["failed"]]
     return "\n".join(L)
@@ -537,12 +550,12 @@ def md_completeness(comp, all_final):
 
 
 def provenance_lines(prov):
-    """Summarise results/m4/_provenance.json and independently re-check that fedqpnt/ is unchanged."""
+    """Summarise <run-root>/_provenance.json and independently re-check that fedqpnt/ is unchanged."""
     import subprocess
     L = []
     entries = prov if isinstance(prov, list) else ([prov] if prov else [])
     if not entries:
-        return ["`results/m4/_provenance.json` not written yet (campaign running)."]
+        return [f"`{CTX['root']}/_provenance.json` not written yet (campaign running)."]
     for i, e in enumerate(entries):
         L.append(f"- record {i}: valid={e.get('valid')}; reasons={e.get('reasons')}; start HEAD "
                  f"`{str(e.get('start', {}).get('head'))[:10]}` -> end HEAD `{str(e.get('end', {}).get('head'))[:10]}`; "
@@ -558,21 +571,99 @@ def provenance_lines(prov):
         L.append(f"- independent fedqpnt/ diff check failed: {exc}")
     return L
 
+def md_s7(an_list):
+    L = ["PREREG_M4 §3 (D-075): S7 chattering bound = at most 223 trust cycles/h (integer comparison, ceil of the max over "
+         "seeds of `n_cyc_per_hour` for `fedqpnt_local`). 133/h is an annotation only. NOTE: the registry criterion "
+         "`n_cyc_bound` in §2 compares against the formal bound 137.93/h (`fedqpnt.eval.metrics.N_CYC_BOUND_PER_HOUR`), "
+         "not the pre-registered 223; the table below applies the pre-registered 223.\n",
+         "| rid | n | max cycles/h | ceil | <= 223 (prereg) | <= 133 (annotation) |", "|---|---|---|---|---|---|"]
+    for a in an_list:
+        e = a["extra"].get("s7")
+        if e:
+            L.append(f"| {a['rid']} | {e['n']} | {fmt(e['max_cycles_per_hour'])} | {e['ceil_max']} | "
+                     f"{'PASS' if e['pass_prereg_223'] else 'FAIL'} | {'yes' if e['within_133'] else 'no'} |")
+    return "\n".join(L)
+
+
+def write_summary(sdir, rows, all_final, h1_tac, comp, an_list, sigma, args):
+    sdir = Path(sdir)
+    sdir.mkdir(parents=True, exist_ok=True)
+    S = dict(round=CTX["label"], code=CTX["code"], seeds=CTX["seed_range"], detector=CTX["detector"],
+             sigma_nom=sigma, sigma_file=args.sigma, family_m=8, family_complete_inputs=all_final,
+             confirmatory=[dict(label=r["label"], setting=r["setting"], metric=r["metric"], arms=[r["arm_a"], r["arm_b"]],
+                                status=r["status"], n=r["n"], raw_p=r["p"], holm_p=r.get("holm_p"),
+                                reject=bool(r["decision"].startswith("REJECT")), hl=r["hl"], hl_ci95=r["hl_ci"],
+                                note="enters with freeze-4 p-values (AMENDMENT R2)" if r["setting"].startswith("results/fleet") else "")
+                           for r in rows],
+             safety={a["rid"]: dict(field=a["safety"]["field"], n=a["safety"]["n"], margin=a["safety"]["margin"],
+                                    bound_3sigma=a["safety"]["bound_3sigma"], primary_pass=a["safety"]["primary_pass"],
+                                    hl=a["safety"]["hl"], hl_ci95=a["safety"]["hl_ci95"]) for a in an_list if a["safety"]},
+             criteria={a["rid"]: [dict(criterion=c["criterion"], status=c["status"], value=c["value"],
+                                       metric_absent=c["metric_absent"]) for c in a["criteria"]] for a in an_list},
+             s7_prereg={a["rid"]: a["extra"]["s7"] for a in an_list if "s7" in a["extra"]},
+             counts=dict(expected=comp["expected"], present=comp["present"], missing=comp["missing_n"],
+                         failed=comp["failed"], missing_by_rid={r: {m: len(x) for m, x in b.items()} for r, b in comp["missing"].items()},
+                         n_by_rid={a["rid"]: a["n_by_method"] for a in an_list}),
+             pending=sorted(r for r in comp["missing"]))
+    (sdir / "summary.json").write_text(json.dumps(clean(S), indent=1))
+    L = [f"# Round-2 M3 summary ({CTX['code']}, seeds {CTX['seed_range']}, n=30/cell)", "",
+         f"sigma_nom ({args.sigma}): " + ", ".join(f"{g} {v:.3f} m" for g, v in sigma.items()) +
+         f". Tasks: {comp['present']}/{comp['expected']} ok, {comp['missing_n']} missing = "
+         f"{', '.join(sorted(comp['missing'])) or 'none'} (PENDING: S14 still running; nothing else missing; failed files: {len(comp['failed'])}).", "",
+         "## Confirmatory family (paired Wilcoxon, Holm fixed m=8; HL = A-B with 95% BCa CI)", "",
+         "| Test | Setting | Metric (A vs B) | n | raw p | Holm p | Reject? | HL | 95% CI |", "|---|---|---|---|---|---|---|---|---|"]
+    for r in rows:
+        ci = f"[{fmt(r['hl_ci'][0])}, {fmt(r['hl_ci'][1])}]" if r["hl_ci"] else "-"
+        st = r["setting"].replace("results/fleet/h2_abrupt_prereg_results_freeze4.json::", "freeze-4 fleet file::")
+        L.append(f"| {r['label']} | {st} | {r['metric']} ({r['arm_a']} vs {r['arm_b']}) | {r['n'] or '-'} | "
+                 f"{fmt(r['p'])} | {fmt(r.get('holm_p'))} | {'YES' if r['decision'].startswith('REJECT') else 'no'} | "
+                 f"{fmt(r['hl'])} | {ci} |")
+    L += ["", "## Safety principle: mean_def <= mean_undef + 3 sigma_nom (field max_h_att; max_h_pre for S1)", "",
+          "| Scenario@grade | n | margin (m) | 3sigma_nom (m) | Primary | HL (def-undef) | 95% CI |", "|---|---|---|---|---|---|---|"]
+    for a in an_list:
+        s_ = a["safety"]
+        if s_:
+            ci = f"[{fmt(s_['hl_ci95'][0])}, {fmt(s_['hl_ci95'][1])}]" if s_["hl_ci95"] else "-"
+            L.append(f"| {a['rid']} | {s_['n']} | {fmt(s_['margin'])} | {fmt(s_['bound_3sigma'])} | "
+                     f"{'PASS' if s_['primary_pass'] else 'FAIL'} | {fmt(s_['hl'])} | {ci} |")
+    for rid in sorted(comp["missing"]):
+        if not any(a["rid"] == rid and a["safety"] for a in an_list):
+            L.append(f"| {rid} | 0 | - | - | PENDING | - | - |")
+    L += ["", "## S7 chattering (prereg bound 223 cycles/h, integer; 133 annotation only)", ""]
+    L += [f"- {rid}: max {fmt(e['max_cycles_per_hour'])}/h -> {'PASS' if e['pass_prereg_223'] else 'FAIL'} (<=133: {'yes' if e['within_133'] else 'no'})"
+          for rid, e in S["s7_prereg"].items()]
+    L += ["", "## Scenario criteria (registry; status per scenario@grade; '*' = metric absent from records)", ""]
+    for a in an_list:
+        if a["base"].startswith(("S7-", "S10-")):
+            continue
+        L.append(f"- {a['rid']}: " + "; ".join(f"{c['criterion']}={c['status']}{'*' if c['metric_absent'] else ''}" for c in a["criteria"])
+                 if a["criteria"] and a["n_by_method"] else f"- {a['rid']}: PENDING (no data)")
+    n_s10 = sum(1 for a in an_list if a["base"].startswith("S10-"))
+    L.append(f"- S10-* ({n_s10} rids): see M3_REPORT.md section 2")
+    (sdir / "SUMMARY.md").write_text("\n".join(L) + "\n", encoding="utf8")
+
+
 # ----------------------------------------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--round2", action="store_true", help="round-2 context labels (core-freeze-5, seeds 10030-10059)")
     ap.add_argument("--run-root", default="results/m4")
+    ap.add_argument("--summary-dir", default=None, help="if set, also write summary.json + SUMMARY.md here")
     ap.add_argument("--out-md", default="docs/M3_REPORT.md")
     ap.add_argument("--out-json", default="results/m3")
     ap.add_argument("--sigma", default="results/sigma_nom.json")
     ap.add_argument("--h2", default=H2_FREEZE4)
     args = ap.parse_args()
+    if args.round2:
+        CTX.update(ROUND2_CTX)
     run_root = args.run_root
+    CTX["root"] = run_root
     out_json = Path(args.out_json)
     out_json.mkdir(parents=True, exist_ok=True)
 
     manifest = json.loads((Path(run_root) / "manifest.json").read_text())
     sigma = M.load_sigma_nom(args.sigma)
+    SC.SIGMA_NOM_PATH = args.sigma     # runtime override so the registry criteria use the SAME frozen sigma_nom (no file under fedqpnt/ is edited)
     h2 = json.loads(Path(args.h2).read_text())
     prov = {}
     pp = Path(run_root) / "_provenance.json"
@@ -605,16 +696,19 @@ def main():
          f"_Generated by `scripts/m3_report.py`; PREREG_M4.md is binding (D-002: reported as measured; nothing post-hoc)._", ""]
     L.append(md_completeness(comp, all_final))
     L += ["", "### Provenance (D-062/D-077)", ""] + provenance_lines(prov)
-    L += ["", f"kappa_R_status stamp: `{SC.KAPPA_R_STATUS}`. Code `core-freeze-4`; detector `results/m1/detector_weights_sup_v3.npz`; "
-              "test seeds 10000-10029.", ""]
+    L += ["", f"kappa_R_status stamp: `{SC.KAPPA_R_STATUS}`. Code `{CTX['code']}`; detector `{CTX['detector']}`; "
+              f"test seeds {CTX['seed_range']}.", ""]
     L += ["## 1. Confirmatory family (8 tests, Holm, fixed m = 8)", "", md_confirmatory(rows, all_final, h1_tac), ""]
     L += ["## 2. Scenario acceptance criteria per scenario × grade", "", md_criteria(an_list), ""]
+    L += ["## 2b. S7 chattering bound (pre-registered 223/h)", "", md_s7(an_list), ""]
     L += ["## 3. Safety principle and main metric tables", "", "### 3.1 Safety principle (defended vs undefended)", "",
-          md_safety(an_list), "", "### 3.2 Per-scenario metric tables (all methods)", "", md_metrics(an_list), ""]
+          md_safety(an_list, ", ".join(f"{g} {v:.3f} m" for g, v in sigma.items())), "", "### 3.2 Per-scenario metric tables (all methods)", "", md_metrics(an_list), ""]
     L += ["## 4. Exploratory analyses", "", md_exploratory(an_by_rid, h2, h1_tac), ""]
     L.append("## 5. Provenance of constants\n\nσ_nom = " + ", ".join(f"{g}: {v:.4f} m" for g, v in sigma.items()) +
              " (D-068, frozen); S7 chattering bound 223 trust cycles/h (D-075); censoring 60 s (event) / t_off−t_on (other), D-068.")
     Path(args.out_md).write_text("\n".join(L) + "\n", encoding="utf8")
+    if args.summary_dir:
+        write_summary(args.summary_dir, rows, all_final, h1_tac, comp, an_list, sigma, args)
     print(f"[m3] wrote {args.out_md} and {out_json}/*.json; family_complete={all_final}; missing={comp['missing_n']}")
 
 

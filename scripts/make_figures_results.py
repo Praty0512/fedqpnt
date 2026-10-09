@@ -5,10 +5,12 @@ Figure (iv) (trust-weight trajectories) is skipped: the campaign result files ho
 trust trace; RunSpec.record=False), see docs/M3_FIGURE_CAPTIONS.md.
 
 Bars that rest on fewer than 30 seeds are tagged 'n=k' so a partial-data render can never be mistaken for final.
-Usage: python scripts/make_figures_results.py
+Usage: python scripts/make_figures_results.py [--m3 results/m3] [--out figures] [--h2 <H2 file>] [--sigma results/sigma_nom.json]
+Round 2: --m3 results/m4r2/report/json --out results/m4r2/figures --sigma results/sigma_nom_freeze5.json
 """
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -21,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 M3 = ROOT / "results" / "m3"
 OUT = ROOT / "figures"
 H2 = ROOT / "results" / "fleet" / "h2_abrupt_prereg_results_freeze4.json"
+SIGMA3 = {}
 GRADES = ("industrial_mems", "tactical")
 GLABEL = {"industrial_mems": "Industrial MEMS", "tactical": "Tactical"}
 COL = dict(fedqpnt_local="#0072B2", undefended="#D55E00", baseline_a="#009E73", abl_minus_quantum="#CC79A7",
@@ -39,11 +42,11 @@ def load(name):
 
 
 def save(fig, stem):
-    OUT.mkdir(exist_ok=True)
+    OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / f"{stem}.pdf", bbox_inches="tight")
     fig.savefig(OUT / f"{stem}.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
-    print("wrote", f"figures/{stem}.pdf/.png")
+    print("wrote", OUT / f"{stem}.pdf/.png")
 
 
 def cell(tab, rid, method, field):
@@ -183,7 +186,8 @@ def fig_safety(safety):
         if s["partial"]:
             ax.text(hi, y, f" n={s['n']}", fontsize=4.5, va="center")
     ax.axvline(0, color="k", lw=0.6)
-    ax.axvline(3.4, color="0.4", lw=0.6, ls=":")   # 3 sigma_nom (MEMS 3.54 m, tactical 3.37 m): pre-registered margin
+    for g_, v_ in SIGMA3.items():                   # pre-registered margin 3 sigma_nom per grade (from the sigma file)
+        ax.axvline(v_, color=col[g_], lw=0.6, ls=":")
     ax.set_xscale("symlog", linthresh=10)
     ax.set_yticks(range(len(order)))
     ax.set_yticklabels(order)
@@ -198,6 +202,18 @@ def fig_safety(safety):
 
 
 def main():
+    global M3, OUT, H2
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--m3", default=str(M3))
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--h2", default=str(H2))
+    ap.add_argument("--sigma", default=str(ROOT / "results" / "sigma_nom.json"))
+    a = ap.parse_args()
+    M3, OUT, H2 = Path(a.m3), Path(a.out), Path(a.h2)
+    sg = json.loads(Path(a.sigma).read_text())
+    sg = sg.get("sigma_nom_m", sg)
+    SIGMA3.update({g: 3 * float(sg[g]) for g in GRADES})
+    OUT.mkdir(parents=True, exist_ok=True)
     tab = load("metrics_table.json")
     safety = load("safety.json")
     fig_defended_vs_undefended(tab)
