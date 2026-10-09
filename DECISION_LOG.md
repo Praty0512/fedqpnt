@@ -4,7 +4,15 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 
 ---
 
-### D-085 — Round-2 outcome and diagnose-first (2026-10-10)
+### D-086 — Bug fixes for freeze-6, mini-matrix before any test round (2026-10-10)
+**Diagnosis (73f6d16, tuning seeds 530-534; Master checked the code refs):**
+- (1) ESKF P0 roll/pitch is 1 mrad, but levelling from a biased accelerometer leaves about σ_ba/g (~10 mrad on MEMS). The coast covariance is overconfident (NEES 12.5k at +240 s), so the shadow-probe NIS can never pass and GNSS is never re-admitted.
+- (2) FL client sends base_round = -1 when it has never installed, so the server drops every update as stale and installs = 0.
+- (3) The θ0 normaliser was estimated from 1,470 samples (σ ~3× narrow), so E_s false-fires on clean fleet nodes.
+All three are **bugs**, not design choices.
+**Decision (user pre-authorised fixing fixable errors with small-sample testing, then iterating):** apply C1/F3/F4 on branch freeze6 (worktree), re-run the pre-registered κ_Q rule, then run a **mini-matrix** (tuning seeds 530-532 × all scenarios, f5 vs f6) before any freeze or test round. C2 (quiet-override re-admission) is a design trade-off, evaluated as an option only, and not enabled without a Master decision. Round-2 results stand as measured.
+
+## D-085 — Round-2 outcome and diagnose-first (2026-10-10)
 **Finding (test seeds 10030-10059, core-freeze-5, verified by Master from raw JSONs):** on spoofing scenarios fedqpnt_local is far worse than undefended and than Baseline A. Examples (medians): S2-med MEMS 7.7 km during the attack and 62 km after it (undefended 254 m / 187 m; Baseline A 3.4 km / 5 m). Cause as observed: GNSS is excluded, the coast diverges, and GNSS is **not re-admitted after the attack ends**. H1 is significant in the adverse direction; H2/H3/H4 are null. S1, S3 and S7 chattering are fine. In the fleet, round_installs = 0 and rmse_h_pre is 6-12 km. Round 1 (freeze-4) shows the same pattern. These results stand as measured; nothing is re-scored.
 **Decision (user, AskUserQuestion):** diagnose first, on TUNING seeds only, in a worktree; no fedqpnt/ change on master. The user then chooses between fix + round 3 (fresh seeds, all rounds disclosed) and publishing as measured.
 
