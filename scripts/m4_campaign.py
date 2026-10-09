@@ -36,6 +36,27 @@ CODE_TAG = "core-freeze-5"
 SPEC_FILE_SCRIPT = Path(__file__).with_name("m4_run_spec_file.py")
 
 
+def core_snapshot(tag: str) -> dict:
+    """fedqpnt/-specific provenance point: HEAD, fedqpnt/ porcelain, and diff vs the freeze tag."""
+    return dict(head=_git("rev-parse", "HEAD").strip(),
+                dirty=sorted(l for l in _git("status", "--porcelain", "--", "fedqpnt/").splitlines() if l.strip()),
+                diff_vs_tag_empty=not _git("diff", tag, "HEAD", "--", "fedqpnt").strip())
+
+
+def fedqpnt_verdict(start: dict, end: dict, tag: str) -> dict:
+    """Core-specific verdict (ignores docs/log commits): fedqpnt/ unchanged between the two HEADs, clean at both
+    ends, and equal to <tag> at both ends."""
+    between_empty = not _git("diff", start["head"], end["head"], "--", "fedqpnt").strip()
+    reasons = []
+    if not between_empty:
+        reasons.append("fedqpnt/ changed between start and end HEAD")
+    if start["dirty"] or end["dirty"]:
+        reasons.append(f"fedqpnt/ dirty: start={start['dirty']} end={end['dirty']}")
+    if not (start["diff_vs_tag_empty"] and end["diff_vs_tag_empty"]):
+        reasons.append(f"fedqpnt/ differs from {tag}")
+    return dict(valid=not reasons, reasons=reasons, tag=tag, start=start, end=end)
+
+
 # ---------------------------------------------------------------- args / preflight
 def parse_seeds(txt: str) -> list[int]:
     out: list[int] = []
@@ -166,6 +187,9 @@ def main() -> None:
     ap.add_argument("--reverse", action="store_true")
     ap.add_argument("--clear-claims", action="store_true")
     ap.add_argument("--tag", default=CODE_TAG)
+    ap.add_argument("--only", default=None, help="run only this scenario id (base before @), e.g. S14")
+    ap.add_argument("--take-reserved", action="store_true",
+                    help="first drop RESERVED claims (placed by hand) on the selected tasks")
     a = ap.parse_args()
     if not a.dry and not a.phase:
         ap.error("--phase required unless --dry")
@@ -216,7 +240,15 @@ def main() -> None:
         for cf in root.rglob("*.claim"):
             cf.unlink()
     prov0 = C.git_provenance()
+    core0 = core_snapshot(a.tag)
     ids, tasks = build(a.phase, seeds, a.weights)
+    if a.only:
+        tasks = [t for t in tasks if t.scenario_id.split("@")[0] == a.only]
+    if a.take_reserved:
+        for t in tasks:
+            cp = Path(str(t.result_path(root)) + ".claim")
+            if cp.exists() and cp.read_text(errors="ignore").startswith("RESERVED"):
+                cp.unlink()
     if a.phase == "1":
         tasks.sort(key=lambda t: not is_long(t))          # long S7-p2/p5 first so they don't tail
     if a.reverse:
@@ -257,8 +289,10 @@ def main() -> None:
             print(f"{time.ctime()} {n}/{len(todo)} {t.scenario_id} {t.method} {t.seed} {st}", flush=True)
     print("DONE", dict(cnt), f"wall {time.time() - t0:.0f}s", flush=True)
     v = C.provenance_verdict(prov0, C.git_provenance())
-    C.record_provenance(root, v)
-    print("PROVENANCE valid:", v["valid"], v["reasons"], flush=True)
+    fv = fedqpnt_verdict(core0, core_snapshot(a.tag), a.tag)
+    C.record_provenance(root, dict(v, fedqpnt_verdict=fv, phase=a.phase, reverse=a.reverse))
+    print("PROVENANCE frozen(whole-repo HEAD) valid:", v["valid"], v["reasons"], flush=True)
+    print("PROVENANCE fedqpnt_verdict valid:", fv["valid"], fv["reasons"], flush=True)
 
 
 from fedqpnt.eval import seed_gate as _SG  # noqa: E402
