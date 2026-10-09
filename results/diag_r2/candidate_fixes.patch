@@ -1,0 +1,99 @@
+diff --git a/fedqpnt/fl/client.py b/fedqpnt/fl/client.py
+index 42efebf..1aa3e6d 100644
+--- a/fedqpnt/fl/client.py
++++ b/fedqpnt/fl/client.py
+@@ -115,6 +115,6 @@ class FLClient:
+         delta["norm_mu"] = new_params["norm_mu"]
+         delta["norm_sd"] = new_params["norm_sd"]
+         metrics = dict(metrics)
+-        metrics["base_round"] = float(self.last_installed_round)
++        metrics["base_round"] = float(self.last_installed_round if self.last_installed_round >= 0 else round_idx)   # CANDIDATE F3: never-installed node = fresh vs theta0
+         return ModelUpdate(node_id=self.node_id, round_idx=round_idx, params=delta,
+                             n_samples=n, metrics=metrics, kind="delta")
+diff --git a/fedqpnt/fusion/eskf.py b/fedqpnt/fusion/eskf.py
+index d0998b4..e46122a 100644
+--- a/fedqpnt/fusion/eskf.py
++++ b/fedqpnt/fusion/eskf.py
+@@ -169,10 +169,12 @@ class ESKF:
+         self.b_a = np.zeros(3)
+         self.b_g = np.zeros(3)
+         mrad = 1e-3
++        # CANDIDATE C1 (diag only): levelling from the biased mean f_b leaves a roll/pitch error ~ sigma_ba_turn_on/g
++        tilt0 = max(mrad, self.sigma_ba_turnon / G0)
+         self.P = np.diag([
+             3.0 ** 2, 3.0 ** 2, 3.0 ** 2,
+             0.1 ** 2, 0.1 ** 2, 0.1 ** 2,
+-            mrad ** 2, mrad ** 2, (35 * mrad) ** 2,
++            tilt0 ** 2, tilt0 ** 2, (35 * mrad) ** 2,
+             self.sigma_ba_turnon ** 2, self.sigma_ba_turnon ** 2, self.sigma_ba_turnon ** 2,
+             self.sigma_bg_turnon ** 2, self.sigma_bg_turnon ** 2, self.sigma_bg_turnon ** 2,
+         ])
+diff --git a/fedqpnt/trust/trust_law.py b/fedqpnt/trust/trust_law.py
+index fcb270c..2d79809 100644
+--- a/fedqpnt/trust/trust_law.py
++++ b/fedqpnt/trust/trust_law.py
+@@ -126,6 +126,9 @@ class TrustLawConfig:
+     # distribution, frozen) are applied by fedqpnt/node/methods.py; see PROBE_NIS_BOUND_BY_GRADE.
+     probe_nis_bound: float | None = None
+     es_gap_reset_factor: float = 1.5
++    # CANDIDATE C2 (diag worktree only; env DIAG_C2=1): PROBE may also succeed when the detector has been quiet
++    # (mean raw p over the probe <= theta_off) and no physical evidence fired, even if the coast-consistency NIS fails.
++    probe_quiet_override: bool = field(default_factory=lambda: __import__("os").environ.get("DIAG_C2") == "1")
+ 
+     @property
+     def nis_clean_threshold(self) -> float:
+@@ -268,6 +271,7 @@ class _LawCoreV2:
+     _probe_nis_sum: float = field(default=0.0, repr=False)
+     _probe_nis_n: int = field(default=0, repr=False)
+     _probe_es_any: bool = field(default=False, repr=False)
++    _probe_p_sum: float = field(default=0.0, repr=False)
+     _suppress_timer: float = field(default=0.0, repr=False)
+     # D-076: True only for the epoch in which a PROBE just FAILED. That epoch's fix has just failed the
+     # consistency test, so it must NOT be applied (w = w_min and shadow reported); otherwise the failed fix
+@@ -353,6 +357,7 @@ class _LawCoreV2:
+                 self._probe_nis_sum = 0.0
+                 self._probe_nis_n = 0
+                 self._probe_es_any = False
++                self._probe_p_sum = 0.0
+ 
+         elif self.state == "PROBE":
+             # sec C item 3: w fixed at w_probe regardless of p, for the whole probe; collect NIS +
+@@ -366,11 +371,13 @@ class _LawCoreV2:
+             self._probe_timer += dt
+             self._probe_nis_sum += nis_value
+             self._probe_nis_n += 1
++            self._probe_p_sum += float(p)
+             self._probe_es_any = self._probe_es_any or es_evidence
+             if self._probe_timer >= c.T_probe:
+                 mean_nis = self._probe_nis_sum / max(self._probe_nis_n, 1)
+                 bound = CHI2_6_99 if c.probe_nis_bound is None else c.probe_nis_bound
+-                if mean_nis <= bound and not self._probe_es_any:
++                quiet = (c.probe_quiet_override and (self._probe_p_sum / max(self._probe_nis_n, 1)) <= c.theta_off)
++                if (mean_nis <= bound or quiet) and not self._probe_es_any:
+                     # sec C item 4, success: TRUST, detector suppressed for
+                     # T_sup, recovery continues via the normal ramp (next
+                     # call, from w=w_probe) in the TRUST branch above.
+@@ -716,7 +723,7 @@ class TrustEngineImpl:
+         # reacquisition consistency); ``clk_law`` is an independent law for the clock (w_clk: ClockKF).
+         # Only used for the v2 continuous law; otherwise w_clk == w_pos (no split).
+         import dataclasses as _dc
+-        self.clk_law = SensorTrustLaw(cfg=_dc.replace(self.cfg.gnss_law_cfg, probe_nis_bound=CHI2_2_99),
++        self.clk_law = SensorTrustLaw(cfg=_dc.replace(self.cfg.gnss_law_cfg, probe_nis_bound=CHI2_2_99, probe_quiet_override=False),
+                                       law_mode=self.cfg.law_mode, trust_law_version=self.cfg.trust_law_version)
+         self.imu_trust = ImuTrust(w_min=self.cfg.gnss_law_cfg.w_min)
+         self.quantum_trust = QuantumTrust(cycle_time_s=self.cfg.quantum_cycle_time_s,
+@@ -914,6 +921,11 @@ class TrustEngineImpl:
+                 # D-072: position law <- position_event + xsat/cn0 (clk_event does NOT cost position).
+                 gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal,
+                                              nis_value=shadow_nis, es_evidence=es_xc, es_position=es_pos)
++                # CANDIDATE C2b (diag worktree only): the pull applied on the first TRUST epoch after a PROBE success
++                # makes the NEXT epoch's short-baseline E_s position test false-fire (delta p_INS contains the pull).
++                if (self.gnss_law.cfg.probe_quiet_override and was_probe and not self.gnss_law.probe_shadow
++                        and self.gnss_law._uses_v2 and self.gnss_law._core_v2.state == "TRUST"):
++                    self._es_position_quarantine = 2
+                 # clock law <- clk_event + xsat/cn0; its own consistency statistic x8^2 + x9^2 (chi2_2).
+                 if self.gnss_law._uses_v2:
+                     clk_stat = float(raw[7] ** 2 + raw[8] ** 2)
+diff --git a/results/fleet/theta0_d054.npz b/results/fleet/theta0_d054.npz
+index 9ffe942..72b1e29 100644
+Binary files a/results/fleet/theta0_d054.npz and b/results/fleet/theta0_d054.npz differ

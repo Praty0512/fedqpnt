@@ -1,0 +1,2 @@
+fedqpnt from C:\Users\DELL\Downloads\FEDQPNT_diag\fedqpnt\__init__.py
+S2-med|tactical|fedqpnt_local|530 {'rmse_h_pre': nan, 'rmse_h_att': 1722.12, 'rmse_v_att': 20.12, 'max_h_att': 4531.26, 'rmse_h_post': 15966.67, 'max_h_post': 28577.12, 't_det': 61.0, 't_rec': nan, 'mean_w_gnss_att': 0.06, 'fpr': 0.9, 'far_per_hour': 0.0, 'latency_on': 1.0, 'anees_pos_pre': nan, 'mean_w_pos_att': 0.06, 'mean_w_clk_att': 0.06}

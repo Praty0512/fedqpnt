@@ -1,0 +1,6 @@
+seed=530 node0 rmse_h=1.5 max_h=3.7 frac_epochs_not_TRUST=0.00 events(t,trans,raw_p,E_s,err_h)=[]
+seed=530 node1 rmse_h=1.9 max_h=2.9 frac_epochs_not_TRUST=0.00 events(t,trans,raw_p,E_s,err_h)=[]
+seed=530 node3 rmse_h=1.6 max_h=2.2 frac_epochs_not_TRUST=0.00 events(t,trans,raw_p,E_s,err_h)=[]
+seed=530 node2 rmse_h=3.5 max_h=5.4 frac_epochs_not_TRUST=0.00 events(t,trans,raw_p,E_s,err_h)=[]
+seed=531 node1 rmse_h=1.9 max_h=4.6 frac_epochs_not_TRUST=0.00 events(t,trans,raw_p,E_s,err_h)=[]
+seed=531 node2 rmse_h=2.6 max_h=3.5 frac_epochs_not_TRUST=0.00 events(t,trans,raw_p,E_s,err_h)=[]
