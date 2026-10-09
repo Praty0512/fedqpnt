@@ -4,7 +4,11 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 
 ---
 
-### D-001 · 2026-09-23 · Pure high-fidelity software simulation
+### D-085 — Round-2 outcome and diagnose-first (2026-10-10)
+**Finding (test seeds 10030-10059, core-freeze-5, verified by Master from raw JSONs):** on spoofing scenarios fedqpnt_local is far worse than undefended and than Baseline A. Examples (medians): S2-med MEMS 7.7 km during the attack and 62 km after it (undefended 254 m / 187 m; Baseline A 3.4 km / 5 m). Cause as observed: GNSS is excluded, the coast diverges, and GNSS is **not re-admitted after the attack ends**. H1 is significant in the adverse direction; H2/H3/H4 are null. S1, S3 and S7 chattering are fine. In the fleet, round_installs = 0 and rmse_h_pre is 6-12 km. Round 1 (freeze-4) shows the same pattern. These results stand as measured; nothing is re-scored.
+**Decision (user, AskUserQuestion):** diagnose first, on TUNING seeds only, in a worktree; no fedqpnt/ change on master. The user then chooses between fix + round 3 (fresh seeds, all rounds disclosed) and publishing as measured.
+
+## D-001 · 2026-09-23 · Pure high-fidelity software simulation
 - **Decision:** All sensing, attacks, fusion and FL run as a scientifically grounded Python simulation.
 - **Rationale:** No quantum hardware or GNSS RF front-end available (proposal §7).
 - **Alternatives:** GNSS SDR record/replay (gnss-sdr + recorded IQ) — rejected for now (no hardware, legal constraints on RF spoofing); may be reconsidered for a validation appendix using public spoofing datasets (e.g. TEXBAT) if they are accessible.
