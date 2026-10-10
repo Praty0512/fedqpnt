@@ -4,7 +4,22 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 
 ---
 
-### D-086 — Bug fixes for freeze-6, mini-matrix before any test round (2026-10-10)
+### D-087 — Mini-matrix f6 result; iteration 2 (2026-10-10)
+**f6 (C1+F3+F4) vs f5, tuning seeds 530-532:**
+- Large improvement: S2-med MEMS 11.4 km att / 115 km post → 954 m / 1.24 km; S7-p10 MEMS 3.9e6 → 32 m; fleet installs 0 → 2.5-5 per node; honest-node fleet rmse 12-17 km → 2 m; fpr 0.
+- Remaining:
+  - tactical post-attack ~16 km (no re-admission);
+  - S11 clean-data lockout (46-59 km);
+  - S7 tactical divergence (609 km on one seed);
+  - fleet fault/poisoning variants identical to clean;
+  - the detector loader silently falls back to untrained.
+**Decision:**
+- Iteration 2 (FIX7) on freeze6: B1 loader raise, B2 S7 divergence, B3 S11 lockout, B4 fleet fault wiring, B5 tactical coast-covariance consistency (NEES target), B6 θ0 re-pretrain with the sup_v4 normaliser, B7 housekeeping. Then a full mini-matrix f7.
+- **C2 (quiet override) not adopted:** quiet-spoof tests show it reduces the defence to undefended-level exposure. The principled route is consistency (B5). Revisit only if B5 fails.
+- Attack-window loss vs undefended on MEMS is the physics floor (coast drift > spoof offset) and will be reported as the envelope.
+**Round 2 COMPLETE:** 5,340/5,340 ok (S14 60/60); report regenerated (094a093).
+
+## D-086 — Bug fixes for freeze-6, mini-matrix before any test round (2026-10-10)
 **Diagnosis (73f6d16, tuning seeds 530-534; Master checked the code refs):**
 - (1) ESKF P0 roll/pitch is 1 mrad, but levelling from a biased accelerometer leaves about σ_ba/g (~10 mrad on MEMS). The coast covariance is overconfident (NEES 12.5k at +240 s), so the shadow-probe NIS can never pass and GNSS is never re-admitted.
 - (2) FL client sends base_round = -1 when it has never installed, so the server drops every update as stale and installs = 0.
