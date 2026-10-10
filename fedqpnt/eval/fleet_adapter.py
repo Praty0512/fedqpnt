@@ -58,7 +58,7 @@ from fedqpnt.fleet.orchestrator import FleetResult, FleetScenarioConfig, run_fle
 from fedqpnt.node.methods import load_detector_weights
 
 FLEET_SCENARIO_IDS = ("S5", "S8", "S9", "S12", "S15")
-THETA0_PATH = Path("results/fleet/theta0_d054.npz")
+THETA0_PATH = Path("results/fleet/theta0_d054_f6.npz")  # D-086 F4: theta0 weights + sup_v4 normaliser
 MAX_LOCAL_ONLY_PARALLEL = 8   # D-059: cap on concurrent 1-node federations for B-cont/B-bin
 
 # D-059 addendum (Master): a local-only node trains on its own vehicle, with

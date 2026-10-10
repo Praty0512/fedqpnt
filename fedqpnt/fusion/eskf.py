@@ -169,10 +169,13 @@ class ESKF:
         self.b_a = np.zeros(3)
         self.b_g = np.zeros(3)
         mrad = 1e-3
+        # Levelling from the biased mean specific force leaves a roll/pitch error of about sigma_ba_turnon / g
+        # (~10 mrad for the MEMS grade), so P0 must not claim less than that (D-086, C1).
+        tilt0 = max(mrad, self.sigma_ba_turnon / G0)
         self.P = np.diag([
             3.0 ** 2, 3.0 ** 2, 3.0 ** 2,
             0.1 ** 2, 0.1 ** 2, 0.1 ** 2,
-            mrad ** 2, mrad ** 2, (35 * mrad) ** 2,
+            tilt0 ** 2, tilt0 ** 2, (35 * mrad) ** 2,
             self.sigma_ba_turnon ** 2, self.sigma_ba_turnon ** 2, self.sigma_ba_turnon ** 2,
             self.sigma_bg_turnon ** 2, self.sigma_bg_turnon ** 2, self.sigma_bg_turnon ** 2,
         ])

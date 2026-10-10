@@ -261,3 +261,15 @@ def test_step_convenience_wrapper_matches_manual_sequence():
 
     assert np.allclose(nav_a.pos, nav_b.pos)
     assert np.allclose(nav_a.P if hasattr(nav_a, "P") else eskf_a.P, eskf_b.P)
+
+
+# D-086 C1: P0 roll/pitch std must cover the levelling error sigma_ba_turnon/g (>= 1 mrad)
+@pytest.mark.parametrize("grade", ["industrial_mems", "tactical"])
+def test_p0_tilt_std_covers_levelling_error(grade):
+    eskf, imu, _ = _fresh_eskf(grade)
+    expected = max(1e-3, eskf.sigma_ba_turnon / G)
+    assert np.isclose(np.sqrt(eskf.P[6, 6]), expected, rtol=1e-3)
+    assert np.isclose(np.sqrt(eskf.P[7, 7]), expected, rtol=1e-3)
+    assert np.sqrt(eskf.P[6, 6]) >= 1e-3
+    if grade == "industrial_mems":
+        assert np.sqrt(eskf.P[6, 6]) > 5e-3     # ~10 mg / g, was 1 mrad before the fix
