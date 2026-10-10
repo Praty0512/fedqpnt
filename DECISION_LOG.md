@@ -4,7 +4,23 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 
 ---
 
-### D-088 — Iteration 2 accepted; freeze-6 pipeline; round 3 (2026-10-10)
+### D-089 — core-freeze-6; detector v5; round 3 ready (2026-10-11)
+- **Tag core-freeze-6 = ca614b7** (merge of freeze6 + detector v5 + θ0 f8 pointer). Suite 673 passed, 1 skipped, 0 F/E.
+- **Detector:** nis_pos, nis_vel and div_cusum depend on the ESKF P, so **v5** was retrained with the unchanged protocol. Held-out AUC 0.959; displaced meaconer 0.974; S1 FAR 0/h at both grades.
+- **Fleet θ0 = f8:** original weights + v5 normaliser. Clean-fleet fpr 0; rmse 2.1-2.3 m; S15 AUC 0.924.
+- **Constants:**
+  - κ_Q rule (schuler) = 1 at both grades;
+  - σ_nom freeze-6: MEMS 1.0977 m, tactical 1.1171 m;
+  - S7 bound 223/h unchanged (a trust-law constant proof).
+- **Mini-matrix f8** (tuning 530-532) matches f7; small shifts come from detector v5. Same envelope as D-088.
+- **H2/H4 θ0 = theta0_noabrupt_v3** (v2 weights + v5 normaliser, the same bug-fix recipe as f6/f8). The pre-registered v2 carries the 1,499-sample normaliser defect (alarms everywhere on freeze-6, AUC 0.17). Chosen BEFORE any round-3 data; H2 may still be null.
+- **PREREG R3 + H2 Amendment 3 written before data.** Seeds: 10060-10089 single/fleet; H2 live 10090-10099; τ calibration on tuning seeds 580-599.
+- **Run order (memory):**
+  1. START_ROUND3.cmd (phase 1 without S14 + phase 2);
+  2. after phase 2 ends: START_H2_R3.cmd;
+  3. after phase 1 ends: START_ROUND3_S14.cmd (serial).
+
+## D-088 — Iteration 2 accepted; freeze-6 pipeline; round 3 (2026-10-10)
 **FIX7 (freeze6 26f49bc), verified by Master on raw mini-matrix files:**
 - B5: the second-order attitude term in P makes the coast covariance consistent (tactical ANEES6 at a t=60 outage: 7.2 → 0.44). The probe now passes: S2-med tactical post-attack 16 km → 2.5 km, set by the designed T_ex dwell; after re-admission the error is 1-5 m. The PROBE→TRUST 2-epoch E_s-position quarantine fixes the pull false-fire.
 - B1: the loader raises on a missing file.
