@@ -1,0 +1,10 @@
+=== industrial_mems outage t_on=60.0 n=20  ANEES6 = mean(NEES6)/6, ANEES3 = mean/3 (ideal 1); med = median NEES6/6
+   +s    ANEES6     med6  ANEES3pos  ANEESvel  med err_h  med sig_h
+    0      0.09     0.06       0.14      0.03        1.2        2.5
+   30      0.28     0.14       0.26      0.23       10.6       22.2
+   60      0.34     0.19       0.17      0.15       43.7       96.7
+  120      0.40     0.19       0.10      0.10      206.5      501.6
+  180      0.31     0.21       0.09      0.10      519.8     1408.9
+  240      0.36     0.23       0.08      0.16     1240.2     3141.6
+  299      0.26     0.18       0.10      0.11     2511.2     5788.7
+pooled mean ANEES6 over +30..+299: 0.32

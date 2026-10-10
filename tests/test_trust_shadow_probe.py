@@ -157,3 +157,17 @@ def test_probe_uses_configured_bound():
         law.step(t, 0.0, nis_ok=True, features_nominal=True, nis_value=10.0, es_evidence=False, es_position=False)
         t += 1.0
     assert law._core_v2.state == "DISTRUST"   # 10 > 6.74 although < chi2_6(0.99)=16.81
+
+
+# ---- FIX7 B5: the epoch after a successful PROBE must not false-fire the short-baseline position test -----------
+def test_probe_success_quarantines_position_evidence_for_next_epochs():
+    eng = TrustEngineImpl(make_method_config("fedqpnt"))
+    law = eng.gnss_law
+    t = _to_probe(law)
+    for _ in range(int(law.cfg.T_probe) - 1):
+        law.step(t, 0.0, nis_ok=True, features_nominal=True, nis_value=1.0, es_evidence=False, es_position=False)
+        t += 1.0
+    assert law._core_v2.state == "PROBE" and eng._es_position_quarantine == 0
+    eng.update(t, _gfix(t), None, None, None, [_shadow(1.0)])      # completes the probe -> TRUST
+    assert law._core_v2.state == "TRUST"
+    assert eng._es_position_quarantine == 2

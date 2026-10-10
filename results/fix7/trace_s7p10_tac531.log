@@ -1,0 +1,561 @@
+# S7-p10 tactical fedqpnt_local seed=531 attacks=[{'kind': 'abrupt_spoof', 'onset_s': 60.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 70.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 80.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 90.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 100.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 110.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 120.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 130.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 140.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 150.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 160.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 170.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 180.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 190.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 200.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 210.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 220.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 230.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 240.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 250.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 260.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 270.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 280.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 290.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 300.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 310.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 320.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 330.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 340.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 350.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 360.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 370.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 380.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 390.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 400.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 410.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 420.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 430.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 440.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 450.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 460.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 470.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 480.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 490.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 500.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 510.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 520.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 530.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 540.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 550.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 560.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 570.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 580.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 590.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 600.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 610.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 620.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 630.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 640.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 650.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 660.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 670.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 680.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 690.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 700.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 710.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 720.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 730.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 740.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 750.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 760.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 770.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 780.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 790.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 800.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 810.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 820.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 830.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 840.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 850.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 860.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 870.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 880.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 890.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 900.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 910.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 920.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 930.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 940.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 950.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 960.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 970.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 980.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 990.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1000.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1010.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1020.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1030.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1040.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1050.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1060.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1070.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1080.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1090.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1100.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1110.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1120.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1130.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1140.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1150.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1160.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1170.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1180.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1190.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1200.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1210.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1220.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1230.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1240.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1250.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1260.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1270.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1280.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1290.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1300.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1310.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1320.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1330.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1340.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1350.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1360.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1370.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1380.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1390.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1400.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1410.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1420.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1430.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1440.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1450.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1460.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1470.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1480.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1490.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1500.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1510.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1520.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1530.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1540.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1550.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1560.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1570.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1580.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1590.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1600.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1610.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1620.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1630.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1640.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1650.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1660.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1670.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1680.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1690.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1700.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1710.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1720.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1730.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1740.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1750.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1760.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1770.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1780.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1790.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1800.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1810.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1820.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1830.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1840.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1850.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1860.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1870.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1880.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1890.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1900.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1910.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1920.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1930.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1940.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1950.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1960.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1970.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1980.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 1990.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2000.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2010.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2020.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2030.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2040.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2050.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2060.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2070.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2080.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2090.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2100.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2110.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2120.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2130.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2140.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2150.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2160.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2170.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2180.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2190.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2200.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2210.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2220.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2230.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2240.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2250.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2260.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2270.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2280.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2290.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2300.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2310.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2320.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2330.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2340.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2350.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2360.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2370.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2380.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2390.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2400.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2410.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2420.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2430.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2440.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2450.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2460.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2470.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2480.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2490.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2500.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2510.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2520.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2530.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2540.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2550.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2560.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2570.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2580.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2590.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2600.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2610.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2620.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2630.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2640.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2650.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2660.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2670.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2680.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2690.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2700.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2710.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2720.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2730.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2740.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2750.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2760.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2770.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2780.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2790.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2800.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2810.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2820.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2830.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2840.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2850.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2860.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2870.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2880.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2890.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2900.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2910.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2920.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2930.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2940.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2950.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2960.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2970.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2980.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 2990.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3000.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3010.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3020.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3030.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3040.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3050.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3060.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3070.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3080.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3090.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3100.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3110.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3120.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3130.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3140.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3150.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3160.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3170.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3180.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3190.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3200.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3210.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3220.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3230.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3240.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3250.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3260.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3270.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3280.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3290.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3300.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3310.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3320.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3330.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3340.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3350.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3360.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3370.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3380.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3390.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3400.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3410.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3420.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3430.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3440.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3450.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3460.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3470.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3480.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3490.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3500.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3510.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3520.0, 'duration_s': 5.0, 'severity': 0.5}, {'kind': 'abrupt_spoof', 'onset_s': 3530.0, 'duration_s': 5.0, 'severity': 0.5}] noise_scale=None dur=3600.0
+   t   state   w_pos  p_raw  es(pos,clk,xc)  nis6   shadow  err_h    sig_h  err_v   sig_v  | raw x1 cn0 xsat
+    31    TRUST 1.000 0.043 (False, False, False)      0.1       0.8      0.0      3.0   0.02   0.10 | 0.00 -3.4 0.000
+    65 DISTRUST 0.150 0.243 (True, False, False)      0.3       2.2      1.8      2.6   0.13   0.15 | 0.00 -3.3 -0.042
+   125    PROBE 0.020 0.247 (True, False, False)      3.9       6.4     81.1     58.0   4.06   2.25 | 0.53 -3.4 -0.039
+   126    PROBE 0.300 0.237 (False, False, False)      4.2       6.6     85.2     60.2   4.31   2.32 | 0.55 -3.4 -0.030
+   127    PROBE 0.300 0.235 (False, False, False)      4.2       5.7     89.6     62.5   4.53   2.39 | 0.56 -3.6 -0.038
+   128    PROBE 0.300 0.296 (False, False, False)      4.3       6.4     94.1     64.9   4.61   2.44 | 0.57 -3.6 -0.037
+   129    PROBE 0.300 0.236 (False, False, False)      4.3       5.8     98.6     67.3   4.61   2.50 | 0.59 -3.4 -0.035
+   130    PROBE 0.300 0.236 None      nan       nan    103.1     69.8   4.54   2.56
+   131    PROBE 0.300 0.236 None      nan       nan    107.4     72.3   4.45   2.61
+   132    PROBE 0.300 0.182 (False, False, False)      6.9      26.3    111.7     74.9   4.35   2.67 | 0.26 -3.6 -0.046
+   133    PROBE 0.300 0.135 (False, False, False)      6.9      29.5    115.8     77.6   4.23   2.73 | 0.28 -3.4 -0.040
+   134    PROBE 0.300 0.126 (False, False, False)      6.2      27.0    119.7     80.3   4.09   2.79 | 0.29 -3.3 -0.033
+   135 DISTRUST 0.020 0.141 (True, False, False)      3.8       5.8    123.6     83.1   3.94   2.85 | 0.63 -3.5 -0.038
+   195    PROBE 0.020 0.387 (True, False, False)      3.4       8.3    502.8    373.3   9.47   7.11 | 0.55 -3.5 0.073
+   196    PROBE 0.300 0.380 (False, False, False)      3.5       5.2    512.3    380.4   9.59   7.19 | 0.55 -3.5 0.075
+   197    PROBE 0.300 0.276 (False, False, False)      3.3       6.4    521.9    387.6   9.71   7.28 | 0.56 -3.4 0.053
+   198    PROBE 0.300 0.316 (False, False, False)      3.4      12.9    531.6    394.9   9.82   7.36 | 0.55 -3.4 0.060
+   199    PROBE 0.300 0.400 (False, False, False)      3.5       6.5    541.6    402.2   9.94   7.45 | 0.56 -3.5 0.054
+   200    PROBE 0.300 0.400 None      nan       nan    551.5    409.6  10.06   7.54
+   201    PROBE 0.300 0.400 None      nan       nan    561.6    417.2  10.18   7.62
+   202    PROBE 0.300 0.233 (False, False, False)      4.4       8.6    571.8    424.8  10.30   7.71 | 0.49 -3.5 0.061
+   203    PROBE 0.300 0.318 (False, False, False)      4.7       8.5    582.1    432.5  10.42   7.80 | 0.48 -3.4 0.062
+   204    PROBE 0.300 0.278 (False, False, False)      4.6       8.4    592.6    440.2  10.54   7.89 | 0.48 -3.5 0.028
+   205 DISTRUST 0.020 0.264 (True, False, False)      3.6       6.5    603.2    448.1  10.67   7.98 | 0.56 -3.4 0.023
+   265    PROBE 0.020 0.231 (True, False, False)      4.3       5.1   1488.4   1098.2  19.27  14.29 | 0.56 -3.5 -0.001
+   266    PROBE 0.300 0.253 (True, False, False)      4.2       5.0   1507.9   1112.3  19.44  14.41 | 0.56 -3.4 0.002
+   267    PROBE 0.300 0.182 (True, False, False)      4.0       5.7   1527.4   1126.5  19.61  14.53 | 0.56 -3.3 0.024
+   268    PROBE 0.300 0.224 (True, False, False)      4.3       6.5   1547.0   1140.9  19.77  14.66 | 0.57 -3.5 0.022
+   269    PROBE 0.300 0.180 (True, False, False)      4.5      15.8   1566.7   1155.4  19.94  14.78 | 0.57 -3.5 -0.018
+   270    PROBE 0.300 0.180 None      nan       nan   1586.4   1170.1  20.10  14.91
+   271    PROBE 0.300 0.180 None      nan       nan   1606.5   1184.8  20.27  15.03
+   272    PROBE 0.300 0.233 (False, False, False)      4.8       7.1   1626.8   1199.7  20.44  15.16 | 0.54 -3.6 -0.017
+   273    PROBE 0.300 0.282 (False, False, False)      4.7       9.3   1647.0   1214.7  20.60  15.29 | 0.54 -3.5 -0.015
+   274    PROBE 0.300 0.213 (True, False, False)      4.8       6.2   1667.6   1229.8  20.77  15.41 | 0.54 -3.4 -0.019
+   275 DISTRUST 0.020 0.241 (True, False, False)      4.1       4.7   1688.3   1245.0  20.94  15.54 | 0.56 -3.6 -0.016
+   335    PROBE 0.020 0.105 (True, False, False)      4.2      16.2   3269.2   2410.3  32.55  24.31 | 0.67 -3.4 0.016
+   336    PROBE 0.300 0.125 (True, False, False)      4.4      20.8   3301.6   2434.2  32.76  24.48 | 0.68 -3.6 0.021
+   337    PROBE 0.300 0.107 (True, False, False)      4.1      16.6   3334.2   2458.4  32.98  24.64 | 0.67 -3.5 -0.006
+   338    PROBE 0.300 0.095 (True, False, False)      4.1       8.7   3367.1   2482.7  33.20  24.81 | 0.67 -3.5 -0.015
+   339    PROBE 0.300 0.106 (True, False, False)      4.0      11.9   3400.1   2507.2  33.42  24.98 | 0.69 -3.6 -0.005
+   340    PROBE 0.300 0.106 None      nan       nan   3433.5   2531.8  33.64  25.15
+   341    PROBE 0.300 0.106 None      nan       nan   3466.9   2556.6  33.85  25.31
+   342    PROBE 0.300 0.108 (False, False, False)      4.1      16.3   3500.5   2581.6  34.07  25.48 | 0.66 -3.3 -0.015
+   343    PROBE 0.300 0.126 (False, False, False)      4.0       8.7   3534.5   2606.7  34.30  25.65 | 0.66 -3.6 -0.013
+   344    PROBE 0.300 0.107 (True, False, False)      4.5      29.5   3568.6   2632.0  34.52  25.82 | 0.66 -3.4 -0.006
+   345 DISTRUST 0.020 0.131 (True, False, False)      3.9       5.1   3602.6   2657.5  34.73  25.99 | 0.68 -3.4 -0.008
+   405    PROBE 0.020 0.093 (True, False, False)      4.3      32.3   6093.1   4516.3  49.63  37.37 | 0.89 -3.5 0.104
+   406    PROBE 0.300 0.117 (True, False, False)      4.2      26.3   6142.3   4553.2  49.90  37.57 | 0.92 -3.3 0.094
+   407    PROBE 0.300 0.064 (True, False, False)      4.0      19.8   6191.9   4590.3  50.17  37.78 | 0.90 -3.5 0.080
+   408    PROBE 0.300 0.079 (True, False, False)      4.1      18.6   6241.7   4627.6  50.44  37.98 | 0.94 -3.7 0.072
+   409    PROBE 0.300 0.090 (True, False, False)      4.0      21.1   6291.8   4665.0  50.72  38.19 | 0.92 -3.4 0.058
+   410    PROBE 0.300 0.090 None      nan       nan   6342.1   4702.8  50.99  38.41
+   411    PROBE 0.300 0.090 None      nan       nan   6392.8   4740.7  51.27  38.62
+   412    PROBE 0.300 0.102 (False, False, False)      4.1      23.9   6443.6   4778.8  51.55  38.83 | 0.95 -3.4 0.045
+   413    PROBE 0.300 0.128 (False, False, False)      4.4      36.4   6494.9   4817.1  51.83  39.04 | 0.94 -3.5 0.041
+   414    PROBE 0.300 0.131 (True, False, False)      4.4      37.2   6546.4   4855.7  52.11  39.25 | 0.95 -3.2 0.059
+   415 DISTRUST 0.020 0.119 (True, False, False)      4.6      44.2   6598.1   4894.4  52.39  39.47 | 0.96 -3.5 0.059
+   475    PROBE 0.020 0.031 (True, False, False)      6.9      64.7  10242.6   7630.3  71.41  53.44 | 1.69 -2.8 0.036
+   476    PROBE 0.300 0.031 (True, False, False)      6.9      69.8  10313.5   7683.1  71.74  53.69 | 1.68 -3.2 0.059
+   477    PROBE 0.300 0.024 (True, False, False)      6.6      45.0  10384.8   7736.1  72.07  53.94 | 1.75 -3.0 0.058
+   478    PROBE 0.300 0.018 (True, False, False)      7.0      61.7  10456.3   7789.4  72.37  54.20 | 1.77 -2.9 0.057
+   479    PROBE 0.300 0.034 (True, False, False)      6.8      51.9  10528.2   7843.0  72.64  54.45 | 1.77 -2.9 0.071
+   480    PROBE 0.300 0.034 None      nan       nan  10600.4   7896.8  72.87  54.71
+   481    PROBE 0.300 0.034 None      nan       nan  10672.8   7950.8  73.08  54.96
+   482    PROBE 0.300 0.022 (False, False, False)      7.2      61.0  10745.4   8005.1  73.27  55.21 | 1.81 -2.9 0.078
+   483    PROBE 0.300 0.033 (False, False, False)      7.3      63.7  10818.2   8059.7  73.44  55.47 | 1.82 -3.0 0.076
+   484    PROBE 0.300 0.026 (True, False, False)      8.0      88.3  10891.1   8114.5  73.60  55.72 | 1.84 -2.9 0.068
+   485 DISTRUST 0.020 0.021 (True, False, False)      7.3      60.6  10964.2   8169.5  73.75  55.97 | 1.86 -2.9 0.070
+   545    PROBE 0.020 0.010 (True, False, False)     13.3     102.3  15920.3  11914.3  92.36  70.00 | 3.49 -2.8 0.115
+   546    PROBE 0.300 0.017 (True, False, False)     14.3     133.4  16012.4  11983.8  92.65  70.22 | 3.55 -3.1 0.137
+   547    PROBE 0.300 0.017 (True, False, False)     13.1      86.6  16104.7  12053.5  92.94  70.43 | 3.54 -2.9 0.106
+   548    PROBE 0.300 0.018 (True, False, False)     13.8     108.0  16197.1  12123.4  93.23  70.65 | 3.59 -2.8 0.124
+   549    PROBE 0.300 0.015 (True, False, False)     13.7      99.3  16289.9  12193.6  93.51  70.86 | 3.65 -3.1 0.096
+   550    PROBE 0.300 0.015 None      nan       nan  16383.0  12263.9  93.80  71.07
+   551    PROBE 0.300 0.015 None      nan       nan  16476.5  12334.5  94.08  71.29
+   552    PROBE 0.300 0.008 (False, False, False)     14.9     130.4  16570.2  12405.3  94.37  71.50 | 3.71 -2.8 0.115
+   553    PROBE 0.300 0.009 (False, False, False)     15.4     148.4  16664.2  12476.3  94.65  71.71 | 3.74 -2.9 0.101
+   554    PROBE 0.300 0.011 (True, False, False)     14.9     129.1  16758.6  12547.5  94.93  71.92 | 3.71 -2.9 0.072
+   555 DISTRUST 0.020 0.010 (True, False, False)     15.0     128.5  16853.2  12619.0  95.21  72.13 | 3.79 -3.0 0.054
+   615    PROBE 0.020 0.012 (True, False, False)     26.8     194.2  23069.3  17287.4 112.78  84.29 | 6.53 -2.8 -0.023
+   616    PROBE 0.300 0.010 (True, False, False)     26.7     182.3  23182.0  17371.5 113.05  84.48 | 6.59 -2.9 -0.022
+   617    PROBE 0.300 0.010 (True, False, False)     26.5     157.7  23295.1  17455.8 113.33  84.68 | 6.69 -2.6 0.026
+   618    PROBE 0.300 0.009 (True, False, False)     27.2     174.3  23408.3  17540.3 113.61  84.88 | 6.80 -2.9 0.026
+   619    PROBE 0.300 0.010 (True, False, False)     28.1     197.6  23522.0  17625.0 113.89  85.08 | 6.87 -3.0 0.011
+   620    PROBE 0.300 0.010 None      nan       nan  23635.8  17709.9 114.16  85.28
+   621    PROBE 0.300 0.010 None      nan       nan  23749.9  17795.0 114.44  85.47
+   622    PROBE 0.300 0.009 (False, False, False)     28.0     167.5  23864.2  17880.3 114.71  85.67 | 6.97 -2.9 0.008
+   623    PROBE 0.300 0.007 (False, False, False)     28.2     168.4  23978.9  17965.8 114.99  85.87 | 7.04 -3.1 0.007
+   624    PROBE 0.300 0.015 (True, False, False)     29.1     190.2  24093.9  18051.5 115.27  86.07 | 7.15 -3.0 -0.006
+   625 DISTRUST 0.020 0.012 (True, False, False)     28.6     171.1  24209.0  18137.5 115.54  86.26 | 7.21 -3.2 0.025
+   685    PROBE 0.020 0.006 (True, False, False)     43.4     222.0  31632.5  23655.5 132.07  97.90 | 10.79 -2.9 -0.077
+   686    PROBE 0.300 0.005 (True, False, False)     44.7     276.7  31765.0  23753.4 132.35  98.09 | 10.77 -3.0 -0.099
+   687    PROBE 0.300 0.005 (True, False, False)     44.3     234.6  31897.5  23851.6 132.62  98.28 | 10.89 -2.8 -0.103
+   688    PROBE 0.300 0.009 (True, False, False)     45.1     260.2  32030.3  23949.9 132.90  98.47 | 11.00 -3.1 -0.094
+   689    PROBE 0.300 0.009 (True, False, False)     47.3     314.0  32163.4  24048.4 133.18  98.66 | 11.12 -2.8 -0.076
+   690    PROBE 0.300 0.009 None      nan       nan  32296.6  24147.1 133.45  98.86
+   691    PROBE 0.300 0.009 None      nan       nan  32430.2  24246.0 133.73  99.05
+   692    PROBE 0.300 0.005 (False, False, False)     45.9     245.2  32564.2  24345.1 134.01  99.24 | 11.22 -3.0 -0.075
+   693    PROBE 0.300 0.003 (False, False, False)     45.7     235.7  32698.4  24444.4 134.29  99.44 | 11.21 -2.8 -0.070
+   694    PROBE 0.300 0.004 (True, False, False)     46.1     232.0  32832.8  24543.9 134.58  99.63 | 11.34 -2.8 -0.055
+   695 DISTRUST 0.020 0.005 (True, False, False)     46.2     235.4  32967.4  24643.6 134.86  99.83 | 11.46 -2.9 -0.058
+   755    PROBE 0.020 0.004 (True, False, False)     64.3     334.7  41556.0  30972.2 151.48 111.23 | 16.06 -2.8 -0.055
+   756    PROBE 0.300 0.003 (True, False, False)     62.6     267.8  41707.5  31083.4 151.76 111.42 | 16.05 -2.8 -0.091
+   757    PROBE 0.300 0.003 (True, False, False)     64.2     321.6  41859.1  31194.7 152.04 111.61 | 16.05 -2.7 -0.081
+   758    PROBE 0.300 0.003 (True, False, False)     62.4     252.0  42011.1  31306.3 152.32 111.80 | 16.22 -3.1 -0.056
+   759    PROBE 0.300 0.004 (True, False, False)     65.1     341.0  42163.4  31418.0 152.61 112.00 | 16.33 -2.9 -0.053
+   760    PROBE 0.300 0.004 None      nan       nan  42315.9  31530.0 152.90 112.20
+   761    PROBE 0.300 0.004 None      nan       nan  42468.8  31642.1 153.20 112.40
+   762    PROBE 0.300 0.015 (False, False, False)     66.4     351.7  42622.0  31754.4 153.49 112.59 | 16.50 -2.9 -0.054
+   763    PROBE 0.300 0.018 (False, False, False)     66.6     349.3  42775.2  31866.9 153.77 112.78 | 16.59 -2.9 -0.062
+   764    PROBE 0.300 0.011 (True, False, False)     66.5     338.2  42928.9  31979.6 154.12 112.97 | 16.68 -3.0 -0.074
+   765 DISTRUST 0.020 0.004 (True, False, False)     64.8     280.4  43083.0  32092.5 154.48 113.15 | 16.73 -2.8 -0.081
+   825    PROBE 0.020 0.003 (True, False, False)     88.5     393.2  52801.9  39202.4 170.63 124.52 | 22.44 -2.9 0.036
+   826    PROBE 0.300 0.003 (True, False, False)     89.9     436.2  52971.7  39326.3 170.89 124.70 | 22.53 -3.0 0.046
+   827    PROBE 0.300 0.003 (True, False, False)     89.3     407.0  53142.0  39450.4 171.16 124.88 | 22.64 -2.9 0.038
+   828    PROBE 0.300 0.004 (True, False, False)     88.3     368.7  53312.3  39574.6 171.43 125.06 | 22.68 -3.1 0.011
+   829    PROBE 0.300 0.004 (True, False, False)     88.5     358.8  53482.9  39699.0 171.69 125.24 | 22.73 -3.0 -0.009
+   830    PROBE 0.300 0.004 None      nan       nan  53653.7  39823.6 171.95 125.41
+   831    PROBE 0.300 0.004 None      nan       nan  53824.8  39948.3 172.22 125.59
+   832    PROBE 0.300 0.004 (False, False, False)     90.9     410.3  53996.1  40073.2 172.48 125.77 | 23.12 -3.2 0.010
+   833    PROBE 0.300 0.004 (False, False, False)     91.9     424.9  54167.5  40198.3 172.74 125.94 | 23.12 -3.0 0.012
+   834    PROBE 0.300 0.003 (True, False, False)     90.8     380.3  54339.4  40323.5 173.00 126.12 | 23.26 -3.0 0.014
+   835 DISTRUST 0.020 0.003 (True, False, False)     91.8     390.9  54511.4  40448.9 173.26 126.29 | 23.49 -2.9 0.015
+   895    PROBE 0.020 0.002 (True, False, False)    114.9     403.3  65265.1  48253.3 188.62 136.14 | 30.07 -3.0 -0.000
+   896    PROBE 0.300 0.002 (True, False, False)    117.5     450.9  65451.6  48387.8 188.87 136.31 | 30.20 -2.7 0.027
+   897    PROBE 0.300 0.002 (True, False, False)    119.0     481.6  65638.2  48522.5 189.13 136.48 | 30.40 -2.9 0.035
+   898    PROBE 0.300 0.003 (True, False, False)    116.9     419.6  65825.1  48657.3 189.38 136.64 | 30.43 -2.9 0.039
+   899    PROBE 0.300 0.002 (True, False, False)    121.1     520.2  66012.2  48792.2 189.63 136.81 | 30.63 -2.7 0.036
+   900    PROBE 0.300 0.002 None      nan       nan  66199.5  48927.3 189.87 136.97
+   901    PROBE 0.300 0.002 None      nan       nan  66387.1  49062.6 190.12 137.13
+   902    PROBE 0.300 0.002 (False, False, False)    120.2     464.4  66574.8  49198.0 190.37 137.30 | 30.83 -2.7 0.026
+   903    PROBE 0.300 0.003 (False, False, False)    120.2     454.6  66762.8  49333.5 190.63 137.47 | 31.03 -2.9 0.025
+   904    PROBE 0.300 0.003 (True, False, False)    120.3     446.1  66951.0  49469.2 190.89 137.64 | 31.16 -2.8 0.022
+   905 DISTRUST 0.020 0.004 (True, False, False)    122.6     484.1  67139.5  49605.0 191.15 137.81 | 31.36 -2.6 0.078
+   965    PROBE 0.020 0.002 (True, False, False)    154.8     608.2  78901.4  58048.7 207.89 149.12 | 38.27 -2.7 -0.011
+   966    PROBE 0.300 0.001 (True, False, False)    152.4     557.6  79105.1  58194.6 208.20 149.34 | 38.44 -3.0 -0.009
+   967    PROBE 0.300 0.001 (True, False, False)    153.4     567.1  79309.1  58340.7 208.52 149.55 | 38.53 -2.9 -0.001
+   968    PROBE 0.300 0.001 (True, False, False)    152.2     532.7  79513.4  58487.0 208.84 149.75 | 38.68 -3.0 -0.014
+   969    PROBE 0.300 0.001 (True, False, False)    156.1     617.2  79718.0  58633.5 209.16 149.96 | 38.74 -3.0 -0.011
+   970    PROBE 0.300 0.001 None      nan       nan  79922.8  58780.1 209.48 150.18
+   971    PROBE 0.300 0.001 None      nan       nan  80128.0  58927.0 209.81 150.39
+   972    PROBE 0.300 0.001 (False, False, False)    157.7     611.7  80333.4  59074.0 210.12 150.60 | 39.05 -2.8 -0.001
+   973    PROBE 0.300 0.001 (False, False, False)    158.2     604.6  80539.1  59221.2 210.44 150.81 | 39.19 -2.8 -0.011
+   974    PROBE 0.300 0.001 (True, False, False)    157.1     588.0  80745.1  59368.6 210.76 151.02 | 39.18 -2.9 -0.011
+   975 DISTRUST 0.020 0.002 (True, False, False)    156.6     556.0  80951.4  59516.2 211.08 151.23 | 39.45 -2.9 -0.029
+  1035    PROBE 0.020 0.002 (True, False, False)    195.7     829.4  93888.4  68730.6 231.00 164.33 | 46.28 -2.8 -0.085
+  1036    PROBE 0.300 0.002 (True, False, False)    192.6     729.9  94113.6  68890.4 231.34 164.56 | 46.38 -2.8 -0.087
+  1037    PROBE 0.300 0.001 (True, False, False)    196.4     833.1  94339.1  69050.4 231.69 164.79 | 46.52 -3.0 -0.092
+  1038    PROBE 0.300 0.001 (True, False, False)    196.2     785.7  94565.0  69210.7 232.04 165.02 | 46.72 -2.7 -0.071
+  1039    PROBE 0.300 0.001 (True, False, False)    197.0     792.7  94791.4  69371.2 232.38 165.24 | 46.79 -2.8 -0.060
+  1040    PROBE 0.300 0.001 None      nan       nan  95017.9  69531.9 232.73 165.47
+  1041    PROBE 0.300 0.001 None      nan       nan  95244.3  69692.8 233.08 165.71
+  1042    PROBE 0.300 0.001 (False, False, False)    197.1     796.9  95472.0  69853.9 233.44 165.94 | 47.07 -3.0 -0.044
+  1043    PROBE 0.300 0.001 (False, False, False)    200.3     872.6  95699.6  70015.3 233.79 166.17 | 47.16 -3.1 -0.022
+  1044    PROBE 0.300 0.001 (True, False, False)    198.6     786.9  95927.5  70176.9 234.14 166.40 | 47.30 -2.8 -0.026
+  1045 DISTRUST 0.020 0.001 (True, False, False)    201.8     866.8  96155.9  70338.6 234.49 166.63 | 47.48 -3.0 -0.012
+  1105    PROBE 0.020 0.001 (True, False, False)    238.9    1099.8 110486.9  80457.9 255.98 180.73 | 54.44 -2.9 -0.043
+  1106    PROBE 0.300 0.001 (True, False, False)    235.9    1016.3 110736.7  80633.6 256.34 180.97 | 54.57 -3.0 -0.056
+  1107    PROBE 0.300 0.001 (True, False, False)    236.5     999.0 110986.9  80809.6 256.71 181.21 | 54.71 -2.8 -0.071
+  1108    PROBE 0.300 0.001 (True, False, False)    236.6     984.6 111237.4  80985.9 257.08 181.45 | 54.77 -2.8 -0.067
+  1109    PROBE 0.300 0.001 (True, False, False)    239.6    1069.0 111488.4  81162.4 257.44 181.69 | 54.88 -3.0 -0.069
+  1110    PROBE 0.300 0.001 None      nan       nan 111739.5  81339.1 257.81 181.93
+  1111    PROBE 0.300 0.001 None      nan       nan 111991.2  81516.0 258.18 182.17
+  1112    PROBE 0.300 0.002 (False, False, False)    241.4    1062.0 112243.1  81693.2 258.55 182.41 | 55.22 -3.0 -0.073
+  1113    PROBE 0.300 0.002 (False, False, False)    242.2    1063.0 112495.6  81870.7 258.92 182.65 | 55.37 -3.1 -0.073
+  1114    PROBE 0.300 0.002 (True, False, False)    239.3     983.7 112748.3  82048.4 259.28 182.89 | 55.40 -3.1 -0.064
+  1115 DISTRUST 0.020 0.001 (True, False, False)    243.9    1070.4 113001.3  82226.3 259.65 183.13 | 55.58 -2.8 -0.043
+  1175    PROBE 0.020 0.001 (True, False, False)    302.8    1481.8 128890.2  93347.9 281.92 197.71 | 63.21 -2.8 -0.000
+  1176    PROBE 0.300 0.001 (True, False, False)    302.7    1377.1 129166.6  93540.9 282.24 197.99 | 63.33 -2.7 -0.028
+  1177    PROBE 0.300 0.001 (True, False, False)    307.1    1436.5 129443.3  93734.2 282.56 198.26 | 63.41 -2.9 -0.048
+  1178    PROBE 0.300 0.001 (True, False, False)    298.5    1188.0 129720.4  93927.8 282.90 198.53 | 63.54 -2.9 -0.046
+  1179    PROBE 0.300 0.001 (True, False, False)    300.2    1199.4 129997.8  94121.6 283.27 198.79 | 63.68 -3.1 -0.026
+  1180    PROBE 0.300 0.001 None      nan       nan 130275.6  94315.6 283.65 199.04
+  1181    PROBE 0.300 0.001 None      nan       nan 130553.8  94510.0 284.01 199.31
+  1182    PROBE 0.300 0.001 (False, False, False)    299.4    1092.4 130832.3  94704.6 284.39 199.57 | 63.93 -2.8 -0.025
+  1183    PROBE 0.300 0.001 (False, False, False)    296.3    1054.0 131111.3  94899.4 284.78 199.83 | 64.02 -2.9 -0.029
+  1184    PROBE 0.300 0.001 (True, False, False)    290.4     934.4 131390.6  95094.5 285.19 200.09 | 64.15 -2.9 -0.032
+  1185 DISTRUST 0.020 0.001 (True, False, False)    290.9     950.2 131670.4  95289.9 285.62 200.33 | 64.23 -2.8 -0.053
+  1245    PROBE 0.020 0.001 (True, False, False)    329.5    1043.7 149133.4 107442.5 306.31 213.52 | 71.24 -2.8 0.040
+  1246    PROBE 0.300 0.001 (True, False, False)    329.6    1070.4 149435.1 107651.8 306.68 213.72 | 71.43 -2.9 0.032
+  1247    PROBE 0.300 0.001 (True, False, False)    323.8     999.3 149737.2 107861.4 307.05 213.90 | 71.61 -2.8 0.032
+  1248    PROBE 0.300 0.001 (True, False, False)    324.9    1014.6 150039.7 108071.1 307.37 214.10 | 71.68 -2.7 0.041
+  1249    PROBE 0.300 0.001 (True, False, False)    324.4    1010.6 150342.5 108281.1 307.68 214.29 | 71.83 -2.9 0.034
+  1250    PROBE 0.300 0.001 None      nan       nan 150645.6 108491.3 307.98 214.48
+  1251    PROBE 0.300 0.001 None      nan       nan 150949.1 108701.7 308.28 214.67
+  1252    PROBE 0.300 0.001 (False, False, False)    324.8    1000.1 151252.8 108912.2 308.58 214.85 | 72.04 -3.0 0.032
+  1253    PROBE 0.300 0.001 (False, False, False)    329.7    1032.2 151556.9 109123.0 308.88 215.04 | 72.17 -2.8 0.018
+  1254    PROBE 0.300 0.001 (True, False, False)    327.4    1025.2 151861.3 109334.0 309.18 215.23 | 72.22 -2.9 0.013
+  1255 DISTRUST 0.020 0.001 (True, False, False)    327.8    1011.8 152166.0 109545.2 309.49 215.42 | 72.40 -2.9 -0.011
+  1315    PROBE 0.020 0.001 (True, False, False)    390.7    1366.4 170984.8 122544.7 325.63 225.06 | 79.66 -3.0 0.045
+  1316    PROBE 0.300 0.001 (True, False, False)    394.2    1380.8 171306.7 122766.2 325.87 225.19 | 79.84 -2.7 0.047
+  1317    PROBE 0.300 0.001 (True, False, False)    397.4    1433.4 171628.8 122987.9 326.10 225.33 | 79.96 -2.9 -0.017
+  1318    PROBE 0.300 0.001 (True, False, False)    395.7    1418.5 171951.2 123209.6 326.33 225.46 | 80.13 -2.9 -0.019
+  1319    PROBE 0.300 0.001 (True, False, False)    395.7    1399.0 172273.8 123431.5 326.55 225.60 | 80.23 -2.9 -0.027
+  1320    PROBE 0.300 0.001 None      nan       nan 172596.6 123653.6 326.78 225.73
+  1321    PROBE 0.300 0.001 None      nan       nan 172919.7 123875.8 327.00 225.86
+  1322    PROBE 0.300 0.001 (False, False, False)    395.9    1362.1 173242.9 124098.1 327.23 225.99 | 80.54 -2.9 -0.029
+  1323    PROBE 0.300 0.001 (False, False, False)    400.8    1419.9 173566.6 124320.6 327.45 226.12 | 80.68 -2.8 -0.025
+  1324    PROBE 0.300 0.001 (True, False, False)    398.3    1425.5 173890.5 124543.2 327.66 226.26 | 80.80 -3.0 -0.035
+  1325 DISTRUST 0.020 0.001 (True, False, False)    399.8    1404.4 174214.4 124765.9 327.87 226.42 | 81.05 -2.7 -0.029
+  1385    PROBE 0.020 0.001 (True, False, False)    425.4    1492.1 194010.2 138343.8 338.73 232.67 | 88.84 -2.9 -0.067
+  1386    PROBE 0.300 0.001 (True, False, False)    430.7    1559.2 194345.4 138572.9 338.87 232.75 | 88.99 -2.7 -0.044
+  1387    PROBE 0.300 0.000 (True, False, False)    426.8    1522.2 194680.6 138802.2 339.01 232.82 | 89.12 -3.0 -0.032
+  1388    PROBE 0.300 0.001 (True, False, False)    427.1    1476.4 195016.0 139031.5 339.15 232.90 | 89.23 -2.8 -0.034
+  1389    PROBE 0.300 0.000 (True, False, False)    432.6    1567.4 195351.6 139260.9 339.29 232.97 | 89.34 -2.7 -0.026
+  1390    PROBE 0.300 0.000 None      nan       nan 195687.2 139490.4 339.42 233.05
+  1391    PROBE 0.300 0.000 None      nan       nan 196023.1 139719.9 339.56 233.12
+  1392    PROBE 0.300 0.000 (False, False, False)    429.6    1488.9 196359.0 139949.5 339.69 233.19 | 89.58 -2.8 -0.057
+  1393    PROBE 0.300 0.000 (False, False, False)    427.1    1439.3 196695.1 140179.2 339.82 233.26 | 89.80 -2.9 -0.061
+  1394    PROBE 0.300 0.000 (True, False, False)    434.5    1576.3 197031.3 140409.0 339.96 233.33 | 89.93 -2.9 -0.065
+  1395 DISTRUST 0.020 0.001 (True, False, False)    435.2    1584.5 197367.6 140638.8 340.09 233.40 | 90.04 -2.9 -0.067
+  1455    PROBE 0.020 0.001 (True, False, False)    449.0    1695.9 217728.0 154518.5 345.38 236.12 | 97.31 -2.9 0.006
+  1456    PROBE 0.300 0.001 (True, False, False)    455.1    1816.7 218069.2 154750.8 345.43 236.14 | 97.36 -2.8 0.024
+  1457    PROBE 0.300 0.000 (True, False, False)    449.8    1698.2 218410.8 154983.2 345.48 236.15 | 97.50 -3.0 0.033
+  1458    PROBE 0.300 0.000 (True, False, False)    457.1    1822.9 218752.3 155215.5 345.53 236.17 | 97.66 -2.7 0.006
+  1459    PROBE 0.300 0.000 (True, False, False)    451.1    1704.6 219094.1 155447.9 345.58 236.19 | 97.76 -2.8 0.007
+  1460    PROBE 0.300 0.000 None      nan       nan 219435.6 155680.3 345.63 236.20
+  1461    PROBE 0.300 0.000 None      nan       nan 219777.3 155912.6 345.67 236.22
+  1462    PROBE 0.300 0.001 (False, False, False)    457.1    1825.5 220118.9 156145.0 345.71 236.23 | 97.93 -2.9 0.004
+  1463    PROBE 0.300 0.000 (False, False, False)    455.5    1744.4 220460.6 156377.4 345.75 236.24 | 98.04 -2.7 0.004
+  1464    PROBE 0.300 0.001 (True, False, False)    457.0    1787.8 220802.1 156609.8 345.79 236.25 | 98.21 -2.9 0.009
+  1465 DISTRUST 0.020 0.001 (True, False, False)    457.9    1786.5 221144.0 156842.2 345.84 236.27 | 98.34 -2.8 -0.014
+  1525    PROBE 0.020 0.000 (True, False, False)    480.3    1753.2 241646.8 170762.3 345.60 235.47 | 104.03 -2.9 -0.039
+  1526    PROBE 0.300 0.000 (True, False, False)    488.3    1913.8 241986.9 170993.3 345.54 235.43 | 104.14 -2.7 -0.009
+  1527    PROBE 0.300 0.000 (True, False, False)    488.0    1904.6 242327.6 171224.3 345.50 235.39 | 104.23 -2.8 0.021
+  1528    PROBE 0.300 0.000 (True, False, False)    488.1    1905.8 242668.2 171455.2 345.45 235.35 | 104.26 -2.7 0.024
+  1529    PROBE 0.300 0.000 (True, False, False)    488.8    1908.9 243009.1 171686.1 345.41 235.31 | 104.41 -2.9 0.021
+  1530    PROBE 0.300 0.000 None      nan       nan 243349.6 171916.9 345.36 235.27
+  1531    PROBE 0.300 0.000 None      nan       nan 243690.0 172147.7 345.31 235.23
+  1532    PROBE 0.300 0.000 (False, False, False)    488.6    1887.8 244030.1 172378.4 345.26 235.19 | 104.56 -2.8 -0.007
+  1533    PROBE 0.300 0.000 (False, False, False)    486.1    1839.4 244370.5 172609.0 345.21 235.15 | 104.61 -3.1 -0.018
+  1534    PROBE 0.300 0.000 (True, False, False)    488.7    1917.9 244710.7 172839.6 345.16 235.10 | 104.69 -3.0 -0.000
+  1535 DISTRUST 0.020 0.000 (True, False, False)    489.1    1858.6 245050.9 173070.2 345.10 235.06 | 104.85 -2.8 0.007
+  1595    PROBE 0.020 0.000 (True, False, False)    514.8    1112.9 265282.9 186763.7 339.85 230.85 | 107.60 -2.9 -0.099
+  1596    PROBE 0.300 0.000 (True, False, False)    515.7    1118.8 265616.4 186988.9 339.73 230.76 | 107.62 -2.9 -0.107
+  1597    PROBE 0.300 0.000 (True, False, False)    515.9    1127.8 265949.7 187214.0 339.61 230.68 | 107.66 -2.9 -0.110
+  1598    PROBE 0.300 0.000 (True, False, False)    518.0    1172.8 266283.0 187439.0 339.48 230.61 | 107.70 -2.9 -0.109
+  1599    PROBE 0.300 0.001 (True, False, False)    518.0    1239.9 266616.0 187664.0 339.35 230.55 | 107.65 -2.9 -0.116
+  1600    PROBE 0.300 0.001 None      nan       nan 266948.9 187888.8 339.23 230.49
+  1601    PROBE 0.300 0.001 None      nan       nan 267281.6 188113.6 339.10 230.44
+  1602    PROBE 0.300 0.000 (False, False, False)    513.2    1466.0 267614.2 188338.2 338.97 230.38 | 107.70 -2.9 -0.110
+  1603    PROBE 0.300 0.000 (False, False, False)    511.5    1592.7 267946.6 188562.8 338.84 230.32 | 107.70 -2.9 -0.111
+  1604    PROBE 0.300 0.000 (True, False, False)    515.8    1754.8 268278.9 188787.3 338.70 230.25 | 107.73 -2.7 -0.098
+  1605 DISTRUST 0.020 0.000 (True, False, False)    509.5    1642.1 268610.8 189011.7 338.57 230.16 | 107.84 -3.1 -0.083
+  1665    PROBE 0.020 0.000 (True, False, False)    521.8    1460.9 288200.4 202229.8 329.06 223.34 | 107.17 -3.0 -0.019
+  1666    PROBE 0.300 0.000 (True, False, False)    520.7    1390.6 288520.7 202445.5 328.88 223.22 | 107.14 -2.8 -0.020
+  1667    PROBE 0.300 0.000 (True, False, False)    519.3    1371.1 288840.8 202661.0 328.71 223.10 | 107.07 -2.8 -0.013
+  1668    PROBE 0.300 0.000 (True, False, False)    520.6    1393.4 289160.6 202876.4 328.53 222.99 | 107.06 -2.8 -0.018
+  1669    PROBE 0.300 0.000 (True, False, False)    521.2    1450.7 289480.2 203091.7 328.36 222.87 | 107.00 -3.1 -0.006
+  1670    PROBE 0.300 0.000 None      nan       nan 289799.6 203306.8 328.18 222.75
+  1671    PROBE 0.300 0.000 None      nan       nan 290118.8 203521.7 328.01 222.63
+  1672    PROBE 0.300 0.000 (False, False, False)    524.8    1499.6 290437.7 203736.5 327.83 222.52 | 106.79 -2.9 -0.021
+  1673    PROBE 0.300 0.000 (False, False, False)    521.0    1403.3 290756.4 203951.1 327.65 222.40 | 106.78 -2.9 -0.015
+  1674    PROBE 0.300 0.000 (True, False, False)    520.9    1405.5 291075.0 204165.6 327.48 222.28 | 106.75 -3.1 -0.000
+  1675 DISTRUST 0.020 0.000 (True, False, False)    518.1    1338.7 291393.2 204379.9 327.30 222.17 | 106.76 -3.0 0.009
+  1735    PROBE 0.020 0.000 (True, False, False)    540.5    1685.8 310070.8 216943.3 316.95 215.50 | 101.66 -2.9 -0.049
+  1736    PROBE 0.300 0.000 (True, False, False)    545.3    1800.5 310374.9 217147.7 316.77 215.39 | 101.54 -2.9 -0.054
+  1737    PROBE 0.300 0.000 (True, False, False)    542.4    1695.7 310678.8 217352.0 316.59 215.28 | 101.44 -2.9 -0.051
+  1738    PROBE 0.300 0.000 (True, False, False)    542.8    1722.5 310982.5 217556.1 316.42 215.18 | 101.37 -3.0 -0.038
+  1739    PROBE 0.300 0.000 (True, False, False)    547.5    1767.1 311285.9 217760.0 316.25 215.07 | 101.27 -2.9 -0.049
+  1740    PROBE 0.300 0.000 None      nan       nan 311589.1 217963.8 316.08 214.97
+  1741    PROBE 0.300 0.000 None      nan       nan 311892.1 218167.4 315.92 214.87
+  1742    PROBE 0.300 0.000 (False, False, False)    550.5    1792.7 312194.7 218370.8 315.75 214.77 | 100.87 -2.8 -0.061
+  1743    PROBE 0.300 0.001 (False, False, False)    542.1    1644.7 312497.2 218574.1 315.58 214.67 | 100.80 -2.9 -0.069
+  1744    PROBE 0.300 0.000 (True, False, False)    547.5    1712.6 312799.1 218777.2 315.41 214.57 | 100.66 -2.9 -0.086
+  1745 DISTRUST 0.020 0.000 (True, False, False)    550.2    1740.3 313101.0 218980.1 315.24 214.47 | 100.63 -2.7 -0.052
+  1805    PROBE 0.020 0.001 (True, False, False)    579.4    1658.1 330762.0 230847.7 306.05 209.21 | 92.40 -2.9 -0.042
+  1806    PROBE 0.300 0.000 (True, False, False)    576.5    1628.1 331048.7 231040.2 305.91 209.09 | 92.24 -3.0 -0.049
+  1807    PROBE 0.300 0.000 (True, False, False)    573.7    1560.2 331335.1 231232.6 305.78 208.98 | 92.06 -3.1 -0.055
+  1808    PROBE 0.300 0.001 (True, False, False)    573.5    1490.8 331621.3 231424.7 305.64 208.88 | 91.91 -3.0 -0.051
+  1809    PROBE 0.300 0.001 (True, False, False)    569.5    1382.4 331907.2 231616.7 305.51 208.80 | 91.73 -3.0 -0.041
+  1810    PROBE 0.300 0.001 None      nan       nan 332192.9 231808.4 305.37 208.73
+  1811    PROBE 0.300 0.001 None      nan       nan 332478.3 231999.9 305.24 208.67
+  1812    PROBE 0.300 0.000 (False, False, False)    568.0    1157.5 332763.4 232191.3 305.11 208.62 | 91.18 -3.0 -0.038
+  1813    PROBE 0.300 0.001 (False, False, False)    570.8    1106.5 333048.4 232382.4 304.98 208.59 | 91.00 -3.1 -0.036
+  1814    PROBE 0.300 0.001 (True, False, False)    570.6    1033.8 333333.0 232573.4 304.85 208.56 | 90.80 -3.0 -0.030
+  1815 DISTRUST 0.020 0.001 (True, False, False)    574.4     989.9 333617.4 232764.2 304.72 208.55 | 90.67 -2.9 -0.030
+  1875    PROBE 0.020 0.001 (True, False, False)    593.2    1037.1 350250.3 243940.0 298.30 206.33 | 78.34 -2.9 -0.103
+  1876    PROBE 0.300 0.001 (True, False, False)    596.6    1047.1 350520.7 244122.0 298.22 206.31 | 78.12 -2.7 -0.064
+  1877    PROBE 0.300 0.001 (True, False, False)    597.8    1068.4 350790.9 244303.9 298.13 206.29 | 77.89 -2.9 -0.067
+  1878    PROBE 0.300 0.001 (True, False, False)    595.8    1072.9 351060.8 244485.6 298.05 206.27 | 77.68 -3.1 -0.055
+  1879    PROBE 0.300 0.001 (True, False, False)    598.1    1062.7 351330.3 244667.2 297.98 206.26 | 77.46 -2.8 -0.055
+  1880    PROBE 0.300 0.001 None      nan       nan 351599.9 244848.7 297.90 206.24
+  1881    PROBE 0.300 0.001 None      nan       nan 351869.1 245030.0 297.82 206.22
+  1882    PROBE 0.300 0.001 (False, False, False)    601.2    1114.4 352138.0 245211.2 297.74 206.15 | 76.77 -3.1 -0.027
+  1883    PROBE 0.300 0.001 (False, False, False)    602.2    1154.2 352406.9 245392.3 297.66 206.07 | 76.56 -2.9 -0.041
+  1884    PROBE 0.300 0.001 (True, False, False)    599.2    1183.1 352675.6 245573.2 297.58 206.00 | 76.37 -3.0 -0.028
+  1885 DISTRUST 0.020 0.001 (True, False, False)    610.1    1320.3 352944.3 245754.0 297.50 205.93 | 76.19 -3.0 -0.027
+  1945    PROBE 0.020 0.001 (True, False, False)    640.3    1343.5 368682.7 256370.5 295.04 206.67 | 64.02 -2.9 -0.068
+  1946    PROBE 0.300 0.001 (True, False, False)    644.0    1400.0 368938.9 256544.1 295.04 206.71 | 63.85 -2.9 -0.075
+  1947    PROBE 0.300 0.001 (True, False, False)    637.1    1319.5 369195.4 256717.5 295.03 206.75 | 63.64 -3.0 -0.065
+  1948    PROBE 0.300 0.001 (True, False, False)    640.5    1370.1 369451.6 256890.8 295.03 206.79 | 63.45 -3.0 -0.083
+  1949    PROBE 0.300 0.001 (True, False, False)    642.3    1373.7 369708.4 257064.1 295.04 206.84 | 63.24 -3.0 -0.089
+  1950    PROBE 0.300 0.001 None      nan       nan 369965.2 257237.2 295.04 206.88
+  1951    PROBE 0.300 0.001 None      nan       nan 370220.9 257410.2 295.04 206.93
+  1952    PROBE 0.300 0.001 (False, False, False)    644.0    1379.8 370476.4 257583.2 295.04 206.98 | 62.64 -3.0 -0.084
+  1953    PROBE 0.300 0.001 (False, False, False)    637.2    1335.6 370732.3 257756.0 295.05 207.02 | 62.44 -3.1 -0.076
+  1954    PROBE 0.300 0.001 (True, False, False)    640.8    1357.6 370987.5 257928.8 295.05 207.07 | 62.25 -2.9 -0.073
+  1955 DISTRUST 0.020 0.001 (True, False, False)    641.0    1371.0 371242.4 258101.5 295.05 207.12 | 62.07 -3.0 -0.081
+  2015    PROBE 0.020 0.001 (True, False, False)    601.5     925.7 386255.5 268307.9 296.80 212.10 | 50.72 -2.7 -0.048
+  2016    PROBE 0.300 0.001 (True, False, False)    598.0     913.3 386500.8 268475.4 296.83 212.18 | 50.52 -2.8 -0.033
+  2017    PROBE 0.300 0.001 (True, False, False)    603.9     958.3 386745.9 268642.8 296.87 212.26 | 50.33 -3.0 -0.040
+  2018    PROBE 0.300 0.001 (True, False, False)    606.4     945.1 386990.8 268810.1 296.91 212.34 | 50.14 -2.8 -0.047
+  2019    PROBE 0.300 0.001 (True, False, False)    602.3     940.2 387235.6 268977.3 296.95 212.42 | 49.95 -3.0 -0.048
+  2020    PROBE 0.300 0.001 None      nan       nan 387480.3 269144.4 296.98 212.50
+  2021    PROBE 0.300 0.001 None      nan       nan 387724.6 269311.4 297.02 212.58
+  2022    PROBE 0.300 0.001 (False, False, False)    608.6     954.7 387968.6 269478.3 297.05 212.66 | 49.38 -2.7 -0.036
+  2023    PROBE 0.300 0.001 (False, False, False)    604.5     945.8 388212.6 269645.1 297.09 212.74 | 49.19 -2.9 -0.046
+  2024    PROBE 0.300 0.001 (True, False, False)    602.4     950.9 388456.5 269811.8 297.12 212.81 | 49.00 -3.1 -0.020
+  2025 DISTRUST 0.020 0.001 (True, False, False)    602.2     932.1 388700.2 269978.4 297.15 212.89 | 48.84 -2.8 -0.040
+  2085    PROBE 0.020 0.001 (True, False, False)    634.5    1065.7 402949.3 279767.6 298.64 217.22 | 38.76 -2.7 0.035
+  2086    PROBE 0.300 0.001 (True, False, False)    626.2    1040.4 403180.2 279927.0 298.67 217.29 | 38.61 -2.8 0.017
+  2087    PROBE 0.300 0.001 (True, False, False)    634.0    1072.4 403411.2 280086.2 298.69 217.36 | 38.46 -2.8 0.017
+  2088    PROBE 0.300 0.001 (True, False, False)    621.6    1036.9 403641.5 280245.3 298.72 217.43 | 38.31 -3.1 0.029
+  2089    PROBE 0.300 0.001 (True, False, False)    629.8    1065.0 403871.7 280404.2 298.74 217.50 | 38.16 -2.9 0.027
+  2090    PROBE 0.300 0.001 None      nan       nan 404102.0 280563.0 298.76 217.46
+  2091    PROBE 0.300 0.001 None      nan       nan 404331.7 280721.7 298.78 217.39
+  2092    PROBE 0.300 0.001 (False, False, False)    667.1    1204.8 404561.1 280880.0 298.80 217.32 | 37.70 -2.9 0.008
+  2093    PROBE 0.300 0.001 (False, False, False)    668.7    1212.1 404790.0 281038.2 298.81 217.30 | 37.56 -3.0 0.010
+  2094    PROBE 0.300 0.001 (True, False, False)    668.5    1231.7 405018.9 281196.3 298.83 217.36 | 37.42 -3.1 0.022
+  2095 DISTRUST 0.020 0.001 (True, False, False)    667.7    1217.0 405247.6 281354.2 298.85 217.43 | 37.29 -2.9 0.008
+  2155    PROBE 0.020 0.001 (True, False, False)    678.2    1183.7 418500.8 290556.2 299.83 221.51 | 29.52 -2.9 0.101
+  2156    PROBE 0.300 0.001 (True, False, False)    692.5    1227.4 418713.7 290704.8 299.85 221.58 | 29.40 -2.8 0.110
+  2157    PROBE 0.300 0.001 (True, False, False)    677.9    1196.4 418926.2 290853.3 299.86 221.64 | 29.29 -3.0 0.092
+  2158    PROBE 0.300 0.001 (True, False, False)    683.9    1213.6 419138.4 291001.6 299.88 221.70 | 29.17 -3.0 0.092
+  2159    PROBE 0.300 0.001 (True, False, False)    685.8    1210.0 419350.5 291149.8 299.89 221.76 | 29.06 -2.8 0.093
+  2160    PROBE 0.300 0.001 None      nan       nan 419562.5 291297.9 299.91 221.82
+  2161    PROBE 0.300 0.001 None      nan       nan 419774.0 291445.8 299.93 221.88
+  2162    PROBE 0.300 0.001 (False, False, False)    681.4    1200.7 419985.3 291593.5 299.94 221.94 | 28.71 -2.9 0.095
+  2163    PROBE 0.300 0.001 (False, False, False)    681.9    1202.0 420196.4 291741.1 299.96 222.00 | 28.60 -3.0 0.079
+  2164    PROBE 0.300 0.001 (True, False, False)    685.9    1212.2 420407.1 291888.6 299.98 222.06 | 28.49 -2.9 0.036
+  2165 DISTRUST 0.020 0.001 (True, False, False)    684.1    1218.1 420617.7 292035.9 299.99 222.12 | 28.38 -2.8 0.058
+  2225    PROBE 0.020 0.001 (True, False, False)    680.9    1214.4 432804.0 300616.6 301.03 225.55 | 22.56 -3.0 -0.000
+  2226    PROBE 0.300 0.001 (True, False, False)    691.1    1279.7 432999.9 300755.4 301.04 225.50 | 22.48 -3.1 0.001
+  2227    PROBE 0.300 0.001 (True, False, False)    712.5    1398.8 433195.4 300894.0 301.03 225.37 | 22.39 -2.8 -0.010
+  2228    PROBE 0.300 0.001 (True, False, False)    715.0    1473.6 433390.7 301032.4 301.02 225.23 | 22.30 -3.0 -0.026
+  2229    PROBE 0.300 0.001 (True, False, False)    723.0    1528.4 433585.7 301170.6 301.00 225.09 | 22.22 -2.7 -0.009
+  2230    PROBE 0.300 0.001 None      nan       nan 433780.4 301308.7 300.97 224.95
+  2231    PROBE 0.300 0.001 None      nan       nan 433974.8 301446.6 300.94 224.82
+  2232    PROBE 0.300 0.001 (False, False, False)    736.4    1834.2 434169.0 301584.3 300.91 224.74 | 21.98 -2.9 -0.015
+  2233    PROBE 0.300 0.001 (False, False, False)    729.2    1823.3 434362.9 301721.9 300.92 224.77 | 21.90 -2.8 0.006
+  2234    PROBE 0.300 0.001 (True, False, False)    725.3    1857.3 434556.6 301859.3 300.94 224.77 | 21.82 -3.0 0.016
+  2235 DISTRUST 0.020 0.001 (True, False, False)    724.5    1888.9 434750.0 301996.6 300.96 224.75 | 21.76 -3.1 0.020
+  2295    PROBE 0.020 0.001 (True, False, False)    700.5    1777.6 445975.2 310041.4 302.93 228.29 | 17.70 -2.8 0.010
+  2296    PROBE 0.300 0.001 (True, False, False)    705.1    1805.9 446156.3 310172.4 303.00 228.37 | 17.64 -2.9 0.011
+  2297    PROBE 0.300 0.001 (True, False, False)    694.4    1760.3 446337.1 310303.3 303.07 228.45 | 17.58 -3.1 0.027
+  2298    PROBE 0.300 0.001 (True, False, False)    694.3    1752.5 446517.8 310434.1 303.13 228.52 | 17.52 -2.9 0.025
+  2299    PROBE 0.300 0.001 (True, False, False)    698.5    1775.5 446698.3 310564.8 303.20 228.60 | 17.46 -2.8 0.030
+  2300    PROBE 0.300 0.001 None      nan       nan 446878.5 310695.4 303.27 228.68
+  2301    PROBE 0.300 0.001 None      nan       nan 447058.6 310825.8 303.34 228.76
+  2302    PROBE 0.300 0.001 (False, False, False)    694.1    1768.6 447238.4 310956.2 303.41 228.84 | 17.29 -3.0 0.044
+  2303    PROBE 0.300 0.001 (False, False, False)    696.2    1770.9 447418.1 311086.5 303.48 228.92 | 17.23 -2.9 0.041
+  2304    PROBE 0.300 0.001 (True, False, False)    697.9    1770.0 447597.7 311216.7 303.56 229.00 | 17.17 -2.9 0.040
+  2305 DISTRUST 0.020 0.001 (True, False, False)    700.3    1803.0 447777.1 311346.8 303.63 229.08 | 17.12 -3.0 0.035
+  2365    PROBE 0.020 0.001 (True, False, False)    707.5    1941.0 458180.1 318967.6 309.80 234.94 | 14.14 -3.2 0.106
+  2366    PROBE 0.300 0.001 (True, False, False)    722.7    1969.3 458347.7 319091.6 309.94 235.07 | 14.10 -3.0 0.083
+  2367    PROBE 0.300 0.001 (True, False, False)    710.8    1915.3 458515.0 319215.5 310.08 235.20 | 14.06 -3.1 0.084
+  2368    PROBE 0.300 0.001 (True, False, False)    717.9    1926.0 458682.2 319339.3 310.21 235.33 | 14.02 -2.8 0.088
+  2369    PROBE 0.300 0.001 (True, False, False)    711.4    1939.4 458849.2 319463.0 310.35 235.46 | 13.97 -3.0 0.067
+  2370    PROBE 0.300 0.001 None      nan       nan 459016.1 319586.7 310.50 235.59
+  2371    PROBE 0.300 0.001 None      nan       nan 459182.7 319710.3 310.64 235.72
+  2372    PROBE 0.300 0.001 (False, False, False)    714.8    1896.5 459349.1 319833.7 310.78 235.86 | 13.84 -2.9 0.058
+  2373    PROBE 0.300 0.001 (False, False, False)    723.5    1973.0 459515.4 319957.1 310.92 235.99 | 13.80 -2.8 0.062
+  2374    PROBE 0.300 0.001 (True, False, False)    720.8    1935.9 459681.5 320080.5 311.06 236.12 | 13.76 -2.8 0.065
+  2375 DISTRUST 0.020 0.001 (True, False, False)    714.4    1926.1 459847.4 320203.7 311.21 236.26 | 13.72 -2.8 0.056
+  2435    PROBE 0.020 0.001 (True, False, False)    661.6    1246.6 469529.5 327487.0 322.31 246.90 | 11.39 -3.0 0.049
+  2436    PROBE 0.300 0.001 (True, False, False)    668.9    1318.3 469686.7 327606.8 322.48 246.92 | 11.35 -2.8 0.045
+  2437    PROBE 0.300 0.001 (True, False, False)    682.7    1443.0 469843.7 327726.6 322.65 246.93 | 11.32 -2.9 0.046
+  2438    PROBE 0.300 0.001 (True, False, False)    688.2    1566.9 470000.5 327846.3 322.82 246.94 | 11.28 -2.9 0.046
+  2439    PROBE 0.300 0.001 (True, False, False)    696.7    1695.3 470157.2 327965.9 322.99 246.96 | 11.25 -3.1 0.056
+  2440    PROBE 0.300 0.001 None      nan       nan 470313.7 328085.5 323.19 247.07
+  2441    PROBE 0.300 0.001 None      nan       nan 470470.0 328204.9 323.40 247.26
+  2442    PROBE 0.300 0.001 (False, False, False)    737.6    1787.2 470626.2 328324.4 323.61 247.44 | 11.15 -3.4 0.045
+  2443    PROBE 0.300 0.001 (False, False, False)    734.5    1755.3 470782.3 328443.8 323.82 247.62 | 11.11 -3.5 0.025
+  2444    PROBE 0.300 0.001 (True, False, False)    728.1    1771.5 470938.3 328563.2 324.03 247.80 | 11.08 -3.6 -0.020
+  2445 DISTRUST 0.020 0.001 (True, False, False)    737.1    1771.1 471094.1 328682.5 324.25 247.99 | 11.05 -3.5 -0.025
+  2505    PROBE 0.020 0.001 (True, False, False)    726.7    1599.6 480254.4 335807.8 339.19 260.69 | 9.29 -3.3 0.001
+  2506    PROBE 0.300 0.001 (True, False, False)    709.2    1527.4 480404.5 335926.5 339.47 260.92 | 9.27 -3.5 0.014
+  2507    PROBE 0.300 0.001 (True, False, False)    717.7    1571.4 480554.4 336045.2 339.74 261.15 | 9.24 -3.4 0.009
+  2508    PROBE 0.300 0.001 (True, False, False)    728.6    1561.3 480704.3 336163.8 340.03 261.39 | 9.21 -3.1 0.033
+  2509    PROBE 0.300 0.001 (True, False, False)    716.2    1522.6 480854.1 336282.5 340.31 261.62 | 9.19 -3.2 0.046
+  2510    PROBE 0.300 0.001 None      nan       nan 481003.5 336401.2 340.58 261.86
+  2511    PROBE 0.300 0.001 None      nan       nan 481153.2 336519.9 340.86 262.09
+  2512    PROBE 0.300 0.001 (False, False, False)    715.3    1562.6 481302.9 336638.7 341.15 262.33 | 9.11 -3.6 0.069
+  2513    PROBE 0.300 0.001 (False, False, False)    710.7    1507.1 481452.2 336757.4 341.43 262.57 | 9.08 -3.5 0.071
+  2514    PROBE 0.300 0.001 (True, False, False)    706.7    1489.3 481601.8 336876.2 341.72 262.80 | 9.06 -3.3 0.063
+  2515 DISTRUST 0.020 0.001 (True, False, False)    707.4    1510.5 481751.9 336995.0 342.01 263.04 | 9.03 -3.5 0.074
+  2575    PROBE 0.020 0.001 (True, False, False)    699.5    1373.3 490644.5 344177.2 360.40 277.87 | 7.71 -3.4 -0.045
+  2576    PROBE 0.300 0.001 (True, False, False)    703.8    1354.5 490792.2 344298.6 360.80 278.38 | 7.69 -3.2 -0.021
+  2577    PROBE 0.300 0.001 (True, False, False)    676.6    1229.5 490939.8 344420.1 361.19 278.91 | 7.67 -3.4 -0.037
+  2578    PROBE 0.300 0.001 (True, False, False)    669.3    1186.3 491087.5 344541.7 361.55 279.28 | 7.65 -3.4 -0.050
+  2579    PROBE 0.300 0.001 (True, False, False)    674.3    1198.0 491235.4 344663.5 361.88 279.52 | 7.63 -3.4 -0.050
+  2580    PROBE 0.300 0.001 None      nan       nan 491383.3 344785.3 362.17 279.62
+  2581    PROBE 0.300 0.001 None      nan       nan 491531.0 344907.0 362.46 279.72
+  2582    PROBE 0.300 0.001 (False, False, False)    681.5    1334.6 491678.7 345028.8 362.75 279.82 | 7.57 -3.6 -0.037
+  2583    PROBE 0.300 0.001 (False, False, False)    694.6    1359.0 491826.5 345150.6 363.04 279.92 | 7.55 -3.5 -0.034
+  2584    PROBE 0.300 0.001 (True, False, False)    696.1    1344.1 491974.2 345272.4 363.35 280.10 | 7.53 -3.4 -0.036
+  2585 DISTRUST 0.020 0.001 (True, False, False)    693.9    1340.4 492121.8 345394.3 363.69 280.37 | 7.51 -3.6 -0.020
+  2645    PROBE 0.020 0.001 (True, False, False)    428.0     475.2 501076.0 352934.0 384.60 300.72 | 6.37 -3.5 -0.045
+  2646    PROBE 0.300 0.001 (True, False, False)    427.1     471.0 501226.6 353062.9 384.91 300.98 | 6.35 -3.5 -0.055
+  2647    PROBE 0.300 0.001 (True, False, False)    427.7     475.2 501377.1 353192.0 385.22 301.24 | 6.34 -3.6 -0.050
+  2648    PROBE 0.300 0.001 (True, False, False)    429.1     477.2 501527.6 353321.1 385.53 301.50 | 6.32 -3.5 -0.050
+  2649    PROBE 0.300 0.001 (True, False, False)    425.8     472.6 501678.4 353450.4 385.84 301.75 | 6.30 -3.6 -0.047
+  2650    PROBE 0.300 0.001 None      nan       nan 501829.0 353579.7 386.14 302.01
+  2651    PROBE 0.300 0.001 None      nan       nan 501979.6 353709.1 386.45 302.26
+  2652    PROBE 0.300 0.001 (False, False, False)    429.1     477.3 502130.2 353838.6 386.76 302.52 | 6.25 -3.6 -0.024
+  2653    PROBE 0.300 0.001 (False, False, False)    427.5     474.4 502280.9 353968.2 387.06 302.77 | 6.23 -3.4 -0.014
+  2654    PROBE 0.300 0.001 (True, False, False)    425.8     472.9 502431.8 354097.9 387.36 303.02 | 6.21 -3.3 0.014
+  2655 DISTRUST 0.020 0.001 (True, False, False)    429.8     480.2 502582.5 354227.7 387.67 303.27 | 6.20 -3.3 0.012
+  2715    PROBE 0.020 0.001 (True, False, False)    571.9     803.0 511627.2 362140.9 403.53 314.65 | 5.32 -3.3 0.008
+  2716    PROBE 0.300 0.001 (True, False, False)    557.5     788.0 511777.7 362274.6 403.77 314.85 | 5.31 -3.3 0.014
+  2717    PROBE 0.300 0.001 (True, False, False)    564.2     799.9 511928.2 362408.3 404.00 315.05 | 5.29 -3.3 -0.017
+  2718    PROBE 0.300 0.001 (True, False, False)    551.6     779.0 512078.6 362542.1 404.25 315.36 | 5.28 -3.5 -0.016
+  2719    PROBE 0.300 0.001 (True, False, False)    534.4     730.3 512229.2 362676.0 404.51 315.77 | 5.27 -3.4 -0.024
+  2720    PROBE 0.300 0.001 None      nan       nan 512379.9 362810.2 404.77 316.18
+  2721    PROBE 0.300 0.001 None      nan       nan 512530.6 362944.5 405.03 316.59
+  2722    PROBE 0.300 0.001 (False, False, False)    490.6     622.7 512681.4 363079.0 405.29 317.00 | 5.23 -3.6 -0.010
+  2723    PROBE 0.300 0.001 (False, False, False)    475.1     594.8 512832.3 363213.6 405.54 317.37 | 5.22 -3.5 -0.018
+  2724    PROBE 0.300 0.001 (True, False, False)    474.1     597.4 512983.3 363348.4 405.77 317.58 | 5.20 -3.6 -0.013
+  2725 DISTRUST 0.020 0.001 (True, False, False)    477.2     598.4 513134.2 363483.2 406.00 317.76 | 5.19 -3.7 -0.020
+  2785    PROBE 0.020 0.001 (True, False, False)    488.2     631.8 522164.7 371676.1 417.58 327.35 | 4.53 -3.9 -0.038
+  2786    PROBE 0.300 0.001 (True, False, False)    494.0     640.6 522314.3 371814.1 417.74 327.49 | 4.52 -3.9 -0.034
+  2787    PROBE 0.300 0.001 (True, False, False)    498.2     648.4 522463.9 371952.1 417.89 327.62 | 4.51 -3.8 -0.033
+  2788    PROBE 0.300 0.001 (True, False, False)    490.3     643.9 522613.6 372090.1 418.05 327.75 | 4.50 -3.9 -0.029
+  2789    PROBE 0.300 0.001 (True, False, False)    489.5     632.6 522763.1 372228.2 418.20 327.88 | 4.49 -3.8 -0.043
+  2790    PROBE 0.300 0.001 None      nan       nan 522912.8 372366.3 418.36 328.01
+  2791    PROBE 0.300 0.001 None      nan       nan 523062.4 372504.5 418.51 328.14
+  2792    PROBE 0.300 0.001 (False, False, False)    491.9     644.0 523211.9 372642.7 418.67 328.27 | 4.46 -3.8 -0.052
+  2793    PROBE 0.300 0.001 (False, False, False)    492.9     650.5 523361.4 372780.9 418.82 328.39 | 4.45 -3.8 -0.068
+  2794    PROBE 0.300 0.001 (True, False, False)    490.7     646.5 523510.8 372919.2 418.97 328.52 | 4.44 -3.8 -0.078
+  2795 DISTRUST 0.020 0.001 (True, False, False)    495.3     653.8 523660.2 373057.4 419.12 328.64 | 4.44 -3.8 -0.089
+  2855    PROBE 0.020 0.001 (True, False, False)    524.5     816.6 532501.1 381390.6 426.38 334.80 | 3.94 -3.9 -0.005
+  2856    PROBE 0.300 0.001 (True, False, False)    522.2     807.8 532646.1 381529.8 426.49 334.90 | 3.94 -3.7 -0.046
+  2857    PROBE 0.300 0.001 (True, False, False)    515.5     818.3 532791.0 381668.9 426.61 335.00 | 3.93 -3.9 -0.061
+  2858    PROBE 0.300 0.001 (True, False, False)    518.9     804.0 532935.8 381808.0 426.73 335.10 | 3.92 -3.8 -0.058
+  2859    PROBE 0.300 0.001 (True, False, False)    519.6     800.2 533080.5 381947.1 426.85 335.20 | 3.92 -3.9 -0.059
+  2860    PROBE 0.300 0.001 None      nan       nan 533225.3 382086.2 426.97 335.29
+  2861    PROBE 0.300 0.001 None      nan       nan 533369.8 382225.2 427.09 335.39
+  2862    PROBE 0.300 0.001 (False, False, False)    517.7     807.1 533514.2 382364.3 427.20 335.49 | 3.89 -3.9 -0.063
+  2863    PROBE 0.300 0.001 (False, False, False)    527.1     822.0 533658.6 382503.4 427.32 335.59 | 3.89 -3.9 -0.068
+  2864    PROBE 0.300 0.001 (True, False, False)    522.2     813.1 533802.9 382642.5 427.44 335.68 | 3.88 -3.9 -0.066
+  2865 DISTRUST 0.020 0.001 (True, False, False)    522.7     811.7 533947.0 382781.5 427.56 335.78 | 3.87 -3.7 -0.057
+  2925    PROBE 0.020 0.001 (True, False, False)    558.0     979.7 542387.1 391081.7 434.58 340.89 | 3.50 -3.8 -0.007
+  2926    PROBE 0.300 0.001 (True, False, False)    532.7     902.7 542523.9 391218.9 434.76 341.23 | 3.49 -3.7 0.008
+  2927    PROBE 0.300 0.001 (True, False, False)    516.2     852.9 542660.6 391356.2 434.96 341.51 | 3.49 -3.8 -0.001
+  2928    PROBE 0.300 0.001 (True, False, False)    515.0     857.3 542797.3 391493.6 435.09 341.63 | 3.48 -3.9 -0.002
+  2929    PROBE 0.300 0.001 (True, False, False)    510.0     846.0 542933.8 391630.9 435.21 341.72 | 3.48 -3.9 -0.000
+  2930    PROBE 0.300 0.001 None      nan       nan 543070.2 391768.1 435.33 341.81
+  2931    PROBE 0.300 0.001 None      nan       nan 543206.5 391905.3 435.45 341.89
+  2932    PROBE 0.300 0.001 (False, False, False)    512.6     855.0 543342.6 392042.5 435.57 341.98 | 3.46 -3.9 0.007
+  2933    PROBE 0.300 0.001 (False, False, False)    518.3     866.3 543478.6 392179.6 435.69 342.08 | 3.46 -3.7 0.004
+  2934    PROBE 0.300 0.001 (True, False, False)    519.2     859.7 543614.4 392316.6 435.82 342.17 | 3.45 -3.7 0.002
+  2935 DISTRUST 0.020 0.001 (True, False, False)    506.9     839.8 543750.1 392453.7 435.95 342.27 | 3.44 -3.9 -0.026
+  2995    PROBE 0.020 0.001 (True, False, False)    537.1     991.7 551605.1 400543.5 443.79 346.66 | 3.16 -3.7 0.043
+  2996    PROBE 0.300 0.001 (True, False, False)    526.9     985.8 551731.0 400676.4 443.89 347.02 | 3.15 -3.8 0.046
+  2997    PROBE 0.300 0.001 (True, False, False)    513.1     963.4 551857.0 400809.4 444.02 347.39 | 3.15 -4.0 0.064
+  2998    PROBE 0.300 0.001 (True, False, False)    509.5     952.4 551983.0 400942.7 444.16 347.77 | 3.14 -3.9 0.041
+  2999    PROBE 0.300 0.001 (True, False, False)    505.4     926.7 552109.0 401076.0 444.32 348.15 | 3.14 -3.9 0.039
+  3000    PROBE 0.300 0.001 None      nan       nan 552235.0 401209.6 444.50 348.53
+  3001    PROBE 0.300 0.001 None      nan       nan 552361.0 401343.2 444.69 348.85
+  3002    PROBE 0.300 0.001 (False, False, False)    478.2     830.8 552486.9 401476.9 444.86 348.98 | 3.13 -3.8 0.022
+  3003    PROBE 0.300 0.001 (False, False, False)    473.7     835.1 552612.7 401610.5 445.13 349.02 | 3.12 -4.0 0.023
+  3004    PROBE 0.300 0.001 (True, False, False)    492.1     854.9 552738.3 401743.9 445.47 349.02 | 3.12 -3.8 -0.004
+  3005 DISTRUST 0.020 0.001 (True, False, False)    496.0     868.4 552863.8 401877.1 445.81 349.03 | 3.11 -4.0 -0.001
+  3065    PROBE 0.020 0.001 (True, False, False)    364.1     470.1 560166.3 409777.3 456.81 358.05 | 2.86 -4.0 -0.037
+  3066    PROBE 0.300 0.001 (True, False, False)    364.1     463.1 560284.3 409908.1 456.99 358.17 | 2.86 -3.8 -0.032
+  3067    PROBE 0.300 0.001 (True, False, False)    364.6     472.4 560402.1 410038.9 457.18 358.30 | 2.86 -3.8 -0.048
+  3068    PROBE 0.300 0.001 (True, False, False)    363.6     462.7 560519.5 410169.6 457.36 358.42 | 2.85 -3.9 -0.051
+  3069    PROBE 0.300 0.001 (True, False, False)    363.0     460.5 560636.9 410300.2 457.54 358.55 | 2.85 -3.7 -0.040
+  3070    PROBE 0.300 0.001 None      nan       nan 560754.2 410430.8 457.72 358.67
+  3071    PROBE 0.300 0.001 None      nan       nan 560871.3 410561.3 457.90 358.80
+  3072    PROBE 0.300 0.001 (False, False, False)    361.5     461.8 560988.3 410691.8 458.08 358.92 | 2.84 -3.8 -0.043
+  3073    PROBE 0.300 0.001 (False, False, False)    357.7     458.3 561104.9 410822.1 458.26 359.05 | 2.83 -3.8 -0.043
+  3074    PROBE 0.300 0.001 (True, False, False)    367.2     471.3 561222.2 410952.4 458.48 359.04 | 2.83 -3.9 -0.043
+  3075 DISTRUST 0.020 0.001 (True, False, False)    384.1     503.4 561338.6 411082.4 458.75 358.87 | 2.83 -3.8 -0.037
+  3135    PROBE 0.020 0.001 (True, False, False)    416.9     721.6 567963.4 418663.5 470.09 364.15 | 2.62 -3.9 0.035
+  3136    PROBE 0.300 0.001 (True, False, False)    414.2     718.8 568068.1 418786.6 470.30 364.29 | 2.62 -3.7 0.046
+  3137    PROBE 0.300 0.001 (True, False, False)    410.2     693.2 568172.6 418909.6 470.51 364.43 | 2.62 -3.8 0.037
+  3138    PROBE 0.300 0.001 (True, False, False)    415.7     703.8 568276.8 419032.6 470.72 364.57 | 2.61 -3.7 0.051
+  3139    PROBE 0.300 0.001 (True, False, False)    414.6     702.0 568380.3 419155.5 470.93 364.71 | 2.61 -3.9 0.054
+  3140    PROBE 0.300 0.001 None      nan       nan 568484.3 419278.3 471.20 364.96
+  3141    PROBE 0.300 0.001 None      nan       nan 568588.3 419401.2 471.54 365.34
+  3142    PROBE 0.300 0.001 (False, False, False)    404.6     588.8 568692.8 419524.1 471.88 365.72 | 2.60 -3.8 0.047
+  3143    PROBE 0.300 0.001 (False, False, False)    398.2     548.6 568796.8 419647.0 472.20 366.08 | 2.60 -3.7 0.048
+  3144    PROBE 0.300 0.001 (True, False, False)    399.0     550.0 568900.2 419770.0 472.43 366.26 | 2.59 -3.8 0.040
+  3145 DISTRUST 0.020 0.001 (True, False, False)    397.7     553.7 569004.0 419892.8 472.65 366.41 | 2.59 -4.0 0.049
+  3205    PROBE 0.020 0.001 (True, False, False)    335.1     541.8 574921.8 427114.3 486.49 374.70 | 2.43 -3.9 -0.002
+  3206    PROBE 0.300 0.001 (True, False, False)    333.1     535.7 575016.8 427233.2 486.76 374.89 | 2.43 -3.8 0.000
+  3207    PROBE 0.300 0.001 (True, False, False)    337.8     535.9 575112.8 427352.1 487.03 375.08 | 2.43 -3.7 -0.016
+  3208    PROBE 0.300 0.001 (True, False, False)    333.2     528.8 575207.6 427471.0 487.37 375.41 | 2.42 -4.0 -0.000
+  3209    PROBE 0.300 0.001 (True, False, False)    339.8     527.1 575302.7 427589.9 487.76 375.84 | 2.42 -3.9 -0.001
+  3210    PROBE 0.300 0.001 None      nan       nan 575397.7 427709.0 488.09 376.16
+  3211    PROBE 0.300 0.001 None      nan       nan 575491.1 427828.0 488.37 376.34
+  3212    PROBE 0.300 0.001 (False, False, False)    340.0     509.5 575585.6 427947.1 488.61 376.46 | 2.41 -3.8 0.001
+  3213    PROBE 0.300 0.001 (False, False, False)    330.2     509.9 575680.3 428066.0 488.86 376.61 | 2.41 -4.0 -0.004
+  3214    PROBE 0.300 0.001 (True, False, False)    334.6     507.1 575775.1 428184.9 489.14 376.80 | 2.41 -3.8 -0.006
+  3215 DISTRUST 0.020 0.001 (True, False, False)    334.7     502.8 575869.4 428303.8 489.41 376.99 | 2.41 -3.8 -0.004
+  3275    PROBE 0.020 0.001 (True, False, False)    276.9     349.2 581451.3 435436.1 507.43 390.17 | 2.26 -3.9 -0.034
+  3276    PROBE 0.300 0.001 (True, False, False)    276.7     345.1 581544.1 435555.7 507.74 390.40 | 2.26 -3.6 -0.017
+  3277    PROBE 0.300 0.001 (True, False, False)    272.4     340.6 581636.9 435675.3 508.05 390.62 | 2.26 -4.0 -0.004
+  3278    PROBE 0.300 0.001 (True, False, False)    272.4     340.3 581729.6 435795.0 508.36 390.85 | 2.26 -3.9 -0.002
+  3279    PROBE 0.300 0.001 (True, False, False)    273.4     342.8 581822.6 435914.7 508.67 391.08 | 2.25 -4.0 -0.005
+  3280    PROBE 0.300 0.001 None      nan       nan 581915.1 436034.4 508.99 391.31
+  3281    PROBE 0.300 0.001 None      nan       nan 582007.8 436154.2 509.30 391.54
+  3282    PROBE 0.300 0.001 (False, False, False)    270.6     340.3 582100.6 436274.0 509.63 391.77 | 2.25 -3.8 -0.012
+  3283    PROBE 0.300 0.001 (False, False, False)    266.4     332.3 582193.1 436393.9 509.95 392.00 | 2.24 -3.8 -0.026
+  3284    PROBE 0.300 0.001 (True, False, False)    269.9     335.0 582285.8 436513.8 510.27 392.24 | 2.24 -3.9 -0.048
+  3285 DISTRUST 0.020 0.001 (True, False, False)    266.8     331.7 582378.6 436633.7 510.58 392.46 | 2.24 -3.9 -0.051
+  3345    PROBE 0.020 0.001 (True, False, False)    236.5     272.9 588030.7 443934.3 531.55 407.27 | 2.11 -4.0 0.031
+  3346    PROBE 0.300 0.001 (True, False, False)    233.8     267.9 588127.2 444057.8 531.88 407.51 | 2.11 -3.9 -0.002
+  3347    PROBE 0.300 0.001 (True, False, False)    233.5     268.8 588223.9 444181.4 532.20 407.76 | 2.10 -3.9 -0.013
+  3348    PROBE 0.300 0.001 (True, False, False)    237.4     270.2 588320.6 444305.1 532.53 408.00 | 2.10 -3.7 -0.007
+  3349    PROBE 0.300 0.001 (True, False, False)    233.3     265.5 588417.5 444429.0 532.85 408.25 | 2.10 -3.7 0.022
+  3350    PROBE 0.300 0.001 None      nan       nan 588514.5 444552.9 533.17 408.49
+  3351    PROBE 0.300 0.001 None      nan       nan 588611.6 444677.0 533.49 408.74
+  3352    PROBE 0.300 0.001 (False, False, False)    231.3     265.0 588708.8 444801.1 533.81 408.98 | 2.09 -3.8 0.017
+  3353    PROBE 0.300 0.001 (False, False, False)    229.5     262.5 588806.2 444925.4 534.13 409.22 | 2.09 -3.7 0.033
+  3354    PROBE 0.300 0.001 (True, False, False)    228.8     260.9 588903.7 445049.8 534.45 409.47 | 2.09 -3.7 0.025
+  3355 DISTRUST 0.020 0.001 (True, False, False)    226.4     258.0 589001.2 445174.3 534.77 409.71 | 2.09 -3.9 0.018
+  3415    PROBE 0.020 0.001 (True, False, False)    167.1     181.2 595143.2 452924.2 551.41 424.06 | 1.97 -3.6 0.050
+  3416    PROBE 0.300 0.001 (True, False, False)    164.0     176.1 595250.7 453058.5 551.73 424.48 | 1.97 -3.8 0.043
+  3417    PROBE 0.300 0.001 (True, False, False)    157.9     168.6 595358.7 453193.0 552.05 424.90 | 1.97 -3.9 0.015
+  3418    PROBE 0.300 0.001 (True, False, False)    153.4     163.4 595466.8 453327.7 552.37 425.33 | 1.96 -3.9 0.016
+  3419    PROBE 0.300 0.001 (True, False, False)    151.3     160.5 595575.3 453462.7 552.65 425.65 | 1.96 -3.9 0.007
+  3420    PROBE 0.300 0.001 None      nan       nan 595683.9 453597.9 552.89 425.81
+  3421    PROBE 0.300 0.001 None      nan       nan 595792.6 453733.1 553.06 425.70
+  3422    PROBE 0.300 0.001 (False, False, False)    160.3     172.2 595901.2 453868.3 553.21 425.55 | 1.96 -3.7 0.016
+  3423    PROBE 0.300 0.001 (False, False, False)    165.6     180.2 596009.7 454003.4 553.36 425.41 | 1.96 -3.9 0.020
+  3424    PROBE 0.300 0.001 (True, False, False)    169.2     186.5 596118.4 454138.5 553.57 425.46 | 1.95 -4.0 0.025
+  3425 DISTRUST 0.020 0.001 (True, False, False)    168.1     184.5 596227.1 454273.7 553.81 425.64 | 1.95 -3.9 0.027
+  3485    PROBE 0.020 0.001 (True, False, False)    126.2     132.3 603080.2 462661.4 566.23 436.26 | 1.85 -3.8 0.037
+  3486    PROBE 0.300 0.001 (True, False, False)    124.3     130.6 603199.1 462805.0 566.38 436.37 | 1.85 -4.0 0.028
+  3487    PROBE 0.300 0.001 (True, False, False)    124.3     130.4 603317.9 462948.6 566.54 436.48 | 1.85 -4.0 0.052
+  3488    PROBE 0.300 0.001 (True, False, False)    124.1     130.0 603436.9 463092.3 566.69 436.58 | 1.85 -3.8 0.045
+  3489    PROBE 0.300 0.001 (True, False, False)    124.0     130.0 603556.0 463236.2 566.84 436.69 | 1.84 -3.7 0.050
+  3490    PROBE 0.300 0.001 None      nan       nan 603675.2 463380.1 566.99 436.80
+  3491    PROBE 0.300 0.001 None      nan       nan 603794.6 463524.2 567.13 436.90
+  3492    PROBE 0.300 0.001 (False, False, False)    123.5     129.7 603914.1 463668.3 567.28 437.01 | 1.84 -4.0 0.071
+  3493    PROBE 0.300 0.001 (False, False, False)    123.7     129.8 604033.7 463812.5 567.42 437.10 | 1.84 -3.9 0.070
+  3494    PROBE 0.300 0.001 (True, False, False)    122.4     128.2 604153.3 463956.8 567.55 437.20 | 1.84 -3.9 0.049
+  3495 DISTRUST 0.020 0.001 (True, False, False)    122.2     128.3 604273.1 464101.2 567.69 437.29 | 1.83 -3.9 0.030
+  3555    PROBE 0.020 0.001 (True, False, False)    129.3     141.6 611597.1 472897.0 573.72 440.69 | 1.76 -3.9 0.029
+  3556    PROBE 0.300 0.001 (True, False, False)    129.7     142.5 611721.2 473045.7 573.83 440.76 | 1.76 -3.9 0.040
+  3557    PROBE 0.300 0.001 (True, False, False)    128.8     141.6 611845.4 473194.4 573.94 440.83 | 1.75 -3.9 0.042
+  3558    PROBE 0.300 0.001 (True, False, False)    129.1     141.6 611969.8 473343.2 574.05 440.90 | 1.75 -3.9 0.047
+  3559    PROBE 0.300 0.001 (True, False, False)    127.9     139.8 612094.1 473492.1 574.16 440.96 | 1.75 -3.9 0.046
+  3560    PROBE 0.300 0.001 (True, False, False)    129.6     142.5 612218.5 473641.0 574.27 441.03 | 1.75 -3.8 0.038
+  3561    PROBE 0.300 0.001 (True, False, False)    129.3     142.0 612343.0 473789.9 574.38 441.10 | 1.75 -3.8 0.044
+  3562    PROBE 0.300 0.001 (True, False, False)    127.3     139.7 612467.4 473938.9 574.49 441.17 | 1.75 -3.8 0.039
+  3563    PROBE 0.300 0.001 (True, False, False)    128.2     140.9 612592.0 474088.0 574.60 441.23 | 1.75 -3.8 0.039
+  3564    PROBE 0.300 0.001 (True, False, False)    127.3     139.6 612716.6 474237.1 574.71 441.30 | 1.75 -3.7 0.028
+  3565 DISTRUST 0.020 0.001 (True, False, False)    127.0     139.5 612841.3 474386.2 574.82 441.36 | 1.74 -3.9 0.045
+  3625    PROBE 0.020 0.001 (True, False, False)    137.3     156.0 620388.9 483344.9 582.41 444.28 | 1.69 -3.8 -0.001
+  3626    PROBE 0.300 0.001 (True, False, False)    135.2     153.0 620516.4 483495.6 582.55 444.36 | 1.69 -3.7 -0.010
+  3627    PROBE 0.300 0.001 (True, False, False)    133.2     153.0 620644.2 483646.3 582.69 444.45 | 1.69 -4.0 0.021
+  3628    PROBE 0.300 0.001 (True, False, False)    134.3     153.4 620772.0 483797.1 582.82 444.53 | 1.69 -3.9 0.016
+  3629    PROBE 0.300 0.001 (True, False, False)    132.7     151.5 620899.8 483948.0 582.96 444.62 | 1.68 -3.8 0.021
+  3630    PROBE 0.300 0.001 (True, False, False)    132.6     150.0 621027.8 484098.9 583.11 444.71 | 1.68 -3.6 0.028
+SUMMARY n_epochs=3600 states={'TRUST': 34, 'DISTRUST': 3060, 'PROBE': 506} first_non_trust_t=65.0 es_pos=2099 es_clk=0 es_xc=0 rmse_h_epochs=376078.3 max_h=621027.8 final_err_h=621027.8

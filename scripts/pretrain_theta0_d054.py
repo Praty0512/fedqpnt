@@ -23,12 +23,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import numpy as np
 
-from fedqpnt.node.methods import save_detector_weights
+from fedqpnt.node.methods import load_detector_weights, save_detector_weights
 from fedqpnt.training.build_supervised_dataset import collect_run, plan_for, stack_dataset
 from fedqpnt.trust.detector import TrustDetector
 
-OUT_WEIGHTS = Path("results/fleet/theta0_d054.npz")
-OUT_PROVENANCE = Path("results/fleet/theta0_d054_provenance.json")
+OUT_WEIGHTS = Path("results/fleet/theta0_d054_f7.npz")
+OUT_PROVENANCE = Path("results/fleet/theta0_d054_f7_provenance.json")
+# FIX7 B6: the running normaliser is FROZEN to the production detector's (sup_v4: 20552 clean samples) and is
+# NOT re-estimated from this script's own small subset (1470 samples), which gave a ~3x narrower xsat/cn0 sd
+# and made E_s (which reuses the detector normaliser) false-fire on clean fleet nodes (D-086 F4 root cause).
+NORM_FROM = Path("results/m1/detector_weights_sup_v4.npz")
 DURATION_S = 120.0
 # D-053a (DETECT-MIX, concurrent): build_supervised_dataset.py's family
 # scheme changed under us (6 families: drift, meaconing, abrupt, jam_cw,
@@ -57,7 +61,9 @@ def main():
     assert "meaconing" not in families and "drift" not in families, "restriction leaked"
 
     det = TrustDetector(arch="mlp", seed=0)
-    U, y_spoof, y_jam = stack_dataset(by_seed, seeds, det, update_normalizer=True)
+    norm = load_detector_weights(NORM_FROM)          # raises if missing (B1)
+    det.normalizer.set_params({k: norm[k] for k in ("norm_mu", "norm_sd", "norm_count")})
+    U, y_spoof, y_jam = stack_dataset(by_seed, seeds, det, update_normalizer=False)
     print(f"U.shape={U.shape} n_pos_spoof={int(y_spoof.sum())} n_pos_jam={int(y_jam.sum())}")
 
     metrics = det.train_local(U, y_spoof, y_jam, epochs=30, lr=0.05, batch_size=64,
@@ -71,7 +77,8 @@ def main():
         decision="D-054.1", seed_range=[400, 449], seeds_used=seeds, allowed_families=sorted(ALLOWED_FAMILIES),
         families_present=families, duration_s=DURATION_S, n_samples=int(U.shape[0]),
         n_pos_spoof=int(y_spoof.sum()), n_pos_jam=int(y_jam.sum()), train_metrics=metrics,
-        weights_file=str(OUT_WEIGHTS),
+        weights_file=str(OUT_WEIGHTS), decision_fix="FIX7 B6", normaliser_frozen_from=str(NORM_FROM),
+        norm_count=float(norm["norm_count"][0]), normaliser_updated_during_pretrain=False,
     )
     OUT_PROVENANCE.write_text(json.dumps(provenance, indent=2, default=str))
     print(f"Wrote {OUT_WEIGHTS} and {OUT_PROVENANCE}")

@@ -50,3 +50,26 @@ def test_install_global_changes_local_params():
     theta_after = client.detector.get_params()
     assert not np.allclose(theta_before["fc1.weight"], theta_after["fc1.weight"])
     assert client.last_installed_round == 99
+
+
+def test_never_installed_client_reports_fresh_base_round():
+    """D-086 F3: base_round must not be -1 for a node that never installed (server drops staleness > max)."""
+    provider = make_provider(base_seed=500, duration_s=20.0)
+    detector = TrustDetector(arch="mlp", seed=0)
+    client = FLClient("n0", provider, detector, ClientConfig(min_samples=32))
+    assert client.last_installed_round < 0
+    update = None
+    for r in range(6):
+        update = client.local_round(r)
+        if update is not None:
+            round_sent = r
+            break
+    assert update is not None
+    assert update.metrics["base_round"] == float(round_sent)
+    client.install_global(TrustDetector(arch="mlp", seed=1).get_params(), round_idx=3)
+    u2 = None
+    for r in range(round_sent + 1, round_sent + 6):
+        u2 = client.local_round(r)
+        if u2 is not None:
+            break
+    assert u2 is not None and u2.metrics["base_round"] == 3.0

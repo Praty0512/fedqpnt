@@ -115,6 +115,9 @@ class FLClient:
         delta["norm_mu"] = new_params["norm_mu"]
         delta["norm_sd"] = new_params["norm_sd"]
         metrics = dict(metrics)
-        metrics["base_round"] = float(self.last_installed_round)
+        # A node that has never installed a global model is still on theta0, which is what the server holds at
+        # round 0..: it is fresh, not stale (base_round = -1 made the server discard every update; D-086, F3).
+        base_round = self.last_installed_round if self.last_installed_round >= 0 else round_idx
+        metrics["base_round"] = float(base_round)
         return ModelUpdate(node_id=self.node_id, round_idx=round_idx, params=delta,
                             n_samples=n, metrics=metrics, kind="delta")

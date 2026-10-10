@@ -455,7 +455,8 @@ class SensorTrustLaw:
             return 1.0
 
         if self._uses_v2:
-            # nis_value: the actual (dof-normalised) NIS, needed for the
+            # nis_value: the actual joint 6-D shadow NIS (UN-normalised: NOT divided by
+            # the dof; the PROBE bound is compared against it as is), needed for the
             # PROBE mean-NIS exit test (sec C item 4). Falls back to a
             # value consistent with nis_ok when the caller doesn't have it
             # (e.g. existing v1-style call sites / tests).
@@ -912,8 +913,18 @@ class TrustEngineImpl:
                 # D-056 metric (d): logging only (position term is superseded while in PROBE)
                 self.last_es_evidence = bool(es_other or (es_pos and not was_probe))
                 # D-072: position law <- position_event + xsat/cn0 (clk_event does NOT cost position).
+                st_before = self.gnss_law._core_v2.state if self.gnss_law._uses_v2 else None
                 gnss_w = self.gnss_law.step(t, p, nis_ok=nis_ok, features_nominal=features_nominal,
                                              nis_value=shadow_nis, es_evidence=es_xc, es_position=es_pos)
+                if st_before == "PROBE" and self.gnss_law._core_v2.state == "TRUST":
+                    # FIX7 B5: PROBE -> TRUST is the first epoch whose fix is APPLIED after >= T_ex + T_probe of
+                    # exclusion / shadow, so it produces a legitimately large correction (km after a long coast).
+                    # The short-baseline position test of the NEXT epoch compares PRE-correction priors, i.e. its
+                    # Delta p_INS contains that pull -> false E_s fire -> TRUST lasts one epoch, then DISTRUST for
+                    # another T_ex (traced: S2-med tactical seed 530 t=411/412, 482/483, ...). Same defect and same
+                    # remedy as the post-gap case (D-058 follow-up, _es_position_quarantine): skip the position
+                    # term for the next 2 epochs. xsat / cn0 / clock evidence and the detector are NOT quarantined.
+                    self._es_position_quarantine = 2
                 # clock law <- clk_event + xsat/cn0; its own consistency statistic x8^2 + x9^2 (chi2_2).
                 if self.gnss_law._uses_v2:
                     clk_stat = float(raw[7] ** 2 + raw[8] ** 2)

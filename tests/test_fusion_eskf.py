@@ -261,3 +261,50 @@ def test_step_convenience_wrapper_matches_manual_sequence():
 
     assert np.allclose(nav_a.pos, nav_b.pos)
     assert np.allclose(nav_a.P if hasattr(nav_a, "P") else eskf_a.P, eskf_b.P)
+
+
+# D-086 C1: P0 roll/pitch std must cover the levelling error sigma_ba_turnon/g (>= 1 mrad)
+@pytest.mark.parametrize("grade", ["industrial_mems", "tactical"])
+def test_p0_tilt_std_covers_levelling_error(grade):
+    eskf, imu, _ = _fresh_eskf(grade)
+    expected = max(1e-3, eskf.sigma_ba_turnon / G)
+    assert np.isclose(np.sqrt(eskf.P[6, 6]), expected, rtol=1e-3)
+    assert np.isclose(np.sqrt(eskf.P[7, 7]), expected, rtol=1e-3)
+    assert np.sqrt(eskf.P[6, 6]) >= 1e-3
+    if grade == "industrial_mems":
+        assert np.sqrt(eskf.P[6, 6]) > 5e-3     # ~10 mg / g, was 1 mrad before the fix
+
+
+# --------------------------------------------------------------------------
+# FIX7 B5: second-order attitude-error covariance (the linear model has no vertical coupling to a horizontal tilt)
+def _prop_noiseless(second_order, tilt_std, seconds=100.0, dt=0.01):
+    cfg = ESKFConfig(second_order_att=second_order)
+    eskf, _, _ = _fresh_eskf("tactical", config=cfg)
+    eskf.P[6, 6] = eskf.P[7, 7] = tilt_std ** 2
+    # exact specific force (no sensor error): the nominal state stays put, only P evolves
+    t = 0.0
+    for _ in range(int(seconds / dt)):
+        t += dt
+        eskf.propagate(t, ImuSample(t=t, f_b=np.array([0.0, 0.0, G]), omega_b=np.zeros(3), sensor_id="x"))
+    return eskf
+
+
+def test_second_order_att_term_adds_vertical_velocity_variance_for_large_tilt():
+    tilt, T = 0.03, 100.0
+    on, off = _prop_noiseless(True, tilt, T), _prop_noiseless(False, tilt, T)
+    assert on.P[5, 5] > off.P[5, 5] + 1e-4                     # extra vertical-velocity variance
+    # coherent term: rms accel = 0.5 g sqrt((tr P_h)^2 + 2 tr P_h^2) with P_h = tilt^2 I2 (plus the P_psi growth, ignored)
+    a_rms = 0.5 * G * np.sqrt((2 * tilt ** 2) ** 2 + 2 * 2 * tilt ** 4)
+    extra_sd = np.sqrt(on.P[5, 5] - off.P[5, 5])
+    assert 0.7 * a_rms * T < extra_sd < 2.0 * a_rms * T       # coherent growth ~ a_rms * T (psi also drifts via b_g)
+
+
+def test_second_order_att_term_negligible_for_small_tilt():
+    on, off = _prop_noiseless(True, 1e-3, 30.0), _prop_noiseless(False, 1e-3, 30.0)
+    assert np.allclose(np.diag(on.P)[:6], np.diag(off.P)[:6], rtol=5e-3)
+    assert np.all(np.linalg.eigvalsh(on.P) >= -1e-12)
+
+
+def test_second_order_att_off_reproduces_linear_model_and_c2_zero():
+    off = _prop_noiseless(False, 0.03, 10.0)
+    assert np.all(off._C2 == 0.0)
