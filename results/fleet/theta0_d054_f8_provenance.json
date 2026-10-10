@@ -1,0 +1,11 @@
+{
+ "decision": "D-089 f8 (f6 recipe)",
+ "file": "results/fleet/theta0_d054_f8.npz",
+ "weights_from": "results/fleet/theta0_d054.npz (freeze-5 re-pretrain, seeds 400-449; unchanged)",
+ "normaliser_from": "results/m1/detector_weights_sup_v5.npz (norm_mu, norm_sd, norm_count=20552)",
+ "old_norm_count": 1470,
+ "reason": "detector features x1/x2/x12 depend on the ESKF covariance changed by C1/B5 (results/m1/feature_dependency_f5_vs_f6.json); the fleet node's E_s reuses the detector normaliser, so it must be the v5 one (campaign precondition norm_count equality)",
+ "caveat": "weights were fitted under the freeze-5 narrow normaliser; inputs scaled by the v5 normaliser, so detector outputs shift (same caveat as f6)",
+ "sha256_weights_source": "763799c3ee328198fdd2339fd8d3bf1645ed723f6061288b031700a9e2d40869",
+ "sha256_new": "0e1fe82995e7f2d822eb1789587ff3e5cc8005e50b3a33f71658408b3e6a766b"
+}

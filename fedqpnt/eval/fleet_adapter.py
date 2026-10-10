@@ -58,7 +58,8 @@ from fedqpnt.fleet.orchestrator import FleetResult, FleetScenarioConfig, run_fle
 from fedqpnt.node.methods import load_detector_weights
 
 FLEET_SCENARIO_IDS = ("S5", "S8", "S9", "S12", "S15")
-THETA0_PATH = Path("results/fleet/theta0_d054_f6.npz")  # D-086 F4 (old weights + sup_v4 normaliser). FIX7 B6: the re-pretrained results/fleet/theta0_d054_f7.npz FAILS the clean-fleet check (fpr 0.3-0.4, rmse 12-19 m on clean nodes, raw detector p 0.55-0.74) and is NOT used; see results/minimatrix_f7/REPORT.md
+THETA0_PATH = Path("results/fleet/theta0_d054_f8.npz")  # D-089: original weights + detector v5 normaliser (f6 recipe). Previous: f6 (sup_v4 normaliser).
+_PREV_THETA0_F6 = Path("results/fleet/theta0_d054_f6.npz")  # D-086 F4 (old weights + sup_v4 normaliser). FIX7 B6: the re-pretrained results/fleet/theta0_d054_f7.npz FAILS the clean-fleet check (fpr 0.3-0.4, rmse 12-19 m on clean nodes, raw detector p 0.55-0.74) and is NOT used; see results/minimatrix_f7/REPORT.md
 MAX_LOCAL_ONLY_PARALLEL = 8   # D-059: cap on concurrent 1-node federations for B-cont/B-bin
 
 # D-059 addendum (Master): a local-only node trains on its own vehicle, with

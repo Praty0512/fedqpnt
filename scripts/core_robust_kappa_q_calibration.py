@@ -36,14 +36,14 @@ def _git() -> str:
 
 
 def run_one(args):
-    kq, seed, grade = args
+    kq, seed, grade, world = args
     from fedqpnt.node.agent import Agent
     from fedqpnt.node.environment import EnvConfig, NodeEnvironment
     from fedqpnt.node.methods import make_agent_config
-    env = NodeEnvironment(EnvConfig(platform="ground", world="flat", imu_grade=grade, quantum_grade="field",
+    env = NodeEnvironment(EnvConfig(platform="ground", world=world, imu_grade=grade, quantum_grade="field",
                                     gnss_rate_hz=1.0, hold_s=30.0, heading_noise_deg=2.0, attacks=[]),
                           seed=seed, node_id="kq", dt=0.01, duration_s=OUT_ON + OUT_LEN)
-    cfg = make_agent_config("undefended", world="flat", imu_grade=grade, quantum_grade="field", kappa_Q=float(kq))
+    cfg = make_agent_config("undefended", world=world, imu_grade=grade, quantum_grade="field", kappa_Q=float(kq))
     ag = Agent(cfg, env.imu.config(), node_id="kq")
     hold, init = [], False
     marks = {round(OUT_ON + c, 3): c for c in CHECK}
@@ -80,10 +80,11 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=3)
     ap.add_argument("--grid", type=float, nargs="+", default=GRID)
     ap.add_argument("--seeds", type=int, nargs="+", default=SEEDS)
+    ap.add_argument("--world", default="flat", help="default flat = original D-078 behaviour; R2+ single-node scenarios use schuler_tangent")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    print("git at launch:", _git(), flush=True)
-    tasks = [(kq, s, a.grade) for kq in a.grid for s in a.seeds]
+    print("git at launch:", _git(), "world:", a.world, flush=True)
+    tasks = [(kq, s, a.grade, a.world) for kq in a.grid for s in a.seeds]
     with ProcessPoolExecutor(max_workers=min(a.workers, 4)) as ex:
         res = list(ex.map(run_one, tasks))
     Path(a.out).write_text(json.dumps(res), encoding="utf8")

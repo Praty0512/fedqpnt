@@ -140,7 +140,10 @@ if __name__ == "__main__":
     ap.add_argument("--out", default=str(OUT))
     ap.add_argument("--tau-mode", choices=["openloop", "closedloop"], default="openloop")
     ap.add_argument("--clean-dir", default="results/fleet/h2_abrupt_clean_closedloop_freeze3")
+    ap.add_argument("--live-seeds", default="500-509")
     a = ap.parse_args()
+    _a, _b = (int(x) for x in a.live_seeds.split("-"))
+    SEEDS = list(range(_a, _b + 1))
     RUNS, OUT = Path(a.runs_dir), Path(a.out)
     if a.tau_mode == "closedloop":
         CLOSED_DIR = Path(a.clean_dir)

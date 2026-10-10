@@ -52,7 +52,8 @@ LOCAL_TRAIN_DURATION_S = 120.0
 ROUND_PERIOD_S = 60.0
 N_ROUNDS = 10
 CHOSEN = dict(local_epochs=2, lr=0.05, prox_mu=0.0)   # D-054.3 FL sanity check
-LIVE_SEEDS = list(range(500, 510))   # n=10 per H2_PREREG (D-064)
+LIVE_SEEDS = list(range(500, 510))   # n=10 per H2_PREREG (D-064); overridable via --live-seeds (round 3: 10090-10099)
+FINAL = False                        # True only for the authorised test-seed run (seed gate, D-068)
 
 # Step 2 result: severity 0.15 (12 m jump) is the largest tested value that
 # still keeps es_fire_frac_attack at 0% pooled over seeds 500-504 (0.2/16m
@@ -205,7 +206,7 @@ def run_h2(theta0, param_names, attack: dict, family_name: str, tag: str, proven
         }
         for method, ids in (("fedqpnt_local", node_ids), ("baseline_b_cont", ["n0"])):
             scenario = FleetScenarioConfig(
-                scenario_id=f"h2abrupt_{tag}_{method}_seed{seed}", method=method, seed=seed, node_ids=ids,
+                final=FINAL, scenario_id=f"h2abrupt_{tag}_{method}_seed{seed}", method=method, seed=seed, node_ids=ids,
                 n_rounds=N_ROUNDS, round_period_s=ROUND_PERIOD_S, duration_s=LIVE_DURATION_S,
                 client_cfg=ClientConfig(min_samples=8, **CHOSEN), attacks={"n0": attack},
                 local_train_seeds={nid: local_seeds[nid] for nid in ids},
@@ -232,7 +233,7 @@ def run_h4(theta0, param_names, attack: dict, family_name: str, tag: str, proven
         }
         for method, ids, join in (("fedqpnt_local", node_ids, {"n0": 5}), ("baseline_b_cont", ["n0"], {})):
             scenario = FleetScenarioConfig(
-                scenario_id=f"h4abrupt_{tag}_{method}_seed{seed}", method=method, seed=seed, node_ids=ids,
+                final=FINAL, scenario_id=f"h4abrupt_{tag}_{method}_seed{seed}", method=method, seed=seed, node_ids=ids,
                 n_rounds=N_ROUNDS, round_period_s=ROUND_PERIOD_S, duration_s=LIVE_DURATION_S,
                 client_cfg=ClientConfig(min_samples=8, **CHOSEN), attacks={"n0": attack}, join_round=join,
                 local_train_seeds={nid: local_seeds[nid] for nid in ids},
@@ -259,7 +260,7 @@ def run_control(theta0, param_names, attack: dict, provenance_log: list) -> dict
                         for i in range(N_NODES)}
         for method, ids in (("fedqpnt_local", node_ids), ("baseline_b_cont", ["n0"])):
             scenario = FleetScenarioConfig(
-                scenario_id=f"h2abrupt_control_drift_{method}_seed{seed}", method=method, seed=seed, node_ids=ids,
+                final=FINAL, scenario_id=f"h2abrupt_control_drift_{method}_seed{seed}", method=method, seed=seed, node_ids=ids,
                 n_rounds=N_ROUNDS, round_period_s=ROUND_PERIOD_S, duration_s=LIVE_DURATION_S,
                 client_cfg=ClientConfig(min_samples=8, **CHOSEN), attacks={"n0": attack},
                 local_train_seeds={nid: local_seeds[nid] for nid in ids},
@@ -277,12 +278,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--parts", default="h2,h4,control",
                     help="comma list from {h2,h4,control}")
+    ap.add_argument("--live-seeds", default="500-509", help="contiguous range a-b (round 3: 10090-10099)")
+    ap.add_argument("--final", action="store_true", help="authorised test-seed run (sets FleetScenarioConfig.final)")
     ap.add_argument("--out", default="results/fleet/h2_abrupt.json")
     ap.add_argument("--runs-dir", default="results/fleet/h2_abrupt_runs")
     ap.add_argument("--provenance-out", default="results/fleet/h2_abrupt_provenance.json")
     args = ap.parse_args()
-    global RUNS_DIR
+    global RUNS_DIR, LIVE_SEEDS, FINAL
     RUNS_DIR = Path(args.runs_dir)
+    _a, _b = (int(x) for x in args.live_seeds.split("-"))
+    LIVE_SEEDS = list(range(_a, _b + 1))
+    FINAL = bool(args.final)
     parts = set(args.parts.split(","))
 
     theta0, param_names = _theta0()

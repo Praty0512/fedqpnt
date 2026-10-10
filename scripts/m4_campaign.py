@@ -1,13 +1,14 @@
-"""M4 orchestration (CAMPAIGN agent), round-2 form. Scripts only; no fedqpnt/ edits.
+"""M4 orchestration (CAMPAIGN agent), round-3 form (defaults: core-freeze-6, seeds 10060-10089, root results/m4r3). Scripts only; no fedqpnt/ edits.
 
 Differs from fedqpnt.eval.campaign.run_campaign in that it (a) passes detector weights EXPLICITLY (required),
 (b) uses a spec-file launcher for tasks whose spec JSON exceeds the Windows command-line limit (2 s / 5 s
 toggling in S7-p2/p5), (c) claim files for every task so several instances can share one result store,
 (d) progress log + D-062 provenance.
 
-Examples (round 2; nothing is launched until the Master says "round 2 go"):
+Examples (round 3; nothing is launched until the user starts it):
     python scripts/m4_campaign.py --dry --weights <placeholder.npz>            # manifest + assertions only
-    python scripts/m4_campaign.py --phase 1 --weights results/m1/detector_weights_sup_v4.npz --workers 4
+    python scripts/m4_campaign.py --phase 1 --exclude S14 --weights results/m1/detector_weights_sup_v4.npz --workers 4
+    python scripts/m4_campaign.py --phase 1 --only S14 --workers 1 --weights ...   # S14 alone, serial
     python scripts/m4_campaign.py --phase 2 --weights ...                       # fleet, 1 at a time
     python scripts/m4_campaign.py --phase 2 --reverse --weights ...             # 2nd fleet instance, reverse order
 Resume = rerun the same command (done tasks skipped). After a crash use --clear-claims ONLY when no instance is live.
@@ -34,7 +35,7 @@ GRADES = ["industrial_mems", "tactical"]
 LONG_SPEC_CHARS = 30_000          # Windows cmdline limit is 32,767
 TIMEOUT_NORMAL_S = 3600           # _execute_one's own timeout
 TIMEOUT_LONG_S = 7200
-CODE_TAG = "core-freeze-5"
+CODE_TAG = "core-freeze-6"
 SPEC_FILE_SCRIPT = Path(__file__).with_name("m4_run_spec_file.py")
 
 
@@ -182,14 +183,15 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--phase", choices=["1", "2"], help="1 = single-node (pool), 2 = fleet (sequential)")
     ap.add_argument("--dry", action="store_true", help="build + assert + write manifest, run nothing")
-    ap.add_argument("--seeds", default="10030-10059")
+    ap.add_argument("--seeds", default="10060-10089")
     ap.add_argument("--weights", required=True, help="detector weights path (no default)")
-    ap.add_argument("--root", default="results/m4r2")
+    ap.add_argument("--root", default="results/m4r3")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--reverse", action="store_true")
     ap.add_argument("--clear-claims", action="store_true")
     ap.add_argument("--tag", default=CODE_TAG)
     ap.add_argument("--only", default=None, help="run only this scenario id (base before @), e.g. S14")
+    ap.add_argument("--exclude", default=None, help="comma list of scenario id bases (before @) to skip, e.g. S14")
     ap.add_argument("--take-reserved", action="store_true",
                     help="first drop RESERVED claims (placed by hand) on the selected tasks")
     a = ap.parse_args()
@@ -254,6 +256,9 @@ def main() -> None:
     ids, tasks = build(a.phase, seeds, a.weights)
     if a.only:
         tasks = [t for t in tasks if t.scenario_id.split("@")[0] == a.only]
+    if a.exclude:
+        _ex = {x.strip() for x in a.exclude.split(",") if x.strip()}
+        tasks = [t for t in tasks if t.scenario_id.split("@")[0] not in _ex]
     if a.take_reserved:
         for t in tasks:
             cp = Path(str(t.result_path(root)) + ".claim")

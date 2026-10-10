@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import numpy as np
 
 CLEAN_DURATION_S = 1000.0
-LIVE_SEEDS = list(range(500, 510))
+LIVE_SEEDS = list(range(500, 510))   # overridable via --live-seeds; clean seeds = 580+2*i, 581+2*i for the i-th live seed (i=0..9)
 ARMS = ("fedqpnt_local", "baseline_b_cont")
 
 
@@ -45,7 +45,11 @@ def main():
     ap.add_argument("--out-dir", default="results/fleet/h2_abrupt_clean_closedloop_freeze3")
     ap.add_argument("--parts", default="h2_abrupt,h4_abrupt,control_drift")
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--live-seeds", default="500-509")
     a = ap.parse_args()
+    global LIVE_SEEDS
+    _a, _b = (int(x) for x in a.live_seeds.split("-"))
+    LIVE_SEEDS = list(range(_a, _b + 1))
     runs, out = Path(a.runs_dir), Path(a.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     jobs, index = [], {}
@@ -55,7 +59,7 @@ def main():
                 npz = runs / f"{part}_{arm}_seed{s}.npz"
                 if not npz.exists():
                     print("MISSING model", npz); continue
-                for c in (580 + 2 * (s - 500), 581 + 2 * (s - 500)):
+                for c in (580 + 2 * (s - LIVE_SEEDS[0]), 581 + 2 * (s - LIVE_SEEDS[0])):
                     cache = out / f"{part}_{arm}_seed{s}_clean{c}.npz"
                     jobs.append((str(npz), c, str(cache))); index.setdefault((part, arm), []).append(str(cache))
     print(f"{len(jobs)} closed-loop clean missions, {a.workers} workers", flush=True)
