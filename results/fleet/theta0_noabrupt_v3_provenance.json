@@ -1,0 +1,9 @@
+{
+ "decision": "D-089 candidate",
+ "weights_from": "results/fleet/theta0_noabrupt_v2.npz",
+ "normaliser_from": "results/m1/detector_weights_sup_v5.npz",
+ "old_norm_count": 1499,
+ "new_norm_count": 20552,
+ "sha256_src": "dc7df8dca58f0a7a7f6b3195fbed5a2fea01da87fbc2d9475a944bca36189fa4",
+ "sha256_new": "8525b7ec20f1185c2c3c601feeddb3e96f3dfc43e96c3f13d20d0f0adad46d82"
+}

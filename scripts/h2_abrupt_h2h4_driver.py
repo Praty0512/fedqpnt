@@ -275,16 +275,18 @@ def run_control(theta0, param_names, attack: dict, provenance_log: list) -> dict
 
 
 def main():
+    global RUNS_DIR, LIVE_SEEDS, FINAL, THETA0_PATH
     ap = argparse.ArgumentParser()
     ap.add_argument("--parts", default="h2,h4,control",
                     help="comma list from {h2,h4,control}")
     ap.add_argument("--live-seeds", default="500-509", help="contiguous range a-b (round 3: 10090-10099)")
+    ap.add_argument("--theta0", default=str(THETA0_PATH), help="theta0 npz (default: H2_PREREG Amendment 1 file)")
     ap.add_argument("--final", action="store_true", help="authorised test-seed run (sets FleetScenarioConfig.final)")
     ap.add_argument("--out", default="results/fleet/h2_abrupt.json")
     ap.add_argument("--runs-dir", default="results/fleet/h2_abrupt_runs")
     ap.add_argument("--provenance-out", default="results/fleet/h2_abrupt_provenance.json")
     args = ap.parse_args()
-    global RUNS_DIR, LIVE_SEEDS, FINAL
+    THETA0_PATH = Path(args.theta0)
     RUNS_DIR = Path(args.runs_dir)
     _a, _b = (int(x) for x in args.live_seeds.split("-"))
     LIVE_SEEDS = list(range(_a, _b + 1))

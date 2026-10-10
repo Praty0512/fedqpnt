@@ -1,0 +1,136 @@
+{
+  "note": "H2-ABRUPT: novel family=abrupt (theta0_noabrupt), severity=0.15 (E_s-quiet, chosen by h2_abrupt_es_firing_check.py)",
+  "chosen_hyperparams": {
+    "local_epochs": 2,
+    "lr": 0.05,
+    "prox_mu": 0.0
+  },
+  "n_rounds": 10,
+  "live_seeds": [
+    500
+  ],
+  "live_duration_s": 600.0,
+  "local_train_duration_s": 120.0,
+  "novel_abrupt": {
+    "kind": "abrupt_spoof",
+    "onset_s": 120.0,
+    "duration_s": 300.0,
+    "severity": 0.15
+  },
+  "control_attack": {
+    "kind": "drift_spoof",
+    "onset_s": 120.0,
+    "duration_s": 300.0,
+    "severity": 1.0
+  },
+  "git_state_at_launch": {
+    "head": "ca614b7f8a737a73e158a8516d674315b42f0d92",
+    "fedqpnt_tree": "fa740335bfcd5ffcd2fe814557967513c2c6300b",
+    "status_porcelain_fedqpnt": ""
+  },
+  "h2_abrupt": {
+    "fedqpnt_local": {
+      "auc_detector_only": {
+        "mean": 0.4953371111111111,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          0.4953371111111111
+        ]
+      },
+      "auc": {
+        "mean": 0.6617315333333333,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          0.6617315333333333
+        ]
+      },
+      "latency_on": {
+        "mean": 300.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          300.0
+        ]
+      },
+      "t_dist": {
+        "mean": NaN,
+        "ci95": NaN,
+        "n": 0
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          0.0
+        ]
+      }
+    },
+    "baseline_b_cont": {
+      "auc_detector_only": {
+        "mean": 0.537158,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          0.537158
+        ]
+      },
+      "auc": {
+        "mean": 0.6739602833333334,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          0.6739602833333334
+        ]
+      },
+      "latency_on": {
+        "mean": 300.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          300.0
+        ]
+      },
+      "t_dist": {
+        "mean": NaN,
+        "ci95": NaN,
+        "n": 0
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 1,
+        "values": [
+          0.0
+        ]
+      }
+    },
+    "wilcoxon_auc_detector_only": {
+      "n": 1,
+      "diff_mean": -0.04182088888888891,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0
+    },
+    "wilcoxon_latency_on": {
+      "n": 1,
+      "diff_mean": 0.0,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0
+    }
+  },
+  "git_state_at_end": {
+    "head": "ca614b7f8a737a73e158a8516d674315b42f0d92",
+    "fedqpnt_tree": "fa740335bfcd5ffcd2fe814557967513c2c6300b",
+    "status_porcelain_fedqpnt": ""
+  }
+}

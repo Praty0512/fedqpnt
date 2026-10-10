@@ -76,3 +76,30 @@ Reason: round 1 (core-freeze-4, seeds 10000–10029) exposed a CAI-trust calibra
   - test seeds are run ONCE;
   - a task that times out or crashes may be retried once, with the same spec, only if the cause is infrastructure (a machine stop or OOM). The retry is logged;
   - nothing else is re-run, and nothing is changed after launch.
+
+---
+## AMENDMENT R3 — Round 3 (2026-10-11), written BEFORE any round-3 data exists
+Reason: round 2 (core-freeze-5, seeds 10030–10059) was run to completion (5,340/5,340 ok) and is reported in full as measured; it exposed bugs, not design choices (D-085…D-088): the ESKF coast covariance was overconfident (P0 roll/pitch tilt, missing second-order attitude term), the FL client sent `base_round = -1` so no global model was ever installed (F3), the fleet θ0 normaliser was estimated from a too-small sample (F4), and the detector loader silently fell back to an untrained detector (B1). All fixes and all checking were done on tuning seeds (< 10000) only. Everything not listed below stands, including §4 (confirmatory family), §5 (safety rule) and §8 (integrity).
+
+**Changes from R2:**
+- **Code:** tag `core-freeze-6` (merge of branch `freeze6` + the D-089 detector/θ0-pointer commit). Validity is judged by `git diff <launch> <end> -- fedqpnt` being empty and `fedqpnt/` equalling core-freeze-6 ("fedqpnt_verdict"); the whole-repo HEAD verdict is also reported. `scripts/m4_campaign.py` defaults: `--tag core-freeze-6`, `--seeds 10060-10089`, `--root results/m4r3`.
+- **Test seeds:** **10060–10089** (n = 30). New and never used (round 1: 10000–10029; round 2: 10030–10059).
+- **Single-node detector:** `results/m1/detector_weights_sup_v5.npz`. The detector input features x1/x2 (ESKF NIS) and x12 (divergence CUSUM) depend on the ESKF covariance changed in core-freeze-6 (evidence: `results/m1/feature_dependency_f5_vs_f6.json`: nis_pos and nis_vel changed in 100% of epochs, div_cusum in 24%, all other features bit-identical), so the detector was retrained with the UNCHANGED D-052/D-053 protocol (`scripts/train_supervised_v5.py`, world `schuler_tangent`, seeds 500–599). Held-out AUC overall 0.959 (v4: 0.958); displaced meaconer 0.974 (v4: 0.988); S1 false-alarm rate 0/h on both grades (`results/m1/s1_v5_*.json`).
+- **Fleet θ0:** `results/fleet/theta0_d054_f8.npz` (original θ0 weights + the v5 normaliser; provenance `theta0_d054_f8_provenance.json`), pointed to by `fedqpnt/eval/fleet_adapter.THETA0_PATH`. Fleet sanity on tuning seed 530 (`results/minimatrix_f8`): clean-node fpr 0, rmse_h_pre 2.1–2.3 m, 2.5–5 installs per node, S15 AUC 0.924.
+- **World:** single-node scenarios use `schuler_tangent`; fleet scenarios use `flat` (fleet runner default). Disclosed.
+- **κ_Q:** the pre-registered D-078 rule (grid {1,2,3,5,8,12,20,30,50}, threshold pooled ANEES ≤ 1.5, seeds 530–549, outage [120,300), CAI on) was re-run on core-freeze-6 with world `schuler_tangent` (the old script default was `flat`; a `--world` option was added, default unchanged). It selects **κ_Q = 1** at both grades (pooled ANEES 0.44 MEMS, 0.37 tactical). `defaults.py` unchanged. Curves: `results/m1/kappa_q_f6_*.log`.
+- **σ_nom** (D-068 rule, re-measured on core-freeze-6, schuler_tangent, seeds 560–579): MEMS **1.0977 m**, tactical **1.1171 m** (`results/sigma_nom_freeze6.json`).
+- **S7 chattering bound:** unchanged, at most 223 trust cycles per hour. The bound (docs/specs/raw/S7_BOUND.md) is a timing-free proof from the trust-law constants (τ_r and the 0.5/0.9 crossings), independent of the navigation filter. The only trust-law change in core-freeze-6 is a 2-epoch position-evidence quarantine after PROBE→TRUST, which adds no upward path for w. `tests/test_trust_chattering_bound.py` passes.
+- **H2/H4:** the core-freeze-4 result is SUPERSEDED (bug: no FL installs, F3) and is reported as a bug-affected null. The H2/H4 fleet experiment is RE-RUN on core-freeze-6 under `H2_PREREG.md` (its Amendment 3): live seeds **10090–10099** (n = 10, test range, never used), τ calibration on tuning seeds 580–599 as before. The confirmatory family is unchanged (8 tests, Holm m = 8; H2/H4 enter with the new p-values).
+- **Safety rule (§5):** unchanged.
+- **Execution:**
+  - `scripts/m4_campaign.py --phase 1 --exclude S14 --workers 4 --weights results/m1/detector_weights_sup_v5.npz` and `--phase 2` (fleet, one at a time); launchers in `results/m4r3/`;
+  - **S14 runs serially** (`--only S14 --workers 1`, after phase 1) because each run needs several GB of RAM;
+  - long specs use the spec-file launcher with a 7200 s timeout; tasks are claimed via claim files;
+  - test seeds are run ONCE; a task that times out or crashes may be retried once with the same spec only if the cause is infrastructure (machine stop or OOM); the retry is logged; nothing else is re-run and nothing is changed after launch.
+- **Stated envelope additions (from D-088; tuning data, not changed for M4):**
+  - S2 post-attack RMSE is dominated by the designed T_ex = 60 s dwell before re-admission (D-002: T_ex is not changed).
+  - On MEMS the attack-window loss versus undefended is the coast-drift physics floor (the MEMS coast floor).
+  - S7 (chattering) on tactical can reach tens of km under rapid toggling: the covariance is consistent and a pure blackout gives the same result (physics floor).
+  - S11 (GNSS noise at least 2x the reported value) locks the filter out; no noise-scale awareness is added (it would be a new design with attack surface). Stated limitation.
+  - S5 and S12 AUC are not evaluable (no attack in those scenarios); the scenarios are unchanged.
