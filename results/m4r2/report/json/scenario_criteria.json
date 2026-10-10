@@ -1380,29 +1380,33 @@
   ]
  },
  "S14@industrial_mems": {
-  "n_by_method": {},
-  "n_paired": 0,
+  "n_by_method": {
+   "fedqpnt_local": 30
+  },
+  "n_paired": 30,
   "criteria": [
    {
     "criterion": "no_slow_drift",
     "metric_absent": true,
     "status": "not-evaluable",
-    "value": null,
-    "detail": "last_vs_first_hour: runner does not emit rmse_h_hour_first/last yet (P3) | P_SPD: runner does not emit p_spd_finite yet (P3) | far: no runs | rss_growth: runner does not emit rss_growth_frac yet (P3)",
+    "value": 0.8681747391500645,
+    "detail": "last_vs_first_hour: median RMSE_h(last h)/RMSE_h(first h)=0.868 (<=1.2) | P_SPD: P SPD+finite in 1.000 of runs (==1) | far: FAR=0.000/h (<=1) | rss_growth: runner does not emit rss_growth_frac yet (P3)",
     "registry_blocked_flag": true
    }
   ]
  },
  "S14@tactical": {
-  "n_by_method": {},
-  "n_paired": 0,
+  "n_by_method": {
+   "fedqpnt_local": 30
+  },
+  "n_paired": 30,
   "criteria": [
    {
     "criterion": "no_slow_drift",
     "metric_absent": true,
     "status": "not-evaluable",
-    "value": null,
-    "detail": "last_vs_first_hour: runner does not emit rmse_h_hour_first/last yet (P3) | P_SPD: runner does not emit p_spd_finite yet (P3) | far: no runs | rss_growth: runner does not emit rss_growth_frac yet (P3)",
+    "value": 0.8970170657821799,
+    "detail": "last_vs_first_hour: median RMSE_h(last h)/RMSE_h(first h)=0.897 (<=1.2) | P_SPD: P SPD+finite in 1.000 of runs (==1) | far: FAR=0.000/h (<=1) | rss_growth: runner does not emit rss_growth_frac yet (P3)",
     "registry_blocked_flag": true
    }
   ]

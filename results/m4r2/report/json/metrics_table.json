@@ -7764,12 +7764,106 @@
   }
  },
  "S14@industrial_mems": {
-  "n_by_method": {},
-  "table": {}
+  "n_by_method": {
+   "fedqpnt_local": 30
+  },
+  "table": {
+   "fedqpnt_local": {
+    "rmse_h_pre": {
+     "n": 30,
+     "mean": 2.7903916256175507,
+     "ci": 0.09846123480297748,
+     "sd": 0.2636840295604533
+    },
+    "rmse_h_att": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "rmse_h_post": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "max_h_att": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "far_per_hour": {
+     "n": 30,
+     "mean": 0.0,
+     "ci": 0.0,
+     "sd": 0.0
+    },
+    "latency_on": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "rmse_t_ns": {
+     "n": 30,
+     "mean": 12.471265954300977,
+     "ci": 0.4836298363362995,
+     "sd": 1.2951844887584287
+    }
+   }
+  }
  },
  "S14@tactical": {
-  "n_by_method": {},
-  "table": {}
+  "n_by_method": {
+   "fedqpnt_local": 30
+  },
+  "table": {
+   "fedqpnt_local": {
+    "rmse_h_pre": {
+     "n": 30,
+     "mean": 2.8048613974019094,
+     "ci": 0.09885892675468913,
+     "sd": 0.2647490681673825
+    },
+    "rmse_h_att": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "rmse_h_post": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "max_h_att": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "far_per_hour": {
+     "n": 30,
+     "mean": 0.0,
+     "ci": 0.0,
+     "sd": 0.0
+    },
+    "latency_on": {
+     "n": 0,
+     "mean": null,
+     "ci": null,
+     "sd": null
+    },
+    "rmse_t_ns": {
+     "n": 30,
+     "mean": 12.471266059182707,
+     "ci": 0.4836298301570581,
+     "sd": 1.2951844722101162
+    }
+   }
+  }
  },
  "S5": {
   "n_by_method": {

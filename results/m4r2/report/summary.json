@@ -1195,7 +1195,7 @@
    {
     "criterion": "no_slow_drift",
     "status": "not-evaluable",
-    "value": null,
+    "value": 0.8681747391500645,
     "metric_absent": true
    }
   ],
@@ -1203,7 +1203,7 @@
    {
     "criterion": "no_slow_drift",
     "status": "not-evaluable",
-    "value": null,
+    "value": 0.8970170657821799,
     "metric_absent": true
    }
   ],
@@ -1368,17 +1368,10 @@
  },
  "counts": {
   "expected": 5340,
-  "present": 5280,
-  "missing": 60,
+  "present": 5340,
+  "missing": 0,
   "failed": [],
-  "missing_by_rid": {
-   "S14@industrial_mems": {
-    "fedqpnt_local": 30
-   },
-   "S14@tactical": {
-    "fedqpnt_local": 30
-   }
-  },
+  "missing_by_rid": {},
   "n_by_rid": {
    "S1@industrial_mems": {
     "fedqpnt_local": 30,
@@ -1672,8 +1665,12 @@
    "S13@tactical": {
     "fedqpnt_local": 30
    },
-   "S14@industrial_mems": {},
-   "S14@tactical": {},
+   "S14@industrial_mems": {
+    "fedqpnt_local": 30
+   },
+   "S14@tactical": {
+    "fedqpnt_local": 30
+   },
    "S5": {
     "fedqpnt": 30,
     "baseline_a": 30,
@@ -1700,8 +1697,5 @@
    }
   }
  },
- "pending": [
-  "S14@industrial_mems",
-  "S14@tactical"
- ]
+ "pending": []
 }

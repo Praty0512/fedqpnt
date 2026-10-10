@@ -609,7 +609,7 @@ def write_summary(sdir, rows, all_final, h1_tac, comp, an_list, sigma, args):
     L = [f"# Round-2 M3 summary ({CTX['code']}, seeds {CTX['seed_range']}, n=30/cell)", "",
          f"sigma_nom ({args.sigma}): " + ", ".join(f"{g} {v:.3f} m" for g, v in sigma.items()) +
          f". Tasks: {comp['present']}/{comp['expected']} ok, {comp['missing_n']} missing = "
-         f"{', '.join(sorted(comp['missing'])) or 'none'} (PENDING: S14 still running; nothing else missing; failed files: {len(comp['failed'])}).", "",
+         f"{', '.join(sorted(comp['missing'])) or 'none'} (failed files: {len(comp['failed'])}).", "",
          "## Confirmatory family (paired Wilcoxon, Holm fixed m=8; HL = A-B with 95% BCa CI)", "",
          "| Test | Setting | Metric (A vs B) | n | raw p | Holm p | Reject? | HL | 95% CI |", "|---|---|---|---|---|---|---|---|---|"]
     for r in rows:

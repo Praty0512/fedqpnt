@@ -1,6 +1,6 @@
 # Round-2 M3 summary (core-freeze-5, seeds 10030-10059, n=30/cell)
 
-sigma_nom (results/sigma_nom_freeze5.json): industrial_mems 1.139 m, tactical 1.120 m. Tasks: 5280/5340 ok, 60 missing = S14@industrial_mems, S14@tactical (PENDING: S14 still running; nothing else missing; failed files: 0).
+sigma_nom (results/sigma_nom_freeze5.json): industrial_mems 1.139 m, tactical 1.120 m. Tasks: 5340/5340 ok, 0 missing = none (failed files: 0).
 
 ## Confirmatory family (paired Wilcoxon, Holm fixed m=8; HL = A-B with 95% BCa CI)
 
@@ -45,8 +45,6 @@ sigma_nom (results/sigma_nom_freeze5.json): industrial_mems 1.139 m, tactical 1.
 | S7-p20@tactical | 30 | 3.135e+05 | 3.361 | FAIL | 2.506e+05 | [7549, 5.376e+05] |
 | S7-p60@industrial_mems | 30 | 2.403e+05 | 3.417 | FAIL | 274 | [205.9, 454.5] |
 | S7-p60@tactical | 30 | 1.358e+05 | 3.361 | FAIL | 4.519e+04 | [7410, 2.822e+05] |
-| S14@industrial_mems | 0 | - | - | PENDING | - | - |
-| S14@tactical | 0 | - | - | PENDING | - | - |
 
 ## S7 chattering (prereg bound 223 cycles/h, integer; 133 annotation only)
 
@@ -85,8 +83,8 @@ sigma_nom (results/sigma_nom_freeze5.json): industrial_mems 1.139 m, tactical 1.
 - S11@tactical: finite_spd_and_vs_raw_gnss=FAIL
 - S13@industrial_mems: t_rec_bounds=FAIL
 - S13@tactical: t_rec_bounds=FAIL
-- S14@industrial_mems: PENDING (no data)
-- S14@tactical: PENDING (no data)
+- S14@industrial_mems: no_slow_drift=not-evaluable*
+- S14@tactical: no_slow_drift=not-evaluable*
 - S5: quorum_or_skip_no_deadlock=PASS; auc_drop_le_0_02=FAIL*
 - S8: global_model_within_2_rounds=FAIL; first_attack_auc=not-evaluable
 - S9: no_deadlock_auc_bound=FAIL*

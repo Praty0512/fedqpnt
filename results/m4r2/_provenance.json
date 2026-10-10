@@ -60,5 +60,37 @@
     "phase": "1",
     "reverse": false,
     "time": 1791569619.0647388
+  },
+  {
+    "valid": false,
+    "reasons": [
+      "HEAD changed during run: 8ef13593c7ce07a82f2648bbfbd2b09c86426e8c -> a9e0f8737c855b94899555f8c2d6acda50057f9a"
+    ],
+    "start": {
+      "head": "8ef13593c7ce07a82f2648bbfbd2b09c86426e8c",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "a9e0f8737c855b94899555f8c2d6acda50057f9a",
+      "dirty_files": []
+    },
+    "fedqpnt_verdict": {
+      "valid": true,
+      "reasons": [],
+      "tag": "core-freeze-5",
+      "start": {
+        "head": "8ef13593c7ce07a82f2648bbfbd2b09c86426e8c",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      },
+      "end": {
+        "head": "a9e0f8737c855b94899555f8c2d6acda50057f9a",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      }
+    },
+    "phase": "1",
+    "reverse": false,
+    "time": 1791605565.7511046
   }
 ]
