@@ -6,6 +6,7 @@ and an arbitrary result root. Does not weaken m4_campaign's test-range assert; r
   python scripts/minimatrix.py --phase 2 --seeds 530 --root results/minimatrix_f6 --weights ...   (fleet, sequential)
 Resume = rerun (done tasks skipped)."""
 import argparse
+import json
 import sys
 import time
 from collections import Counter
@@ -32,6 +33,15 @@ def parse_seeds(txt):
 
 
 def one(task_dict, root):
+    task = C.RunTask(**task_dict)
+    if (not task.is_fleet) and len(json.dumps(task.spec)) > 30000:      # Windows cmdline limit: spec-file launcher
+        import importlib.util as iu
+        sp = iu.spec_from_file_location("m4c", str(REPO / "scripts" / "m4_campaign.py")); m4 = iu.module_from_spec(sp)
+        sp.loader.exec_module(m4)
+        out = task.result_path(Path(root))
+        if C._is_done(out):
+            return dict(status="skipped_done")
+        return m4.exec_spec_file(task, root, sys.executable, 7200)
     return C._execute_one(task_dict, root, sys.executable, False)
 
 
