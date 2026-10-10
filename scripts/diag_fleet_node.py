@@ -13,7 +13,7 @@ from fedqpnt.node.methods import make_agent_config, load_detector_weights
 from fedqpnt.node.agent import Agent
 seed = int(sys.argv[1]); node_id = sys.argv[2]; dur = float(sys.argv[3]) if len(sys.argv) > 3 else 600.0
 assert seed < 10000
-theta0 = load_detector_weights(REPO / "results/fleet/theta0_d054.npz")
+theta0 = load_detector_weights(REPO / os.environ.get("DIAG_THETA", "results/fleet/theta0_d054.npz"))
 if os.environ.get('DIAG_NORM_V4') == '1':     # candidate F4: theta0 weights but the sup_v4 running normaliser (more clean-data support)
     v4 = load_detector_weights(REPO / 'results/m1/detector_weights_sup_v4.npz')
     for k in ('norm_mu', 'norm_sd', 'norm_count'): theta0[k] = v4[k]
