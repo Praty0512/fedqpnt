@@ -81,6 +81,12 @@ class ESKFConfig:
                                       # "random_walk" (new default) drops the decay term (F block
                                       # = 0); "gm1" keeps the old (pre-D-035) mean-reverting
                                       # behaviour, retained for ablation only.
+    second_order_att: bool = True   # FIX7 B5: covariance for the neglected 2nd-order attitude-error term
+                                     # 0.5 psi x (psi x f_n) of the velocity error model (see _so_att_B). The linear
+                                     # error model dv' = [f_n x] psi has NO vertical coupling to a horizontal tilt;
+                                     # the true vertical error is -0.5 g |psi_h|^2 (tactical: psi_h ~ 30 mrad after
+                                     # a 300 s outage -> ~1 m/s vs a conditional filter sd of 0.02 m/s). No tuning
+                                     # constant: second moment of the term under psi ~ N(0, P_psipsi). False = old model.
     fallback_cov_pos: np.ndarray = field(default_factory=lambda: np.diag([9.0, 9.0, 25.0]))
     fallback_cov_vel: np.ndarray = field(default_factory=lambda: np.diag([0.01, 0.01, 0.01]))
 
@@ -104,6 +110,7 @@ class ESKF:
         self.b_a = np.zeros(3)
         self.b_g = np.zeros(3)
         self.P = np.eye(self.N) * 1e-6
+        self._C2 = np.zeros((self.N, 3))   # FIX7 B5: coherent 2nd-order-attitude error columns (P already contains C2 C2^T)
 
         self._f_hat_prev: np.ndarray | None = None
         self._omega_hat_prev: np.ndarray | None = None
@@ -147,7 +154,7 @@ class ESKF:
             "kappa_Q": self.cfg.kappa_Q, "kappa_zoh": self.cfg.kappa_zoh,
             "w_min": self.cfg.w_min, "w_excl": self.cfg.w_excl, "alpha_gate": self.cfg.alpha_gate,
             "gating": self.cfg.gating,
-            "sigma_win_g": self.cfg.sigma_win_g, "vrw": self.vrw, "arw": self.arw,
+            "sigma_win_g": self.cfg.sigma_win_g, "second_order_att": self.cfg.second_order_att, "vrw": self.vrw, "arw": self.arw,
             "q_ba": self.q_ba, "q_bg": self.q_bg, "tau_a": self.tau_a, "tau_g": self.tau_g,
             "model_sf_mis": self.cfg.model_sf_mis, "bias_model": self.cfg.bias_model,
             "sigma_sf_a": self.sigma_sf_a, "sigma_mis_a": self.sigma_mis_a,
@@ -184,6 +191,7 @@ class ESKF:
         self._last_raw_imu = None
         self._imu_buffer = []
         self._gap_accum_s = 0.0
+        self._C2 = np.zeros((self.N, 3))
         self.initialized = True
 
     # ------------------------------------------------------------------
@@ -300,6 +308,14 @@ class ESKF:
         Qd = 0.5 * (Phi @ GQGt + GQGt @ Phi.T) * dt
 
         self.P = Phi @ self.P @ Phi.T + Qd
+        if self.cfg.second_order_att:
+            # FIX7 B5: coherent accumulation of the 2nd-order attitude term. The added covariance is
+            # C_{k+1} C_{k+1}^T - (Phi C_k)(Phi C_k)^T with C_{k+1} = Phi C_k + B_k (the Phi C_k C_k^T Phi^T part is
+            # already inside Phi P Phi^T because P contains C C^T).
+            Bk = self._so_att_B(f_n_mid, dt)
+            PhiC = Phi @ self._C2
+            self.P = self.P + Bk @ PhiC.T + PhiC @ Bk.T + Bk @ Bk.T
+            self._C2 = PhiC + Bk
         self._hygiene()
 
         self.C = C_new
@@ -312,6 +328,22 @@ class ESKF:
         if self._imu_buffer:
             tmin = t - max(self.cfg.cai_buffer_min_s, 10.0)
             self._imu_buffer = [(ti, fi) for ti, fi in self._imu_buffer if ti >= tmin]
+
+    def _so_att_B(self, f_n: np.ndarray, dt: float) -> np.ndarray:
+        """FIX7 B5: (N,3) matrix B with B B^T / dt^2 = E[d2 d2^T], d2 = 0.5 psi x (psi x f_n) = 0.5 (psi psi^T - |psi|^2 I) f_n,
+        psi ~ N(0, P_psipsi) (exact Gaussian 4th moment, Isserlis). The second moment is taken about ZERO, i.e. it covers the
+        (one-signed) mean -0.5 [tr(P) f - P f] AND its fluctuation. Enters the velocity-error rows (3:6)."""
+        Pp = self.P[6:9, 6:9]
+        W = np.einsum("ia,b->iab", I3, f_n) - np.einsum("i,ab->iab", f_n, I3)
+        S = 0.5 * (W + W.transpose(0, 2, 1))
+        SP = np.einsum("iab,bc->iac", S, Pp)
+        tr = np.einsum("iaa->i", SP)
+        M = 0.25 * (np.outer(tr, tr) + 2.0 * np.einsum("iab,jba->ij", SP, SP))
+        w, V = np.linalg.eigh(0.5 * (M + M.T))
+        L = V * np.sqrt(np.maximum(w, 0.0))
+        B = np.zeros((self.N, 3))
+        B[3:6, :] = L * dt
+        return B
 
     def _hygiene(self) -> None:
         """D-043: symmetrise, then clip ONLY negative eigenvalues to 0
@@ -450,6 +482,7 @@ class ESKF:
             dx = K @ nu
             IKH = np.eye(self.N) - K @ H
             self.P = IKH @ self.P @ IKH.T + K @ R_eff @ K.T
+            self._C2 = IKH @ self._C2          # the systematic 2nd-order component is corrected like the rest of the state
             self._hygiene()
 
             self.p = self.p - dx[0:3]

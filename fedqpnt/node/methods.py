@@ -68,12 +68,23 @@ _NEEDS_TRAINED_DETECTOR = {"fedqpnt_local", "baseline_a", "baseline_b_bin", "bas
 METHOD_NAMES = tuple(_METHOD_TRUST_KEY)
 
 
-def load_detector_weights(path: str | Path) -> dict[str, np.ndarray] | None:
+def load_detector_weights(path: str | Path) -> dict[str, np.ndarray]:
+    """Load trained detector weights. FIX7 B1: RAISES FileNotFoundError / ValueError on a missing, unreadable or
+    empty file. It used to return None, and make_agent_config then silently ran an UNTRAINED random-init detector
+    (invalidated the first f5 mini-matrix pass). Callers that really want an untrained detector must pass
+    ``detector_weights_path=None`` (training paths) -- never a path that may not exist."""
     path = Path(path)
-    if not path.exists():
-        return None
-    npz = np.load(path, allow_pickle=False)
-    return {k: npz[k] for k in npz.files}
+    if not path.is_file():
+        raise FileNotFoundError(f"detector weights file not found: {path} (pass detector_weights_path=None "
+                                f"explicitly if an untrained detector is intended)")
+    try:
+        npz = np.load(path, allow_pickle=False)
+        out = {k: npz[k] for k in npz.files}
+    except Exception as e:  # corrupted / not an npz
+        raise ValueError(f"detector weights file unreadable: {path}: {e}") from e
+    if not out:
+        raise ValueError(f"detector weights file is empty: {path}")
+    return out
 
 
 def save_detector_weights(path: str | Path, params: dict[str, np.ndarray]) -> None:

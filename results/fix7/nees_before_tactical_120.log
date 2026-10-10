@@ -1,0 +1,10 @@
+=== tactical outage t_on=120.0 n=20  ANEES6 = mean(NEES6)/6, ANEES3 = mean/3 (ideal 1); med = median NEES6/6
+   +s    ANEES6     med6  ANEES3pos  ANEESvel  med err_h  med sig_h
+    0      0.46     0.29       0.71      0.22        2.4        2.4
+   30      0.47     0.30       0.47      0.31        3.1        6.5
+   60      0.46     0.32       0.45      0.38        9.3       18.0
+  120      0.58     0.52       0.47      0.50       42.7       72.3
+  180      0.68     0.64       0.48      0.58      110.9      179.5
+  240      0.63     0.56       0.51      0.60      238.2      368.5
+  299      0.74     0.64       0.54      0.63      458.1      637.3
+pooled mean ANEES6 over +30..+299: 0.59

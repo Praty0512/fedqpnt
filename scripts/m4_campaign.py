@@ -27,6 +27,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO))
 from fedqpnt.eval import campaign as C, scenarios as SC  # noqa: E402
+from fedqpnt.eval.fleet_adapter import THETA0_PATH as FLEET_THETA0  # noqa: E402  (FIX7 B7: single source of the fleet theta0)
+import numpy as np  # noqa: E402
 
 GRADES = ["industrial_mems", "tactical"]
 LONG_SPEC_CHARS = 30_000          # Windows cmdline limit is 32,767
@@ -221,8 +223,8 @@ def main() -> None:
     manifest = dict(code=code, weights=a.weights, seeds=[seeds[0], seeds[-1]], grades=GRADES,
                     n_tasks=len(man_tasks), n_single=sum(not m["fleet"] for m in man_tasks),
                     n_fleet=sum(m["fleet"] for m in man_tasks), n_long_spec=n_long, per_result_id=counts,
-                    fleet_note="fleet tasks use fleet_adapter.THETA0_PATH (results/fleet/theta0_d054.npz), "
-                               "NOT --weights", tasks=man_tasks)
+                    fleet_note=f"fleet tasks use fleet_adapter.THETA0_PATH ({FLEET_THETA0}), NOT --weights",
+                    fleet_theta0=str(FLEET_THETA0), tasks=man_tasks)
     (root / "manifest.json").write_text(json.dumps(manifest, indent=1))
     print(f"manifest: {manifest['n_tasks']} tasks = {manifest['n_single']} single-node ({n_long} long-spec) "
           f"+ {manifest['n_fleet']} fleet; weights={a.weights}; code {code['tag']} == HEAD on fedqpnt/", flush=True)
@@ -232,8 +234,16 @@ def main() -> None:
     # ---- launch checks
     assert Path(a.weights).exists(), f"weights file missing: {a.weights}"
     if a.phase == "2":
-        prov = Path("results/fleet/theta0_d054_freeze5_provenance.json")
-        assert prov.exists(), f"fleet theta0 not retrained on {a.tag}: {prov} missing; phase 2 refused"
+        # FIX7 B7: the precondition follows the theta0 file the fleet adapter actually loads (no hard-coded freeze name):
+        # it must exist, have a provenance JSON, and its normaliser must be the production detector's (frozen sup_v4).
+        prov = FLEET_THETA0.with_name(FLEET_THETA0.stem + "_provenance.json")
+        assert FLEET_THETA0.exists(), f"fleet theta0 missing: {FLEET_THETA0}; phase 2 refused"
+        assert prov.exists(), f"fleet theta0 provenance missing: {prov}; phase 2 refused"
+        _pv = json.loads(prov.read_text())
+        _nc = float(np.load(FLEET_THETA0)["norm_count"][0])
+        _nw = float(np.load(a.weights)["norm_count"][0])
+        assert _nc == _nw, f"fleet theta0 normaliser (count {_nc}) is not the detector weights' ({_nw}); phase 2 refused"
+        print(f"fleet theta0: {FLEET_THETA0} (provenance {prov.name}: {_pv.get('decision_fix') or _pv.get('decision')})", flush=True)
     C.ensure_gate_file()
     assert C.gate_cleared(), "seed gate not cleared"
     if a.clear_claims:
