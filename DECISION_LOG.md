@@ -4,7 +4,29 @@ Format: ID · date · decision · rationale · alternatives considered · owner.
 
 ---
 
-### D-087 — Mini-matrix f6 result; iteration 2 (2026-10-10)
+### D-088 — Iteration 2 accepted; freeze-6 pipeline; round 3 (2026-10-10)
+**FIX7 (freeze6 26f49bc), verified by Master on raw mini-matrix files:**
+- B5: the second-order attitude term in P makes the coast covariance consistent (tactical ANEES6 at a t=60 outage: 7.2 → 0.44). The probe now passes: S2-med tactical post-attack 16 km → 2.5 km, set by the designed T_ex dwell; after re-admission the error is 1-5 m. The PROBE→TRUST 2-epoch E_s-position quarantine fixes the pull false-fire.
+- B1: the loader raises on a missing file.
+- S1 and S3 equal undefended; fpr 0 on clean data.
+**Rulings:**
+- (1) θ0 = the original weights + the sup normaliser (the f6 recipe). The f7 re-pretrain is rejected (false alarms on a clean fleet).
+- (2) B2 (S7 tactical tens of km under chatter) is the physics floor: the covariance is consistent and a pure blackout gives the same result. Reported as the envelope.
+- (3) B3 (S11 lockout when GNSS noise is ≥2× the reported value): no fix. Noise-scale awareness would be a new design with attack surface. Reported as a stated limitation.
+- (4) S5/S12 AUC is not evaluable (no attack in those scenarios). Reported as not evaluable; the scenarios are unchanged.
+- (5) S2 post-attack RMSE is dominated by the T_ex = 60 s dwell. This is the design; T_ex is not changed (D-002).
+- (6) C2 stays rejected.
+**H2/H4 (freeze-4) is invalid as a test of FL:** the fleet never installed a global model (the F3 bug). It must be re-run on freeze-6 under H2_PREREG (new amendment) as part of round 3. The freeze-4 null is reported as a superseded, bug-affected result.
+**Pipeline:**
+1. Merge freeze6 and tag core-freeze-6.
+2. Retrain the detector (v5) only if its features depend on the changed filter; if so, rebuild θ0 normaliser + fleet check.
+3. Re-run the κ_Q rule on freeze-6 (schuler world, matching the scenarios).
+4. Re-measure σ_nom.
+5. Run the mini-matrix sanity on the final freeze.
+6. PREREG amendment R3 before any data (seeds 10060-10089; H2/H4 re-run).
+7. Round-3 launchers; the user launches.
+
+## D-087 — Mini-matrix f6 result; iteration 2 (2026-10-10)
 **f6 (C1+F3+F4) vs f5, tuning seeds 530-532:**
 - Large improvement: S2-med MEMS 11.4 km att / 115 km post → 954 m / 1.24 km; S7-p10 MEMS 3.9e6 → 32 m; fleet installs 0 → 2.5-5 per node; honest-node fleet rmse 12-17 km → 2 m; fpr 0.
 - Remaining:
