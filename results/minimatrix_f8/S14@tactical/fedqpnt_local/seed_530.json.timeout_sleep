@@ -1,0 +1,10 @@
+{
+  "status": "timeout",
+  "scenario_id": "S14@tactical",
+  "method": "fedqpnt_local",
+  "seed": 530,
+  "config_hash": "5b276ed940c33fd7",
+  "kappa_R_status": "D-061_kappa_R=60",
+  "wall_s": 13199.694784641266,
+  "stderr": "Command '['C:\\\\Users\\\\DELL\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe', '-m', 'fedqpnt.node.runner', '{\"name\": \"S14_fedqpnt_local_530\", \"master_seed\": 530, \"method\": \"fedqpnt_local\", \"duration_s\": 14400.0, \"dt\": 0.01, \"platform\": \"ground\", \"world\": \"schuler_tangent\", \"imu_grade\": \"tactical\", \"quantum_grade\": \"field\", \"gnss_rate_hz\": 1.0, \"hold_s\": 30.0, \"heading_noise_deg\": 2.0, \"attack\": null, \"kappa_R\": 60.0, \"kappa_Q\": 1.0, \"detector_weights_path\": \"results/m1/detector_weights_sup_v5.npz\", \"record\": false, \"record_root\": \"runs_raw\", \"node_id\": \"node0\"}']' timed out after -9599.675827199942 seconds"
+}

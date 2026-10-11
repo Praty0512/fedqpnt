@@ -1,0 +1,14 @@
+Sun Oct 11 12:52:30 2026 phase 2 total 24 todo 12 workers 2
+Sun Oct 11 12:56:34 2026 1/12 S5 fedqpnt 531 ok
+Sun Oct 11 13:00:20 2026 2/12 S5 baseline_a 531 ok
+Sun Oct 11 13:04:26 2026 3/12 S5 fedqpnt_nofault 531 ok
+Sun Oct 11 13:07:06 2026 4/12 S8 fedqpnt 531 ok
+Sun Oct 11 13:09:39 2026 5/12 S8 baseline_b_cont 531 ok
+Sun Oct 11 13:12:19 2026 6/12 S9 fedqpnt 531 ok
+Sun Oct 11 13:14:44 2026 7/12 S9 fedqpnt_noloss 531 ok
+Sun Oct 11 13:18:39 2026 8/12 S12-f20 fedqpnt 531 ok
+Sun Oct 11 13:23:05 2026 9/12 S12-f20 fedqpnt_clean 531 ok
+Sun Oct 11 13:27:31 2026 10/12 S12-f40 fedqpnt 531 ok
+Sun Oct 11 13:32:14 2026 11/12 S12-f40 fedqpnt_clean 531 ok
+Sun Oct 11 13:36:39 2026 12/12 S15 fedqpnt 531 ok
+DONE {'ok': 12} wall 2650s

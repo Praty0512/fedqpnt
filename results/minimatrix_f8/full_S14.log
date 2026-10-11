@@ -1,0 +1,3 @@
+Sun Oct 11 13:36:40 2026 phase 1 total 2 todo 2 workers 1
+Sun Oct 11 17:52:10 2026 2/2 {'ok': 1, 'timeout': 1} elapsed 15330s
+DONE {'ok': 1, 'timeout': 1} wall 15330s

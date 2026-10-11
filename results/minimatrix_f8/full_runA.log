@@ -1,0 +1,33 @@
+Sun Oct 11 10:17:15 2026 phase 1 total 492 todo 300 workers 4
+Sun Oct 11 10:20:54 2026 10/300 {'ok': 10} elapsed 219s
+Sun Oct 11 10:23:06 2026 20/300 {'ok': 20} elapsed 352s
+Sun Oct 11 10:26:21 2026 30/300 {'ok': 30} elapsed 547s
+Sun Oct 11 10:28:35 2026 40/300 {'ok': 40} elapsed 681s
+Sun Oct 11 10:31:50 2026 50/300 {'ok': 50} elapsed 876s
+Sun Oct 11 10:34:05 2026 60/300 {'ok': 60} elapsed 1010s
+Sun Oct 11 10:37:15 2026 70/300 {'ok': 70} elapsed 1200s
+Sun Oct 11 10:39:37 2026 80/300 {'ok': 80} elapsed 1342s
+Sun Oct 11 10:42:42 2026 90/300 {'ok': 90} elapsed 1527s
+Sun Oct 11 10:45:10 2026 100/300 {'ok': 100} elapsed 1675s
+Sun Oct 11 10:48:07 2026 110/300 {'ok': 110} elapsed 1852s
+Sun Oct 11 10:50:39 2026 120/300 {'ok': 120} elapsed 2005s
+Sun Oct 11 10:54:29 2026 130/300 {'ok': 130} elapsed 2234s
+Sun Oct 11 11:04:21 2026 140/300 {'ok': 140} elapsed 2826s
+Sun Oct 11 11:17:27 2026 150/300 {'ok': 150} elapsed 3612s
+Sun Oct 11 11:35:41 2026 160/300 {'ok': 160} elapsed 4707s
+Sun Oct 11 11:48:55 2026 170/300 {'ok': 170} elapsed 5501s
+Sun Oct 11 12:07:08 2026 180/300 {'ok': 180} elapsed 6594s
+Sun Oct 11 12:20:34 2026 190/300 {'ok': 190} elapsed 7399s
+Sun Oct 11 12:33:00 2026 200/300 {'ok': 200} elapsed 8145s
+Sun Oct 11 12:34:36 2026 210/300 {'ok': 210} elapsed 8242s
+Sun Oct 11 12:35:49 2026 220/300 {'ok': 220} elapsed 8315s
+Sun Oct 11 12:37:36 2026 230/300 {'ok': 230} elapsed 8421s
+Sun Oct 11 12:38:57 2026 240/300 {'ok': 240} elapsed 8502s
+Sun Oct 11 12:41:00 2026 250/300 {'ok': 250} elapsed 8625s
+Sun Oct 11 12:42:48 2026 260/300 {'ok': 260} elapsed 8734s
+Sun Oct 11 12:45:04 2026 270/300 {'ok': 270} elapsed 8869s
+Sun Oct 11 12:47:45 2026 280/300 {'ok': 280} elapsed 9030s
+Sun Oct 11 12:50:40 2026 290/300 {'ok': 290} elapsed 9205s
+Sun Oct 11 12:52:28 2026 300/300 {'ok': 300} elapsed 9313s
+DONE {'ok': 300} wall 9314s
+CHAIN DONE 
