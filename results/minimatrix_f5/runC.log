@@ -1,0 +1,4 @@
+Sat Oct 10 17:03:28 2026 phase 1 total 24 todo 24 workers 4
+Sat Oct 10 17:20:03 2026 10/24 {'ok': 10} elapsed 996s
+Sat Oct 10 17:31:08 2026 20/24 {'ok': 20} elapsed 1660s
+DONE {'ok': 24} wall 2002s
