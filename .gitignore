@@ -16,3 +16,10 @@ paper/*.synctex.gz
 paper/*.fdb_latexmk
 paper/*.fls
 paper/main.pdf
+
+# Cleanup additions
+*.claim
+results/_dry_check/
+results/sensors/
+results/*.partial_*.json
+*.log.tmp
