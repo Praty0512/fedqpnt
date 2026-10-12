@@ -1,0 +1,44 @@
+{
+ "h2_abrupt/fedqpnt_local": {
+  "tau": 0.011596514843404297,
+  "achieved_far_per_hour": 0.3707518022657054,
+  "target_far_per_hour": 1.0,
+  "clean_hours": 5.394444444444445,
+  "n_clean_epochs": 19420
+ },
+ "h2_abrupt/baseline_b_cont": {
+  "tau": 0.00897193141281605,
+  "achieved_far_per_hour": 0.3707518022657054,
+  "target_far_per_hour": 1.0,
+  "clean_hours": 5.394444444444445,
+  "n_clean_epochs": 19420
+ },
+ "h4_abrupt/fedqpnt_local": {
+  "tau": 0.009510080330073832,
+  "achieved_far_per_hour": 0.3707518022657054,
+  "target_far_per_hour": 1.0,
+  "clean_hours": 5.394444444444445,
+  "n_clean_epochs": 19420
+ },
+ "h4_abrupt/baseline_b_cont": {
+  "tau": 0.008740643970668318,
+  "achieved_far_per_hour": 0.3707518022657054,
+  "target_far_per_hour": 1.0,
+  "clean_hours": 5.394444444444445,
+  "n_clean_epochs": 19420
+ },
+ "control_drift/fedqpnt_local": {
+  "tau": 0.011032616719603535,
+  "achieved_far_per_hour": 0.3707518022657054,
+  "target_far_per_hour": 1.0,
+  "clean_hours": 5.394444444444445,
+  "n_clean_epochs": 19420
+ },
+ "control_drift/baseline_b_cont": {
+  "tau": 0.00897193141281605,
+  "achieved_far_per_hour": 0.3707518022657054,
+  "target_far_per_hour": 1.0,
+  "clean_hours": 5.394444444444445,
+  "n_clean_epochs": 19420
+ }
+}
