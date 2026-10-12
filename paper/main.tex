@@ -42,8 +42,9 @@ We disclose two scoped limitations up front: the rigid-mode cold-atom sensor los
 $\Omega_c \approx 17\,\mathrm{mrad/s}$, making quantum aiding intermittent during ordinary vehicle
 manoeuvres, and the loosely-coupled filter requires a GNSS covariance inflation factor ($\kappa_R = 60$, tuned once on
 tuning seeds identically for every method) as a surrogate for the time-correlated error of a loosely coupled
-fix, while its attitude and accelerometer-bias states remain over-confident. No experimental outcome is claimed in this draft; all
-quantitative statements are placeholders pending the completed evaluation matrix.
+fix, and its attitude and accelerometer-bias states may remain over-confident \todo{R3: re-measure residual consistency on the frozen core}.
+No experimental outcome is claimed in this draft; all
+quantitative statements are placeholders pending the completed evaluation.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -490,8 +491,44 @@ error-propagation blocks $F$ and noise-input blocks $G$ and continuous noise
 $Q_c = \mathrm{diag}(\mathrm{VRW}^2 I_3,\ \mathrm{ARW}^2 I_3,\ q_{b_a} I_3,\ q_{b_g} I_3)$ read from the IMU's
 own configuration, with $q_b = 2\sigma_{\mathrm{GM}}^2/\tau_c$. During IMU dropouts the last sample is held
 and $Q_c$ is inflated by a factor of $10$ ($100$ beyond a $0.1\,\mathrm{s}$ gap). The initial covariance is
-$P_0 = \mathrm{diag}\big((3\,\mathrm{m})^2, (0.1\,\mathrm{m/s})^2,\ (1,1,35\,\mathrm{mrad})^2,\ \sigma_{b_a,0}^2,\ \sigma_{b_g,0}^2\big)$
-with the turn-on bias standard deviations of Table~\ref{tab:imu}.
+$P_0 = \mathrm{diag}\big((3\,\mathrm{m})^2, (0.1\,\mathrm{m/s})^2,\ (\sigma_{\mathrm{tilt}},\sigma_{\mathrm{tilt}},35\,\mathrm{mrad})^2,\ \sigma_{b_a,0}^2,\ \sigma_{b_g,0}^2\big)$
+with the turn-on bias standard deviations of Table~\ref{tab:imu} and the roll/pitch term of
+Eq.~\eqref{eq:tilt0}.
+
+\paragraph{Initial roll/pitch covariance.}
+The filter is initialised static and levelled from the mean specific force. An accelerometer turn-on bias
+$\sigma_{b_a,0}$ tilts that levelling by about $\sigma_{b_a,0}/g$ (roughly $10\,\mathrm{mrad}$ for the MEMS grade), so a fixed
+$1\,\mathrm{mrad}$ prior claims more than the sensor can deliver. We set
+\begin{equation}
+\sigma_{\mathrm{tilt}} = \max\!\big(1\,\mathrm{mrad},\ \sigma_{b_a,0}/g\big),
+\label{eq:tilt0}
+\end{equation}
+a property of the levelling procedure and not a tuned constant.
+
+\paragraph{Second-order attitude-error term.}
+The linear error model $\delta\dot v = [f_n\times]\psi + \dots$ has no vertical coupling to a horizontal tilt: for
+$f_n \approx g\hat z$ and horizontal $\psi_h$, $[f_n\times]\psi$ is horizontal. The neglected second-order term of the
+velocity error,
+\begin{equation}
+d_2 = \tfrac12\,\psi\times(\psi\times f_n) = \tfrac12\big(\psi\psi^{\top} - \lVert\psi\rVert^2 I\big) f_n,
+\label{eq:so}
+\end{equation}
+is $\approx -\tfrac12 g\lVert\psi_h\rVert^2\hat z$: a one-signed vertical velocity error that grows with the square of the
+tilt. After a long GNSS exclusion this can far exceed the linear filter's vertical-velocity standard deviation, so the coast covariance
+is over-confident; the shadow-probe NIS against a returning fix then exceeds its bound, the probe never passes, and GNSS is never re-admitted.
+We therefore add the second moment of $d_2$ under $\psi\sim\mathcal N(0,P_{\psi\psi})$ to the covariance propagation.
+By Isserlis' theorem $\mathbb E[d_2 d_2^{\top}]$ is a closed-form quadratic form in $P_{\psi\psi}$ and $f_n$; it is taken about zero, so it covers the
+mean $-\tfrac12[\mathrm{tr}(P_{\psi\psi})I - P_{\psi\psi}]f_n$ as well as the fluctuation. Let $B_k\in\mathbb R^{15\times3}$ satisfy
+$B_kB_k^{\top} = \Delta t^2\,\mathbb E[d_2d_2^{\top}]$, nonzero only in the velocity rows. Because the term is persistent and
+one-signed, its contributions add coherently rather than as independent noise, so a tracked block $C_k\in\mathbb R^{15\times3}$ carries
+it through the dynamics:
+\begin{align}
+P_{k+1} &= \Phi P_k\Phi^{\top} + Q_{d} + B_k(\Phi C_k)^{\top} + (\Phi C_k)B_k^{\top} + B_kB_k^{\top},\nonumber\\
+C_{k+1} &= \Phi C_k + B_k.
+\label{eq:sotrack}
+\end{align}
+(The $\Phi C_kC_k^{\top}\Phi^{\top}$ part is already inside $\Phi P_k\Phi^{\top}$, because $P_k$ contains $C_kC_k^{\top}$.) The term has
+no tuning constant and is part of the shared core, so every method has it.
 
 \paragraph{Bias model.}
 The default bias blocks of $F$ are zero, i.e.\ $b_a$ and $b_g$ are random walks. Applying the GM1 decay
@@ -515,10 +552,10 @@ horizontal ANEES is close to one. It is $\kappa_R = 60$, a single constant that 
 resolves to and that is frozen with the core; it was re-tuned from an earlier $40$ after the covariance-hygiene
 and soft-gating fixes described below changed the propagated covariance. We do not add a
 correlated-error state, because a slow drift spoof would be absorbed into it as ``correlated noise''.
-The attitude and bias states remain over-confident at this $\kappa_R$ (against the effective-bias truth,
-which includes turn-on bias, GM1, random-walk and scale-factor/misalignment aliasing, the residual
-accelerometer-bias NEES is about six times its nominal value on tuning seeds); this is a stated limitation
-(Section~\ref{sec:limitations}).
+The attitude and bias states may remain over-confident at this $\kappa_R$ (against the effective-bias truth,
+which includes turn-on bias, GM1, random-walk and scale-factor/misalignment aliasing; an earlier measurement,
+before the covariance corrections of this section, found the accelerometer-bias NEES about six times its nominal value on
+tuning seeds); this is a stated limitation (Section~\ref{sec:limitations}). \todo{R3: re-measure on core-freeze-6.}
 
 The CAI enters as a direct observation of the classical accelerometer bias. Over the sample's response
 window $W$ (length $T_W = 2T$), the filter forms the same-window, triangularly weighted mean of the
@@ -645,6 +682,13 @@ CAI-aided-inertial divergence statistic, was the original design; its measured p
 failed its acceptance gate on tuning missions, so it is retained only as a reported ablation and is not part
 of H1--H4.
 
+\paragraph{Retraining after the filter change (v5).}
+Features 1, 2 and 12 are computed from the filter's innovations and covariance, so the covariance corrections above change them
+(on tuning seeds features 1 and 2 changed in every epoch and feature 12 in about a quarter; all others were bit-identical).
+The detector used for the primary results (v5) is therefore retrained with the unchanged protocol of this subsection (seeds 500--549 training,
+550--574 Platt calibration, 575--599 held out). The detector loader raises an error if the weight file is missing; an earlier
+silent fallback to an untrained detector is removed.
+
 %---------------------------------------------------------------------
 \subsection{Trust engine}
 \label{sec:trustlaw}
@@ -655,7 +699,7 @@ GNSS position/velocity update of the filter, a \emph{clock} weight $w_{\mathrm{c
 \texttt{ClockKF}, a quantum weight $w_{\mathrm{q}}$ and an IMU weight, and reports the alias
 $w_{\mathrm{gnss}} = \min(w_{\mathrm{pos}}, w_{\mathrm{clk}})$ for metrics. Trust enters the filter only
 through Eq.~\eqref{eq:reff}, with two additions described below (a suspended update while probing, and a
-clock holdover). This subsection describes the law as frozen in the code. \todo{Cite the final freeze tag: \texttt{core-freeze-1} was superseded by a re-freeze after the clock-gap correction of D-073.}
+clock holdover). This subsection describes the law as frozen in the code. The law and filter described here are those of git tag \texttt{core-freeze-6}.
 The law was revised several times on tuning seeds before the freeze, in response to failures found there
 (unbounded time spent excluded, a probe that dragged the state onto a persisting spoof, and
 position-domain exclusion driven by a clock-domain signature); each revision is a design iteration on
@@ -727,7 +771,9 @@ observed to couple the evidence to the trust law's own exclusion dynamics. A slo
 epoch to the next and does not fire the test, an abrupt jump appears entirely in one epoch and does. After a
 gap of more than $1.5$ nominal epochs (for example a jamming outage) the baseline is stale by the whole gap, so
 it is reset and the position term is suppressed for two epochs, the first fix and the epoch after its
-corrective pull. (ii)~\emph{Clock jump} (\texttt{clk\_event}). With $\Delta t$ the time since the last fix with a valid clock estimate (invalid fixes emitted during an outage do not reset it),
+corrective pull. The same two-epoch quarantine of the position term (only; the clock, C/N0 and cross-satellite members
+and the detector are not quarantined) applies after a PROBE$\rightarrow$TRUST transition, because the first corrective
+update of the coasted state produces a one-epoch jump in the pre-correction estimate that is not spoof evidence. (ii)~\emph{Clock jump} (\texttt{clk\_event}). With $\Delta t$ the time since the last fix with a valid clock estimate (invalid fixes emitted during an outage do not reset it),
 \begin{align}
 x_8 &= \frac{\lvert b_k - (b_{k-1} + d_{k-1}\Delta t)\rvert}{\sigma_b(\Delta t)}, &
 x_9 &= \frac{\lvert d_k - d_{k-1}\rvert}{\sigma_d(\Delta t)}, \nonumber\\
@@ -856,7 +902,8 @@ Rounds are bulk-synchronous in simulation time with period $T_{\mathrm{round}} =
 round boundary a live node trains for $E = 2$ epochs (SGD, learning rate $0.05$, batch $64$) on a replay
 buffer of at most $20{,}000$ labelled samples, with an optional FedProx term
 $\tfrac{\mu}{2}\lVert\theta-\theta_g\rVert^2$ \cite{li2020fedprox}; a node with fewer than $64$ labelled
-samples sends a heartbeat instead. A node installs a received global model at the first GNSS epoch after
+samples sends a heartbeat instead. A node that has never installed a global model reports the current round as its base round, so its update is fresh
+rather than stale (a base round of $-1$ would be discarded by the staleness rule below and no node would ever install). A node installs a received global model at the first GNSS epoch after
 the simulated uplink and downlink delays, and its trust state is never reset by a model swap.
 Communications are simulated in simulation time: a log-normal delay (median $0.2\,\mathrm{s}$, log-scale
 $0.5$) plus a serialisation term at $1\,\mathrm{Mbit/s}$, and a Gilbert--Elliott loss channel
@@ -899,6 +946,9 @@ after two earlier previews, in which $\theta_0$ was trained on every family and 
 decimals, were rejected as evidence. Before any H2 or H4 run, an FL sanity check requires FedAvg and
 TRIM-NB-R on IID nodes that all see all families to reach at least $0.95\times$ the AUC of the centrally
 trained detector on the union of their data; only FL hyperparameters are tuned to meet it, on tuning seeds.
+The feature normaliser of $\theta_0$ is taken from the supervised detector dataset (the production normaliser, $20{,}552$
+samples) rather than estimated from the small pretraining pool ($1{,}470$ samples), whose too-narrow standard deviations made the
+normaliser-referenced physical evidence of Section~\ref{sec:trustlaw} fire on clean nodes; the pretrained weights are unchanged.
 Each evaluated detector also logs a parameter hash per arm and per round, and the arms are asserted to
 differ after the first install.
 
@@ -1087,16 +1137,14 @@ Seed ranges are disjoint by purpose and fixed in advance.
 smoke and safety-principle checks.
 A further disjoint tuning-class range (9500--9699) is used for per-design studies such as the
 signature-strength sweep. The pilot for the power rule uses 600--609.
-\emph{Test} (10000 and above; 10000--10029 for the $30$-seed cells) is held out behind a gate: the campaign
+\emph{Test} (10000 and above, in disjoint $30$-seed blocks, each used once; Section~\ref{sec:campaign}) is held out behind a gate: the campaign
 runner refuses any test seed unless it is invoked with both a final flag and a gate-cleared flag \emph{and}
-a gate file records that the gate is cleared; the file currently records that it is not, and it is cleared
-only after the filter-consistency condition is met or its failure is understood and accepted as a stated
-result. The protocol requires every campaign or fleet run to record the repository revision and the state of the package tree at
+a gate file records that the gate is cleared. The protocol requires every campaign or fleet run to record the repository revision and the state of the package tree at
 launch and at completion, and a run is valid only if the tree is clean and unchanged throughout; core
 changes are made only when no evaluation run is live. Trust-law and filter hyperparameters are frozen with
 their configuration hash logged before the test sweep, and all random streams derive hierarchically from
-the master seed, node identifier and component name. The frozen $\kappa_R$ is $60$ (single source \texttt{DEFAULT\_KAPPA\_R}, core freeze tag to be cited).
-\todo{State the configuration hash after the freeze.}
+the master seed, node identifier and component name. The frozen $\kappa_R$ is $60$ (single source \texttt{DEFAULT\_KAPPA\_R}); the core for the primary results is tag \texttt{core-freeze-6}.
+\todo{State the configuration hash of core-freeze-6.}
 
 %---------------------------------------------------------------------
 \subsection{H2/H4 event-level protocol (pre-registered)}
@@ -1113,7 +1161,7 @@ For the abrupt-spoofing family the following was registered \emph{before any val
   (abrupt spoofing and meaconing excluded); abrupt spoof of severity $0.15$ (a $12\,\mathrm{m}$ jump, chosen
   because the rule evidence does not fire at that severity); $N=5$ nodes, $600\,\mathrm{s}$ missions,
   $60\,\mathrm{s}$ rounds, $10$ rounds; FL hyperparameters as in Section~\ref{sec:fl}; live seeds 500--509
-  ($n=10$, raised from $5$ for power).
+  ($n=10$, raised from $5$ for power) in the original registration; a dated amendment moves the live seeds to 10090--10099 for the final core.
 \item \emph{Primary.} Event-level detection: $P_D@10\,\mathrm{s}$, the fraction of attack events for which the
   raw detector score $p$ crosses a threshold $\tau$ within $[t_{\mathrm{on}}, t_{\mathrm{on}}+10\,\mathrm{s}]$.
   $\tau$ is set \emph{per arm} to give a clean false-alarm rate of $1$/h, calibrated on clean missions from
@@ -1130,16 +1178,26 @@ For the abrupt-spoofing family the following was registered \emph{before any val
 \item \emph{Sampling.} Every metric is computed on the $1\,\mathrm{Hz}$ detector-update epochs (the ticks at
   which the detector is scored), not on the $100\,\mathrm{Hz}$ ticks; an earlier invalid run mixed the two.
 \end{itemize}
-The re-run is parked until the core is frozen, because the pending trust revision changes the closed-loop
-features. \todo{result: H2/H4 event-level outcome, after the core freeze.}
+The experiment is run on \texttt{core-freeze-6}, in which a fleet node installs the global model each round. \todo{R3: H2/H4 event-level outcome, per-seed values and degeneracy diagnostics.}
+
+%---------------------------------------------------------------------
+\subsection{Validation protocol}
+\label{sec:campaign}
+%---------------------------------------------------------------------
+The confirmatory family (eight tests, Holm-corrected with fixed $m=8$), the constants frozen from tuning data and the censoring rules were
+registered before the test seeds were run; later deviations are dated amendments written before the affected data existed. Tuning, training and
+calibration use seeds below 10000 only. The primary results use the code at git tag \texttt{core-freeze-6} and test seeds 10060--10089
+(10090--10099 for the H2/H4 fleet experiment), each run once. Two earlier test rounds on disjoint seeds exposed implementation defects
+(coast-covariance consistency, federated staleness bookkeeping, normaliser estimation) and informed which defects were investigated; these were corrected on tuning data only, and the
+results reported here are from a fresh, pre-registered round on unused seeds. Earlier-round results are archived in the reproducibility package.
 
 %---------------------------------------------------------------------
 \subsection{IMU grade as an evaluation dimension}
 \label{sec:grade}
 %---------------------------------------------------------------------
-The value of a defence that excludes GNSS depends on how well the platform coasts, and the CAI's benefit is
-expected to be small with MEMS gyros, whose tilt error dominates within about a minute, and larger with
-tactical-grade gyros. The IMU grade is therefore an explicit, pre-registered evaluation dimension: the
+The value of a defence that excludes GNSS depends on how well the platform coasts, and the CAI's benefit may be
+small with MEMS gyros, whose tilt error dominates within about a minute, and larger with
+tactical-grade gyros; this is a hypothesis, not a finding. The IMU grade is therefore an explicit, pre-registered evaluation dimension: the
 attack scenarios are run with both the industrial MEMS and the tactical grade, with the CAI on and off, and
 \emph{both} grades are reported. The default grade is not switched to whichever one favours the method.
 A coasting-envelope measurement (a forced GNSS outage of $180\,\mathrm{s}$, maximum horizontal error with the CAI
@@ -1226,12 +1284,13 @@ measured extent on the test seeds, the number is left to Section~\ref{sec:result
   uncertainty to avoid false alarms on ordinary holdover drift, detects a replay-delay step only in proportion
   to its size: a $750\,\mathrm{m}$ step is only about $2.9\sigma$ against the $5\sigma$ threshold. Immediately
   after a long outage, meaconing therefore has to be caught by the other evidence (position, C/N0, detector).
-\item \textbf{The filter is over-confident in attitude and accelerometer bias.} $\kappa_R$ is a surrogate
+\item \textbf{The filter may remain over-confident in attitude and accelerometer bias.} $\kappa_R$ is a surrogate
   for the time-correlated error of a loosely coupled fix. The receiver's reported velocity covariance was
   checked and found honest, and $\kappa_R = 60$ brings the position/velocity consistency to nominal, but the
-  attitude and bias states stay over-confident: against the effective-bias truth, which includes turn-on bias,
-  GM1, random walk and scale-factor/misalignment aliasing, the accelerometer-bias NEES remains about six times
-  its nominal value on tuning seeds. The residual is a stated limitation. Results that depend on attitude or
+  attitude and bias states were over-confident when last measured against the effective-bias truth, which includes turn-on bias,
+  GM1, random walk and scale-factor/misalignment aliasing (accelerometer-bias NEES about six times
+  nominal on tuning seeds, before the covariance corrections of Section~\ref{sec:fusion}). \todo{R3: re-measure on core-freeze-6.}
+  The residual is a stated limitation. Results that depend on attitude or
   bias estimates (coasting envelope, the CAI contribution, multi-hour stability) carry this caveat, and the
   test-seed gate that guards them is described in Section~\ref{sec:seeds}. \todo{status of the test-seed gate
   at submission.}
@@ -1271,9 +1330,18 @@ measured extent on the test seeds, the number is left to Section~\ref{sec:result
   Byzantine clients. FedQPNT's contribution is the closed loop that couples an FL-trained detector to a
   continuous, evidence-bounded trust law and to physical quantum-sensor aiding, not the robust-aggregation
   idea in isolation.
-\item \textbf{Hypotheses are pre-registered; no result yet exists.} H1--H4 above are stated as hypotheses,
-  to be reported whatever their outcome, including a null or reversed result, per the project's own
-  scientific-integrity rule.
+\item \textbf{Hypotheses are pre-registered.} H1--H4 are reported whatever their outcome, including a null or reversed
+  result, per the project's own scientific-integrity rule.
+\end{itemize}
+
+\paragraph{Stated operating envelope.} Properties of the frozen design and scenario set, stated before the primary round and not changed for it:
+\begin{itemize}
+\item \textbf{MEMS coast floor.} At the MEMS grade, free-inertial drift can exceed a small spoof offset, so exclusion cannot beat following that spoof during the attack.
+\item \textbf{Exclusion dwell.} Post-attack error is dominated by the designed $T_{\mathrm{ex}} = 60\,\mathrm{s}$ dwell before re-admission.
+\item \textbf{S7 chatter on tactical.} Rapid toggling can cause long cumulative exclusion; the coast error then equals that of a pure blackout.
+\item \textbf{S11 lockout.} If true GNSS noise is at least twice the reported value, the filter can lock out GNSS; no noise-scale estimation is added.
+\item \textbf{S5/S12 AUC.} Detector AUC is not evaluable there (no attack in those scenarios).
+\item \textbf{H2/H4 primary.} The event-level primary metric is degenerate (ceiling) in the setting used. \todo{R3: values.}
 \end{itemize}
 
 %=====================================================================
@@ -1291,8 +1359,8 @@ mechanism, and a pre-registered, mechanism-class baseline and hypothesis structu
 eventual results can be attributed to a specific mechanism rather than to incidental implementation
 choices. \todo{result: one-sentence outcome summary once the evaluation matrix completes} We have also
 disclosed, in advance of any result, the two most consequential limitations of the current design: the
-intermittency of rigid-mode quantum aiding above ordinary vehicle turn rates, and the need for a GNSS covariance
-inflation factor in the loosely-coupled filter, together with the residual over-confidence of its attitude and
+the intermittency of rigid-mode quantum aiding above ordinary vehicle turn rates, and the need for a GNSS covariance
+inflation factor in the loosely-coupled filter, together with possible residual over-confidence of its attitude and
 bias states.
 
 \section*{Reproducibility Statement}
