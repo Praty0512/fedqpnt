@@ -19,3 +19,9 @@
 - Dry-run manifest results/m4r2/manifest.json (placeholder weights): 5340 tasks = 4980 single (240 long-spec) + 360 fleet. Round-1 files in results/m4 untouched.
 - OPEN QUESTION for Master: fleet tasks use fleet_adapter.THETA0_PATH (results/fleet/theta0_d054.npz), not --weights.
 - 2026-10-08: results/m4/ROUND1_STATUS.json written (5340 expected / 3602 done / 28 failed records / 1710 missing). Phase-2 preflight assertion for results/fleet/theta0_d054_freeze5_provenance.json added. Waiting for 'round 2 go'.
+- Added fedqpnt_verdict (core-specific provenance) recorded next to the frozen verdict in _provenance.json at end of each instance.
+
+## ROUND 2 LAUNCHED 2026-10-08 18:07 (weights results/m1/detector_weights_sup_v4.npz, root results/m4r2)
+- launch_all.cmd weights; manifest regenerated with v4 path (5340 tasks); preflight passed (code == core-freeze-5, theta0 freeze5 provenance present).
+- PIDs: phase1 cmd 24692 / python 10016 (4 workers; long S7-p2/p5 spec-file tasks scheduled first, ~20 min each, children 21644 27892 15484 27504); phase2 cmd 29108 / python 12172; autoscale cmd 26480 / bash 20668 (+11208). Logs results/m4r2/phase1.log, phase2.log, autoscale.log.
+- Resume = rerun launch_*.cmd with M4R2_WEIGHTS set. Retry only infra failures once, per amendment.
