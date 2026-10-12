@@ -1,0 +1,652 @@
+git state at launch: {'head': '2c65807bfe859b9982839df081d567f4f47e8a55', 'fedqpnt_tree': 'fa740335bfcd5ffcd2fe814557967513c2c6300b', 'status_porcelain_fedqpnt': ''}
+=== H2 (novel family = abrupt) ===
+[H2-abrupt fedqpnt_local seed10090] aborted=False auc_det=0.29288888888888887 auc_pbar=0.43417334444444444 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt baseline_b_cont seed10090] aborted=False auc_det=0.3143013333333333 auc_pbar=0.4468493055555556 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt fedqpnt_local seed10091] aborted=False auc_det=0.38251244444444443 auc_pbar=0.3574055888888889 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt baseline_b_cont seed10091] aborted=False auc_det=0.38844588888888887 auc_pbar=0.3538559777777778 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt fedqpnt_local seed10092] aborted=False auc_det=0.47559433333333334 auc_pbar=0.40281514444444444 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt baseline_b_cont seed10092] aborted=False auc_det=0.3849287777777778 auc_pbar=0.3584210388888889 latency_on=300.0 es_frac=0.0 installs=3
+[H2-abrupt fedqpnt_local seed10093] aborted=False auc_det=0.652233 auc_pbar=0.6137075 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt baseline_b_cont seed10093] aborted=False auc_det=0.6687777777777778 auc_pbar=0.6248574166666667 latency_on=300.0 es_frac=0.0 installs=9
+[H2-abrupt fedqpnt_local seed10094] aborted=False auc_det=0.35482755555555556 auc_pbar=0.35326257777777775 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt baseline_b_cont seed10094] aborted=False auc_det=0.44508033333333336 auc_pbar=0.4106407444444444 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt fedqpnt_local seed10095] aborted=False auc_det=0.38712433333333335 auc_pbar=0.5446022972222222 latency_on=300.0 es_frac=0.0 installs=9
+[H2-abrupt baseline_b_cont seed10095] aborted=False auc_det=0.3997341111111111 auc_pbar=0.5551094527777778 latency_on=300.0 es_frac=0.0 installs=8
+[H2-abrupt fedqpnt_local seed10096] aborted=False auc_det=0.7447478888888889 auc_pbar=0.6542297444444445 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt baseline_b_cont seed10096] aborted=False auc_det=0.7147627777777777 auc_pbar=0.6348676888888889 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt fedqpnt_local seed10097] aborted=False auc_det=0.25845844444444444 auc_pbar=0.32116735555555553 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt baseline_b_cont seed10097] aborted=False auc_det=0.27170044444444447 auc_pbar=0.3440849888888889 latency_on=300.0 es_frac=0.0 installs=10
+[H2-abrupt fedqpnt_local seed10098] aborted=False auc_det=0.7372415555555556 auc_pbar=0.6953303055555555 latency_on=300.0 es_frac=0.0 installs=9
+[H2-abrupt baseline_b_cont seed10098] aborted=False auc_det=0.7130956666666667 auc_pbar=0.6805221111111112 latency_on=300.0 es_frac=0.0 installs=2
+[H2-abrupt fedqpnt_local seed10099] aborted=False auc_det=0.7891808888888889 auc_pbar=0.58274425 latency_on=300.0 es_frac=0.0 installs=8
+[H2-abrupt baseline_b_cont seed10099] aborted=False auc_det=0.8100486666666666 auc_pbar=0.5911944666666666 latency_on=300.0 es_frac=0.0 installs=8
+=== H4 (cold-start, novel family = abrupt) ===
+[H4-abrupt fedqpnt_local seed10090] aborted=False auc_det=0.33834033333333335 auc_pbar=0.4603899833333333 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10090] aborted=False auc_det=0.34566855555555553 auc_pbar=0.4663911666666667 installs=10 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10091] aborted=False auc_det=0.4583897777777778 auc_pbar=0.40975683888888886 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10091] aborted=False auc_det=0.29662222222222223 auc_pbar=0.2914209611111111 installs=10 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10092] aborted=False auc_det=0.5499206666666666 auc_pbar=0.4506648888888889 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10092] aborted=False auc_det=0.5572624444444444 auc_pbar=0.4608012888888889 installs=3 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10093] aborted=False auc_det=0.6287101111111111 auc_pbar=0.6005656388888889 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10093] aborted=False auc_det=0.7218777777777777 auc_pbar=0.6661342222222222 installs=9 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10094] aborted=False auc_det=0.34348911111111113 auc_pbar=0.34623756666666666 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10094] aborted=False auc_det=0.2953412222222222 auc_pbar=0.31305934444444444 installs=10 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10095] aborted=False auc_det=0.5092382222222223 auc_pbar=0.6028331638888889 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10095] aborted=False auc_det=0.5121781111111111 auc_pbar=0.606210925 installs=8 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10096] aborted=False auc_det=0.7530735555555556 auc_pbar=0.66811905 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10096] aborted=False auc_det=0.6298743333333333 auc_pbar=0.5861469944444444 installs=10 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10097] aborted=False auc_det=0.3349642222222222 auc_pbar=0.3571983722222222 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10097] aborted=False auc_det=0.2549137777777778 auc_pbar=0.3216218111111111 installs=10 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10098] aborted=False auc_det=0.7740888888888889 auc_pbar=0.7158404722222222 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10098] aborted=False auc_det=0.7305173333333334 auc_pbar=0.6904904166666667 installs=2 es_frac=0.0
+[H4-abrupt fedqpnt_local seed10099] aborted=False auc_det=0.8071143333333334 auc_pbar=0.5965962777777778 installs=5 es_frac=0.0
+[H4-abrupt baseline_b_cont seed10099] aborted=False auc_det=0.8242272222222222 auc_pbar=0.5966071166666667 installs=8 es_frac=0.0
+=== CONTROL (family = drift, s=1, n0 DID see it locally) ===
+[control-drift fedqpnt_local seed10090] aborted=False auc_det=0.9978442375216676 auc_pbar=0.9547094037512779 es_frac=0.9966887417218543 installs=10
+[control-drift baseline_b_cont seed10090] aborted=False auc_det=0.9981109160407129 auc_pbar=0.9547094037512779 es_frac=0.9966887417218543 installs=10
+[control-drift fedqpnt_local seed10091] aborted=False auc_det=0.996499733321481 auc_pbar=0.9250114171740966 es_frac=0.9966887417218543 installs=10
+[control-drift baseline_b_cont seed10091] aborted=False auc_det=0.9963886172718788 auc_pbar=0.9250114171740966 es_frac=0.9966887417218543 installs=10
+[control-drift fedqpnt_local seed10092] aborted=False auc_det=0.9994444197519889 auc_pbar=0.9240361238277257 es_frac=0.9966887417218543 installs=10
+[control-drift baseline_b_cont seed10092] aborted=False auc_det=0.9989555091337393 auc_pbar=0.9240250122227655 es_frac=0.9966887417218543 installs=3
+[control-drift fedqpnt_local seed10093] aborted=False auc_det=0.9986443841948531 auc_pbar=0.9256256389172852 es_frac=0.9966887417218543 installs=10
+[control-drift baseline_b_cont seed10093] aborted=False auc_det=0.9987553891284057 auc_pbar=0.9253032912573892 es_frac=0.9966887417218543 installs=9
+[control-drift fedqpnt_local seed10094] aborted=False auc_det=0.9964219520867594 auc_pbar=0.9187478999066625 es_frac=0.9867549668874173 installs=10
+[control-drift baseline_b_cont seed10094] aborted=False auc_det=0.9961664962887239 auc_pbar=0.9187479999111071 es_frac=0.9867549668874173 installs=10
+[control-drift fedqpnt_local seed10095] aborted=False auc_det=0.9965108449264412 auc_pbar=0.9613904506866972 es_frac=0.9966887417218543 installs=9
+[control-drift baseline_b_cont seed10095] aborted=False auc_det=0.995844148628828 auc_pbar=0.9613904506866972 es_frac=0.9966887417218543 installs=8
+[control-drift fedqpnt_local seed10096] aborted=False auc_det=0.9987665007333659 auc_pbar=0.9245784812658341 es_frac=0.9966887417218543 installs=10
+[control-drift baseline_b_cont seed10096] aborted=False auc_det=0.9987776123383262 auc_pbar=0.9244479199075515 es_frac=0.9966887417218543 installs=10
+[control-drift fedqpnt_local seed10097] aborted=False auc_det=0.9990777367883017 auc_pbar=0.9257339770656474 es_frac=0.9966887417218543 installs=10
+[control-drift baseline_b_cont seed10097] aborted=False auc_det=0.9979221298724388 auc_pbar=0.9212113871727632 es_frac=0.9933774834437086 installs=10
+[control-drift fedqpnt_local seed10098] aborted=False auc_det=0.9995888706164718 auc_pbar=0.9904686319391973 es_frac=0.9966887417218543 installs=9
+[control-drift baseline_b_cont seed10098] aborted=False auc_det=0.9983331481399174 auc_pbar=0.9900447242099649 es_frac=0.9966887417218543 installs=2
+[control-drift fedqpnt_local seed10099] aborted=False auc_det=0.9990331792524112 auc_pbar=0.9470509244855327 es_frac=0.9966887417218543 installs=8
+[control-drift baseline_b_cont seed10099] aborted=False auc_det=0.9994443086359394 auc_pbar=0.9470914818436375 es_frac=0.9966887417218543 installs=8
+git state at end: {'head': '2c65807bfe859b9982839df081d567f4f47e8a55', 'fedqpnt_tree': 'fa740335bfcd5ffcd2fe814557967513c2c6300b', 'status_porcelain_fedqpnt': ''}
+{
+  "note": "H2-ABRUPT: novel family=abrupt (theta0_noabrupt), severity=0.15 (E_s-quiet, chosen by h2_abrupt_es_firing_check.py)",
+  "chosen_hyperparams": {
+    "local_epochs": 2,
+    "lr": 0.05,
+    "prox_mu": 0.0
+  },
+  "n_rounds": 10,
+  "live_seeds": [
+    10090,
+    10091,
+    10092,
+    10093,
+    10094,
+    10095,
+    10096,
+    10097,
+    10098,
+    10099
+  ],
+  "live_duration_s": 600.0,
+  "local_train_duration_s": 120.0,
+  "novel_abrupt": {
+    "kind": "abrupt_spoof",
+    "onset_s": 120.0,
+    "duration_s": 300.0,
+    "severity": 0.15
+  },
+  "control_attack": {
+    "kind": "drift_spoof",
+    "onset_s": 120.0,
+    "duration_s": 300.0,
+    "severity": 1.0
+  },
+  "git_state_at_launch": {
+    "head": "2c65807bfe859b9982839df081d567f4f47e8a55",
+    "fedqpnt_tree": "fa740335bfcd5ffcd2fe814557967513c2c6300b",
+    "status_porcelain_fedqpnt": ""
+  },
+  "h2_abrupt": {
+    "fedqpnt_local": {
+      "auc_detector_only": {
+        "mean": 0.5074809333333333,
+        "sd": 0.2032727140194064,
+        "ci95": 0.12598973344321143,
+        "n": 10,
+        "values": [
+          0.29288888888888887,
+          0.38251244444444443,
+          0.47559433333333334,
+          0.652233,
+          0.35482755555555556,
+          0.38712433333333335,
+          0.7447478888888889,
+          0.25845844444444444,
+          0.7372415555555556,
+          0.7891808888888889
+        ]
+      },
+      "auc": {
+        "mean": 0.4959438108333334,
+        "sd": 0.1379072891581731,
+        "ci95": 0.08547582337713726,
+        "n": 10,
+        "values": [
+          0.43417334444444444,
+          0.3574055888888889,
+          0.40281514444444444,
+          0.6137075,
+          0.35326257777777775,
+          0.5446022972222222,
+          0.6542297444444445,
+          0.32116735555555553,
+          0.6953303055555555,
+          0.58274425
+        ]
+      },
+      "latency_on": {
+        "mean": 300.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0
+        ]
+      },
+      "t_dist": {
+        "mean": NaN,
+        "ci95": NaN,
+        "n": 0
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "baseline_b_cont": {
+      "auc_detector_only": {
+        "mean": 0.5110875777777778,
+        "sd": 0.1944449050942889,
+        "ci95": 0.12051820078459317,
+        "n": 10,
+        "values": [
+          0.3143013333333333,
+          0.38844588888888887,
+          0.3849287777777778,
+          0.6687777777777778,
+          0.44508033333333336,
+          0.3997341111111111,
+          0.7147627777777777,
+          0.27170044444444447,
+          0.7130956666666667,
+          0.8100486666666666
+        ]
+      },
+      "auc": {
+        "mean": 0.5000403191666667,
+        "sd": 0.13091244228549884,
+        "ci95": 0.08114037236879297,
+        "n": 10,
+        "values": [
+          0.4468493055555556,
+          0.3538559777777778,
+          0.3584210388888889,
+          0.6248574166666667,
+          0.4106407444444444,
+          0.5551094527777778,
+          0.6348676888888889,
+          0.3440849888888889,
+          0.6805221111111112,
+          0.5911944666666666
+        ]
+      },
+      "latency_on": {
+        "mean": 300.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0
+        ]
+      },
+      "t_dist": {
+        "mean": NaN,
+        "ci95": NaN,
+        "n": 0
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "wilcoxon_auc_detector_only": {
+      "n": 10,
+      "diff_mean": -0.0036066444444444457,
+      "wilcoxon_stat": 25.0,
+      "wilcoxon_p": 0.845703125
+    },
+    "wilcoxon_latency_on": {
+      "n": 10,
+      "diff_mean": 0.0,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0
+    }
+  },
+  "h4_abrupt": {
+    "fedqpnt_local": {
+      "auc_detector_only": {
+        "mean": 0.5497329222222223,
+        "sd": 0.18484166102827068,
+        "ci95": 0.11456604844627083,
+        "n": 10,
+        "values": [
+          0.33834033333333335,
+          0.4583897777777778,
+          0.5499206666666666,
+          0.6287101111111111,
+          0.34348911111111113,
+          0.5092382222222223,
+          0.7530735555555556,
+          0.3349642222222222,
+          0.7740888888888889,
+          0.8071143333333334
+        ]
+      },
+      "auc": {
+        "mean": 0.5208202252777777,
+        "sd": 0.13195840268536957,
+        "ci95": 0.08178866534115566,
+        "n": 10,
+        "values": [
+          0.4603899833333333,
+          0.40975683888888886,
+          0.4506648888888889,
+          0.6005656388888889,
+          0.34623756666666666,
+          0.6028331638888889,
+          0.66811905,
+          0.3571983722222222,
+          0.7158404722222222,
+          0.5965962777777778
+        ]
+      },
+      "latency_on": {
+        "mean": 300.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0
+        ]
+      },
+      "t_dist": {
+        "mean": NaN,
+        "ci95": NaN,
+        "n": 0
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "baseline_b_cont": {
+      "auc_detector_only": {
+        "mean": 0.5168483,
+        "sd": 0.20872109301258407,
+        "ci95": 0.12936667372936572,
+        "n": 10,
+        "values": [
+          0.34566855555555553,
+          0.29662222222222223,
+          0.5572624444444444,
+          0.7218777777777777,
+          0.2953412222222222,
+          0.5121781111111111,
+          0.6298743333333333,
+          0.2549137777777778,
+          0.7305173333333334,
+          0.8242272222222222
+        ]
+      },
+      "auc": {
+        "mean": 0.49988842472222217,
+        "sd": 0.15087115527349979,
+        "ci95": 0.0935109108414959,
+        "n": 10,
+        "values": [
+          0.4663911666666667,
+          0.2914209611111111,
+          0.4608012888888889,
+          0.6661342222222222,
+          0.31305934444444444,
+          0.606210925,
+          0.5861469944444444,
+          0.3216218111111111,
+          0.6904904166666667,
+          0.5966071166666667
+        ]
+      },
+      "latency_on": {
+        "mean": 300.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0,
+          300.0
+        ]
+      },
+      "t_dist": {
+        "mean": NaN,
+        "ci95": NaN,
+        "n": 0
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "wilcoxon_auc_detector_only": {
+      "n": 10,
+      "diff_mean": 0.03288462222222224,
+      "wilcoxon_stat": 18.0,
+      "wilcoxon_p": 0.375
+    },
+    "wilcoxon_latency_on": {
+      "n": 10,
+      "diff_mean": 0.0,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0
+    }
+  },
+  "control_drift": {
+    "fedqpnt_local": {
+      "auc_detector_only": {
+        "mean": 0.9981831859193742,
+        "sd": 0.0012688532823193004,
+        "ci95": 0.0007864434121870905,
+        "n": 10,
+        "values": [
+          0.9978442375216676,
+          0.996499733321481,
+          0.9994444197519889,
+          0.9986443841948531,
+          0.9964219520867594,
+          0.9965108449264412,
+          0.9987665007333659,
+          0.9990777367883017,
+          0.9995888706164718,
+          0.9990331792524112
+        ]
+      },
+      "auc": {
+        "mean": 0.9397352949019957,
+        "sd": 0.023211910784101446,
+        "ci95": 0.014386891356787555,
+        "n": 10,
+        "values": [
+          0.9547094037512779,
+          0.9250114171740966,
+          0.9240361238277257,
+          0.9256256389172852,
+          0.9187478999066625,
+          0.9613904506866972,
+          0.9245784812658341,
+          0.9257339770656474,
+          0.9904686319391973,
+          0.9470509244855327
+        ]
+      },
+      "latency_on": {
+        "mean": 1.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "t_dist": {
+        "mean": 1.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.9956953642384105,
+        "sd": 0.003141335424008305,
+        "ci95": 0.001947019867549657,
+        "n": 10,
+        "values": [
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9867549668874173,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9966887417218543
+        ]
+      }
+    },
+    "baseline_b_cont": {
+      "auc_detector_only": {
+        "mean": 0.9978698275478909,
+        "sd": 0.0012797660050865814,
+        "ci95": 0.0007932071878331328,
+        "n": 10,
+        "values": [
+          0.9981109160407129,
+          0.9963886172718788,
+          0.9989555091337393,
+          0.9987553891284057,
+          0.9961664962887239,
+          0.995844148628828,
+          0.9987776123383262,
+          0.9979221298724388,
+          0.9983331481399174,
+          0.9994443086359394
+        ]
+      },
+      "auc": {
+        "mean": 0.939198308813725,
+        "sd": 0.023486715299731193,
+        "ci95": 0.014557216960202665,
+        "n": 10,
+        "values": [
+          0.9547094037512779,
+          0.9250114171740966,
+          0.9240250122227655,
+          0.9253032912573892,
+          0.9187479999111071,
+          0.9613904506866972,
+          0.9244479199075515,
+          0.9212113871727632,
+          0.9900447242099649,
+          0.9470914818436375
+        ]
+      },
+      "latency_on": {
+        "mean": 1.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "t_dist": {
+        "mean": 1.0,
+        "sd": 0.0,
+        "ci95": 0.0,
+        "n": 10,
+        "values": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "es_fire_frac_attack": {
+        "mean": 0.995364238410596,
+        "sd": 0.0031989794141698375,
+        "ci95": 0.00198274798280649,
+        "n": 10,
+        "values": [
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9867549668874173,
+          0.9966887417218543,
+          0.9966887417218543,
+          0.9933774834437086,
+          0.9966887417218543,
+          0.9966887417218543
+        ]
+      }
+    },
+    "wilcoxon_auc_detector_only": {
+      "n": 10,
+      "diff_mean": 0.0003133583714831745,
+      "wilcoxon_stat": 14.0,
+      "wilcoxon_p": 0.193359375
+    },
+    "wilcoxon_latency_on": {
+      "n": 10,
+      "diff_mean": 0.0,
+      "wilcoxon_stat": 0.0,
+      "wilcoxon_p": 1.0
+    }
+  },
+  "git_state_at_end": {
+    "head": "2c65807bfe859b9982839df081d567f4f47e8a55",
+    "fedqpnt_tree": "fa740335bfcd5ffcd2fe814557967513c2c6300b",
+    "status_porcelain_fedqpnt": ""
+  }
+}
