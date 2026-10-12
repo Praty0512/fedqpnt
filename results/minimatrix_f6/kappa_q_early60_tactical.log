@@ -1,8 +1,0 @@
-git at launch: HEAD=73f6d16017bbd9c62ef61d58a0e5ec2a54b98574 status[fedqpnt/]=M fedqpnt/eval/fleet_adapter.py;  M fedqpnt/fl/client.py;  M fedqpnt/fusion/eskf.py
-=== kappa_Q coast-consistency curve, grade=tactical, seeds 530-549 (n=20), CAI on ===
- kappa_Q   ANEES@60  ANEES@120  ANEES@179    pooled  <=1.5
-       1       0.31       0.33       0.35      0.33   True
-       2       0.31       0.33       0.35      0.33   True
-       5       0.31       0.32       0.34      0.32   True
-CHOSEN kappa_Q = 1.0
-git at end: HEAD=73f6d16017bbd9c62ef61d58a0e5ec2a54b98574 status[fedqpnt/]=M fedqpnt/eval/fleet_adapter.py;  M fedqpnt/fl/client.py;  M fedqpnt/fusion/eskf.py

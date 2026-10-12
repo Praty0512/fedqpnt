@@ -1,9 +1,0 @@
-Sat Oct 10 08:29:51 2026 phase 1 total 24 todo 24 workers 1
-Sat Oct 10 08:52:29 2026 10/24 {'ok': 10} elapsed 1358s
-Sat Oct 10 08:57:15 2026 13/24 {'ok': 12, 'skipped_done': 1} elapsed 1643s
-Sat Oct 10 08:57:15 2026 14/24 {'ok': 12, 'skipped_done': 2} elapsed 1643s
-Sat Oct 10 08:57:15 2026 15/24 {'ok': 12, 'skipped_done': 3} elapsed 1643s
-Sat Oct 10 08:57:15 2026 16/24 {'ok': 12, 'skipped_done': 4} elapsed 1643s
-Sat Oct 10 08:57:15 2026 17/24 {'ok': 12, 'skipped_done': 5} elapsed 1643s
-Sat Oct 10 09:04:26 2026 20/24 {'ok': 15, 'skipped_done': 5} elapsed 2075s
-DONE {'ok': 19, 'skipped_done': 5} wall 2638s
