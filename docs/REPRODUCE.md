@@ -1,154 +1,130 @@
-# Reproducibility Guide
+# Reproduction Guide (round 3, core-freeze-6)
 
-This document specifies seeds policy, determinism guarantees, and how to regenerate each artefact in `results/`. **All results in this repository are reproducible from git tag `core-freeze-1` (commit a7c8bf0).**
+This guide reproduces the reported round-3 results from git tag `core-freeze-6` (commit `ca614b7`). The earlier rounds (`results/m4` = round 1, `results/m4r2` = round 2) are archived and superseded; their guide is in git history before this commit.
 
-## Seeds Policy
+## 1. Environment
 
-Simulations use deterministic seeding via `fedqpnt.core.seeding.stream` (SHA-256 RNG per seed). Seed namespaces are enforced at all layers by `fedqpnt.core.seed_gate.enforce_seed()` (D-067):
+- Python 3.13 (the launchers use `Python313`). Other 3.11+ versions may work but are not what the results were produced with.
+- Install: `python -m pip install -r requirements.txt` (numpy 2.3.4, scipy 1.16.2, matplotlib 3.10.7, pandas 2.3.3, torch 2.9.0, pytest 9.1.1, scikit-learn 1.7.2).
+- Tests: `python -m pytest tests/ -q` (673 passed, 1 skipped at freeze).
+- Paper build: MiKTeX (or TeX Live) with `pdflatex` and `bibtex`.
+- Hardware used: Windows 11, 4 CPU workers for single-node runs. Each S14 run needs about 5 GB RAM.
 
-| Category | Seed Range | Status | Use Case |
-|----------|---|---|---|
-| **Tuning** | [0, 10000) | ✅ All runs complete | Detector training, threshold tuning, preliminary M1 results |
-| **Pretraining** | 400–449 | ✅ All runs complete | Supervised detector pre-training (within tuning namespace) |
-| **Test** | [10000, 20000) | ⛔ **GATED** | Full evaluation; requires `results/GATE_D047.json` cleared AND `final=True` flag |
-| **Fleet-derived** | ≥ 100000 | ✅ Allowed (derived) | Fleet local-training seeds (100_000 + parent_seed*100 + ...); allowed because parent is gated |
-| **Unregistered** | [20000, 100000) | ⛔ Refused | Reserved for future use; not a registered namespace |
+## 2. Data
 
-### Test Seed Gate
+The Jarlaud et al. 2024 raw data is **not in git**. It is needed only for the real-data calibration (`data/processed/jarlaud2024/`).
 
-Test-seed runs ([10000, 20000)) are blocked unless **both** conditions hold:
-1. CLI flag `--final=True` (or `--final --gate-cleared`) passed to `run_campaign.py` or `run_fleet`
-2. `results/GATE_D047.json` contains `{"cleared": true}`
+1. Download `Raw Data.zip` from Zenodo (DOI 10.5281/zenodo.11543715):
+   `wget https://zenodo.org/records/11543715/files/Raw%20Data.zip`
+2. Check the MD5 `103d382e42a6f600fd0768c2a3286c40` (875,547,718 bytes).
+3. Extract to `data/raw/jarlaud2024/` (about 2.9 GB unzipped).
+4. Calibration outputs: `scripts/jarlaud2024_manifest.py` and `scripts/jarlaud2024_calibrate.py`. Details in `docs/DATA.md`.
 
-**Current status:** `results/GATE_D047.json` = `{"cleared": false}` (gate not cleared; blocked by issue #1 — defended RMSE ≥ undefended on tuning seeds after core fixes in D-061). Test seeds cannot be used until this gate is explicitly cleared by the Master.
+The simulation campaign does not read the raw data once the calibrated constants and detector weights are in place (`results/m1/`, `results/fleet/`).
 
-## Determinism
-
-**Guarantee:** Bit-identical reruns on the same Python version (3.11+) and architecture (D-062).
-
-- **RNG seed:** `fedqpnt.core.seeding.stream(seed_int)` produces deterministic NumPy RandomState
-- **Floating-point:** No special handling; varies ≤1 ULP across runs on same machine
-- **Serialization:** All saved states are JSON or NumPy .npz format; lossless reload
-- **Git provenance:** Every campaign/fleet run records `git rev-parse HEAD` and `git status --porcelain` at launch and completion; a run is valid only if the fedqpnt/ tree is clean and unchanged throughout. Runs on a dirty tree are flagged INVALID.
-
-**Test:** Run any script twice with the same seed on a clean tree; output checksums must match.
+## 3. Check out the frozen code
 
 ```bash
-# Example: reproduce S1 FAR check
-python scripts/run_m1_s1_far_check.py --seed 500
-# ... run again ...
-python scripts/run_m1_s1_far_check.py --seed 500
-# Results should be identical
+git clone https://github.com/Praty0512/fedqpnt.git && cd fedqpnt
+git checkout core-freeze-6          # ca614b7
+git diff core-freeze-6 -- fedqpnt   # must be empty
 ```
 
-## Results Mapping
+Each run records its git provenance. A run is valid only if `fedqpnt/` is unchanged from the tag.
 
-This table maps each results artefact to the script(s) that produce it (core-freeze-1 era).
+## 4. Pre-round artefacts (already committed)
 
-### M1 Single-Node Results
+These are in `results/` at the tag and do not need to be regenerated to reproduce the campaign:
 
-| File | Script(s) | Scenario / Seeds | Output Location |
-|------|-----------|---|---|
-| `kappa_r_tuning.json` | `scripts/tune_kappa_r.py` | κ_R sweep on seed 500 | `results/m1/kappa_r_tuning.json` |
-| `s1_far_check.json` | `scripts/run_m1_s1_far_check.py` | S1 FAR (false-alarm rate), seeds 500–509 | `results/m1/s1_far_check.json` |
-| `s1_far_check_v2.json` | `scripts/run_m1_s1_far_check.py` (v2 trust law) | S1 FAR with trust law v2, seeds 500–509 | `results/m1/s1_far_check_v2.json` |
-| `smoke_matrix.json` | `scripts/run_m1_smoke.py` | Attack smoke tests (drift, meaconing, jamming); seeds 500–549; IMU-grade dimension | `results/m1/smoke_matrix.json` |
-| `smoke_matrix_v2.json` | `scripts/run_m1_smoke.py` (v2 trust law) | Smoke matrix with trust law v2 | `results/m1/smoke_matrix_v2.json` |
-| `detector_train_sup_v1_report.json` | `scripts/train_supervised_v1.py` | Supervised detector training (v1), seeds 400–449 | `results/m1/detector_train_sup_v1_report.json` |
-| `detector_train_sup_v2_report.json` | `scripts/train_supervised_v2.py` | Supervised detector training (v2), seeds 400–449 | `results/m1/detector_train_sup_v2_report.json` |
-| `detector_train_sup_v3_report.json` | `scripts/train_supervised_v3.py` | Supervised detector training (v3, core-freeze-1), seeds 400–449, κ_R=60 | `results/m1/detector_train_sup_v3_report.json` |
-| `detector_weights_sup_v1.npz` | `scripts/train_supervised_v1.py` | Trained detector weights (v1) | `results/m1/detector_weights_sup_v1.npz` |
-| `detector_weights_sup_v2.npz` | `scripts/train_supervised_v2.py` | Trained detector weights (v2) | `results/m1/detector_weights_sup_v2.npz` |
-| `detector_weights_sup_v3.npz` | `scripts/train_supervised_v3.py` | Trained detector weights (v3, core-freeze-1) | `results/m1/detector_weights_sup_v3.npz` |
-| `defended_vs_undefended_v1.json` | `scripts/defended_vs_undefended_check.py` | Defended ≤ undefended check, v1, seeds 500–549 | `results/m1/defended_vs_undefended_v1.json` |
-| `signature_summary.txt` | `scripts/gen_gnss_attack_results.py` | GNSS attack signature strength validation (includes meaconing_displaced) | `results/attacks/signature_summary.txt` |
+| Artefact | Path |
+|---|---|
+| Detector v5 weights | `results/m1/detector_weights_sup_v5.npz` (report: `detector_train_sup_v5_report.json`) |
+| Fleet θ0 f8 | `results/fleet/theta0_d054_f8.npz` (provenance: `theta0_d054_f8_provenance.json`) |
+| H2/H4 θ0 | `results/fleet/theta0_noabrupt_v3.npz` |
+| σ_nom (freeze-6) | `results/sigma_nom_freeze6.json` (1.0977 m MEMS, 1.1171 m tactical) |
+| κ_Q calibration | `results/m1/kappa_q_f6_*.json` (selects κ_Q = 1) |
 
-### Core-Robustness Session Diagnostics
+To rebuild them from scratch, use the commands in section 5.
 
-| File | Script(s) | Purpose | Output Location |
-|------|-----------|---------|---|
-| (logs) | `scripts/core_robust_attack_trace.py` | Per-epoch trace for meaconing/drift_spoof attacks | `results/core_robust/` |
-| (logs) | `scripts/core_robust_ba_nees_artifact_check.py` | Diagnose b_a NEES metric artifact under CAI | `results/core_robust/` |
-| (logs) | `scripts/core_robust_clock_meaconing_trace.py` | Trace ClockKF under meaconing; separate clock/position trusts | `results/core_robust/` |
-| (logs) | `scripts/core_robust_coasting_envelope.py` | Measure pure GNSS-coasting error envelope (180 s outage) | `results/core_robust/` |
-| (logs) | `scripts/core_robust_drift_probe_trace.py` | Generalized per-epoch trace for drift/meaconing with probing | `results/core_robust/` |
-| (logs) | `scripts/core_robust_es_firing_fraction.py` | E_s firing fraction on drift and meaconing attacks | `results/core_robust/` |
-| (logs) | `scripts/core_robust_jam_recovery_summary.py` | Post-jam recovery summary with shadow probe / reacquisition | `results/core_robust/` |
-| (logs) | `scripts/core_robust_jam_recovery_trace.py` | Trace jam_cw non-recovery per epoch | `results/core_robust/` |
-| (logs) | `scripts/core_robust_kappa60_block_nees.py` | Per-block NEES at κ_R=60 (post D-043/D-057/D-058) | `results/core_robust/` |
-| (logs) | `scripts/core_robust_overconfidence_diag.py` | Diagnose ψ/b overconfidence at κ_R=40 | `results/core_robust/` |
-| (logs) | `scripts/core_robust_safety_principle_sweep.py` | D-055 safety principle across signature-strength sweep | `results/core_robust/` |
-| (logs) | `scripts/core_robust_shadow_nis_check.py` | Empirical check of gnss_shadow NIS as probe acceptance statistic | `results/core_robust/` |
-| `sigma_nom.json` | `scripts/core_robust_sigma_nom.py` | D-068 pre-registration: σ_nom per IMU grade (when exists) | `results/sigma_nom.json` |
+## 5. Regenerate the inputs (optional)
 
-### H2-ABRUPT Evaluation Scripts
-
-| File | Script(s) | Purpose | Output Location |
-|------|-----------|---------|---|
-| `theta0_noabrupt.npz` | `scripts/h2_abrupt_pretrain_theta0_v2.py` | Pretrain θ₀ excluding abrupt family (novel); core-freeze-1 | `results/fleet/` |
-| (logs) | `scripts/h2_abrupt_h2h4_driver.py` | H2/H4/drift-control fleet runs with abrupt as novel family | `results/h2_abrupt/` |
-| (logs) | `scripts/h2_abrupt_metrics.py` | H2-ABRUPT pre-registered metrics (D-064) | — (module) |
-| (logs) | `scripts/h2_abrupt_diag_score_trace.py` | Diagnostic: explain live AUC inversion vs held-out check | `results/h2_abrupt/` |
-| (logs) | `scripts/h2_abrupt_diag_weight_provenance.py` | Diagnostic: compare n0 weights between arms | `results/h2_abrupt/` |
-| (logs) | `scripts/h2_abrupt_es_firing_check.py` | Verify E_s stays quiet on abrupt under current core | `results/h2_abrupt/` |
-| (logs) | `scripts/h2_abrupt_theta0_auc_by_severity_v2.py` | θ₀_noabrupt held-out AUC on abrupt at explicit severities (0.1, 0.15, 0.2) | `results/h2_abrupt/` |
-
-### Federation and Fleet Results
-
-| File | Script(s) | Scenario / Seeds | Output Location |
-|------|-----------|---|---|
-| `fl_sanity_check_d054.json` | `scripts/fl_sanity_check_d054.py` | FL sanity: federated ≈ centralised, seeds 500–509 | `results/fleet/fl_sanity_check_d054.json` |
-| `h2_h4_full_d054.json` | `scripts/h2_h4_full_d054.py` | H2/H4 federation on tuning seeds (D-054) | `results/fleet/h2_h4_full_d054.json` |
-| `h2_h4_subrule_d056.json` | `scripts/h2_h4_subrule_d056.py` | H2/H4 sub-rule regime search (D-056) | `results/fleet/h2_h4_subrule_d056.json` |
-| `theta0_d054.npz` | `scripts/pretrain_theta0_d054.py` | Pretrained detector θ₀ (D-054), seeds 400–449 | `results/fleet/theta0_d054.npz` |
-| `fl_s5_s9_auc.json` | `scripts/run_fl_s5_s9_auc.py` | FL AUC on S5/S9, seeds 500–549 | `results/fl/fl_s5_s9_auc.json` |
-| `fl_s12_full_sweep.json` | `scripts/run_fl_s12_full.py` | FL S12 (poison defence), N ∈ [2,4,6,8,10], seeds 500–549 | `results/fl/fl_s12_full_sweep.json` |
-| `fl_s12_n10_sweep.json` | `scripts/run_fl_s12_n10.py` | FL S12 poisoning at N=10 (CI), seeds 500–549 | `results/fl/fl_s12_n10_sweep.json` |
-| `fl_validation_report.json` | `scripts/run_fl_validate.py` | FL infrastructure validation (42 tests) | `results/fl/fl_validation_report.json` |
-
-### Campaign and Dry-run
-
-| File | Script(s) | Scenario / Seeds | Output Location |
-|------|-----------|---|---|
-| (variable) | `scripts/run_campaign.py` (dry-run) | Plumbing check; scenario registry, mission flow; test-seed gate enforced | `runs/dryrun/` |
-
-## Running the Campaign (Dry-run)
-
-To verify plumbing without long runs:
+Run from the repo root. Each script's arguments can be checked with `--help`.
 
 ```bash
-# Dry-run: 2 scenarios, 3 seeds, 120 s per mission, 2 workers
-python scripts/run_campaign.py \
-  --scenarios S1 S2-low \
-  --methods fedqpnt_local baseline_a undefended \
-  --seeds 500 501 502 \
-  --duration 120 \
-  --workers 2 \
-  --run-root runs/dryrun
+# Detector v5 (tuning seeds 500-599, world schuler_tangent)
+python scripts/train_supervised_v5.py --workers 4
+
+# Fleet θ0: original weights + v5 normaliser (no retraining)
+python scripts/build_theta0_f8.py
+
+# H2/H4 θ0 (no-abrupt, v3)
+python scripts/build_theta0_noabrupt_v3.py
+
+# σ_nom on schuler_tangent (tuning seeds 560-579)
+python scripts/core_robust_sigma_nom.py --world schuler_tangent --workers 4 --out results/sigma_nom_freeze6.json
+
+# κ_Q rule (grid {1,2,3,5,8,12,20,30,50}, seeds 530-549, CAI on), one run per grade
+python scripts/core_robust_kappa_q_calibration.py --grade industrial_mems --world schuler_tangent --workers 4 --out results/m1/kappa_q_f6_industrial_mems.json
+python scripts/core_robust_kappa_q_calibration.py --grade tactical --world schuler_tangent --workers 4 --out results/m1/kappa_q_f6_tactical.json
 ```
 
-Expected output: JSON with task counts and statuses.
+## 6. Round-3 campaign (test seeds 10060-10089, n = 30 per cell)
 
-**Note:** Full campaign (M4, 15 scenarios, 30–120 min per mission, 100 seeds) requires clearing GATE_D047 and is **not run** in preliminary results (tuning seeds only).
-
-## Validation
-
-All test files are reproducible via pytest:
+Test seeds are run **once**. Do not re-run finished tasks to "improve" them. The campaign is resumable: finished runs are skipped.
 
 ```bash
-# Validate data reproduction
-python -m pytest tests/test_data_jarlaud.py -v
+# Phase 1: single-node, S14 excluded, 4 workers
+python scripts/m4_campaign.py --phase 1 --exclude S14 --workers 4 --weights results/m1/detector_weights_sup_v5.npz
 
-# Validate simulation and attacks
-python -m pytest tests/test_sim_*.py tests/test_gnss_*.py tests/test_attacks_*.py -v
+# Phase 2: fleet scenarios, one fleet at a time
+python scripts/m4_campaign.py --phase 2 --weights results/m1/detector_weights_sup_v5.npz
 
-# Validate fusion and trust
-python -m pytest tests/test_fusion_*.py tests/test_trust_*.py -v
-
-# Full suite (40 modules, ~300 tests)
-python -m pytest tests/ -v
+# S14 (4-hour scenario), serial after phase 1
+python scripts/m4_campaign.py --phase 1 --only S14 --workers 1 --weights results/m1/detector_weights_sup_v5.npz
 ```
 
----
+Defaults already set in the script: `--tag core-freeze-6`, `--seeds 10060-10089`, `--root results/m4r3`. Dry run: add `--dry`. The Windows launchers are in `results/m4r3/` (`launch_phase1.cmd`, `launch_phase2.cmd`, `START_ROUND3*.cmd`).
 
-**Last updated:** 2026-09-29
+**Expected runtime:** about 30 h for single-node on 4 workers, about 11 h for the fleet phase, and about 3-11 h for S14 run serially.
+
+## 7. H2/H4 re-run (live seeds 10090-10099)
+
+`results/m4r3/h2_r3_chain.cmd` runs three steps in order:
+
+```bash
+python -u scripts/h2_abrupt_h2h4_driver.py --parts h2,h4,control --live-seeds 10090-10099 --final --theta0 results/fleet/theta0_noabrupt_v3.npz --runs-dir results/fleet/h2_abrupt_runs_freeze6 --out results/fleet/h2_abrupt_freeze6.json --provenance-out results/fleet/h2_abrupt_provenance_freeze6.json
+python -u scripts/h2_abrupt_calibrate_closedloop.py --live-seeds 10090-10099 --runs-dir results/fleet/h2_abrupt_runs_freeze6 --out-dir results/fleet/h2_abrupt_clean_closedloop_freeze6 --workers 2
+python -u scripts/h2_abrupt_prereg_analysis.py --tau-mode closedloop --live-seeds 10090-10099 --runs-dir results/fleet/h2_abrupt_runs_freeze6 --clean-dir results/fleet/h2_abrupt_clean_closedloop_freeze6 --out results/fleet/h2_abrupt_prereg_results_freeze6.json
+```
+
+Fleets run one at a time (about 3-4 GB each). Do not run them alongside the 4-worker phase 1.
+
+## 8. Report and figures
+
+```bash
+# Confirmatory family, safety, chattering, scenario criteria (Holm m = 8)
+python scripts/m3_report.py --round3 --run-root results/m4r3 --summary-dir results/m4r3/report --out-md docs/M3_REPORT.md --out-json results/m4r3 --sigma results/sigma_nom_freeze6.json --h2 results/fleet/h2_abrupt_prereg_results_freeze6.json
+
+# Figures
+python scripts/make_figures_results.py --m3 results/m4r3 --out results/m4r3/figures --h2 results/fleet/h2_abrupt_prereg_results_freeze6.json --sigma results/sigma_nom_freeze6.json
+```
+
+The `m3_report.py` invocation is reconstructed from the script's flags and the committed output layout. Confirm it against `results/m4r3/report/SUMMARY.md` if the regenerated files differ.
+
+Outputs: `results/m4r3/report/SUMMARY.md`, `HEADLINE.md`, `M3_REPORT.md`, `json/`.
+
+## 9. Paper
+
+```bash
+cd paper
+pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
+```
+
+Expect 21 pages. The abstract and results sections are in `paper/main.tex`.
+
+## 10. Pre-registration
+
+- `docs/specs/raw/PREREG_M4.md`, Amendment R3 (round 3), written before round-3 data existed.
+- `docs/specs/raw/H2_PREREG.md`, Amendment 3 (H2/H4 re-run).
+- Decisions: `DECISION_LOG.md` (D-085 to D-089).
+- Execution trace: `EXECUTION_LOG.md` (rows 166 to 181).

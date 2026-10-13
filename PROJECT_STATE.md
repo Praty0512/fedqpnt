@@ -1,57 +1,50 @@
 # FedQPNT — Project State
 
-_Last updated: 2026-10-08 by Master · repo: private https://github.com/Praty0512/fedqpnt (`master`, pushed) · decisions up to D-083 · log up to #166 · latest freeze: `core-freeze-4` (`core-freeze-5` in preparation) · live agent registry: `AGENTS_ACTIVE.md`_
+_Date: 2026-10-13 · Status: **COMPLETE** · repo: private https://github.com/Praty0512/fedqpnt (`master`) · decisions up to D-089 · log up to #181_
 
 ## Identity
-Federated learning across vehicle/UAV nodes. Each node fuses a cold-atom quantum accelerometer (CAI), GNSS and a classical IMU behind a continuous, attack-adaptive trust engine; the detector improves fleet-wide via FL, and no raw data leaves a node.
+Federated learning across vehicle/UAV nodes. Each node fuses a cold-atom quantum accelerometer (CAI), GNSS and a classical IMU behind a continuous, attack-adaptive trust engine. The detector is trained across the fleet with FL, and no raw data leaves a node.
+
+## Final code
+- **Tag `core-freeze-6` = commit `ca614b7`.** Detector v5, fleet θ0 f8, κ_Q = 1, σ_nom 1.0977 m (MEMS) / 1.1171 m (tactical).
+- Suite at freeze: 673 passed, 1 skipped, 0 failures (D-089).
 
 ## Milestones
 | Milestone | Status |
 |---|---|
-| **M0 — Foundations** | ✅ |
-| **M1 — Single-node closed loop** | 🔶 Freeze-4 characterised (D-080). A CAI-trust calibration bug was found (D-082), so **freeze-5 fixes are in progress** (D-083) |
-| **M2 — Federation (H2/H4)** | ✅ **Confirmatory result (freeze-4): NULL by ceiling** (D-081). Both arms detect the abrupt onset at the first epoch (P_D@10 s = 1.0, latency 0 s); no FL benefit measurable. Reported as measured |
-| **M3 — Eval/stats** | ✅ Pipeline + report generator + figures built (`scripts/m3_report.py`, `make_figures_results.py`); final run waits for round 2 |
-| **M4 — Test-seed campaign** | 🔶 **Round 1** (freeze-4, seeds 10000–10029) STOPPED after the bug: partial record committed (3,775/4,980 single-node processed). **Round 2** (freeze-5, NEW seeds 10030–10059) is next (user decision, D-082) |
-| **M5 — Deliverables** | 🔶 Paper Sections I–V + trust engine + limitations; **compiles with MiKTeX (15 pp, all references verified via Crossref/arXiv/manufacturer pages)**. Patent rev. 2. Repro docs. Results/abstract wait for round 2 |
+| M0 — Foundations | ✅ Done |
+| M1 — Single-node closed loop | ✅ Done (freeze-6, detector v5; limitations stated) |
+| M2 — Federation (H2/H4) | ✅ Done. Null by ceiling, as measured on round 3 |
+| M3 — Eval/stats | ✅ Done. Round-3 report `1bb82d18` |
+| M4 — Test-seed campaign | ✅ Done. Round 3 (seeds 10060–10089) is the reported result. Rounds 1 and 2 are archived and superseded |
+| M5 — Deliverables | ✅ Paper 21 pp (`c32f0d0d`), patent rev 3 (`e94f72b2`), reproduction guide |
 
-## Key findings so far (honest status)
-- **Works:**
-  - no harm in normal operation (0 false alarms, accuracy equal to undefended);
-  - jamming defence at both IMU grades;
-  - drift-spoof defence with a tactical IMU (69 vs 108 m);
-  - timing protection under meaconing (168 vs 2363 ns);
-  - the detector generalises to an unseen attack (displaced meaconer AUC 0.9985);
-  - Baseline A (detect-and-exclude) is beaten everywhere.
-- **Limits (stated):**
-  - MEMS-grade IMUs coast too fast for exclusion to pay against slow drift;
-  - co-located meaconing costs position (timing protected);
-  - post-attack re-admission is slow after long or weak attacks;
-  - consistency-matched small spoofs on MEMS.
-- **Bugs found and fixed before round 2** (all on tuning seeds):
-  - the CAI-trust contrast calibration (FedQPNT had been ignoring the quantum sensor);
-  - the flat-world scenarios (no Schuler bound);
-  - the CAI measurement-noise model (missing IMU scale-factor/misalignment term);
-  - a Windows command-line limit and a slow attack lookup (orchestration).
-- **The FL claim (H2/H4) is null.** The paper reframes FL to what was shown: it matches centralised training, it is robust to poisoning, and the detector generalises.
+## Round-3 results
+Source: `results/m4r3/report/SUMMARY.md`. n = 30 per cell, 5,340/5,340 tasks ok, 0 errors.
 
-## Running now
-| Agent | Work |
-|---|---|
-| CORE-ROBUST | Freeze-5 fixes in worktree `FEDQPNT_freeze5`: R_q patch, gate-test update, sanity re-run, full suite, commit |
+- **Confirmatory family (Holm, m = 8):** only **H1 latency rejected** (S2-med MEMS vs Baseline A, Holm p = 0.0037). H1 RMSE not rejected (p = 1). **H2, H3, H4 null** (p = 1).
+- **Safety (3σ_nom rule):** PASS at S1 and S3 (both grades) and at S2-DM MEMS. FAIL at the other spoofing cells (S2 levels, S4, S6, S7 at both grades; S2-DM tactical).
+- **Chattering (S7):** at most 29 cycles/h against the 223/h bound. PASS everywhere.
+- **S14 (4-h):** 60/60 done. Its no-slow-drift criterion is not evaluable in SUMMARY, so no drift claim is made.
 
-## What's left (in order)
-1. Merge → **core-freeze-5** tag.
-2. **Detector v4** retrain on the round-Earth world (~1.5 h).
-3. Tuning sanity check (defended vs undefended, CAI on/off), then the **round-2 pre-registration** (seeds 10030–10059).
-4. **Round 2 campaign:** ~1 day of compute (single-node + fleet scenarios).
-5. **M3 report + figures** (pipeline ready), then **paper results, discussion and abstract**, then the final compile.
-6. **Patent final pass** (shadow probe, split trust, CAI-aware claims); **release** (tag, results manifest, reproducibility).
+**Where FedQPNT wins (as stated in the round-3 report):** faster detection (H1 latency); displaced-meaconer position (MEMS) and timing protection; no cost in nominal operation or under jamming; chattering far below the bound.
 
-**Estimate:** ~2 days, mostly unattended compute, plus usage-limit pauses.
+**Where it loses:**
+- Worse than undefended under ordinary spoofing (the 3σ safety rule fails there).
+- Slow re-admission of GNSS after the attack ends (designed T_ex = 60 s dwell plus the re-admission path).
+- Lockout when GNSS noise is at least 2× the reported value (S11; stated limitation).
 
-## Waiting on the user
-- **Keep the laptop awake and plugged in** during round 2 (round 1 died when the machine stopped on 2026-10-04). Set Windows sleep to "Never" while plugged in.
-- Later:
-  - review the paper draft;
-  - patent filing timing and attorney review (prior-art search needed).
+**CAI and FL:** no measurable effect (H3 null; H2/H4 null).
+
+## Deliverables
+- Paper: `paper/main.tex` (21 pp; `paper/main.pdf`; references `paper/refs.bib`). Results, discussion and abstract committed at `c32f0d0d`.
+- Patent: `patent/CLAIMS_SKELETON.md` rev 3 (37 claims: 3 independent, 34 dependent). Draft for attorney review.
+- Results: `results/m4r3/report/SUMMARY.md`, `HEADLINE.md`, `M3_REPORT.md`, `json/`; figures in `results/m4r3/figures/`.
+- Pre-registration: `docs/specs/raw/PREREG_M4.md` (Amendment R3, written before round-3 data); `docs/specs/raw/H2_PREREG.md` (Amendment 3).
+- Reproduction: `docs/REPRODUCE.md`. Logs: `DECISION_LOG.md` (D-089 latest), `EXECUTION_LOG.md` (#181).
+
+## What is left for the user
+1. Review the paper (`paper/main.tex`), especially the adverse results and the limitations sections.
+2. Patent: attorney review and a prior-art search before any filing. The repo makes no filing recommendation.
+3. Choose the publication venue.
+4. Decide the license. The README still says "License: TBD".

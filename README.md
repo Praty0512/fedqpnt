@@ -2,7 +2,16 @@
 
 Federated, quantum-sensor-augmented PNT (positioning, navigation, and timing) with continuous attack-adaptive trust fusion.
 
-## Status
+## Status & results
+
+**Project complete (2026-10-13).** Final code: tag `core-freeze-6` (commit `ca614b7`). Round-3 test campaign (seeds 10060-10089, 5,340/5,340 tasks ok): the only confirmatory rejection is H1 latency (Holm p = 0.0037); H2, H3 and H4 are null, reported as measured.
+
+- **[PROJECT_STATE.md](PROJECT_STATE.md)**: milestones, full results summary, what is left.
+- **[docs/REPRODUCE.md](docs/REPRODUCE.md)**: environment, data, and exact commands to reproduce round 3 from the tag.
+- **[results/m4r3/report/SUMMARY.md](results/m4r3/report/SUMMARY.md)**: round-3 numbers (confirmatory family, safety, chattering).
+- **[paper/](paper/)**: 21-page paper (`paper/main.tex`).
+
+## Status (earlier, historical)
 
 **Code frozen at tag `core-freeze-1` (commit a7c8bf0); results from this tag are reproducible.**
 
