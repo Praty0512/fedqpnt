@@ -11,19 +11,6 @@ Federated, quantum-sensor-augmented PNT (positioning, navigation, and timing) wi
 - **[results/m4r3/report/SUMMARY.md](results/m4r3/report/SUMMARY.md)**: round-3 numbers (confirmatory family, safety, chattering).
 - **[paper/](paper/)**: 21-page paper (`paper/main.tex`).
 
-## Status (earlier, historical)
-
-**Code frozen at tag `core-freeze-1` (commit a7c8bf0); results from this tag are reproducible.**
-
-**Results are PRELIMINARY on tuning seeds (500–599).** M1 Milestone (single-node closed loop) is signed off with stated limitations; federation, full campaign evaluation, and test-seed results are in progress. See [PROJECT_STATE.md](PROJECT_STATE.md) for milestone status and open issues.
-
-- **M0 — Foundations:** ✅ Signed off 2026-09-26
-- **M1 — Single-node closed loop:** ✅ Signed off 2026-09-28 (with limitations)
-- **M2 — Federation:** 🔶 In progress (H2-ABRUPT diagnostic phase)
-- **M3 — Baselines/eval/stats:** 🔶 Core-robustness session in progress
-- **M4 — Full 15-scenario campaign:** ⛔ Gated on issue #1 (κ_R/filter overconfidence; test-seed gate closed in results/GATE_D047.json)
-- **M5 — Paper/patent/figures/repro:** ⏸ On hold
-
 ## Repository Layout
 
 - **`fedqpnt/`** – Core package (subpackages below)

@@ -103,13 +103,13 @@ Fleets run one at a time (about 3-4 GB each). Do not run them alongside the 4-wo
 
 ```bash
 # Confirmatory family, safety, chattering, scenario criteria (Holm m = 8)
-python scripts/m3_report.py --round3 --run-root results/m4r3 --summary-dir results/m4r3/report --out-md docs/M3_REPORT.md --out-json results/m4r3 --sigma results/sigma_nom_freeze6.json --h2 results/fleet/h2_abrupt_prereg_results_freeze6.json
+python scripts/m3_report.py --round3 --run-root results/m4r3 --sigma results/sigma_nom_freeze6.json --h2 results/fleet/h2_abrupt_prereg_results_freeze6.json --out-md results/m4r3/report/M3_REPORT.md --out-json results/m4r3/report/json --summary-dir results/m4r3/report
 
 # Figures
-python scripts/make_figures_results.py --m3 results/m4r3 --out results/m4r3/figures --h2 results/fleet/h2_abrupt_prereg_results_freeze6.json --sigma results/sigma_nom_freeze6.json
+python scripts/make_figures_results.py --m3 results/m4r3/report/json --out results/m4r3/figures --sigma results/sigma_nom_freeze6.json --h2 results/fleet/h2_abrupt_prereg_results_freeze6.json
 ```
 
-The `m3_report.py` invocation is reconstructed from the script's flags and the committed output layout. Confirm it against `results/m4r3/report/SUMMARY.md` if the regenerated files differ.
+These are the exact invocations used to produce the committed round-3 report.
 
 Outputs: `results/m4r3/report/SUMMARY.md`, `HEADLINE.md`, `M3_REPORT.md`, `json/`.
 
