@@ -45,6 +45,13 @@ CTX = dict(label="round 1", root="results/m4", seed_range="10000-10029", code="c
            detector="results/m1/detector_weights_sup_v3.npz", pending_rids=())
 ROUND2_CTX = dict(label="round 2 (AMENDMENT R2)", root="results/m4r2", seed_range="10030-10059", code="core-freeze-5",
                   detector="results/m1/detector_weights_sup_v4.npz", pending_rids=())
+ROUND3_CTX = dict(label="round 3 (AMENDMENT R3)", root="results/m4r3", seed_range="10060-10089", code="core-freeze-6",
+                  detector="results/m1/detector_weights_sup_v5.npz", pending_rids=())
+H2_STATE = dict(path=H2_FREEZE4, note="D-081; seeds 500-509 of the separate H2 fleet experiment, not the 10000+ range",
+                short="freeze-4 fleet file", pnote="enters with freeze-4 p-values (AMENDMENT R2)")
+ROUND3_H2 = dict(note="H2_PREREG Amendment 3; live seeds 10090-10099 of the separate H2 fleet experiment (core-freeze-6), "
+                      "supersedes the freeze-4 result",
+                 short="freeze-6 fleet file", pnote="enters with freeze-6 p-values (AMENDMENT R3; supersedes freeze-4)")
 
 
 # ----------------------------------------------------------------------------------------------- utilities
@@ -169,7 +176,7 @@ def eval_h2file(t, d, seed_master=0):
         b = np.array([M.censor_event(float(rb[s]["latency_s"]), not rb[s]["censored"]) for s in seeds])
     out = RP._paired_stats(a, b, seed_master)
     out["seeds"] = seeds
-    out["source"] = H2_FREEZE4 + " (D-081; seeds 500-509 of the separate H2 fleet experiment, not the 10000+ range)"
+    out["source"] = H2_STATE["path"] + " (" + H2_STATE["note"] + ")"
     return out
 
 
@@ -193,7 +200,7 @@ def confirmatory(run_root, comp, sigma_path, h2):
         row = dict(label=t.label, hypothesis=t.hypothesis, metric=t.metric, arm_a=t.arm_a, arm_b=t.arm_b,
                    status=None, p=None, hl=None, hl_ci=None, n=None, extra={})
         if t.source == "h2file":
-            row["setting"] = f"{H2_FREEZE4}::{t.scenario}"
+            row["setting"] = f"{H2_STATE['path']}::{t.scenario}"
             try:
                 r = eval_h2file(t, h2)
                 row.update(status="EVALUATED", n=r["n"], p=r["wilcoxon_p"], hl=r["hodges_lehmann"],
@@ -510,7 +517,7 @@ def md_exploratory(an_by_rid, h2, h1_tac):
             L.append(f"| {rid} | {d['n']} | {fmt(d['mean'])} ± {fmt(d['ci'], 3)} | {u['n']} | "
                      f"{fmt(u['mean'])} ± {fmt(u['ci'], 3)} |")
     # H2 secondaries
-    L.append("\n### 4.4 H2/H4 secondary and tertiary metrics (D-081 file; uncorrected, exploratory)\n")
+    L.append("\n### 4.4 H2/H4 secondary and tertiary metrics (H2/H4 results file; uncorrected, exploratory)\n")
     L.append("| part | metric | FedQPNT mean | B-cont mean | paired diff (mean) | Wilcoxon p (uncorrected) |")
     L.append("|---|---|---|---|---|---|")
     for blk in ("h2_abrupt", "h4_abrupt", "control_drift"):
@@ -593,7 +600,7 @@ def write_summary(sdir, rows, all_final, h1_tac, comp, an_list, sigma, args):
              confirmatory=[dict(label=r["label"], setting=r["setting"], metric=r["metric"], arms=[r["arm_a"], r["arm_b"]],
                                 status=r["status"], n=r["n"], raw_p=r["p"], holm_p=r.get("holm_p"),
                                 reject=bool(r["decision"].startswith("REJECT")), hl=r["hl"], hl_ci95=r["hl_ci"],
-                                note="enters with freeze-4 p-values (AMENDMENT R2)" if r["setting"].startswith("results/fleet") else "")
+                                note=H2_STATE["pnote"] if r["setting"].startswith("results/fleet") else "")
                            for r in rows],
              safety={a["rid"]: dict(field=a["safety"]["field"], n=a["safety"]["n"], margin=a["safety"]["margin"],
                                     bound_3sigma=a["safety"]["bound_3sigma"], primary_pass=a["safety"]["primary_pass"],
@@ -606,7 +613,7 @@ def write_summary(sdir, rows, all_final, h1_tac, comp, an_list, sigma, args):
                          n_by_rid={a["rid"]: a["n_by_method"] for a in an_list}),
              pending=sorted(r for r in comp["missing"]))
     (sdir / "summary.json").write_text(json.dumps(clean(S), indent=1))
-    L = [f"# Round-2 M3 summary ({CTX['code']}, seeds {CTX['seed_range']}, n=30/cell)", "",
+    L = [f"# {CTX['label']} M3 summary ({CTX['code']}, seeds {CTX['seed_range']}, n=30/cell)", "",
          f"sigma_nom ({args.sigma}): " + ", ".join(f"{g} {v:.3f} m" for g, v in sigma.items()) +
          f". Tasks: {comp['present']}/{comp['expected']} ok, {comp['missing_n']} missing = "
          f"{', '.join(sorted(comp['missing'])) or 'none'} (failed files: {len(comp['failed'])}).", "",
@@ -614,7 +621,7 @@ def write_summary(sdir, rows, all_final, h1_tac, comp, an_list, sigma, args):
          "| Test | Setting | Metric (A vs B) | n | raw p | Holm p | Reject? | HL | 95% CI |", "|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         ci = f"[{fmt(r['hl_ci'][0])}, {fmt(r['hl_ci'][1])}]" if r["hl_ci"] else "-"
-        st = r["setting"].replace("results/fleet/h2_abrupt_prereg_results_freeze4.json::", "freeze-4 fleet file::")
+        st = r["setting"].replace(H2_STATE["path"] + "::", H2_STATE["short"] + "::")
         L.append(f"| {r['label']} | {st} | {r['metric']} ({r['arm_a']} vs {r['arm_b']}) | {r['n'] or '-'} | "
                  f"{fmt(r['p'])} | {fmt(r.get('holm_p'))} | {'YES' if r['decision'].startswith('REJECT') else 'no'} | "
                  f"{fmt(r['hl'])} | {ci} |")
@@ -647,6 +654,7 @@ def write_summary(sdir, rows, all_final, h1_tac, comp, an_list, sigma, args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--round2", action="store_true", help="round-2 context labels (core-freeze-5, seeds 10030-10059)")
+    ap.add_argument("--round3", action="store_true", help="round-3 context labels (core-freeze-6, seeds 10060-10089, detector v5)")
     ap.add_argument("--run-root", default="results/m4")
     ap.add_argument("--summary-dir", default=None, help="if set, also write summary.json + SUMMARY.md here")
     ap.add_argument("--out-md", default="docs/M3_REPORT.md")
@@ -656,6 +664,11 @@ def main():
     args = ap.parse_args()
     if args.round2:
         CTX.update(ROUND2_CTX)
+    if args.round3:
+        CTX.update(ROUND3_CTX)
+    H2_STATE["path"] = args.h2
+    if args.round3:
+        H2_STATE.update(ROUND3_H2)
     run_root = args.run_root
     CTX["root"] = run_root
     out_json = Path(args.out_json)
