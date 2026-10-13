@@ -18,33 +18,7 @@
 \maketitle
 
 \begin{abstract}
-Global Navigation Satellite System (GNSS) spoofing and jamming remain an open threat to autonomous
-vehicles and unmanned aerial vehicles (UAVs), and existing defenses trade off three properties that
-have not, to our knowledge, been combined in one closed loop: (i) federated learning (FL) across a
-fleet so that one node's experience protects nodes that have not yet seen a given attack,
-(ii) continuously varying, per-sensor trust rather than a binary detect-and-exclude decision, and
-(iii) a physically independent quantum inertial sensor -- a cold-atom interferometer (CAI) -- whose
-absolute, low-bias output is not subject to the same spoofing surface as GNSS. \todo{result: one-sentence
-summary of the headline RMSE\_h(P\_att) comparison, once measured} We present FedQPNT, a system that
-fuses a classical inertial measurement unit (IMU), GNSS, and a cold-atom accelerometer inside a
-loosely-coupled error-state Kalman filter, in which a learnable, federated detector drives a continuous,
-asymmetric trust law with evidence-bounded exclusion \todo{chattering bound re-derived for the frozen law (S7-BOUND agent)}, and in which detector parameters (never raw
-sensor data) are aggregated fleet-wide by a trust-aware robust aggregator (TRIM-NB-R). The quantum
-sensor's noise and fault statistics are calibrated against real cold-atom interferometer laboratory data
-(d'Armagnac de Castanet et al., 2024) rather than assumed; the platform dynamics, GNSS observables, and
-attacks are simulated at the raw-observable level. We report the system design, the pre-registered
-hypotheses (H1--H4) that isolate the contribution of FL, continuous trust, and quantum aiding
-respectively, and the experimental protocol. \todo{result: RMSE\_h(P\_att) FedQPNT vs B-cont}
-\todo{result: RMSE\_h(P\_att) FedQPNT vs Baseline A (FL detect-and-exclude)}
-\todo{result: latency\_on FedQPNT vs B-cont, cold-start scenario S8}
-\todo{result: H3, latency\_eff with vs without quantum aiding, gradual spoofing}
-We disclose two scoped limitations up front: the rigid-mode cold-atom sensor loses contrast above
-$\Omega_c \approx 17\,\mathrm{mrad/s}$, making quantum aiding intermittent during ordinary vehicle
-manoeuvres, and the loosely-coupled filter requires a GNSS covariance inflation factor ($\kappa_R = 60$, tuned once on
-tuning seeds identically for every method) as a surrogate for the time-correlated error of a loosely coupled
-fix, and its attitude and accelerometer-bias states may remain over-confident \todo{R3: re-measure residual consistency on the frozen core}.
-No experimental outcome is claimed in this draft; all
-quantitative statements are placeholders pending the completed evaluation.
+Global Navigation Satellite System (GNSS) spoofing and jamming threaten autonomous vehicles and unmanned aerial vehicles. We present FedQPNT, which fuses an inertial measurement unit, GNSS and a cold-atom accelerometer (CAI) in an error-state Kalman filter. A learned detector drives a continuous, asymmetric trust law with evidence-bounded exclusion, and detector parameters are aggregated across a fleet by a robust federated-learning (FL) aggregator. The CAI noise model is calibrated to real laboratory data; platform, GNSS observables and attacks are simulated. We report a pre-registered evaluation on 30 unseen seeds per scenario at two inertial grades, with a Holm-corrected confirmatory family of eight tests. FedQPNT detects attack onset significantly earlier than a detect-and-exclude baseline (median paired difference 0.5\,s, Holm-adjusted $p=0.004$); the accompanying position-error test was not significant. It adds no measurable cost in nominal operation or under jamming. Against a displaced meaconer it lowers attack-window horizontal error relative to the baseline at both grades and to the undefended filter at the MEMS grade, and it cuts median clock error about eight-fold (634 versus 5220\,ns). Trust cycling stayed at or below 29 cycles per hour (proven bound: 223), and a four-hour mission showed no drift. The evaluation also characterises where GNSS exclusion does not pay: for small-offset spoofs an inertial coast drifts further than the spoof displaces, and the re-admission dwell dominates post-attack error. The CAI and federated learning showed no measurable effect in this configuration (hypotheses H2--H4 not supported).
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -99,13 +73,13 @@ laboratory data rather than assumed.}
 \item A continuous, asymmetric trust law with evidence-bounded exclusion (a bounded distrust time, a
   shadow probe that tests returning GNSS against the coasting state without applying it, and separate
   position and clock trust weights) that couples a learned, federated detector to the GNSS, clock and
-  quantum measurement covariances via a bounded inflation $R_{\mathrm{eff}} = R / \max(w, w_{\min})$
-  \todo{chattering bound re-derived for the frozen law (S7-BOUND agent)}
+  quantum measurement covariances via a bounded inflation $R_{\mathrm{eff}} = R / \max(w, w_{\min})$,
+  with trust cycling bounded at $223$ cycles per hour independently of the timing of the evidence
   (Section~\ref{sec:method}).
 \item TRIM-NB-R, a trust-aware robust federated aggregator that combines norm clipping, coordinate-wise
-  trimmed-mean/median aggregation, and a cosine-similarity reputation score with quarantine, evaluated
+  trimmed-mean/median aggregation, and a cosine-similarity reputation score with quarantine, specified
   against a FedAvg reference (FedProx is implemented but not evaluated, as with the frozen $\mu=0$ it coincides with FedAvg) under sign-flip, Gaussian, label-flip and "A Little Is Enough"
-  poisoning (Section~\ref{sec:method}).
+  poisoning (Section~\ref{sec:method}); the round-3 evaluation does not include an AUC-based poisoning comparison (Section~\ref{sec:results}).
 \item A quantum inertial sensor model whose noise density, per-interrogation-time noise scaling, and
   bursty fault process are calibrated from real cold-atom interferometer shot data
   \cite{darmagnac2024atom} rather than from published summary statistics alone, together with an
@@ -122,8 +96,7 @@ laboratory data rather than assumed.}
 Section~\ref{sec:related} surveys related work in five groups and positions FedQPNT against it.
 Section~\ref{sec:threat} specifies the node and threat model. Section~\ref{sec:method} gives the
 fusion, trust, and federation equations. Section~\ref{sec:setup} describes the experimental protocol.
-Section~\ref{sec:results} and Section~\ref{sec:discussion} report results and limitations (currently
-placeholders). Section~\ref{sec:conclusion} concludes, followed by a reproducibility statement.
+Section~\ref{sec:results} and Section~\ref{sec:discussion} report results, discussion and limitations. Section~\ref{sec:conclusion} concludes, followed by a reproducibility statement.
 
 %=====================================================================
 \section{Related Work}
@@ -555,7 +528,7 @@ correlated-error state, because a slow drift spoof would be absorbed into it as 
 The attitude and bias states may remain over-confident at this $\kappa_R$ (against the effective-bias truth,
 which includes turn-on bias, GM1, random-walk and scale-factor/misalignment aliasing; an earlier measurement,
 before the covariance corrections of this section, found the accelerometer-bias NEES about six times its nominal value on
-tuning seeds); this is a stated limitation (Section~\ref{sec:limitations}). \todo{R3: re-measure on core-freeze-6.}
+tuning seeds); this is a stated limitation (Section~\ref{sec:limitations}). The round-3 campaign measured the position ANEES only (S1: $0.84$ and $0.94$, inside the band $[0.5,2]$) and did not re-measure the attitude and bias states, so the earlier figure is the latest available.
 
 The CAI enters as a direct observation of the classical accelerometer bias. Over the sample's response
 window $W$ (length $T_W = 2T$), the filter forms the same-window, triangularly weighted mean of the
@@ -749,9 +722,13 @@ is fed $p = 1$. Jamming evidence (AGC drop, C/N0 loss, lost lock) does not block
 jamming degrades rather than deceives and the receiver's own covariance already down-weights a degraded fix;
 invalid fixes are simply absent. Because DISTRUST can only be left through PROBE, successive entries into
 DISTRUST are separated by at least $T_{\mathrm{ex}} + T_{\mathrm{probe}} = 70\,\mathrm{s}$ by construction.
-\todo{Chattering bound: the abstract and Contribution~2 no longer state $T_{\mathrm{cyc}} \ge 26.1\,\mathrm{s}$;
-the bound for the frozen law, its property-based verification and the S7 count are being re-derived (S7-BOUND
-agent, D-068) and must be inserted here.}
+Consequently the number of trust cycles per hour (a downward crossing of $w = 0.5$ followed by an upward
+crossing of $w = 0.9$) is bounded without any assumption on the timing of the evidence: from the ramp time
+constant $\tau_{\mathrm{r}}$ and the $0.5$ and $0.9$ crossings, every cycle lasts at least
+$L = 16.094\,\mathrm{s}$, so $N_{\mathrm{cyc}} \le \lfloor 3600/16.094 \rfloor = 223$ per hour, and
+$N_{\mathrm{cyc}} \le 133$ per hour when fixes arrive on a regular $1\,\mathrm{Hz}$ grid. The bound is
+independent of the navigation filter and is exercised by a test suite of periodic, adversarial and random
+toggling sequences; the counts observed in the S7 scenarios are in Section~\ref{sec:results}.
 
 \paragraph{Physical spoof evidence $E_s$.}
 $E_s$ is a set of rule-based signatures that do not depend on the learned detector. It has four members.
@@ -883,8 +860,7 @@ exceeds the saturation limit ($156.9\,\mathrm{m/s^2}$, assumed) and $1$ otherwis
 The three-state law with the shadow probe, consistency-based reacquisition and the position/clock split is
 used by FedQPNT and by B-cont (which differ only in how the detector is trained). Baseline~A, B-bin and B$'$
 keep their earlier, simpler laws, and the CAI-off arm of H3 is FedQPNT with the CAI switched off.
-\todo{result: trust trajectories $w_{\mathrm{pos}}(t)$, $w_{\mathrm{clk}}(t)$ and the fraction of time spent in
-TRUST/DISTRUST/PROBE per scenario, from the test-seed sweep.}
+Trust trajectories and the fraction of time in each state are not reported in this version; the trust behaviour is summarised by the alarm fraction, detection latency, recovery time and cycle counts of Section~\ref{sec:results}.
 
 %---------------------------------------------------------------------
 \subsection{Federated learning}
@@ -985,20 +961,22 @@ platform is a ground vehicle unless stated.
 \begin{table*}[t]
 \centering
 \caption{Scenario matrix as registered in the code. ``Nodes'' is the fleet size; attack onsets in seconds.
-$\dagger$ marks scenarios whose attitude/bias-dependent claims are gated (see text).}
+$\dagger$ marks scenarios that were gated behind the filter-consistency gate before the freeze (see text).}
 \label{tab:scenarios}
 \small
-\begin{tabular}{llrrl}
+\begin{tabular}{llrrp{6.4cm}}
 \toprule
 ID & Scenario & Nodes & Duration (s) & Attack (severity, onset, duration) \\
 \midrule
 S1 & Nominal & 1 & 600 & none \\
 S2 & Gradual spoofing: low / medium / high & 1 & 600 & drift spoof; 0.3 / 0.6 / 0.9; 60; 300 \\
+S2-DM & Displaced meaconer (variant of S2) & 1 & 600 & displaced meaconing (max.\ $500\,$m); 0.6; 60; 300 \\
 S3$^\dagger$ & Sudden jamming & 1 & 300 & wideband jam; 1.0; 60; 60 \\
-S4$^\dagger$ & Jam-then-spoof at reacquisition & 1 & 400 & (jam leg registered; see text) \\
+S4$^\dagger$ & Jam-then-spoof at reacquisition & 1 & 400 & wideband jam; 1.0; 60; 40, then drift spoof; 0.6; 100; 200 \\
 S5 & Partial node failure / delayed FL updates & 10 & 600 & none (30\% node failure at $T/2$) \\
 S6$^\dagger$ & Long-duration CAI bias drift (Schuler world) & 1 & 14\,400 & drift spoof; 0.05; 600; open \\
-S7 & Trust chattering & 1 & 3600 & drift spoof toggled every 10\,s; 0.5; 60 \\
+S6-coast & CAI coasting envelope (exploratory) & 1 & -- & forced GNSS outage of $180\,$s \\
+S7 & Trust chattering & 1 & 3600 & drift spoof toggled with period $p \in \{2,5,10,20,60\}\,$s; 0.5; 60 \\
 S8 & Cold-start node at $T/2$ & 5 & 600 & drift spoof; 0.6; 330; 120 \\
 S9 & Communications dropouts & 5 & 600 & none (Gilbert--Elliott loss sweep) \\
 S10 & Sample-rate mismatch & 1 & 300 & none (GNSS rate $\times$ CAI cycle grid) \\
@@ -1011,11 +989,12 @@ S15 & Simultaneous attacks on a fleet subset (30\%) & 10 & 600 & drift spoof; 0.
 \end{tabular}
 \end{table*}
 
-The code still marks the attitude- and bias-dependent scenarios (S3, S4, S6, S14) as gated behind the
-filter-consistency gate and the test-seed gate (Section~\ref{sec:seeds}); their claims are reported only if
-the gate clears. \todo{Confirm after the core freeze which of S3/S4/S6/S14 are unblocked (the code now stamps
-$\kappa_R = 60$), and register a true jam-then-spoof attack for S4: the registered S4 attack is
-currently the jam leg only.}
+The attitude- and bias-dependent scenarios (S3, S4, S6, S14) were gated behind the filter-consistency gate and the
+test-seed gate (Section~\ref{sec:seeds}); in round 3 they were run once on the frozen core ($\kappa_R = 60$) and
+are reported as measured. The S4 attack comprises both legs: a $40\,\mathrm{s}$ wideband jam from $60\,\mathrm{s}$
+followed by a drift spoof of severity $0.6$ from $100\,\mathrm{s}$ for $200\,\mathrm{s}$. S2-DM is a displaced-meaconer variant of S2
+(a common-mode delay with a position displacement of up to $500\,\mathrm{m}$) held out of detector training, and S6-coast is an exploratory
+$180\,\mathrm{s}$ forced-outage test of the CAI's coasting contribution (not in the Holm family).
 
 %---------------------------------------------------------------------
 \subsection{Methods and baselines}
@@ -1057,7 +1036,7 @@ B-bin is reported alongside. B$'$ is the classical innovation-based adaptive-fil
 ablations (binary trust, $-$recovery-gate, logistic-regression detector, FedAvg aggregation) are registered in
 the trust-law method table; FedAvg is the only aggregator ablation with an evaluation arm in the fleet
 runner, and FedProx is implemented but, with the frozen $\mu = 0$, coincides with FedAvg.
-\todo{Table of all ablations with their detector/trust/CAI/aggregator columns, once the trust law is frozen.}
+In round 3 the single-node arms run were Undefended, Baseline~A, B-bin, B-cont, B$'$ and fixed trust in S1--S4, and the $-$quantum ablation in S6; the fleet arms are those named in Section~\ref{sec:results}. The $-$recovery-gate, logistic-regression-detector and FedAvg ablations were not part of the round-3 matrix.
 
 %---------------------------------------------------------------------
 \subsection{Hypotheses}
@@ -1099,8 +1078,7 @@ timing, clock-bias and clock-drift errors in nanoseconds give $\mathrm{RMSE}_t$ 
 secondary except that meaconing scenarios report $\mathrm{RMSE}_t$ alongside the primaries, since meaconing
 is chiefly a timing attack. FL metrics are the global-model AUC per round on a fixed labelled evaluation set
 (evaluator only), rounds skipped and quarantined-node counts. Ground truth and labels are read only by the
-evaluator, after the mission, from the recorded files. \todo{$\mathrm{latency}_{\mathrm{eff}}$ is specified
-but not yet computed by the evaluation code; implement before the H3 analysis.}
+evaluator, after the mission, from the recorded files.
 
 %---------------------------------------------------------------------
 \subsection{Statistics}
@@ -1122,9 +1100,9 @@ outcomes use the exact McNemar test; proportions carry Wilson $95\%$ intervals. 
 take the censoring value and are handled by the rank tests. Holm--Bonferroni \cite{holm1979simple}
 controls the family-wise error over the confirmatory family $\{\mathrm{H1},\ldots,\mathrm{H4}\}\times\{\text{primary
 metrics}\}$ (scenarios where applicable); secondary metrics carry unadjusted $p$-values labelled
-exploratory. \todo{Reconcile the implemented confirmatory family with this specification: the report code
-currently lists five tests on S2-medium and S8, excludes H3 while it is gated, and uses only
-$\mathrm{latency}_{\mathrm{on}}$ for H4.}
+exploratory. The implemented family has eight tests (Table~\ref{tab:conf}): H1 on $\mathrm{RMSE}_h(P_{\mathrm{att}})$ and
+$\mathrm{latency}_{\mathrm{on}}$ against Baseline~A (S2-medium, MEMS grade); H2 and H4 on $P_D@10\,\mathrm{s}$ and onset latency
+against B-cont (abrupt and cold-start fleet experiments); and H3 on $\mathrm{latency}_{\mathrm{eff}}$ with and without the CAI (S6, both grades); Holm's procedure uses a fixed $m=8$.
 
 %---------------------------------------------------------------------
 \subsection{Seed protocol and code freeze}
@@ -1144,7 +1122,7 @@ launch and at completion, and a run is valid only if the tree is clean and uncha
 changes are made only when no evaluation run is live. Trust-law and filter hyperparameters are frozen with
 their configuration hash logged before the test sweep, and all random streams derive hierarchically from
 the master seed, node identifier and component name. The frozen $\kappa_R$ is $60$ (single source \texttt{DEFAULT\_KAPPA\_R}); the core for the primary results is tag \texttt{core-freeze-6}.
-\todo{State the configuration hash of core-freeze-6.}
+The tag \texttt{core-freeze-6} resolves to git commit \texttt{ca614b7f8a73}; each run record carries its own configuration hash.
 
 %---------------------------------------------------------------------
 \subsection{H2/H4 event-level protocol (pre-registered)}
@@ -1178,7 +1156,7 @@ For the abrupt-spoofing family the following was registered \emph{before any val
 \item \emph{Sampling.} Every metric is computed on the $1\,\mathrm{Hz}$ detector-update epochs (the ticks at
   which the detector is scored), not on the $100\,\mathrm{Hz}$ ticks; an earlier invalid run mixed the two.
 \end{itemize}
-The experiment is run on \texttt{core-freeze-6}, in which a fleet node installs the global model each round. \todo{R3: H2/H4 event-level outcome, per-seed values and degeneracy diagnostics.}
+The experiment is run on \texttt{core-freeze-6}, in which a fleet node installs the global model each round. The outcome, with per-seed values, is in Section~\ref{sec:res-fleet}: the primary metric is at its ceiling in both arms in all ten seeds.
 
 %---------------------------------------------------------------------
 \subsection{Validation protocol}
@@ -1201,8 +1179,7 @@ tactical-grade gyros; this is a hypothesis, not a finding. The IMU grade is ther
 attack scenarios are run with both the industrial MEMS and the tactical grade, with the CAI on and off, and
 \emph{both} grades are reported. The default grade is not switched to whichever one favours the method.
 A coasting-envelope measurement (a forced GNSS outage of $180\,\mathrm{s}$, maximum horizontal error with the CAI
-on and off, per grade) characterises the quantum contribution under denial. \todo{result: coasting envelope
-and H3 by grade on test seeds.}
+on and off, per grade) characterises the quantum contribution under denial; the measured values are in Section~\ref{sec:results}.
 
 %---------------------------------------------------------------------
 \subsection{Safety principle}
@@ -1219,26 +1196,192 @@ deviation of the undefended method's nominal-scenario $\mathrm{RMSE}_h$, measure
 all methods. It is a noise floor, not the spread of attack-phase errors. Detection of a drifting spoofer
 depends on the strength $s$ of its single-antenna C/N0 signature (the shared common-mode fluctuation and its
 convergence, scaled from $s=0$ to $s=1$). The paper therefore states a minimum signature strength,
-$s \gtrsim 0.5$, as an explicit operating assumption, reports the $s < 0.5$ failure boundary with a harm
-analysis, and includes signature strengths $s\in\{0,0.25,0.5,1\}$ in the protocol. Failures of
+$s \gtrsim 0.5$, as an explicit operating assumption, and registers a measurement of the $s < 0.5$ failure boundary, with a harm
+analysis, over signature strengths $s\in\{0,0.25,0.5,1\}$. Failures of
 Eq.~\eqref{eq:safety} are reported as measured and are not tuned away. A relaxed criterion may be adopted
 only if pre-registered prospectively, before the test sweep, and labelled as defined after the tuning data.
-\todo{result: safety-principle table over $s$ and methods; failure boundary. State the recovery-after-jamming
-requirement (jamming must not slow recovery) with its result.}
+That sweep was not executed in the round-3 test campaign, so the failure boundary remains a tuning-seed diagnostic. The round-3 outcome of Eq.~\eqref{eq:safety} for the scenarios that were run, and the recovery-after-jamming requirement (jamming must not slow recovery), are reported in Section~\ref{sec:results}.
 
 %=====================================================================
 \section{Results}
 \label{sec:results}
 %=====================================================================
-\todo[inline]{No results exist yet. This section will report, per scenario and per method: RMSE\_h/MAX\_h/P95\_h and ANEES for S1--S15; detection probability and latency\_on/latency\_eff for the spoofing/jamming scenarios; trust chattering counts for S7; FL global-model AUC, rounds skipped and quarantined-node counts for S5/S8/S9/S12/S15; and the H1--H4 hypothesis tests with Hodges--Lehmann effect sizes and Holm-corrected p-values. All numbers below are placeholders.}
+All results in this section come from a single pre-registered round on the code at tag \texttt{core-freeze-6}: test seeds $10060$--$10089$ ($n=30$ per scenario--method cell; $5{,}340$ of $5{,}340$ runs completed) and, for the H2/H4 fleet experiment, seeds $10090$--$10099$ ($n=10$). The nominal noise floor of the safety rule is $\sigma_{\mathrm{nom}} = 1.098\,\mathrm{m}$ (industrial MEMS) and $1.117\,\mathrm{m}$ (tactical), so $3\sigma_{\mathrm{nom}} = 3.29$ and $3.35\,\mathrm{m}$. Cells report the median over seeds unless stated. The alarm fraction is the fraction of epochs outside the attack label in which the trust alarm is active, so it includes the post-attack exclusion dwell. In the single-node scenarios the FedQPNT arm is the node configuration with the frozen supervised detector and no federation rounds (a single node has no peers), so single-node comparisons test the continuous trust law and the quantum-aided filter; federated learning enters only in the fleet experiments (S5, S8, S9, S12, S15, H2, H4). Verdicts are paired Hodges--Lehmann (HL) differences with $95\%$ BCa intervals; ``better''/``worse'' means that the interval excludes zero, and these descriptive verdicts are not part of the Holm family. Both IMU grades are always reported.
 
-\todo{result: Table -- RMSE\_h(P\_att), MAX\_h(P\_att), P95\_h(P\_att) for FedQPNT, A, A0, B-bin, B-cont, B$'$, per attack scenario (S2--S4, S15), 30 seeds, median [IQR]}
-\todo{result: Table -- detection probability P\_D and latency\_on/latency\_eff, same methods and scenarios}
-\todo{result: Figure -- trust trajectory $w_{\mathrm{gnss}}(t)$, $w_{\mathrm{quantum}}(t)$ and detector output $\bar p(t)$ across a representative gradual-spoof run}
-\todo{result: Table -- S12 poisoning: global-model AUC drop at $f=20\%$ and $f=40\%$, TRIM-NB-R vs FedAvg}
-\todo{result: S1 nominal-operation cost check (RMSE\_h ratio to fixed-trust, FAR/h, ANEES, mean $w_{\mathrm{gnss}}$) for every method}
-\todo{result: H1--H4 hypothesis test table with Hodges--Lehmann median differences, 95\% BCa CIs, Holm-adjusted p-values}
-\todo{result: MEMS vs tactical IMU grade comparison of the CAI's contribution (H3), reported for both grades per D-002/D-009 risk R-6}
+\subsection{Confirmatory family}
+Table~\ref{tab:conf} lists the eight pre-registered tests. One rejects after Holm correction: the latency of attack-onset detection (H1, S2-medium, MEMS), where FedQPNT detects the onset a median $0.5\,\mathrm{s}$ earlier than the FL detect-and-exclude Baseline~A (raw $p = 4.65\times10^{-4}$, Holm $p = 3.72\times10^{-3}$; FedQPNT median $1\,\mathrm{s}$, Baseline~A median $1\,\mathrm{s}$ with interquartile range $[1,2]\,\mathrm{s}$, on a $1\,\mathrm{Hz}$ detector clock). The H1 position-error test was \emph{not} significant (raw $p=0.271$, Holm $p=1$; HL $+85.3\,\mathrm{m}$, $95\%$ CI $[-59.7, 235]$), so H1 is supported on latency only. H2, H3 and H4 are not supported: every paired difference is exactly zero ($p=1$); in the H2/H4 experiments both arms detect all abrupt-spoof events at the onset epoch ($P_D@10\,\mathrm{s} = 1$, latency $0\,\mathrm{s}$, no censored events), and in S6 both CAI arms have identical $\mathrm{latency}_{\mathrm{eff}}$ at both grades. These primary metrics are therefore at a ceiling or floor and cannot separate the arms (details in Section~\ref{sec:res-fleet}).
+
+\begin{table*}[t]
+\centering
+\caption{Confirmatory family (paired Wilcoxon, Holm with fixed $m=8$). HL is the paired Hodges--Lehmann difference (FedQPNT $-$ comparator; metres for RMSE, seconds for latencies) with $95\%$ BCa CI; ``Rej.'' is rejection at the Holm-adjusted $0.05$ level. Source: round-3 summary.}
+\label{tab:conf}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llllrrrrlc}
+\toprule
+Hyp. & Metric & Setting & $n$ & raw $p$ & Holm $p$ & HL & 95\% CI & Rej. \\
+\midrule
+H1 & RMSE$_h(P_{\rm att})$ vs.\ Baseline A & S2-med, MEMS & 30 & 0.27 & 1 & 85.3 & [$-$59.7, 235] & no \\
+H1 & latency$_{\rm on}$ vs.\ Baseline A & S2-med, MEMS & 30 & $4.65\times 10^{-4}$ & $3.72\times 10^{-3}$ & $-$0.5 & [$-$1, $-$1] & yes \\
+H2 & $P_D@10$\,s vs.\ B-cont & abrupt fleet & 10 & 1 & 1 & 0 & [0, 0] & no \\
+H2 & onset latency vs.\ B-cont & abrupt fleet & 10 & 1 & 1 & 0 & [0, 0] & no \\
+H3 & latency$_{\rm eff}$, CAI vs.\ $-$CAI & S6, MEMS & 30 & 1 & 1 & 0 & [0, 0] & no \\
+H3 & latency$_{\rm eff}$, CAI vs.\ $-$CAI & S6, tactical & 30 & 1 & 1 & 0 & [0, 0] & no \\
+H4 & $P_D@10$\,s vs.\ B-cont & cold-start fleet & 10 & 1 & 1 & 0 & [0, 0] & no \\
+H4 & onset latency vs.\ B-cont & cold-start fleet & 10 & 1 & 1 & 0 & [0, 0] & no \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Safety principle}
+Table~\ref{tab:safety} gives the outcome of Eq.~\eqref{eq:safety} (mean attack-window maximum horizontal error, defended minus undefended, against the bound $3\sigma_{\mathrm{nom}}$; the S1 row uses the nominal-window maximum). The principle holds in nominal operation (S1) and under jamming (S3) at both grades, and for the displaced meaconer at the MEMS grade (S2-DM margin $-60.1\,\mathrm{m}$; the HL CI $[-686, 578]$ includes zero). It fails for the tactical grade on S2-DM (margin $522\,\mathrm{m}$, HL CI $[-270, 1172]$), for every gradual-spoof severity (S2-low/medium/high margins $1.75$--$2.87\,\mathrm{km}$), for jam-then-spoof (S4, $1.04$ and $1.50\,\mathrm{km}$), for the four-hour drift spoof (S6, $47.4$ and $6.81\,\mathrm{km}$) and for every chattering variant (S7). These failures are reported as measured and were not tuned away. Recovery after jamming is not slowed: in S3 the median recovery time is $3\,\mathrm{s}$ with FedQPNT versus $3\,\mathrm{s}$ undefended at the MEMS grade (HL $-0.36\,\mathrm{s}$, CI $[-0.72, 0]$) and $0\,\mathrm{s}$ versus $1\,\mathrm{s}$ at the tactical grade (HL $-0.5\,\mathrm{s}$, CI $[-0.73,-0.73]$). The signature-strength sweep $s\in\{0,0.25,0.5,1\}$ of Section~\ref{sec:safety} was not part of the round-3 test campaign, so the $s<0.5$ failure boundary is not re-measured here.
+
+\begin{table}[t]
+\centering
+\caption{Safety principle, Eq.~\eqref{eq:safety}: margin is mean defended minus mean undefended maximum horizontal error (m); the bound is $3\sigma_{\mathrm{nom}} = 3.29$\,m (MEMS) and $3.35$\,m (tactical). $p$ is the S7 toggle period in seconds.}
+\label{tab:safety}
+\scriptsize
+\begin{tabular}{lrrrr}
+\toprule
+ & \multicolumn{2}{c}{Industrial MEMS} & \multicolumn{2}{c}{Tactical} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Scenario & Result & Margin & Result & Margin \\
+\midrule
+S1 & PASS & $-$0.00223 & PASS & $-$0.0196 \\
+S2-low & FAIL & 2{,}260 & FAIL & 2{,}870 \\
+S2-med & FAIL & 1{,}990 & FAIL & 2{,}560 \\
+S2-high & FAIL & 1{,}750 & FAIL & 2{,}230 \\
+S2-DM & PASS & $-$60.1 & FAIL & 522 \\
+S3 & PASS & $-$0.00684 & PASS & 0.682 \\
+S4 & FAIL & 1{,}040 & FAIL & 1{,}500 \\
+S6 & FAIL & 47{,}400 & FAIL & 6{,}810 \\
+S7, $p{=}2$ & FAIL & 29.1 & FAIL & 10.9 \\
+S7, $p{=}5$ & FAIL & 26.1 & FAIL & 165 \\
+S7, $p{=}10$ & FAIL & 122 & FAIL & 51{,}200 \\
+S7, $p{=}20$ & FAIL & 144 & FAIL & 15{,}600 \\
+S7, $p{=}60$ & FAIL & 202 & FAIL & 65{,}900 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Headline comparison}
+Tables~\ref{tab:head1} and~\ref{tab:head2} compare FedQPNT (FQ) with the undefended filter (UD) and Baseline~A (BA). The pattern separates cleanly into scenarios in which FedQPNT costs nothing or helps, and scenarios in which it is worse.
+
+\emph{Nominal operation and jamming (S1, S3).} FedQPNT is equal to the undefended filter in nominal horizontal error at the MEMS grade ($2.91$ versus $2.90\,\mathrm{m}$) and marginally better at the tactical grade (HL $-0.036\,\mathrm{m}$, CI $[-0.072,-0.006]$); the alarm fraction is $0$ in all arms. Its clock error is marginally worse ($10.4$ versus $10.0\,\mathrm{ns}$, HL $+0.28\,\mathrm{ns}$, CI $[0.14, 0.43]$). The S1 acceptance criteria pass on horizontal error relative to fixed trust (median ratio $0.997$ MEMS, $0.991$ tactical; bound $1.05$), false alarms ($0$/h), position ANEES ($0.84$ and $0.94$, band $[0.5, 2]$) and mean GNSS weight ($0.975$ at both grades), but the total variation of $w_{\mathrm{gnss}}$ ($12.5$ and $12.6$ per hour against a bound of $1$) fails. Under jamming (S3) attack-window error is equal to the undefended and Baseline~A arms at both grades, and post-attack error is marginally lower (HL $-0.042\,\mathrm{m}$ MEMS, $-0.029\,\mathrm{m}$ tactical).
+
+\emph{Displaced meaconer (S2-DM).} At the MEMS grade the attack-window horizontal error is lower than undefended (median $943$ versus $1{,}340\,\mathrm{m}$; HL $-471\,\mathrm{m}$, CI $[-743,-202]$) and than Baseline~A ($2{,}150\,\mathrm{m}$; HL $-5{,}020\,\mathrm{m}$, CI $[-8{,}620,-881]$). At the tactical grade it is indistinguishable from undefended (HL $-239\,\mathrm{m}$, CI $[-508, 17.9]$) and lower than Baseline~A ($3{,}010\,\mathrm{m}$; HL $-2{,}910\,\mathrm{m}$, CI $[-3{,}940,-1{,}090]$). Clock error falls from $5{,}220\,\mathrm{ns}$ undefended to $634\,\mathrm{ns}$ (HL $-4{,}570\,\mathrm{ns}$, CI $[-5{,}180,-4{,}180]$), and is also lower than Baseline~A ($1{,}220$ and $2{,}230\,\mathrm{ns}$ at the two grades; HL $-1{,}390$ and $-1{,}860\,\mathrm{ns}$). The cost is paid after the attack: post-attack horizontal error is higher than both comparators ($1{,}310$ versus $859$ undefended and $268\,\mathrm{m}$ Baseline~A at the MEMS grade), and the alarm fraction is $0.169$ versus $0.021$ undefended and $0.0027$ Baseline~A.
+
+\emph{Gradual spoofing (S2-low/medium/high).} Here FedQPNT is worse than the undefended filter in the attack window at both grades (medium severity, MEMS: $760$ versus $254\,\mathrm{m}$; tactical: $973$ versus $254\,\mathrm{m}$; low severity: $766$ versus $127\,\mathrm{m}$ at MEMS; high: $734$ versus $381\,\mathrm{m}$) and equal to Baseline~A at the MEMS grade for all three severities (HL CIs include zero, e.g.\ $+85.3\,\mathrm{m}$ at medium). Post-attack error is much larger than for either comparator (medium, MEMS: $1{,}120$ versus $189\,\mathrm{m}$ undefended and $5.69\,\mathrm{m}$ Baseline~A), and the alarm fraction is $0.164$ versus $0$. Detection is nevertheless faster than both comparators by $0.5$--$1\,\mathrm{s}$ at all severities and grades.
+
+\emph{Jam-then-spoof (S4) and the four-hour drift spoof (S6).} In S4 (a $40\,\mathrm{s}$ jam followed by a drift spoof) FedQPNT detects the attack at a median $42\,\mathrm{s}$ against $61\,\mathrm{s}$ for both comparators (HL $-19.5\,\mathrm{s}$, CI $[-20.5,-19.5]$), but its attack-window error ($461$ and $638\,\mathrm{m}$) exceeds the undefended filter ($137\,\mathrm{m}$) at both grades, and Baseline~A ($227$ and $104\,\mathrm{m}$) as well. In S6 the attack-window error is $16{,}200\,\mathrm{m}$ (MEMS) and $2{,}680\,\mathrm{m}$ (tactical) against $438\,\mathrm{m}$ undefended; the alarm fraction is $0.132$ and the clock error $3{,}790$ versus $11.6\,\mathrm{ns}$ undefended. FedQPNT detects the spoof as quickly as the undefended filter does or faster ($1\,\mathrm{s}$ median; HL $-0.5\,\mathrm{s}$, CI $[-1,-1]$), but in this scenario detection does not translate into lower error.
+
+\begin{table*}[t]
+\centering
+\caption{Horizontal error, median over $30$ seeds (m). FQ: FedQPNT; UD: undefended; BA: Baseline~A. The verdict column gives the paired HL verdict of FQ against UD/BA (B: FQ better; W: FQ worse; $=$: CI includes zero). The S1 attack-window entry is the nominal-window RMSE$_h$ (S1 has no attack). S6 has no Baseline~A arm.}
+\label{tab:head1}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrcrrrc}
+\toprule
+ & & \multicolumn{4}{c}{Attack window RMSE$_h$} & \multicolumn{4}{c}{Post-attack RMSE$_h$} \\
+\cmidrule(lr){3-6}\cmidrule(lr){7-10}
+Scen. & Grade & FQ & UD & BA & vs UD/BA & FQ & UD & BA & vs UD/BA \\
+\midrule
+S1 & MEMS & 2.91 & 2.9 & 2.9 & =/= & -- & -- & -- & -- \\
+ & Tact. & 2.9 & 2.96 & 2.95 & B/B & -- & -- & -- & -- \\
+S2-med & MEMS & 760 & 254 & 623 & W/= & 1{,}120 & 189 & 5.69 & W/W \\
+ & Tact. & 973 & 254 & 569 & W/W & 1{,}310 & 191 & 5.76 & W/W \\
+S2-DM & MEMS & 943 & 1{,}340 & 2{,}150 & B/B & 1{,}310 & 859 & 268 & W/W \\
+ & Tact. & 1{,}050 & 1{,}340 & 3{,}010 & =/B & 1{,}420 & 887 & 296 & W/W \\
+S3 & MEMS & 14.3 & 14.4 & 14.4 & =/= & 2.58 & 2.6 & 2.6 & B/B \\
+ & Tact. & 21.1 & 21.1 & 21.1 & =/= & 2.42 & 2.43 & 2.42 & B/B \\
+S4 & MEMS & 461 & 137 & 227 & W/W & 1{,}430 & 165 & 5.45 & W/W \\
+ & Tact. & 638 & 137 & 104 & W/W & 1{,}790 & 167 & 5.31 & W/W \\
+S6 & MEMS & 16{,}200 & 438 & -- & W/-- & 24{,}600 & 268 & -- & W/-- \\
+ & Tact. & 2{,}680 & 438 & -- & W/-- & 3{,}840 & 268 & -- & W/-- \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+\centering
+\caption{Detection latency (s, from attack onset) and clock error RMSE$_t$ (ns), median over $30$ seeds; notation as in Table~\ref{tab:head1}. The clock-error values coincide across the two IMU grades in most scenarios. S1 has no attack, so no latency is defined.}
+\label{tab:head2}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrcrrrc}
+\toprule
+ & & \multicolumn{4}{c}{Detection latency$_{\mathrm{on}}$} & \multicolumn{4}{c}{Clock RMSE$_t$} \\
+\cmidrule(lr){3-6}\cmidrule(lr){7-10}
+Scen. & Grade & FQ & UD & BA & vs UD/BA & FQ & UD & BA & vs UD/BA \\
+\midrule
+S1 & MEMS & -- & -- & -- & -- & 10.4 & 10 & 10 & W/W \\
+ & Tact. & -- & -- & -- & -- & 10.4 & 10 & 10 & W/W \\
+S2-med & MEMS & 1 & 1 & 1 & B/B & 743 & 10.5 & 412 & W/W \\
+ & Tact. & 1 & 1 & 1 & B/B & 743 & 10.5 & 412 & W/W \\
+S2-DM & MEMS & 1 & 1 & 1 & =/= & 634 & 5{,}220 & 1{,}220 & B/B \\
+ & Tact. & 1 & 1 & 1 & =/= & 634 & 5{,}220 & 2{,}230 & B/B \\
+S3 & MEMS & 62 & 62 & 62 & =/= & 29.4 & 29.3 & 29.3 & W/W \\
+ & Tact. & 62 & 62 & 62 & =/= & 29.4 & 29.3 & 29.3 & W/W \\
+S4 & MEMS & 42 & 61 & 61 & B/B & 748 & 17.3 & 231 & W/W \\
+ & Tact. & 42 & 61 & 61 & B/B & 748 & 17.3 & 231 & W/W \\
+S6 & MEMS & 1 & 1 & -- & B/-- & 3{,}790 & 11.6 & -- & W/-- \\
+ & Tact. & 1 & 1 & -- & B/-- & 3{,}790 & 11.6 & -- & W/-- \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/r3/results_defended_vs_undefended.pdf}
+\caption{Attack-window RMSE$_h$ (mean and $95\%$ CI over $30$ seeds, log scale) for FedQPNT, the undefended filter and Baseline~A, per scenario and IMU grade.}
+\label{fig:defended}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\columnwidth]{figures/r3/results_safety_overview.pdf}
+\caption{Safety principle: HL difference in maximum horizontal error, defended minus undefended, with $95\%$ BCa CI (symlog axis); dotted lines mark $3\sigma_{\mathrm{nom}}$.}
+\label{fig:safety}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\columnwidth]{figures/r3/results_timing_meaconing.pdf}
+\caption{Clock RMSE under the displaced meaconer (S2-DM): mean and $95\%$ CI over $30$ seeds.}
+\label{fig:timing}
+\end{figure}
+
+\subsection{Trust chattering and long-duration stability}
+Across the ten S7 variants (toggle periods $p\in\{2,5,10,20,60\}\,\mathrm{s}$, both grades) the maximum number of trust cycles per hour observed in any run was $4$ for $p\le 5\,\mathrm{s}$, $1$ for $p=10$ and $20\,\mathrm{s}$, and $29$ (MEMS) and $13$ (tactical) for $p=60\,\mathrm{s}$, all within the pre-registered bound of $223$ per hour (and the $133$ per hour regular-grid annotation). The bound is the timing-free result of Section~\ref{sec:trustlaw} (every cycle lasts at least $16.1\,\mathrm{s}$). Bounded chattering does not imply small error: FedQPNT is worse than undefended on attack-window horizontal error in all S7 variants, and on the tactical grade rapid toggling accumulates long exclusion, with median attack-window error of $106$ and $312\,\mathrm{m}$ at $p=10$ and $20\,\mathrm{s}$ and a mean maximum-error excess of up to $6.6\times 10^{4}\,\mathrm{m}$ at $p=60\,\mathrm{s}$ (Table~\ref{tab:safety}); the stated operating envelope (Section~\ref{sec:limitations}) notes that a pure blackout gives the same result.
+
+In the four-hour nominal mission (S14) the median horizontal RMSE of the last hour is $0.786$ (MEMS) and $0.840$ (tactical) of the first hour (criterion $\le 1.2$), i.e.\ there is no slow drift; the median RMSE$_h$ is $2.98\,\mathrm{m}$ [IQR $2.71$--$3.14$] and $2.90\,\mathrm{m}$ [$2.71$--$3.07$], the alarm fraction is $0$, every run is finite and positive-definite, and the false-alarm rate is $0.067$ per hour (criterion $\le 1$). The registry marks S14 ``not evaluable'' overall because its covariance-growth leg is not emitted by the runner.
+
+\subsection{Quantum aiding (S6-coast, H3)}
+In the exploratory $180\,\mathrm{s}$ forced-outage test the CAI did not reduce the maximum coasting error. The median ratio of the maximum error without and with the CAI is $1.006$ at the MEMS grade (mean maximum error $513.4\,\mathrm{m}$ without and $521.4\,\mathrm{m}$ with the CAI; HL $-0.34\,\mathrm{m}$, CI $[-11.7, 20.9]$) and $0.986$ at the tactical grade ($106.1$ versus $104.6\,\mathrm{m}$; HL $+0.035\,\mathrm{m}$, CI $[-4.77, 2.62]$); the $2.1$--$3.4\times$ envelope seen on tuning seeds was not reproduced (Fig.~\ref{fig:cai}). Pre-attack horizontal error with the CAI is marginally larger (HL $+0.031\,\mathrm{m}$ MEMS, $+0.071\,\mathrm{m}$ tactical, CIs exclude zero). The confirmatory H3 test shows identical $\mathrm{latency}_{\mathrm{eff}}$ with and without the CAI at both grades (Table~\ref{tab:conf}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\columnwidth]{figures/r3/results_cai_coasting.pdf}
+\caption{Maximum horizontal coasting error in a $180\,\mathrm{s}$ GNSS outage with and without the CAI: mean and $95\%$ CI over $30$ seeds, per IMU grade.}
+\label{fig:cai}
+\end{figure}
+
+\subsection{Fleet experiments and federated learning}
+\label{sec:res-fleet}
+\emph{Functional federation.} Fleet nodes install the global model: in the abrupt H2 experiment FedQPNT nodes installed it in $9.6$ of $10$ rounds on average (range $8$--$10$ over the ten seeds), against $8.0$ ($2$--$10$) for B-cont. In S5 (node failures and delayed updates) no run deadlocked or aborted ($P=1.000$) and $5.93$ rounds per run were gracefully skipped; in S8 a cold-start node received the global model within two rounds of joining in every run ($P=1.000$). In S15 (simultaneous attack on $30\%$ of a ten-node fleet) the detection probability over attacked nodes is $1.000$, the attacked-node attack-window error is $935\pm115\,\mathrm{m}$ (mean, $95\%$ CI), the mean false-alarm rate on unattacked nodes is $0$ per hour, and no quarantine event occurred in any run ($P=1.000$). The clean-window horizontal error and alarm rate in S12 (sign-flip poisoning at $f=20\%$ and $40\%$) are identical to the clean-fleet arm ($2.79\pm0.14\,\mathrm{m}$, $0$ false alarms per hour). The AUC-based legs of S5, S9 and S12 are undefined because those scenarios contain no attack (the registry records them as failed or not evaluable with an undefined value), so the poisoning-robustness of TRIM-NB-R against FedAvg is \emph{not} evaluated in this round.
+
+\emph{H2 and H4 (abrupt spoof, $n=10$).} At the pre-registered per-arm threshold both FedQPNT and B-cont detect every event at the onset epoch ($P_D@10\,\mathrm{s}=1$, latency $0\,\mathrm{s}$, $0$ censored events, in both the H2 and the cold-start H4 experiments), so the paired tests are degenerate ($p=1$). The calibrated thresholds are $\tau = 0.0116$ (FedQPNT) and $0.0090$ (B-cont) in H2. The secondary onset-window AUC ($N=10\,\mathrm{s}$) is near chance for both arms: H2, $0.505$ versus $0.507$ (paired $p=0.625$, uncorrected); H4, $0.526$ versus $0.501$ (paired $p=0.006$, uncorrected, exploratory, not in the Holm family). Per-seed values range from $0.20$ to $0.89$ in both arms (Fig.~\ref{fig:h2h4}) and the H4 mean difference of $+0.025$ is small against that spread; we do not interpret it as a detection benefit. Under the control drift the AUC is high for both arms ($0.958$ versus $0.958$).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\columnwidth]{figures/r3/results_h2h4_auc_paired.pdf}
+\caption{Per-seed onset-window AUC ($N=10\,\mathrm{s}$), FedQPNT versus B-cont, for H2 and H4 ($n=10$ seeds each); $p$ is the uncorrected paired Wilcoxon value.}
+\label{fig:h2h4}
+\end{figure}
+
+\subsection{Other scenarios}
+For the sample-rate-mismatch scenarios (S10) the position ANEES lies in the band $[0.5,2]$ at GNSS rates of $1$ and $2\,\mathrm{Hz}$ ($0.65$--$0.72$ and $1.35$--$1.47$) and outside it at $5\,\mathrm{Hz}$ ($3.26$--$3.47$) and $10\,\mathrm{Hz}$ ($6.40$--$6.62$), independent of the assumed CAI cycle time. In the extreme-noise scenario (S11) the filter locks out GNSS as stated in the operating envelope: its error is far above that of raw GNSS (median ratio $5{,}494$ MEMS, $1{,}823$ tactical; criterion $\le 1.5$). In the recovery scenario (S13) no run recovers within $60\,\mathrm{s}$ at either grade; at the MEMS grade $20$ of $30$ runs recover within $180\,\mathrm{s}$ (median recovery time $112\,\mathrm{s}$) and at the tactical grade none do, so the pre-registered recovery bounds fail.
 
 %=====================================================================
 \section{Discussion and Limitations}
@@ -1246,28 +1389,29 @@ requirement (jamming must not slow recovery) with its result.}
 %=====================================================================
 
 \subsection{Discussion}
-\todo[inline]{Results-dependent discussion, to be written after Section~\ref{sec:results} is populated: which
-of H1--H4 were supported; whether the position/clock split recovered position accuracy under co-located
-meaconing; the measured signature-strength failure boundary and harm analysis (Section~\ref{sec:safety}); the
-measured coasting benefit of the CAI per IMU grade; and which scenario legs failed their criteria as
-reported.}
+\paragraph{When trust-based exclusion pays.} The measured benefits are concentrated where excluding GNSS removes a large, sustained error. Against the displaced meaconer, which drags the position solution towards the attacker's antenna and corrupts the clock, FedQPNT lowers attack-window horizontal error relative to Baseline~A at both IMU grades and relative to the undefended filter at the MEMS grade, and reduces median clock error about eight-fold ($634$ versus $5{,}220\,\mathrm{ns}$): timing is where exclusion helps most and most consistently. It also detects attack onset earlier than a binary detect-and-exclude baseline (by $0.5$ to $1\,\mathrm{s}$ in the gradual-spoof scenarios and by $19.5\,\mathrm{s}$ in jam-then-spoof), and the confirmatory H1 latency test is the only test of the family that rejects. These gains cost nothing in nominal operation or under jamming (S1, S3: equal to the undefended filter, no false alarms), the trust state machine cycles at most $29$ times per hour against a proven bound of $223$, and a four-hour mission shows no drift. The design therefore behaves as intended on the axes of detection speed, timing protection and benign-case safety.
+
+\paragraph{When it does not.} Against ordinary drifting spoofs (S2) and the jam-then-spoof, long-drift and toggling scenarios (S4, S6, S7), FedQPNT's horizontal error is larger than that of the undefended filter, and for S2 and S4 usually no better than Baseline~A, so the safety principle fails in all of them. Two mechanisms stated in the pre-registered operating envelope are consistent with this pattern. First, when the spoof offset is small, the inertial coast drifts further than the spoof displaces the position: at the MEMS grade, the attack-window error of the undefended filter that simply follows the spoof ($127$ to $381\,\mathrm{m}$ across S2 severities) is below the coast error of an excluding filter ($730$ to $770\,\mathrm{m}$), so exclusion cannot win on a short horizon. Second, post-attack error is dominated by the designed $60\,\mathrm{s}$ re-admission dwell during which GNSS is not used; the post-attack error of FedQPNT ($1{,}100$ to $1{,}300\,\mathrm{m}$ in S2) is far above both comparators, and the alarm fraction of $0.164$ is consistent with this dwell. The tactical grade should coast better, yet its S2 and S4 errors are not lower than the MEMS ones, so the MEMS coast floor alone does not explain the loss; a plausible but untested contributor is the residual over-confidence of the attitude and accelerometer-bias states during long coasts (Section~\ref{sec:limitations}). We therefore read the results as characterising the regime in which exclusion pays (large or timing-corrupting offsets) rather than as a uniform improvement over not defending.
+
+\paragraph{CAI and federated learning showed no measurable effect here.} The CAI did not reduce coasting error (ratio $1.006$ and $0.986$; CIs include zero) or the effective detection latency, and federated learning did not change detection in the abrupt-spoof experiments (identical ceiling detection, onset AUC near $0.5$). We offer three hypotheses, none tested here. (i) The rigid-mode CAI loses contrast above $\Omega_c\approx17\,\mathrm{mrad/s}$, so its aiding is intermittent in manoeuvring motion, and in the simulated platform its bias observation may add little to an inertial filter whose coast error is dominated by tilt (attitude) error. (ii) The rule-based physical evidence, not the learned detector, may drive detection at the tested severities, which would make detection latency insensitive to both the CAI and the federated model; the $P_D@10\,\mathrm{s}$ metric is at its ceiling at the registered threshold, so a harder setting (a lower-severity or signature-free family, a stricter latency metric) is needed to separate the arms. (iii) The experiments are simulation-only and use ten live seeds for the fleet tests. The null results are therefore results about this configuration; they are not evidence that quantum aiding or fleet learning cannot help.
 
 \subsection{Limitations}
 \label{sec:limitations}
 The following limitations are already established by the project's own validation work and the decision log
 and are stated here rather than deferred, in keeping with the scientific-integrity requirement that known
 weaknesses be disclosed regardless of how they affect the headline comparison. Where a limitation has a
-measured extent on the test seeds, the number is left to Section~\ref{sec:results}.
+measured extent on the test seeds, the number is in Section~\ref{sec:results}.
 
 \begin{itemize}
+\item \textbf{FedQPNT does not reduce position error under ordinary spoofing.} In the gradual-spoof scenarios (S2-low, medium, high), jam-then-spoof (S4), the long drift spoof (S6) and the toggling scenarios (S7), the attack-window horizontal error is larger than that of the undefended filter at both IMU grades, usually no better than Baseline~A, and the safety principle fails; post-attack error is increased by the $60\,\mathrm{s}$ re-admission dwell. The benefits reported are confined to detection latency, timing, the displaced meaconer, and absence of nominal cost.
+\item \textbf{No benefit from quantum aiding or federated learning was measured.} The CAI did not reduce coasting error or $\mathrm{latency}_{\mathrm{eff}}$ (H3 null), and federated learning did not change abrupt-spoof detection (H2, H4 null: ceiling detection, onset AUC near $0.5$). The single-node results involve no federation, the fleet tests use $n=10$ seeds, and the poisoning-robustness of TRIM-NB-R against FedAvg was not evaluated because the AUC legs of S5, S9 and S12 are undefined. The explanations in Section~\ref{sec:discussion} are hypotheses.
 \item \textbf{Detection has a signature-strength envelope.} Detection of a drifting single-antenna spoofer
   relies on the strength $s$ of its C/N0 signature (Section~\ref{sec:safety}). The detector is trained at
   full strength and detects reliably at $s \gtrsim 0.5$; for $s < 0.5$ it fails, its ranking of spoofed
   against clean epochs falling to chance and, at $s = 0$, inverting. The minimum strength $s \gtrsim 0.5$ is
   therefore an explicit operating assumption, not a guarantee, and a fully signature-free spoofer
   (multi-antenna, per-satellite-power-matched) is outside the threat model. Against such a spoofer the
-  probe-based recovery has no physical signature to rely on. \todo{result: failure boundary and harm analysis
-  over $s$ on test seeds.}
+  probe-based recovery has no physical signature to rely on. The round-3 campaign did not run the signature-strength sweep.
 \item \textbf{A consistency-matched adversary can pass the shadow probe.} The probe accepts GNSS whose
   innovation against the coasting state is within a calibrated bound (Section~\ref{sec:trustlaw}). An adversary
   that keeps its offset inside the coasting uncertainty is by construction consistent with the coasting state
@@ -1276,8 +1420,7 @@ measured extent on the test seeds, the number is left to Section~\ref{sec:result
   whereas the tighter tactical-grade bound rejects far smaller offsets. Once admitted, the damage per epoch is
   bounded by the coasting covariance, not unbounded. The detection-power figures that motivated the calibration
   were obtained on tuning seeds and are diagnostics, not findings. The same limit applies to the
-  consistency-based waiver of the reacquisition cap. \todo{result: detection power of the shadow probe against
-  offset spoofs, both IMU grades, test seeds.}
+  consistency-based waiver of the reacquisition cap. The detection power of the probe against offset spoofs was not measured separately on the test seeds.
 \item \textbf{Clock-only evidence is weak just after a long outage.} After a long GNSS outage the receiver
   oscillator's own uncertainty is large (a TCXO drifts by about $263\,\mathrm{m}$, one standard deviation, over
   $180\,\mathrm{s}$), so the clock-jump evidence of Eq.~\eqref{eq:clkjump}, which is normalised by that
@@ -1289,11 +1432,10 @@ measured extent on the test seeds, the number is left to Section~\ref{sec:result
   checked and found honest, and $\kappa_R = 60$ brings the position/velocity consistency to nominal, but the
   attitude and bias states were over-confident when last measured against the effective-bias truth, which includes turn-on bias,
   GM1, random walk and scale-factor/misalignment aliasing (accelerometer-bias NEES about six times
-  nominal on tuning seeds, before the covariance corrections of Section~\ref{sec:fusion}). \todo{R3: re-measure on core-freeze-6.}
+  nominal on tuning seeds, before the covariance corrections of Section~\ref{sec:fusion}). The round-3 campaign reports position ANEES only ($0.84$ and $0.94$ in S1) and did not re-measure these states on \texttt{core-freeze-6}.
   The residual is a stated limitation. Results that depend on attitude or
   bias estimates (coasting envelope, the CAI contribution, multi-hour stability) carry this caveat, and the
-  test-seed gate that guards them is described in Section~\ref{sec:seeds}. \todo{status of the test-seed gate
-  at submission.}
+  test-seed gate that guards them is described in Section~\ref{sec:seeds}; the gated scenarios were run once on the frozen core and are reported as measured.
 \item \textbf{The evaluation is simulation-only.} The CAI noise density, per-interrogation-time scaling and
   bursty-outlier fault process are fitted to real cold-atom interferometer laboratory shot data
   \cite{darmagnac2024atom}, but the vehicle/UAV trajectories, the GNSS constellation and signal propagation
@@ -1307,7 +1449,7 @@ measured extent on the test seeds, the number is left to Section~\ref{sec:result
   The position/clock trust split can therefore be evaluated only on this co-located threat. A displaced meaconer
   pins the position toward the meaconer's antenna and is a distinct threat; a displaced variant has been added
   as a separate scenario entry and is held out of detector training, so that it tests generalisation.
-  \todo{result: displaced-meaconer outcome.} Even for the co-located case, the learned detector drives both laws
+  The displaced variant (S2-DM) was run in round 3: it lowers attack-window error relative to Baseline~A and, at the MEMS grade, relative to the undefended filter, and cuts clock error, but raises post-attack error and the alarm fraction (Section~\ref{sec:results}); the co-located case was not part of the round-3 matrix. Even for the co-located case, the learned detector drives both laws
   and may still depress the position weight, so the split's benefit is measured, not assumed.
 \item \textbf{Several scenario legs are narrowed relative to the pre-registered intent.} A cold-atom
   \emph{fault injector} was not built, so the leg in which a CAI bias drift drives $w_{\mathrm{q}}$ below $0.5$
@@ -1341,27 +1483,30 @@ measured extent on the test seeds, the number is left to Section~\ref{sec:result
 \item \textbf{S7 chatter on tactical.} Rapid toggling can cause long cumulative exclusion; the coast error then equals that of a pure blackout.
 \item \textbf{S11 lockout.} If true GNSS noise is at least twice the reported value, the filter can lock out GNSS; no noise-scale estimation is added.
 \item \textbf{S5/S12 AUC.} Detector AUC is not evaluable there (no attack in those scenarios).
-\item \textbf{H2/H4 primary.} The event-level primary metric is degenerate (ceiling) in the setting used. \todo{R3: values.}
+\item \textbf{H2/H4 primary.} The event-level primary metric is degenerate (ceiling) in the setting used: in round 3 both arms detect every event at the onset epoch ($P_D@10\,\mathrm{s}=1$, latency $0\,\mathrm{s}$, ten seeds), so the primary tests cannot discriminate.
 \end{itemize}
 
 %=====================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=====================================================================
-\todo[inline]{To be finalized once Section~\ref{sec:results} is populated. Draft closing paragraph
-below.}
-
-We have presented FedQPNT, a system architecture that closes the loop between federated, fleet-shared
-attack detection, a continuous and evidence-bounded per-sensor trust law, and physical quantum inertial
-aiding whose noise and fault behaviour is calibrated against real laboratory data rather than assumed.
-We have specified the node and threat model, the fusion and trust equations, the federated aggregation
-mechanism, and a pre-registered, mechanism-class baseline and hypothesis structure designed so that the
-eventual results can be attributed to a specific mechanism rather than to incidental implementation
-choices. \todo{result: one-sentence outcome summary once the evaluation matrix completes} We have also
-disclosed, in advance of any result, the two most consequential limitations of the current design: the
-the intermittency of rigid-mode quantum aiding above ordinary vehicle turn rates, and the need for a GNSS covariance
-inflation factor in the loosely-coupled filter, together with possible residual over-confidence of its attitude and
-bias states.
+We have presented FedQPNT, a system architecture that closes the loop between a learned, fleet-shared
+attack detector, a continuous and evidence-bounded per-sensor trust law, and physical quantum inertial
+aiding whose noise and fault behaviour is calibrated against real laboratory data, and we have evaluated it
+in a pre-registered round of $5{,}340$ simulated runs on unseen seeds. The evidence supports a specific and
+bounded set of conclusions. The continuous trust law detects attack onset significantly earlier than a
+detect-and-exclude baseline (median $0.5\,\mathrm{s}$, Holm-adjusted $p=0.004$), adds no measurable cost in nominal
+operation or under jamming, cycles trust at most $29$ times per hour against a proven bound of $223$, remains stable over
+four hours, and, against a displaced meaconer, lowers attack-window horizontal error relative to the baseline and cuts median
+clock error about eight-fold. The study did not show that the cold-atom accelerometer improves coasting
+or detection (coasting-error ratio $1.006$ and $0.986$; H3 null), that federated learning improves abrupt-spoof
+detection (H2 and H4 null, with the primary metric at its ceiling), or that FedQPNT reduces position error under
+ordinary drifting spoofs, where its error exceeded that of the undefended filter at both IMU grades and the
+safety principle failed; the position-error component of H1 was not significant. These outcomes delimit the regime in which GNSS exclusion pays, namely large or
+timing-corrupting offsets, and point to future work on harder detection settings that can separate the arms, on filter consistency during long
+coasts, and on the re-admission dwell. The limitations that most affect these conclusions are the
+simulation-only evaluation, the intermittency of rigid-mode quantum aiding above ordinary vehicle turn rates, and the
+GNSS covariance inflation required by the loosely-coupled filter.
 
 \section*{Reproducibility Statement}
 Every numeric default in the system specification is tagged as literature-derived, design-derived, or an
