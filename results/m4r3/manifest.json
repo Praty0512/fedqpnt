@@ -2,7 +2,7 @@
  "code": {
   "tag": "core-freeze-6",
   "tag_commit": "ca614b7f8a737a73e158a8516d674315b42f0d92",
-  "head": "ca614b7f8a737a73e158a8516d674315b42f0d92"
+  "head": "25f97fe529296ca19f582499385b7905d504b54a"
  },
  "weights": "results/m1/detector_weights_sup_v5.npz",
  "seeds": [

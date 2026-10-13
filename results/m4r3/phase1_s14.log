@@ -1,0 +1,12 @@
+manifest: 5340 tasks = 4980 single-node (240 long-spec) + 360 fleet; weights=results/m1/detector_weights_sup_v5.npz; code core-freeze-6 == HEAD on fedqpnt/
+Mon Oct 12 13:57:28 2026 phase 1 total 60 todo 60 workers 1 reverse=False
+Mon Oct 12 18:20:27 2026 25/60 {'ok': 25} elapsed 15779s
+Mon Oct 12 21:35:22 2026 50/60 {'ok': 43, 'skipped_claimed': 7} elapsed 27475s
+DONE {'ok': 43, 'skipped_claimed': 17} wall 27476s
+PROVENANCE frozen(whole-repo HEAD) valid: False ['HEAD changed during run: a8e9f279fbf1dfc5828afe4bdeb51184a42a5f3c -> 25f97fe529296ca19f582499385b7905d504b54a']
+PROVENANCE fedqpnt_verdict valid: True []
+manifest: 5340 tasks = 4980 single-node (240 long-spec) + 360 fleet; weights=results/m1/detector_weights_sup_v5.npz; code core-freeze-6 == HEAD on fedqpnt/
+Tue Oct 13 00:02:45 2026 phase 1 total 60 todo 17 workers 1 reverse=False
+DONE {'ok': 17} wall 9749s
+PROVENANCE frozen(whole-repo HEAD) valid: True []
+PROVENANCE fedqpnt_verdict valid: True []

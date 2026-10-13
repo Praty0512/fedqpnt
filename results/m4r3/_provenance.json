@@ -1,0 +1,128 @@
+[
+  {
+    "valid": false,
+    "reasons": [
+      "HEAD changed during run: 6c4bcee327ae7fb47790eceab64eba04629e8db5 -> 2c65807bfe859b9982839df081d567f4f47e8a55"
+    ],
+    "start": {
+      "head": "6c4bcee327ae7fb47790eceab64eba04629e8db5",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "2c65807bfe859b9982839df081d567f4f47e8a55",
+      "dirty_files": []
+    },
+    "fedqpnt_verdict": {
+      "valid": true,
+      "reasons": [],
+      "tag": "core-freeze-6",
+      "start": {
+        "head": "6c4bcee327ae7fb47790eceab64eba04629e8db5",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      },
+      "end": {
+        "head": "2c65807bfe859b9982839df081d567f4f47e8a55",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      }
+    },
+    "phase": "2",
+    "reverse": false,
+    "time": 1791770318.8643334
+  },
+  {
+    "valid": false,
+    "reasons": [
+      "HEAD changed during run: a8e9f279fbf1dfc5828afe4bdeb51184a42a5f3c -> 25f97fe529296ca19f582499385b7905d504b54a"
+    ],
+    "start": {
+      "head": "a8e9f279fbf1dfc5828afe4bdeb51184a42a5f3c",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "25f97fe529296ca19f582499385b7905d504b54a",
+      "dirty_files": []
+    },
+    "fedqpnt_verdict": {
+      "valid": true,
+      "reasons": [],
+      "tag": "core-freeze-6",
+      "start": {
+        "head": "a8e9f279fbf1dfc5828afe4bdeb51184a42a5f3c",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      },
+      "end": {
+        "head": "25f97fe529296ca19f582499385b7905d504b54a",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      }
+    },
+    "phase": "1",
+    "reverse": false,
+    "time": 1791821124.981809
+  },
+  {
+    "valid": true,
+    "reasons": [],
+    "start": {
+      "head": "25f97fe529296ca19f582499385b7905d504b54a",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "25f97fe529296ca19f582499385b7905d504b54a",
+      "dirty_files": []
+    },
+    "fedqpnt_verdict": {
+      "valid": true,
+      "reasons": [],
+      "tag": "core-freeze-6",
+      "start": {
+        "head": "25f97fe529296ca19f582499385b7905d504b54a",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      },
+      "end": {
+        "head": "25f97fe529296ca19f582499385b7905d504b54a",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      }
+    },
+    "phase": "1",
+    "reverse": false,
+    "time": 1791839715.0518482
+  },
+  {
+    "valid": false,
+    "reasons": [
+      "HEAD changed during run: 6c4bcee327ae7fb47790eceab64eba04629e8db5 -> 25f97fe529296ca19f582499385b7905d504b54a"
+    ],
+    "start": {
+      "head": "6c4bcee327ae7fb47790eceab64eba04629e8db5",
+      "dirty_files": []
+    },
+    "end": {
+      "head": "25f97fe529296ca19f582499385b7905d504b54a",
+      "dirty_files": []
+    },
+    "fedqpnt_verdict": {
+      "valid": true,
+      "reasons": [],
+      "tag": "core-freeze-6",
+      "start": {
+        "head": "6c4bcee327ae7fb47790eceab64eba04629e8db5",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      },
+      "end": {
+        "head": "25f97fe529296ca19f582499385b7905d504b54a",
+        "dirty": [],
+        "diff_vs_tag_empty": true
+      }
+    },
+    "phase": "1",
+    "reverse": false,
+    "time": 1791849337.5543785
+  }
+]
