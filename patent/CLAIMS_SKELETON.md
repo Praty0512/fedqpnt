@@ -1,5 +1,30 @@
 # FedQPNT — Patent Claim Skeleton (engineering draft)
 
+> **Draft for attorney review. Not legal advice, not a filing recommendation. NO prior-art search has been
+> performed for any claim in this document (the §2 map is a verified-abstract reading list only). This file contains
+> no advice on whether, when, where or how to file.**
+
+## Change log (rev. 3, 2026-10-13) — read this first
+
+Rev. 3 conforms the skeleton to the FROZEN code at git tag `core-freeze-6` (D-085 … D-089) and to the
+round-3 test-seed results (`results/m4r3/report/SUMMARY.md`, `HEADLINE.md`, `M3_REPORT.md`; seeds 10060-10089,
+5,340/5,340 tasks ok). Rev. 2 text is kept below except where stated.
+
+| # | Change | Where |
+|---|---|---|
+| R3-1 | Independent claims 1 and 2 re-worded: the probe state is the SHADOW probe (no update; innovation of the fix against the coasted state, normalised by the state covariance); probe failure returns to DISTRUST. | §3 |
+| R3-2 | Claim 3 is now a stand-alone independent CRM claim (was "perform the method of claim 2"). Independent claims: 1 system, 2 method, 3 CRM. | §3 |
+| R3-3 | New dependent claims 27-37: DISTRUST pinning (D-075); probe-failure handling (D-076); 2-epoch post-re-admission position-evidence quarantine; coast-covariance second-order attitude term + P0 tilt floor (the enabler of probe re-admission, D-086/D-088); incremental second-order accumulation; CAI-aware trust inputs; FL staleness bookkeeping; staleness-weighted robust aggregation; median-norm-relative clipping; method analogues. | §4 |
+| R3-4 | Claim 25 support note: the quarantine counter is now also armed at probe-to-trust re-admission (FIX7 B5). | §4 |
+| R3-5 | NEW §5B "Evidence-backed advantages and statements the specification must NOT make". No implication that (a) the CAI improves coasting/navigation accuracy or (b) federated learning improves detection: both are NULL in round 3. Adverse results are recorded for the candour review. | §5B |
+| R3-6 | §5 items annotated with round-3 status. Claims 11, 16 (CAI/Schuler world) are NOT supported by any measured accuracy benefit. | §5 / §5B |
+| R3-7 | Disclaimers retained (§6). | §6 |
+
+Claim count (rev. 3): **37 claims = 3 independent (1 system, 2 method, 3 CRM) + 34 dependent (4-37).**
+Claim 20 remains flagged as likely unsupported (F7) and is a deletion candidate (then 33 dependent).
+
+---
+
 _Author: PATENT agent · 2026-09-29 (rev. 1) · against DECISION_LOG.md up to D-058, PROJECT_STATE.md (M1 signed off; M2 in
 progress; M4 gated), docs/specs/ARCHITECTURE.md, docs/specs/TRUST_DESIGN_V2.md, docs/REFERENCES.md +
 REFERENCES_ADDENDUM_D044.md._
@@ -54,10 +79,13 @@ trust value, the latter driven by clock-bias-jump evidence normalised by the osc
 innovation uncertainty, so that a clock-only attack (e.g. co-located meaconing) does not cost position
 accuracy. Third, the CAI is fused not as an independent navigation aid but as a direct
 observation of the classical accelerometer's bias state, letting a slow, high-purity quantum reference
-continuously correct the fast classical IMU inside the same filter. The combination lets a fleet detect and
+correct the classical IMU inside the same filter, and supplying a CAI-aware trust input (the CAI's own
+trust value from fringe contrast, validity and the CAI innovation test). [Rev. 3: no navigation-accuracy
+benefit of the CAI was measured in round 3 (§5B); the CAI is claimed as an architecture, not as an accuracy
+improvement.] The combination lets a fleet detect and
 recover from GNSS attacks that no single node could label on its own, without any node exposing raw
-measurements, trajectories, or attack ground truth to the fleet, and without conceding unbounded navigation
-divergence when the learned detector itself misbehaves.
+measurements, trajectories, or attack ground truth to the fleet, and with a bounded-time re-admission path (shadow probe) rather than indefinite exclusion. [Rev. 3: the
+federated limb is claimed as an architecture; round 3 measured no detection improvement from federation (§5B).]
 
 ---
 
@@ -161,23 +189,26 @@ claim.
    (iii) a global-navigation-satellite-system receiver configured to output a navigation fix derived from
    received satellite signals;
    (iv) a fusion filter configured to estimate a navigation state of the navigation node by propagating the
-   navigation state using the classical acceleration and angular-rate measurements and correcting the
-   navigation state using the navigation fix and the quantum acceleration measurement, wherein the fusion
-   filter is configured to use the quantum acceleration measurement as a direct observation of a bias state
-   of the inertial measurement unit;
+   navigation state, and a state covariance, using the classical acceleration and angular-rate measurements and
+   correcting the navigation state using the navigation fix and the quantum acceleration measurement, wherein
+   the fusion filter is configured to use the quantum acceleration measurement as a direct observation of a
+   bias state of the inertial measurement unit;
    (v) a trained classifier configured to compute, from features derived at least from an innovation of the
    navigation fix against the fusion filter, a calibrated probability that the navigation fix is subject to a
    spoofing or jamming attack;
    (vi) a trust engine configured to compute, from the calibrated probability and from the innovation, a
    continuous trust value and to set a measurement-noise covariance applied by the fusion filter to the
    navigation fix as an inflation of a nominal measurement-noise covariance by an amount that varies
-   continuously with the trust value, wherein the trust engine is further configured to: responsive to the
+   continuously with the trust value, wherein the trust engine is further configured to: (a) responsive to the
    navigation node remaining continuously in a distrust state for longer than a maximum exclusion duration,
-   transition the navigation node from the distrust state to a probe state in which an influence of the
-   navigation fix on the navigation state is determined independently of the calibrated probability; and
-   responsive to an innovation consistency condition being satisfied during the probe state and to an absence
-   of physical attack evidence determined independently of the trust value, transition the navigation node to
-   a trust state; and
+   transition the navigation node from the distrust state to a probe state; (b) during the probe state, cause
+   the fusion filter to withhold correction of the navigation state using the navigation fix, and evaluate a
+   consistency statistic of innovations of the navigation fix against the navigation state as propagated
+   without correction by the navigation fix, the innovations being normalised by a covariance comprising the
+   state covariance; (c) responsive to the consistency statistic satisfying a consistency condition at the end
+   of the probe state and to an absence of physical attack evidence determined independently of the trust
+   value, transition the navigation node to a trust state; and (d) responsive otherwise, return the navigation
+   node to the distrust state; and
    (vii) a federated-learning client configured to train a local update to parameters of the trained
    classifier using data local to the navigation node and to transmit the local update, without transmitting
    raw sensor data, the navigation fix, or the navigation state, to a server; and
@@ -188,8 +219,8 @@ claim.
    updating, for each navigation node, a reputation score computed from a similarity between that navigation
    node's local update and the aggregated update over a preceding plurality of rounds, and excluding from
    subsequent aggregation rounds a navigation node whose reputation score remains below a reputation
-   threshold for a predetermined number of consecutive rounds; and to transmit the aggregated update to the plurality of
-   navigation nodes for use as updated parameters of the trained classifier.
+   threshold for a predetermined number of consecutive rounds; and to transmit the aggregated update to the
+   plurality of navigation nodes for use as updated parameters of the trained classifier.
 
 ### Claim 2 (Method)
 
@@ -198,7 +229,8 @@ claim.
    obtaining classical acceleration and angular-rate measurements from an inertial measurement unit;
    obtaining a quantum acceleration measurement from a cold-atom interferometric accelerometer;
    obtaining a navigation fix from a global-navigation-satellite-system receiver;
-   propagating a navigation state using the classical acceleration and angular-rate measurements;
+   propagating a navigation state and a state covariance using the classical acceleration and angular-rate
+   measurements;
    correcting the navigation state using the quantum acceleration measurement as a direct observation of a
    bias state of the inertial measurement unit;
    computing, from features derived at least from an innovation of the navigation fix against the navigation
@@ -209,12 +241,14 @@ claim.
    measurement-noise covariance that varies continuously with the continuous trust value, and correcting the
    navigation state using the navigation fix weighted by the measurement-noise covariance;
    responsive to the navigation node remaining continuously in a distrust state for longer than a maximum
-   exclusion duration, entering a probe state in which an influence of the navigation fix on the navigation
-   state is determined independently of the calibrated probability;
-   during the probe state, evaluating an innovation consistency condition and evaluating, independently of the
-   continuous trust value, whether physical attack evidence is present;
-   responsive to the innovation consistency condition being satisfied and the physical attack evidence being
-   absent, exiting the probe state to a trust state; responsive otherwise, returning to a distrust state;
+   exclusion duration, entering a probe state;
+   during the probe state, withholding correction of the navigation state using the navigation fix, evaluating a
+   consistency statistic of innovations of the navigation fix against the navigation state as propagated
+   without correction by the navigation fix and normalised by a covariance comprising the state covariance,
+   and evaluating, independently of the continuous trust value, whether physical attack evidence is present;
+   responsive to the consistency statistic satisfying a consistency condition and the physical attack evidence
+   being absent, exiting the probe state to a trust state; responsive otherwise, returning to the distrust
+   state;
    training a local update to parameters of the classifier using data local to the navigation node; and
    transmitting the local update, without transmitting raw sensor data, the navigation fix, or the navigation
    state, to a server that computes an aggregated update by clipping each of a plurality of local updates
@@ -222,14 +256,34 @@ claim.
    trimmed-mean or median of the clipped local updates, updating for each navigation node a reputation score
    derived from consistency of that navigation node's local updates with the aggregated update over time,
    excluding from subsequent aggregation rounds a navigation node whose reputation score remains below a
-   reputation threshold for a predetermined number of consecutive rounds, and transmitting the aggregated update back to the plurality of navigation nodes.
+   reputation threshold for a predetermined number of consecutive rounds, and transmitting the aggregated
+   update back to the plurality of navigation nodes.
 
 ### Claim 3 (Non-transitory computer-readable medium)
 
 3. A non-transitory computer-readable medium storing instructions that, when executed by one or more
    processors of a navigation node comprising an inertial measurement unit, a cold-atom interferometric
-   accelerometer, and a global-navigation-satellite-system receiver, cause the one or more processors to
-   perform the method of claim 2.
+   accelerometer, and a global-navigation-satellite-system receiver, cause the one or more processors to:
+   propagate a navigation state and a state covariance using classical acceleration and angular-rate
+   measurements of the inertial measurement unit; correct the navigation state using a quantum acceleration
+   measurement of the cold-atom interferometric accelerometer as a direct observation of a bias state of the
+   inertial measurement unit; compute a calibrated probability that a navigation fix of the receiver is subject
+   to a spoofing or jamming attack using a classifier whose parameters are updated by federated learning in which
+   only parameter updates leave the navigation node; compute a continuous trust value and correct the navigation
+   state using the navigation fix with a measurement-noise covariance inflated by an amount that varies
+   continuously with the trust value; responsive to the navigation node remaining continuously in a distrust
+   state for longer than a maximum exclusion duration, enter a probe state in which correction of the navigation
+   state using the navigation fix is withheld and a consistency statistic of innovations of the navigation fix
+   against the navigation state as propagated without correction, normalised by a covariance comprising the state
+   covariance, is evaluated; and transition to a trust state only if the consistency statistic satisfies a
+   consistency condition and physical attack evidence, determined independently of the trust value, is absent,
+   and otherwise return to the distrust state.
+
+_[Rev. 3 drafting note D5: the rev. 2 limb "an influence of the navigation fix ... determined independently of
+the calibrated probability" is replaced by the frozen shadow probe (no update). This narrows claims 1-3
+relative to rev. 2; the earlier partial-trust probe embodiment (found to drag the state onto a persisting spoof,
+D-065/D-066) is no longer covered by the independent claims. The attorney may choose to restore the broader
+rev. 2 wording and keep the shadow probe as claim 21. Dependent claims 21 and 36 now partly restate 1(vi)(b).]_
 
 **Drafting note D1 — single vs "one or more" trust values (claim 1(vi)).** TRUST_SPLIT_DESIGN §6 offers two
 options: (A) broaden 1(vi) to "one or more trust values / measurement-noise covariances" (single value as a
@@ -276,7 +330,7 @@ FL code — not the claim — must change, and the freeze must be reopened.
 
 ---
 
-## 4. Dependent claims (4–26)
+## 4. Dependent claims (4–37)
 
 Each attaches to Claim 1 (system) with a corresponding method-claim (Claim 2) analogue implied; the method and
 medium analogues of claims 21–26 have NOT been drafted and should be added once the attorney selects which of
@@ -483,7 +537,7 @@ them to keep.
     `_last_gnss_pos/_last_gnss_cov/_last_p_prior`; `_es_position_quarantine = 2` covers the stale-baseline epoch
     and the corrective-pull epoch), D-058 follow-up and D-063 (accepted). Fixes a false fire of the jump test on
     every first post-outage fix. "Nominal epoch interval" 1 s is an [ASSUMPTION]-grade constant matching the 1 Hz
-    GNSS rate.]_
+    GNSS rate. Rev. 3: the same `_es_position_quarantine` counter is also armed on PROBE->TRUST (claim 29).]_
 
 26. The system of claim 23, wherein the trust engine operates the second continuous trust value with the same
     distrust, probe and trust states as the trust value applied to the navigation fix, and wherein, in the
@@ -500,9 +554,107 @@ them to keep.
     "shadow innovation against the free-running oscillator" — the claim is worded accordingly (statistic of the
     normalised deviations) and should not be broadened to "shadow probe" of the clock without a code check.]_
 
+### New dependent claims added in rev. 3 (D-075, D-076, D-086, D-088, D-089; frozen code tag `core-freeze-6`)
+
+Claims 27-37 attach to claim 1 or 2 as stated. Support citations are to `core-freeze-6`; line numbers approximate.
+
+27. The system of claim 1, wherein, while the navigation node is in the distrust state, the trust engine pins
+    the trust value at a predetermined minimum value and suspends any recovery of the trust value irrespective
+    of the calibrated probability, such that the only exit from the distrust state is through the probe state.
+    _[Support: `_LawCoreV2.advance` DISTRUST branch, trust_law.py ~L341-357 (D-075: `self.w = c.w_min`; before
+    D-075 the recovery ramp could lift w inside DISTRUST when the detector went quiet). Evidence: only the S7
+    chattering bound (SUMMARY.md "S7 chattering": max 29/h vs bound 223/h) bears on this; no measurement
+    isolates pinning.]_
+
+28. The system of claim 1, wherein, responsive to the consistency condition not being satisfied or the physical
+    attack evidence being present at the end of the probe state, the trust engine returns the navigation node to
+    the distrust state for a further period of at least the maximum exclusion duration, pins the trust value at
+    the predetermined minimum value within the same epoch in which the probe fails, and reports the probe state
+    to the fusion filter for that epoch so that the navigation fix that failed the probe is not applied.
+    _[Support: trust_law.py ~L378-388 (D-076: `_probe_failed_now`; the `probe_shadow` property ~L437 is true
+    for PROBE or `_probe_failed_now`).]_
+
+29. The system of claim 1, wherein the trust engine determines the physical attack evidence at least in part
+    from a position-jump test of the navigation fix (claim 5), and wherein, upon transition from the probe state
+    to the trust state, the trust engine suppresses the position-jump test for a quarantine window of a
+    predetermined number of navigation-fix epochs, while continuing to evaluate signal-domain evidence and the
+    calibrated probability during the quarantine window.
+    _[Support: trust_law.py ~L918-927 (FIX7 B5): `_es_position_quarantine = 2` after PROBE->TRUST. Stated
+    reason: the first applied fix after >= T_ex + T_probe of coasting produces a corrective pull that would
+    otherwise false-fire the position term and send the node back to distrust (traced: S2-med tactical seed
+    530). The xsat/cn0/clock evidence and the detector are NOT quarantined. Same counter as claim 25 (gap
+    reset). D-088: "The PROBE->TRUST 2-epoch E_s-position quarantine fixes the pull false-fire."]_
+
+30. The system of claim 1, wherein the fusion filter propagates the state covariance with a second-order
+    attitude-error term, the second-order attitude-error term adding covariance corresponding to a neglected
+    second-order product of an attitude error and the specific force in a velocity-error model, and wherein the
+    state covariance so propagated is the state covariance used to normalise the innovations of the
+    consistency statistic.
+    _[Support: `ESKF` config `second_order_att` (eskf.py ~L84-86); covariance added at ~L311-318 via
+    `_so_att_B` (~L332); D-088 FIX7 B5. This is the ENABLER of the shadow probe: D-086 diagnosed that without
+    it the coast covariance was overconfident (NEES 12.5k at +240 s) so the probe could never pass and GNSS was
+    never re-admitted; D-088 reports tactical ANEES6 at a t=60 s outage 7.2 -> 0.44 with the term. Those are
+    tuning-seed mini-matrix numbers. Round 3 (test seeds) shows re-admission occurring, with S2-med post-attack
+    error set by the T_ex dwell (D-088 ruling 5), but it is not a controlled A/B of the term on test seeds.]_
+
+31. The system of claim 30, wherein the fusion filter further initialises roll and pitch variances of the state
+    covariance to no less than the square of a ratio of an accelerometer turn-on bias standard deviation to a
+    gravity magnitude, and accumulates the second-order attitude-error term coherently over successive
+    propagation steps by maintaining a cumulative first-order attitude-error sensitivity matrix and adding, at
+    each step, the cross terms and the quadratic term of an increment of that matrix.
+    _[Support: eskf.py ~L179-186 (D-086 C1: `tilt0 = max(1 mrad, sigma_ba_turnon/g0)`, ~10 mrad on the MEMS
+    grade) and ~L311-318 (`_C2`; `Bk @ PhiC.T + PhiC @ Bk.T + Bk @ Bk.T`).]_
+
+32. The system of claim 1, wherein the trust engine further computes a quantum trust value for the cold-atom
+    interferometric accelerometer from a fringe-contrast term, a validity flag of the quantum acceleration
+    measurement, and a chi-squared test of the innovation of the quantum acceleration measurement, and
+    evaluates a cumulative-sum statistic of a standardised residual of the quantum acceleration measurement only
+    while the trust value applied to the navigation fix exceeds a high-trust threshold, such that the residual
+    is checked against a bias anchored by a trusted navigation fix.
+    _[Support: `QuantumTrust.step`, trust_law.py ~L543-600 (`p_q = 1 - valid*contrast_term*nis_ok_hi`; CUSUM
+    gated on `gnss_w > 0.9`), wired at ~L963-973. CAUTION: no CAI fault injector exists (D-070, scenarios.py
+    ~L501), so the quantum trust value's response to a CAI fault was NOT tested, and the CAI gave no measured
+    accuracy benefit in round 3 (§5B). Architecture claim only.]_
+
+33. The system of claim 1, wherein the federated-learning client reports with each local update a base round
+    identifying the round of the most recently installed aggregated update, or the current round when no
+    aggregated update has yet been installed, and wherein the server computes a staleness of each local update
+    as the non-negative difference between the current round and the base round and discards a local update
+    whose staleness exceeds a maximum staleness.
+    _[Support: fl/client.py ~L119-121 (D-086 F3 fix: base_round = current round when nothing is installed;
+    before it, base_round = -1 made the server discard every update, installs = 0); fl/server.py ~L26,
+    ~L109-120 (`max_staleness = 3`).]_
+
+34. The system of claim 33, wherein the aggregator multiplies each clipped local update by a staleness weight
+    that decreases with the staleness, before computing the coordinate-wise trimmed-mean or median, and wherein
+    the staleness weight is the reciprocal of the square root of one plus the staleness.
+    _[Support: fl/aggregator.py ~L14-16, ~L119-120 (`(1+s)^-0.5`; FedAsync, Xie 2019 - cited in the repo, not
+    reviewed as prior art).]_
+
+35. The system of claim 1, wherein the bounded norm of the clipping is a multiple of the median norm of the
+    local updates received in the same round, and wherein the multiple is smaller for a navigation node within
+    an initial number of rounds after joining.
+    _[Support: aggregator.py ~L58-66, ~L106-114 (`clip_c = 2.0`; `probation_clip_c = 1.0` for
+    `probation_rounds = 2`).]_
+
+36. The method of claim 2, wherein, while the navigation node is in the distrust state, the trust value is pinned
+    at a predetermined minimum with recovery suspended; the probe state is entered only after the maximum
+    exclusion duration; a failed probe returns the navigation node to the distrust state with the navigation fix
+    that failed the probe not applied; and, upon exit from the probe state to the trust state, a position-jump
+    test is suppressed for a predetermined number of navigation-fix epochs.
+    _[Method analogue of claims 27-29.]_
+
+37. The method of claim 2, further comprising: reporting by each navigation node, with its local update, a base
+    round; computing at the server a staleness from the base round; discarding local updates whose staleness
+    exceeds a maximum; and weighting each clipped local update by a decreasing function of the staleness before
+    the trimmed-mean or median computation.
+    _[Method analogue of claims 33-34.]_
+
 ---
 
 ## 5. Elements NOT yet evidenced — must be confirmed before filing (M4 campaign pending)
+
+> **Rev. 3: items below are rev. 2 text and are SUPERSEDED where §5B (round-3 evidence) says otherwise; in particular the CAI figure in item 6 and the "pending" language for H2/H4 and M4.**
 
 Per PROJECT_STATE.md, M1 (single-node) is signed off with stated limitations on **tuning seeds only**; M2
 (federation) is infrastructure-complete but FL detection results are not yet valid (D-054 previews rejected,
@@ -590,6 +742,61 @@ performance or a specific numeric bound is filed:
 
 ---
 
+## 5B. Round-3 evidence: permitted advantages and statements the specification must NOT make (rev. 3)
+
+Round 3: core-freeze-6, test seeds 10060-10089 (n = 30 per cell), 5,340/5,340 tasks ok, pre-registered (PREREG
+R3, written before data). Sources: `results/m4r3/report/SUMMARY.md` (confirmatory family, safety principle,
+criteria), `HEADLINE.md` (medians), `M3_REPORT.md` (per-scenario tables). The Holm family has m = 8 tests; only
+H1_latency_on_vs_A is rejected. All results are simulation; none is hardware.
+
+**Status of the §5 items above (rev. 3):** item 1 (poisoning robustness, S12): S12 has no attack, so AUC drop
+is "not evaluable" (D-088 ruling 4); aggregator robustness is NOT evidenced. Item 2 (FL benefit, H2/H4):
+**null** (all four tests HL 0, CI [0,0]). Items 5/6 (CAI benefit): **null** (H3 both grades HL 0; S6-coast
+ratio 1.006 / 0.986, CIs include 0); the pre-M4 tactical "7.0 -> 3.3 m" figure is superseded and must not be
+cited. Item 9 (shadow probe): re-admission now occurs on test seeds; see the adverse results below. Item 10
+(split): see A4/A5. The test seed ranges are no longer untouched; all rounds are disclosed (D-085).
+
+### 5B.1 Advantages the specification MAY cite
+
+| # | Advantage | Evidence and limits | Pointer |
+|---|---|---|---|
+| A1 | **Faster attack-onset detection than a detect-and-exclude baseline** (Baseline A). | H1_latency_on_vs_A (S2-med, industrial MEMS): n = 30, raw p 4.7e-4, Holm p 0.0037, REJECT; HL = -0.5 s, 95% CI [-1, -1] s. Latency is quantised to 1 s epochs, so the effect is about one epoch, on one scenario@grade. Attack-window position error is NOT improved (H1_rmse_h_att_vs_A: HL +85 m, CI [-60, 235], not rejected). | SUMMARY.md "Confirmatory family", row H1_latency_on_vs_A |
+| A2 | **No degradation under nominal conditions.** | S1: safety principle PASS at both grades (margin -0.002 m MEMS, -0.020 m tactical vs 3 sigma_nom 3.29 / 3.35 m); FAR 0/h; ANEES in band; mean GNSS trust >= 0.95; rmse_h_pre 3.056 vs 3.067 m (MEMS) defended vs undefended. The criterion `tv_w_le_1_per_hour` FAILS at both grades; do not claim low trust variation. | SUMMARY.md "Safety principle" S1 rows, "Scenario criteria" S1; M3_REPORT.md S1 tables |
+| A3 | **No degradation under (sudden) jamming.** | S3: safety principle PASS at both grades; FAR 0; position RMSE indistinguishable from undefended (MEMS attack 16.35 vs 16.38 m, post 3.152 vs 3.199 m; tactical attack 24.80 vs 24.52 m). The registry criterion `tdist_consistency_no_update` is FAIL* (metric absent from records); not claimed. | SUMMARY.md "Safety principle" S3 rows; M3_REPORT.md S3 tables |
+| A4 | **Timing protection under displaced meaconing.** | S2-DM (n = 30): rmse_t_ns 793 +/- 179 ns (defended) vs 5518 +/- 450 ns (undefended) vs 2568 +/- 1030 ns (Baseline A, MEMS) - about 7x and 3x lower. Scope: displaced meaconing only (split-trust scenario, claims 23-26). In gradual spoofing S2 the defended timing RMSE is WORSE than undefended (724 ns vs 11 ns); do not generalise. | M3_REPORT.md §4.2, §4.3 |
+| A5 | **Attack-window position protection under displaced meaconing (MEMS), with FAR 0.** Descriptive only. | S2-DM@industrial_mems: attack-window rmse_h 986 +/- 192 m vs undefended 1479 +/- 189 m; safety principle PASS but HL CI [-686, 578] m includes 0 (NOT statistically established); FAR 0 vs 34/h undefended. Post-attack error is higher than undefended (1416 vs 892 m), and at the tactical grade the safety principle FAILS (margin +522 m). | SUMMARY.md safety rows S2-DM@*; M3_REPORT.md S2-DM tables |
+| A6 | **Bounded trust chattering under on/off spoofing.** | S7 (toggle periods 2-60 s): max trust cycles/h over 30 seeds = 1-4 (p2-p20), 29 MEMS / 13 tactical (p60) vs the pre-registered bound 223/h; all PASS, all also below the 133/h annotation. A cycle-count property only: S7 position-error outcomes at the tactical grade are poor (safety rows S7-*: FAIL). | SUMMARY.md "S7 chattering"; M3_REPORT.md §2b |
+| A7 | **Long-run stability.** | S14 (multi-hour, Schuler world, FedQPNT only, no baseline): covariance finite and SPD in 100% of runs; last-hour/first-hour RMSE ratio 0.786 (MEMS) / 0.840 (tactical) vs <= 1.2; FAR 0.067/h (<= 1). The registry marks the full criterion "not-evaluable" (`rss_growth_frac` not emitted); state only the three measured sub-criteria. | SUMMARY.md "Scenario criteria" S14; M3_REPORT.md S14 tables |
+
+### 5B.2 Statements the specification must NOT make
+
+1. **That the CAI improves navigation or coasting accuracy.** NULL: H3_latency_eff (S6) HL 0, CI [0,0] at both
+   grades; S6-coast (exploratory, 180 s outage) max-error ratio (minus-quantum / CAI) 1.006 MEMS, 0.986 tactical,
+   HL CIs [-11.7, 20.9] and [-4.8, 2.6] m. S6 post-attack error with CAI is not better than without (tactical
+   6737 vs 5748 m, means). Claims 1(iv), 11, 16, 32 are architecture/function claims only: remove any
+   accuracy, drift-reduction or bias-estimation-benefit language.
+2. **That federated learning improves detection.** NULL: H2_pd10, H2_onset_latency, H4_pd10_coldstart,
+   H4_onset_latency_coldstart all HL 0, CI [0,0], n = 10. S8/S9/S12 arms are identical in rmse_h_pre.
+   Poisoning robustness (S12) is not evaluable (no attack). The FL limb is claimed as a privacy-preserving
+   architecture with robust aggregation, not for a detection gain.
+3. **Improved position accuracy under gradual spoofing, or any claim that the defence beats undefended or
+   Baseline A in position error.** Round 3 shows the opposite: the safety principle FAILS in all S2-low/med/high
+   cells (e.g. S2-med MEMS HL +1873 m, CI [1343, 2518]); S4, S6 and most S7 cells also FAIL. Post-attack error is
+   set by the designed T_ex = 60 s dwell (D-088 ruling 5). Cite only A1-A7.
+4. **Recovery-speed or noise-robustness advantages.** S13 t_rec criterion FAILS (P(t_rec <= 60 s) = 0; MEMS
+   P(recovered <= 180 s) = 0.667, tactical 0); S11 (extreme noise, filter not told) locks out with fpr ~0.99
+   (stated limitation, D-088 ruling 3).
+5. **General shadow-probe rejection power.** Consistency-matched spoofs inside the coast uncertainty pass by
+   construction (D-066, D-071; claim 21 note); on MEMS the coast drift exceeds spoof offsets (D-087 "physics
+   floor").
+
+### 5B.3 Candour items (37 CFR 1.56) raised by rev. 3
+The adverse results in 5B.2 items 3-4 and the two null results (CAI, FL) are known material facts about the
+embodiments. The attorney must decide whether and how the specification discloses them; they are listed here so
+that they are not omitted.
+
+---
+
 ## 5A. Claim-vs-frozen-code audit (tag `core-freeze-1`, commit a7c8bf0) — flags
 
 "OK" means: the element is present in the frozen code as read by the PATENT-2 agent (source reading only;
@@ -635,7 +842,7 @@ the test suite was not run and no behaviour was measured). Line numbers are appr
   jam-recovery/gap-reset fix, and D-057/D-058 "must re-verify" items still await the post-freeze
   re-verification (D-072 steps 3–6).
 
-## 6. Disclaimer
+## 6. Disclaimer (retained in rev. 3)
 
 This document is an **engineering draft** prepared to organize the technical disclosure and candidate claim
 language for the FedQPNT system. It is **not legal advice** and has **not been reviewed by a registered
@@ -644,5 +851,5 @@ U.S.C. §101 for software/algorithmic claims), best-mode and enablement sufficie
 completeness (several full texts were not accessible to the drafting agents per docs/REFERENCES.md and the
 D-044 addendum — only verified abstracts/metadata were used), and the experimental-evidence gaps in §5 must
 all be reviewed and resolved with qualified patent counsel before any filing. No claim in this document should
-be treated as final, and no performance figures should be understood as validated results suitable for
+be treated as final. **No prior-art search has been performed; nothing here is advice on whether, when or how to file.** No performance figures should be understood as validated results suitable for
 supporting a claim of criticality or unexpected results absent the confirmations listed in §5.
