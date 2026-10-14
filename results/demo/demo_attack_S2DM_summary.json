@@ -1,0 +1,44 @@
+{
+  "scenario": "S2-DM",
+  "seed": 531,
+  "imu_grade": "industrial_mems",
+  "world": "schuler_tangent",
+  "detector_weights": "results\\m1\\detector_weights_sup_v5.npz",
+  "attack_window_s": [
+    60.0,
+    360.2
+  ],
+  "fedqpnt_events_s": {
+    "t_drop": 62.0,
+    "t_probe": 121.0,
+    "t_readmit": 411.0,
+    "state_from_law": true
+  },
+  "methods": {
+    "fedqpnt_local": {
+      "rmse_h_pre": NaN,
+      "rmse_h_att": 591.6161199964746,
+      "max_h_att": 1558.185627125121,
+      "rmse_h_post": 874.0167830922894,
+      "rmse_t_ns": 1652.4331137136237,
+      "rmse_t_ns_att": 1697.8209078056618
+    },
+    "undefended": {
+      "rmse_h_pre": NaN,
+      "rmse_h_att": 2370.5516561538116,
+      "max_h_att": 4371.04566784722,
+      "rmse_h_post": 1681.651508874181,
+      "rmse_t_ns": 7655.155348367724,
+      "rmse_t_ns_att": 10512.738807177859
+    },
+    "baseline_a": {
+      "rmse_h_pre": NaN,
+      "rmse_h_att": 611.6580254836392,
+      "max_h_att": 1611.665964837777,
+      "rmse_h_post": 88.11772166384563,
+      "rmse_t_ns": 759.8562750293097,
+      "rmse_t_ns_att": 1072.79623908591
+    }
+  },
+  "wall_s": 73.0457272529602
+}

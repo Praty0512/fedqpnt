@@ -23,3 +23,4 @@ results/_dry_check/
 results/sensors/
 results/*.partial_*.json
 *.log.tmp
+results/demo/runs/
