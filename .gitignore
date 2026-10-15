@@ -24,3 +24,11 @@ results/sensors/
 results/*.partial_*.json
 *.log.tmp
 results/demo/runs/
+
+# Review-3 report build artefacts
+paper/review3/*.aux
+paper/review3/*.bbl
+paper/review3/*.blg
+paper/review3/*.log
+paper/review3/*.out
+paper/review3/*.toc
