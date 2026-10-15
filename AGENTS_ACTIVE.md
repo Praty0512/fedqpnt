@@ -2,12 +2,12 @@
 
 Purpose: survive usage-limit and network cut-offs. On any interruption the Master resumes every agent listed here from its checkpoint file. Each agent keeps `docs/specs/raw/progress/<AGENT>.md` updated after every completed step (done / in-progress / next / background PIDs / output files).
 
-_Last updated: 2026-09-29_
+_Last updated: 2026-10-15. No agents running; all work complete (round 3 + H2/H4 re-run + docs; EXECUTION_LOG #181–#184)._
 
 | Agent | Model | Task | Owns (files) | Checkpoint | Last known state | Resume instruction |
 |---|---|---|---|---|---|---|
-| H2-ABRUPT | Sonnet | Core FL claim H2/H4 with abrupt as the novel family (θ0 without abrupt), ≥ 5 seeds; ≤ 6 processes | scripts/h2_abrupt_*.py, results/fleet/h2_abrupt.json | progress/H2-ABRUPT.md | θ0_v2 done (AUC(0.15) 0.834 < 0.85). RUNNING n = 10 fleet re-run → τ calibration → D-064 metrics | "Resume from your checkpoint; don't redo; background runs + end turn" |
-| CORE-ROBUST | Sonnet | D-043/D-057/D-058 shared-core fixes; overconfidence diag; κ_R re-tune; M1 + safety-principle re-verification; the b_a truth-definition test | fedqpnt/fusion/eskf.py, fedqpnt/trust/*, fedqpnt/node/* | progress/CORE-ROBUST.md | RUNNING combined M1 re-verification with v3 at both grades (decisive defended-vs-undefended test) | "Resume from your checkpoint; don't redo; background runs + end turn" |
+| H2-ABRUPT | Sonnet | Core FL claim H2/H4 with abrupt as the novel family (θ0 without abrupt), ≥ 5 seeds; ≤ 6 processes | scripts/h2_abrupt_*.py, results/fleet/h2_abrupt.json | progress/H2-ABRUPT.md | **DONE** (freeze-4 confirmatory result; H2/H4 re-run on core-freeze-6 done, EXECUTION_LOG #179). Not running | — |
+| CORE-ROBUST | Sonnet | D-043/D-057/D-058 shared-core fixes; overconfidence diag; κ_R re-tune; M1 + safety-principle re-verification; the b_a truth-definition test | fedqpnt/fusion/eskf.py, fedqpnt/trust/*, fedqpnt/node/* | progress/CORE-ROBUST.md | **DONE** (superseded by the freeze-5/freeze-6 work; core-freeze-6 = ca614b7, EXECUTION_LOG #176). Not running | — |
 | PERF | Sonnet | Bit-identical speedups (sensors/gnss/sim/attacks; NOT eskf) | fedqpnt/sensors/*, fedqpnt/sim/rotations.py, trajectory.py, fedqpnt/gnss/*, fedqpnt/attacks/* (perf-only), scripts/perf_* | progress/PERF.md | **DONE; change REJECTED** (1-ulp mismatches for large rotations; patch kept in patches/; D-060) | — |
 | CAMPAIGN-FLEET | Sonnet | Wire S5/S8/S9/S12/S15 into the campaign via the fleet runner | fedqpnt/eval/campaign.py, scenarios.py, report.py, fleet_adapter.py, scripts/run_campaign.py, tests/test_eval_campaign.py | progress/CAMPAIGN-FLEET.md | **DONE, accepted** (D-059 + lossless-comms addendum) | — |
 | PATENT | Sonnet | Patent claim skeleton | patent/ | progress/PATENT.md | **DONE 2026-09-29, accepted** (3 independent + 17 dependent claims) | — |

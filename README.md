@@ -10,6 +10,8 @@ Federated, quantum-sensor-augmented PNT (positioning, navigation, and timing) wi
 - **[docs/REPRODUCE.md](docs/REPRODUCE.md)**: environment, data, and exact commands to reproduce round 3 from the tag.
 - **[results/m4r3/report/SUMMARY.md](results/m4r3/report/SUMMARY.md)**: round-3 numbers (confirmatory family, safety, chattering).
 - **[paper/](paper/)**: 21-page paper (`paper/main.tex`).
+- **[results/demo/](results/demo/)**: live displaced-meaconer attack demo (`python scripts/demo_attack.py`, about 1 min, tuning seed 531). It illustrates the mechanism; the 30-seed round-3 result carries the claim.
+- **[docs/FedQPNT_Overview_Novelty_Plain_Summary.pdf](docs/FedQPNT_Overview_Novelty_Plain_Summary.pdf)**: technical overview, novelty statement and plain-language summary.
 
 ## Repository Layout
 

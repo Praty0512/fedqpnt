@@ -1,6 +1,6 @@
 # FedQPNT — Project State
 
-_Date: 2026-10-13 · Status: **COMPLETE** · repo: private https://github.com/Praty0512/fedqpnt (`master`) · decisions up to D-089 · log up to #181_
+_Date: 2026-10-15 · Status: **COMPLETE** · repo: private https://github.com/Praty0512/fedqpnt (`master`) · decisions up to D-089 · log up to #184_
 
 ## Identity
 Federated learning across vehicle/UAV nodes. Each node fuses a cold-atom quantum accelerometer (CAI), GNSS and a classical IMU behind a continuous, attack-adaptive trust engine. The detector is trained across the fleet with FL, and no raw data leaves a node.
@@ -41,10 +41,19 @@ Source: `results/m4r3/report/SUMMARY.md`. n = 30 per cell, 5,340/5,340 tasks ok,
 - Patent: `patent/CLAIMS_SKELETON.md` rev 3 (37 claims: 3 independent, 34 dependent). Draft for attorney review.
 - Results: `results/m4r3/report/SUMMARY.md`, `HEADLINE.md`, `M3_REPORT.md`, `json/`; figures in `results/m4r3/figures/`.
 - Pre-registration: `docs/specs/raw/PREREG_M4.md` (Amendment R3, written before round-3 data); `docs/specs/raw/H2_PREREG.md` (Amendment 3).
-- Reproduction: `docs/REPRODUCE.md`. Logs: `DECISION_LOG.md` (D-089 latest), `EXECUTION_LOG.md` (#181).
+- Reproduction: `docs/REPRODUCE.md`. Logs: `DECISION_LOG.md` (D-089 latest), `EXECUTION_LOG.md` (#184).
+
+## Demo & presentation material
+- **Overview, novelty and plain-language summary (PDF):** `docs/FedQPNT_Overview_Novelty_Plain_Summary.pdf` (commit `f755ed63`).
+- **Live demo:** `python scripts/demo_attack.py [--seed N] [--grade industrial_mems|tactical]` (about 1 min). Displaced-meaconer attack (S2-DM) on tuning seed 531; shows trust drop, probe and re-admission. Outputs in `results/demo/` (`demo_attack_S2DM.png/.pdf`, `demo_attack_S2DM_summary.json`; see `results/demo/README.md`).
+  - Caveat: on seed 531, Baseline A matches FedQPNT in the attack window and is better on clock and post-attack. The demo illustrates the mechanism only. The claim rests on the 30-seed round-3 result (`results/m4r3/report/HEADLINE.md`, where FedQPNT is better on S2-DM).
+- **Result figures** (`results/m4r3/figures/`): `results_timing_meaconing.pdf`, `results_defended_vs_undefended.pdf`, `results_safety_overview.pdf` (PNG versions alongside).
 
 ## What is left for the user
 1. Review the paper (`paper/main.tex`), especially the adverse results and the limitations sections.
 2. Patent: attorney review and a prior-art search before any filing. The repo makes no filing recommendation.
 3. Choose the publication venue.
 4. Decide the license. The README still says "License: TBD".
+5. **Review-3 meeting:** presentation plus live demo (`scripts/demo_attack.py`, outputs in `results/demo/`).
+6. **Basket = novelty project:** journal paper draft and patent claim draft.
+7. **Review-3 report and Google Drive link (dataset, code), due 2026-10-20 on VTOP.**

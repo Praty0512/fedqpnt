@@ -214,3 +214,6 @@ Chronological. Timestamps local (IST).
 - Reported as measured. Single-node phase 1 at 3,025/4,920. |  — |
 | 180 | 2026-10-12 | Master | User asked to pause S14 until after 01:00. Done cleanly: the 17 remaining S14 tactical tasks were given RESERVED claims, so the S14 instance finishes its current run (seed 10072 tactical) and then skips the rest, with no aborted run. Resume with results/m4r3/START_ROUND3_S14_RESUME.cmd (--take-reserved). S14: 42/60 done. |  — |
 | 181 | 2026-10-13 | Master | Round 3 complete (5,340/5,340 + H2/H4); M3 report 1bb82d18; paper results c32f0d0d (21 pp); patent rev 3 e94f72b2; docs + release prep. |  — |
+| 182 | 2026-10-13 | Master | Overview/novelty/plain-summary doc (Claude Doc + docs/FedQPNT_Overview_Novelty_Plain_Summary.pdf). |  — |
+| 183 | 2026-10-14 | Master | Live demo scripts/demo_attack.py (S2-DM, tuning seed 531; mechanism illustration). |  — |
+| 184 | 2026-10-15 | Master | Docs updated; Review-3 prep (presentation, report, Drive package). |  — |
