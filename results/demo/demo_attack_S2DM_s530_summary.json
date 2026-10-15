@@ -1,0 +1,45 @@
+{
+  "scenario": "S2-DM",
+  "seed": 530,
+  "imu_grade": "industrial_mems",
+  "world": "schuler_tangent",
+  "case": "Run 2 (FedQPNT does well)",
+  "detector_weights": "results\\m1\\detector_weights_sup_v5.npz",
+  "attack_window_s": [
+    60.0,
+    360.2
+  ],
+  "fedqpnt_events_s": {
+    "t_drop": 62.0,
+    "t_probe": 121.0,
+    "t_readmit": 411.0,
+    "state_from_law": true
+  },
+  "methods": {
+    "fedqpnt_local": {
+      "rmse_h_pre": NaN,
+      "rmse_h_att": 2239.9515593109063,
+      "max_h_att": 6179.8347341781855,
+      "rmse_h_post": 3538.415068112417,
+      "rmse_t_ns": 334.7760461125591,
+      "rmse_t_ns_att": 407.910088361743
+    },
+    "undefended": {
+      "rmse_h_pre": NaN,
+      "rmse_h_att": 3186.5298766991855,
+      "max_h_att": 5199.949700857949,
+      "rmse_h_post": 1898.4809314900601,
+      "rmse_t_ns": 9694.245759487772,
+      "rmse_t_ns_att": 13374.685037477699
+    },
+    "baseline_a": {
+      "rmse_h_pre": NaN,
+      "rmse_h_att": 4092.9206142667763,
+      "max_h_att": 9959.251649681975,
+      "rmse_h_post": 548.0411864194948,
+      "rmse_t_ns": 5423.196278787833,
+      "rmse_t_ns_att": 7656.774203542978
+    }
+  },
+  "wall_s": 30.663071155548096
+}

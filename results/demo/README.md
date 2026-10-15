@@ -20,3 +20,10 @@ exactly); this is a single seed, so numbers differ from the 30-seed HEADLINE med
 3. FedQPNT's detector flags the signal within 2 s, its trust weight drops to the floor, and it coasts on the inertial sensor and quantum accelerometer, so error stays far lower.
 4. Every ~70 s it briefly re-tests GNSS (PROBE) and rejects it while it is still fake; once the attack ends, one probe passes and GNSS is re-admitted (t=411 s), snapping the error back to about a metre.
 5. Honest caveat: the simple detect-and-exclude baseline is similar here (and better in clock on this seed); FedQPNT's gain is mainly vs the undefended receiver, with the timing and position error bounded during the attack.
+
+## Two runs (default since 2026-10-15)
+`python scripts/demo_attack.py` now runs two tuning seeds back to back, labelled for what they show:
+- **Run 1, seed 531 (Baseline A does well):** FedQPNT 592 m / 1,652 ns, undefended 2,371 m / 7,655 ns, Baseline A 612 m / 760 ns (attack-window position RMSE / clock RMSE). Output `demo_attack_S2DM.png`.
+- **Run 2, seed 530 (FedQPNT does well):** FedQPNT 2,240 m / 335 ns, undefended 3,187 m / 9,694 ns, Baseline A 4,093 m / 5,423 ns. Post-attack, Baseline A is still better (548 vs 3,538 m). Output `demo_attack_S2DM_s530.png`.
+
+Neither run is "typical"; the typical (30 test seeds) comparison is `results/m4r3/report/HEADLINE.md`. A single seed: `--seed N`.

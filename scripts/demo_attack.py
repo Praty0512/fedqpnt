@@ -1,6 +1,6 @@
 """Live demo: FedQPNT under the registry scenario S2-DM (displaced meaconer), one TUNING seed.
 
-  python scripts/demo_attack.py [--seed N] [--grade industrial_mems|tactical] [--outdir results/demo]
+  python scripts/demo_attack.py [--seeds 531,530 | --seed N] [--grade industrial_mems|tactical] [--outdir results/demo]
 
 Runs fedqpnt_local, undefended and baseline_a on the same seed (3 processes in parallel), re-traces the
 per-epoch signals with the SAME loop/metric functions as fedqpnt.node.runner.run_single (no frozen code is
@@ -103,7 +103,7 @@ def first_t(t, mask, after=-np.inf):
     return float(t[idx[0]]) if idx.size else None
 
 
-def make_figure(res, seed, grade, out_png):
+def make_figure(res, seed, grade, out_png, case=""):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -175,41 +175,57 @@ def make_figure(res, seed, grade, out_png):
     ax[2].set_xlabel("Time (s)  -  navigation starts after a 30 s static alignment")
     ax[2].legend(loc="center right", fontsize=9, framealpha=0.95)
     ax[2].set_xlim(t[0], t[-1])
-    fig.suptitle(f"FedQPNT under a displaced-meaconer attack (seed {seed}, "
+    fig.suptitle(f"{case + chr(10) if case else ''}FedQPNT under a displaced-meaconer attack (seed {seed}, "
                  f"{'industrial MEMS' if grade == 'industrial_mems' else grade})", fontsize=15, weight="bold", y=0.975)
     cap = ("Attack-window RMSE (m): " + ", ".join(f"{LABEL[m].split(' (')[0]} {res[m]['rmse_h_att']:.0f}" for m in METHODS)
            + "  |  Clock RMSE (ns): " + ", ".join(f"{LABEL[m].split(' (')[0]} {res[m]['rmse_t_ns']:.0f}" for m in METHODS)
            + f"\nS2-DM, single tuning seed; trust-state bands {'read from the trust law' if have_state else 'derived from w_pos'}."
              " Red band = attack window.")
     fig.text(0.5, 0.012, cap, ha="center", va="bottom", fontsize=9.5)
-    fig.subplots_adjust(top=0.945, bottom=0.095, left=0.075, right=0.985)
+    fig.subplots_adjust(top=0.93 if case else 0.945, bottom=0.095, left=0.075, right=0.985)
     fig.savefig(out_png, dpi=200)
     fig.savefig(Path(out_png).with_suffix(".pdf"))
     plt.close(fig)
     return dict(t_drop=t_drop, t_probe=t_probe, t_readmit=t_back, state_from_law=have_state)
 
 
+# Default demo = two runs, labelled for what they are (both tuning seeds; neither is "typical"):
+#   seed 531: Baseline A does as well as FedQPNT during the attack and better afterwards;
+#   seed 530: FedQPNT beats both comparators during the attack and on clock error.
+# Typical (30 test seeds) performance is in results/m4r3/report/HEADLINE.md.
+CASES = {531: "Run 1 (Baseline A does well)", 530: "Run 2 (FedQPNT does well)"}
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--seed", type=int, default=531)
+    ap.add_argument("--seeds", default="531,530", help="comma-separated tuning seeds, run in order")
+    ap.add_argument("--seed", type=int, default=None, help="run a single seed instead")
     ap.add_argument("--grade", choices=["industrial_mems", "tactical"], default="industrial_mems")
     ap.add_argument("--outdir", default=str(REPO / "results" / "demo"))
     a = ap.parse_args()
-    assert a.seed < 10000, "demo uses TUNING seeds only (< 10000)"
-    out = Path(a.outdir)
+    seeds = [a.seed] if a.seed is not None else [int(s) for s in a.seeds.split(",")]
+    assert all(s < 10000 for s in seeds), "demo uses TUNING seeds only (< 10000)"
+    for i, seed in enumerate(seeds):
+        if i:
+            print("\n" + "=" * 78 + "\n")
+        run_one(seed, a.grade, Path(a.outdir), CASES.get(seed, "") if a.grade == "industrial_mems" else "")
+
+
+def run_one(seed, grade, out, case):
     out.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    print(f"FedQPNT demo: scenario {SCEN} (displaced meaconer: onset 60 s, 300 s, 500 m drift), "
-          f"{a.grade}, seed {a.seed}, methods {', '.join(METHODS)}", flush=True)
+    print(f"{case + ' - ' if case else ''}FedQPNT demo: scenario {SCEN} (displaced meaconer: onset 60 s, 300 s, "
+          f"500 m drift), {grade}, seed {seed}, methods {', '.join(METHODS)}", flush=True)
     print("running 3 methods in parallel (~1-3 min)...", flush=True)
     with ProcessPoolExecutor(max_workers=3) as ex:
-        outs = list(ex.map(trace, [(m, a.seed, a.grade) for m in METHODS]))
+        outs = list(ex.map(trace, [(m, seed, grade) for m in METHODS]))
     res = {r["method"]: r for r in outs}
-    suffix = "" if a.grade == "industrial_mems" and a.seed == 531 else f"_{a.grade}_s{a.seed}"
+    suffix = "" if grade == "industrial_mems" and seed == 531 else (
+        f"_s{seed}" if grade == "industrial_mems" else f"_{grade}_s{seed}")
     png = out / f"demo_attack_S2DM{suffix}.png"
-    ev = make_figure(res, a.seed, a.grade, png)
+    ev = make_figure(res, seed, grade, png, case)
     keys = ("rmse_h_pre", "rmse_h_att", "max_h_att", "rmse_h_post", "rmse_t_ns", "rmse_t_ns_att")
-    summ = dict(scenario=SCEN, seed=a.seed, imu_grade=a.grade, world="schuler_tangent",
+    summ = dict(scenario=SCEN, seed=seed, imu_grade=grade, world="schuler_tangent", case=case,
                 detector_weights=str(WEIGHTS.relative_to(REPO)),
                 attack_window_s=[res["fedqpnt_local"]["t_on"], res["fedqpnt_local"]["t_off"]], fedqpnt_events_s=ev,
                 methods={m: {k: float(res[m][k]) for k in keys} for m in METHODS}, wall_s=time.time() - t0)

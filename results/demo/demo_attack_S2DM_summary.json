@@ -3,6 +3,7 @@
   "seed": 531,
   "imu_grade": "industrial_mems",
   "world": "schuler_tangent",
+  "case": "Run 1 (Baseline A does well)",
   "detector_weights": "results\\m1\\detector_weights_sup_v5.npz",
   "attack_window_s": [
     60.0,
@@ -40,5 +41,5 @@
       "rmse_t_ns_att": 1072.79623908591
     }
   },
-  "wall_s": 73.0457272529602
+  "wall_s": 31.594215869903564
 }
