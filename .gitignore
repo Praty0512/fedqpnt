@@ -32,3 +32,6 @@ paper/review3/*.blg
 paper/review3/*.log
 paper/review3/*.out
 paper/review3/*.toc
+
+# Review-3 Drive upload (built by scripts/build_review3_zip.py)
+review3/*.zip

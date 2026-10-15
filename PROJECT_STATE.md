@@ -44,7 +44,7 @@ Source: `results/m4r3/report/SUMMARY.md`. n = 30 per cell, 5,340/5,340 tasks ok,
 - Reproduction: `docs/REPRODUCE.md`. Logs: `DECISION_LOG.md` (D-089 latest), `EXECUTION_LOG.md` (#184).
 
 ## Demo & presentation material
-- **Overview, novelty and plain-language summary (PDF):** `docs/FedQPNT_Overview_Novelty_Plain_Summary.pdf` (commit `f755ed63`).
+- **Overview, novelty and plain-language summary (PDF):** `review3/FedQPNT_Overview_Novelty_Plain_Summary.pdf` (commit `f755ed63`).
 - **Live demo:** `python scripts/demo_attack.py [--seed N] [--grade industrial_mems|tactical]` (about 1 min). Displaced-meaconer attack (S2-DM) on tuning seed 531; shows trust drop, probe and re-admission. Outputs in `results/demo/` (`demo_attack_S2DM.png/.pdf`, `demo_attack_S2DM_summary.json`; see `results/demo/README.md`).
   - Caveat: on seed 531, Baseline A matches FedQPNT in the attack window and is better on clock and post-attack. The demo illustrates the mechanism only. The claim rests on the 30-seed round-3 result (`results/m4r3/report/HEADLINE.md`, where FedQPNT is better on S2-DM).
 - **Result figures** (`results/m4r3/figures/`): `results_timing_meaconing.pdf`, `results_defended_vs_undefended.pdf`, `results_safety_overview.pdf` (PNG versions alongside).
