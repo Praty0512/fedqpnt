@@ -29,7 +29,7 @@ GNSS spoofing, meaconing, sensor fusion, trust management, Kalman filter, federa
 
 \section{Introduction}
 
-Satellite navigation reaches a receiver at roughly $-130$\,dBm, well below thermal noise. A cheap transmitter can therefore jam it, and a slightly more capable one can spoof it, producing a believable but false position or time~\cite{psiaki2016gnss,humphreys2008assessing}. Meaconing is a particularly awkward case: the attacker records genuine signals in one place and replays them in another, so every signal looks authentic while both position and clock are shifted.
+Satellite navigation reaches a receiver at about $-130$\,dBm, well below thermal noise. A cheap transmitter can therefore jam it, and a slightly more capable one can spoof it, producing a believable but false position or time~\cite{psiaki2016gnss,humphreys2008assessing}. Meaconing is a particularly awkward case: the attacker records genuine signals in one place and replays them in another, so every signal looks authentic while both position and clock are shifted.
 
 Inertial sensors are immune to all of this, but they drift. A practical vehicle therefore has to make a running judgement about how much to believe GNSS. Recent work has made good progress on the detection half of that judgement, including federated detectors trained across vehicles~\cite{khan2025enhancing,chai2025navigation,liu2026g2fl}. The other half, deciding \emph{when to believe GNSS again}, has received less attention. In a detect-and-exclude scheme, re-admission is usually memoryless: the moment the detector quietens, GNSS is back. An attacker who switches off for a few seconds, or who drifts slowly enough to stay under the alarm threshold, takes the navigation solution with it.
 
